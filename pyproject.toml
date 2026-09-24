@@ -1,0 +1,22 @@
+[project]
+name = "heurbridge"
+dynamic = ["version"]
+requires-python = ">=3.10"
+dependencies = ["numpy", "scipy", "scikit-learn", "pandas", "pyyaml", "networkx", "torch"]
+
+[project.optional-dependencies]
+graph = ["torch_geometric"]
+dev = ["pytest", "hypothesis", "matplotlib"]
+
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.dynamic]
+version = {attr = "heurbridge.__version__"}
+
+[tool.setuptools.packages.find]
+include = ["heurbridge*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

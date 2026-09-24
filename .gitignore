@@ -1,0 +1,47 @@
+# --- Python / tooling ---
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.hypothesis/
+.ipynb_checkpoints/
+.venv/
+venv/
+*.egg-info/
+.DS_Store
+*.swp
+*~
+
+# --- secrets: never commit ---
+*.env
+secrets/
+**/secrets/
+*.pem
+*.key
+id_*
+
+# --- third-party papers (copyrighted; not redistributed) ---
+papers/
+
+# --- unpublished research documents: kept local until the owner approves publishing ---
+HEURBRIDGE_TASKS.md
+HEURBRIDGE_TASKS.pdf
+HeurBridge_PR_Proposal.pdf
+HeurBridge_PR_plagiarism_audit.md
+HeurBridge-PR_prior_art_check.md
+bridge_theory.pdf
+reply_Q1_Q3.pdf
+v1.2_audit_response/
+
+# --- run artifacts: large or machine-local (synced with rsync, summarized in reports/) ---
+logs/
+archive/db/
+archive/blobs/
+archive/programs/
+data/
+benchmarks/
+runs/
+checkpoints/
+*.pt
+*.npz
+*.odb
+*.def.gz

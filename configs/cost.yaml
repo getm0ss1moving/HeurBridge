@@ -1,0 +1,16 @@
+# Final cost J (task spec B.3; proposal v1.2 s.3.1).  FROZEN before any experiment (L1).
+# heurbridge/eval/cost.py holds the same values; tests/test_configs.py keeps them identical.
+version: cost_v1_2026-09-25
+weights:          # J = sum_k w_k * y_k / y_k^base
+  rwl: 0.30       # routed wirelength (detailed route; GR wirelength at f1)
+  via: 0.05       # via count
+  of: 0.15        # (1 + GR overflow)
+  tns: 0.30       # (1 - setup TNS), TNS <= 0 in ns
+  power: 0.20     # total power, W
+baseline: median over 3 seeds of the tool-native flow, per design
+gates:
+  setup_wns_guard_ns: 0.02     # cand >= base - 0.02 and base >= 0 => cand >= 0
+  hold_wns_guard_ns: 0.02
+  drc: 0
+  lvs: clean when checked (required at f3)
+failures: J_inf = +inf; every failure recorded by name

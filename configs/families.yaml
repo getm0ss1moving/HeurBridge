@@ -1,0 +1,25 @@
+# Design families for leave-one-family-out splits (task T0.4).  Status is filled in by T0.4:
+# a design is usable only when its files exist on the server with a sha256 manifest entry.
+families:
+  ibm:            # ICCAD04 mixed-size bookshelf (IBM01-18); macro stage, Track A
+    source: ICCAD04 mixed-size benchmarks
+    designs: [ibm01, ibm02, ibm03, ibm04, ibm05, ibm06, ibm07, ibm08, ibm09, ibm10, ibm11, ibm12, ibm13, ibm14, ibm15, ibm16, ibm17, ibm18]
+    format: bookshelf
+  ispd05:         # ISPD2005 placement contest
+    source: ISPD2005
+    designs: [adaptec1, adaptec2, adaptec3, adaptec4, bigblue1, bigblue2, bigblue3, bigblue4]
+    format: bookshelf
+  orfs_cpu:       # ORFS Nangate45 macro designs; end-to-end PPA, Track B
+    source: OpenROAD-flow-scripts
+    designs: [ariane133, ariane136, bp_be_top, bp_fe_top, swerv_wrapper]
+    format: odb
+    tech: nangate45
+  sky130_small:   # HA-PR designs (no macros); full-flow checks on OpenROAD 2022
+    source: HA-PR eda/ harness
+    designs: [gcd, aes, jpeg, ibex]
+    format: def
+    tech: sky130hd
+splits:           # leave-one-family-out; the test family never enters the training archive
+  - {test: orfs_cpu, train: [ibm, ispd05]}
+  - {test: ibm, train: [ispd05, orfs_cpu]}
+  - {test: ispd05, train: [ibm, orfs_cpu]}
