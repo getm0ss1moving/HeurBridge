@@ -4,6 +4,24 @@ Every change to the code is recorded here with its version, task and verificatio
 Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 (The task list's `_harness/CHANGELOG.md` does not exist in the current checkout; this file replaces it.)
 
+## [0.2.0] — 2026-09-25 — T2 infrastructure + statistics (local)
+
+### Added
+- `heurbridge/core/project.py` — certified macro projection P_M (T2.5): largest-first greedy grid
+  legalization, exact nearest-free-slot search over a prefix-sum occupancy map, halo as whole grid cells,
+  site-aligned lower-left corners, fixed-macro obstacles; `check_macros` exact checker. Test: 3 designs x
+  1,000 random layouts (incl. out-of-core targets, orientations, halos) -> 100% legal.
+- `heurbridge/archive/store.py` — elite archive (T2.6): SQLite (WAL) + content-addressed `.npz`; atomic
+  admission (f>=2, admissible, beats k-th best, not duplicate), every rejection logged; `topk`,
+  `conditional`, `snapshot`. Property test (hypothesis): best J per key never increases (Lemma 3).
+- `heurbridge/evolve/sandbox.py` — program contract and sandbox (T2.1/V0): AST allow-list, separate
+  interpreter with CPU/memory limits and a PEP 578 audit hook, read-only `DesignView`, output validation,
+  determinism and MR1 permutation-equivariance checks, content-addressed program store.
+- `heurbridge/stats/paired.py` — one-sided paired Wilcoxon with +inf failures kept, Holm, stratified
+  bootstrap geometric-mean ratio with the +-0.5% effect floor, Clopper-Pearson, Page's L (T7.2).
+- `heurbridge/stats/alpha_ledger.py` — alpha-spending ledger, alpha_j = alpha 2^-j per campaign (T7.3).
+- Tests: 53 passing.
+
 ## [0.1.0] — 2026-09-25 — T1 foundations (local)
 
 ### Added
