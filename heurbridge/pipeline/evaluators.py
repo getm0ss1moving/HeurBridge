@@ -118,6 +118,7 @@ class MiniflowEvaluator(Evaluator):
     threads: int = 6
     docker_image: str | None = "efabless/openlane:master-arm64v8"
     timeout_s: int = 7200
+    exact: bool = False               # place_macro -exact exists only in newer OpenROAD builds
 
     def evaluate(self, design, layout, run_id, workdir):
         from ..eval import miniflow as MF
@@ -125,7 +126,7 @@ class MiniflowEvaluator(Evaluator):
         work = Path(workdir) / run_id
         work.mkdir(parents=True, exist_ok=True)
         tcl = work / "macros.tcl"
-        tcl.write_text(macro_placement_tcl(design, layout))
+        tcl.write_text(macro_placement_tcl(design, layout, exact=self.exact))
         p, d = MF.Nangate45(self.flow_dir), MF.from_orfs(self.flow_dir, self.platform_design)
         crashes = []
         for attempt in (0, 1):                     # one retry on a tool crash; every crash is recorded by name
