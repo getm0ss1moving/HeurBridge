@@ -4,6 +4,26 @@ Every change to the code is recorded here with its version, task and verificatio
 Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 (The task list's `_harness/CHANGELOG.md` does not exist in the current checkout; this file replaces it.)
 
+## [0.10.5] — 2026-09-26 — Track-B dev seeding results, distinct top-k, calibration on distinct layouts
+
+### Fixed
+- T2.7 driver: the top-k for verification / archive admission were the top-k *rows*; seed-independent programs
+  repeat their layout, so on bp_fe_top the top 10 held 3 distinct layouts (M5.v0 x5, M4.v0 x4) and the archive
+  got 3 elites. Top-k are now distinct layouts (`seed_archive.distinct`, also in `run_f2_miniflow.select`);
+  re-running the driver (all evaluations from the ledger) completed the dev archive to 5 elites.
+- E3-lite calibration counts one row per distinct layout (duplicates overweighted repeated layouts).
+
+### Added
+- `reports/T2_trackB_dev_bp_fe_top.md` — Track-B dev seeding with the corrected flow: 80/80 program evaluations
+  completed (no tool failure), setup/hold gates passed on 62% (all failures setup WNS), 15 distinct gated
+  layouts below the M1 baseline J = 0.95; best M5.v0 0.8559; local search (45 evaluations) did not improve it;
+  archive top-5 (fidelity 1): 0.8559 / 0.8673 / 0.8737 / 0.8745 / 0.8790.
+- `reports/E3_calibration_dev_bp_fe_top.md` — Track B, f0 vs mini-flow f1 on 87 distinct layouts: Kendall 0.35,
+  top-5 recall 0, f0's pick worse than a random pick (regret 0.116 vs 0.107). Track A redone on distinct
+  layouts: Kendall 0.70 / 0.51 / 0.16 on ibm01 / 02 / 03. The G0 rule is not met on either track: f0 must not
+  make macro-stage decisions (guard, fitness) — the spec's f1 defaults stand.
+- Tests: 126 passing.
+
 ## [0.10.4] — 2026-09-26 — reproducible HB-GP f1, E0 fairness and control results
 
 ### Fixed

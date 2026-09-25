@@ -87,6 +87,25 @@ def _eval(ev: Evaluator, design, layout, base, run_id, work, ledger: Ledger, ext
     return row
 
 
+def layout_key(row: dict) -> str:
+    """Identity of a row's macro layout (positions to 1e-9 and orientations)."""
+    import hashlib
+    pos = np.round(np.asarray(row.get("pos_macros", []), dtype=np.float64), 9)
+    ori = np.asarray(row.get("orient_macros", []), dtype=np.int64)
+    return hashlib.sha256(pos.tobytes() + ori.tobytes()).hexdigest()
+
+
+def distinct(rows: list) -> list:
+    """Rows with a new macro layout, in the given order (seed-independent programs repeat their layout)."""
+    seen, out = set(), []
+    for r in rows:
+        k = layout_key(r)
+        if k not in seen:
+            seen.add(k)
+            out.append(r)
+    return out
+
+
 def _layout_from_row(design: Design, base: Layout, row: dict) -> Layout:
     l = base.copy()
     mm = design.is_macro & ~design.is_fixed
@@ -166,9 +185,12 @@ def seed_design(design: Design, base_layout: Layout, programs: list, f1: Evaluat
             extra["pm_disp"] = rep.mean_disp
             rows.append(_eval(f1, design, lay_p, baseline, rid, work, ledger, extra))
     ok = sorted([r for r in rows if r.get("status") == "ok" and math.isfinite(r["J"])], key=lambda r: r["J"])
-    log(json.dumps({"design": design.id, "f1_ok": len(ok), "f1_total": len(rows),
+    uniq = distinct(ok)
+    log(json.dumps({"design": design.id, "f1_ok": len(ok), "f1_distinct_layouts": len(uniq), "f1_total": len(rows),
                     "f1_failed": {r["run_id"]: r["status"] for r in rows if r.get("status") != "ok"}}))
-    top = ok[: cfg.top_f2]
+    # the top by f1 are distinct layouts: a seed-independent program would otherwise fill several slots with one
+    # layout (bp_fe_top: M5.v0 x5 and M4.v0 x4 of the top 10 -> only 3 elites)
+    top = uniq[: cfg.top_f2]
     verified = []
     top_ev = f2 or f1
     for r in top:

@@ -49,3 +49,13 @@ def test_seed_campaign_dev(tmp_path):
     n_calls = ev.calls
     SA.seed_design(des, ref, progs, ev, None, arch, baseline, tmp_path / "out", cfg, cluster=cl, log=lambda x: None)
     assert ev.calls == n_calls                      # resumed: nothing re-evaluated
+
+
+def test_distinct_rows_by_layout():
+    from heurbridge.pipeline.seed_archive import distinct, layout_key
+    a = {"pos_macros": [[0.1, 0.2], [0.3, 0.4]], "orient_macros": [0, 4], "J": 1.0}
+    b = dict(a, J=1.0)                                            # same layout from another seed
+    c = dict(a, orient_macros=[0, 5])                             # same positions, other orientation
+    d = dict(a, pos_macros=[[0.1, 0.2], [0.3, 0.4 + 1e-6]])
+    assert layout_key(a) == layout_key(b) != layout_key(c) != layout_key(d)
+    assert distinct([a, b, c, d, b]) == [a, c, d]

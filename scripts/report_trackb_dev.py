@@ -23,6 +23,7 @@ sys.path.insert(0, str(ROOT))
 
 from heurbridge import reporting  # noqa: E402
 from heurbridge.archive.store import Archive  # noqa: E402
+from heurbridge.pipeline.seed_archive import distinct  # noqa: E402
 
 
 def fmt(x, nd=4):
@@ -78,7 +79,9 @@ def main():
            "(%.0f%%; setup failures %d, hold failures %d); layouts with GR overflow > 0: %d." % (
                len(prog_rows), len(ok_all), len(prog_rows) - len(ok_all), sum(math.isfinite(r["J"]) for r in ok_all),
                len(ok_all), 100 * gate_rate, setup_fail, hold_fail, len(of_pos)),
-           "Below the baseline J %.2f: %d layouts after the gates, %d before the gates." % (J_base, len(beat), len(raw_beat)),
+           "Below the baseline J %.2f: %d layouts after the gates (%d distinct), %d before the gates (%d distinct); "
+           "completed layouts: %d distinct of %d (seed-independent programs repeat their layout)." % (
+               J_base, len(beat), len(distinct(beat)), len(raw_beat), len(distinct(raw_beat)), len(distinct(ok_all)), len(ok_all)),
            "", "\n".join(lines)]
     if ls_rows:
         traj = []

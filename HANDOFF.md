@@ -28,8 +28,10 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 **Development results (no claims; stand-ins for the server experiments)**
 - T1.1: bookshelf load -> write -> load identity on all 26 designs (`reports/T1_roundtrip_bookshelf.json`).
-- E3-lite, Track A (`reports/E3_calibration_dev_ibm.md`): f0 J0 (the guard's scorer) vs HB-GP f1 J —
-  Kendall 0.65 / 0.50 / 0.03 on ibm01 / 02 / 03, top-5 recall 0, regret 55% of random: G0 rule not met.
+- E3-lite (one row per distinct layout): f0 J0 (the guard's scorer) vs f1 — Track A (HB-GP,
+  `reports/E3_calibration_dev_ibm.md`) Kendall 0.70 / 0.51 / 0.16 on ibm01 / 02 / 03; Track B (mini-flow,
+  `reports/E3_calibration_dev_bp_fe_top.md`) Kendall 0.35, top-5 recall 0, f0's pick worse than random. G0 rule
+  not met on either track: f0 must not make macro-stage decisions (the spec's f1 guard / fitness stand).
 - T3 dev bridge (`reports/T3_bridge_macro_dev.md`): f0 criterion 2.0125 vs raw 2.0411 on ibm03 (91% of sources
   improved) while the validation residual and terminal error rose.
 - E0 dev on held-out ibm04 / ibm06 (`reports/E0_partner_ablation_dev.md`; 16 programs x 5 seeds, every partner
@@ -42,8 +44,10 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
   bridge (geometric-mean J ratio vs raw 0.933 vs 0.931, bridge vs control p = 0.071; E0_dev#3), and HB-GP was
   not reproducible in these runs (winner's curse on noise). Deterministic rerun with all controls: E0_dev#4
   (`runs/e0_dev/det_f1guard_equal_randctl`).
-- Track-B dev campaign on bp_fe_top with the corrected flow: see `runs/seed_miniflow/bp_fe_top/` and the
-  report added at the end of the session.
+- Track-B dev seeding on bp_fe_top with the corrected flow (`reports/T2_trackB_dev_bp_fe_top.md`): 80/80
+  evaluations completed, gates passed on 62% (all failures setup WNS), 15 distinct gated layouts beat the M1
+  baseline (J 0.95); best M5.v0 0.8559; dev archive top-5 0.856-0.879 (fidelity 1). f2 verification of the
+  f1 top 8 + 6 spread layouts: `runs/seed_miniflow/bp_fe_top/evals_f2.jsonl` (see the next entry / report).
 
 **New tools**: `scripts/run_evolution.py` (T5 driver; `--llm mock` dry runs, all five proposers work end to
 end), `scripts/run_f2_miniflow.py` + `MiniflowF2Evaluator` (Track-B dev f2: CTS, repair_timing, GRT, DRT,

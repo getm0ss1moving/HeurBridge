@@ -28,14 +28,14 @@ from heurbridge.eval import cost, miniflow as MF  # noqa: E402
 from heurbridge.eval.orfs import parse_macro_tcl  # noqa: E402
 from heurbridge.meta import write_meta  # noqa: E402
 from heurbridge.pipeline.evaluators import MiniflowF2Evaluator  # noqa: E402
-from heurbridge.pipeline.seed_archive import Ledger, _eval, _layout_from_row  # noqa: E402
+from heurbridge.pipeline.seed_archive import Ledger, _eval, _layout_from_row, distinct  # noqa: E402
 
 FLOW = ROOT / "third_party" / "OpenROAD-flow-scripts" / "flow"
 
 
 def select(rows, top, spread):
-    fin = sorted([r for r in rows if r.get("status") == "ok" and r.get("J_raw") is not None
-                  and math.isfinite(r["J_raw"]) and r["run_id"].endswith(".f1")], key=lambda r: r["J_raw"])
+    fin = distinct(sorted([r for r in rows if r.get("status") == "ok" and r.get("J_raw") is not None
+                           and math.isfinite(r["J_raw"]) and r["run_id"].endswith(".f1")], key=lambda r: r["J_raw"]))
     pick = fin[:top]
     rest = fin[top:]
     if spread and rest:

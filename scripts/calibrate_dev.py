@@ -11,6 +11,7 @@ Proxy  = the f0 surrogate J0 on the clustered design, exactly the scorer the bri
 Target = the stored f1 cost of the same row (no tool re-run): Track A rows are re-scored with the bounded
          overflow proxy (rudy_of_pct); Track B uses J before the gates (J_raw) for the rank study, and the
          gate pass rate is reported separately (a gated row has J = +inf).
+Rows: one per distinct macro layout (a seed-independent program repeats its layout for every seed).
 Per design: Spearman, Kendall, top-5 recall, decision regret vs random (stats/calibration.per_design);
 gate G0 rule (regret <= 25% of random and Kendall >= 0.5).  Development evidence: f1 stands in for
 signoff, so this is not the pre-registered E3 study.
@@ -69,10 +70,17 @@ def rows_for(b, rdir, track):
         recs = [with_pct(r) for r in json.loads((rdir / "baseline.json").read_text())["records"]]
         base = cost.Baseline.from_records(b.design.id, recs)
         ev = HBGPEvaluator()
+    from heurbridge.pipeline.seed_archive import layout_key
+    seen = set()
     for line in (rdir / "evals.jsonl").read_text().splitlines():
         r = json.loads(line)
         if not r["run_id"].endswith(".f1"):
             continue
+        if r.get("status") == "ok":            # one row per distinct layout (seed-independent programs repeat theirs)
+            k = layout_key(r)
+            if k in seen:
+                continue
+            seen.add(k)
         if r.get("status") != "ok":
             failed.append((r["run_id"], r.get("status"), (r.get("record") or {}).get("failure") or r.get("error")))
             continue
