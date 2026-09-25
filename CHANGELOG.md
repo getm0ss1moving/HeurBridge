@@ -4,6 +4,21 @@ Every change to the code is recorded here with its version, task and verificatio
 Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 (The task list's `_harness/CHANGELOG.md` does not exist in the current checkout; this file replaces it.)
 
+## [0.5.0] — 2026-09-25 — f1 evaluator backends, HB-GP development placer
+
+### Added
+- `heurbridge/eval/f1.py` — f1 (T1.4): OpenROAD Track-B script (macros FIRM, routability/timing-driven GP,
+  DP, check_placement, estimate_parasitics -placement / -global_routing, global_route with 30 congestion
+  iterations) and log parser (FastRoute final table: max H / max V / total overflow; GR wirelength);
+  Track-A metrics from f0 (HPWL, RUDY overflow/peak, density overflow, channel shortage); DREAMPlace
+  parameter builder; missing metrics listed as `unchecked`.
+- `heurbridge/eval/gp.py` — HB-GP, an ePlace-style placer (quadratic init, WA wirelength, electrostatic
+  density via an exact Neumann Poisson solve, Nesterov with Lipschitz step and pin/charge preconditioning,
+  ePlace lambda schedule, Tetris row legalization). Development stand-in only (not DREAMPlace):
+  ibm01 HPWL 2.51e6 after legalization (benchmark .pl 2.44e6), adaptec1 1.00e8 (benchmark .pl 1.05e8;
+  DREAMPlace-class ~7.3e7); known limitation: does not converge on ibm18 (step collapse on high-degree nets).
+- Tests: 81 passing.
+
 ## [0.4.0] — 2026-09-25 — T2.2 macro seed population, T0 scripts, ENV_REPORT draft
 
 ### Added
