@@ -1,0 +1,9 @@
+{
+ "suite": "ibm_lefdef",
+ "files": 72,
+ "bytes": 424004000,
+ "source": "http://vlsicad.eecs.umich.edu/BK/ICCAD04bench/ibmMSWpinsICCAD04Bench_LEFDEF.tar.gz",
+ "archive_sha256": "59f537b94755365672fe484ecb24673239a5d72e9ed42c6f8aca70ae5015aab5",
+ "created": "2026-09-25T13:43:12",
+ "host": "local"
+}

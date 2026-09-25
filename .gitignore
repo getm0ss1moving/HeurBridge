@@ -45,3 +45,6 @@ checkpoints/
 *.npz
 *.odb
 *.def.gz
+
+# external code (cloned, not redistributed)
+third_party/

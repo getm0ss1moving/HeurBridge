@@ -4,6 +4,49 @@ Every change to the code is recorded here with its version, task and verificatio
 Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 (The task list's `_harness/CHANGELOG.md` does not exist in the current checkout; this file replaces it.)
 
+## [0.3.0] — 2026-09-25 — T3 macro bridge core, T0.4 benchmarks (local), T0.6 client
+
+### Added
+- `heurbridge/bridge/graph.py` — macro-stage bridge graph: movable/fixed macros, IOs, soft cell-cluster
+  nodes; star edges from each net's driver with rotated pin offsets (both directions, cluster-cluster
+  edges merged); graph features; attention set = macros + 512 largest clusters (label-free tie-break);
+  quadratic cluster seeding with macros/IOs fixed.
+- `heurbridge/bridge/model.py` — BridgeNet: encoder -> [GATv2(4 heads) -> MLP -> global attention] x L ->
+  decoder; sinusoidal tau + FiLM; raw + sinusoidal position encodings; zero-init decoder (identity at init);
+  small ~1.14M / base ~6.0M parameters; output masked to movable nodes.
+- `heurbridge/bridge/data.py` — pairs with Hungarian symmetry matching inside interchangeable-macro groups,
+  nearest-elite selection, orientation-mismatch flags, pair weights exp(-(J*-Jmin)/0.02), sharded `.pt`
+  storage, DAgger cap; joint dihedral (8) + aspect (+-5%) augmentation.
+- `heurbridge/bridge/train.py` — corrected stochastic-interpolant loss + overlap penalty on the
+  extrapolated endpoint; AdamW, cosine warm-up, grad clip, bf16 (CUDA), EMA; validation (residual,
+  terminal error, evaluator criterion, alpha histogram), early stopping, checkpoints with sha256.
+- `heurbridge/bridge/sample.py` — guarded partial transport (alpha in {0, .25, .5, 1}), batched ODE,
+  deterministic inference, fixed nodes exactly unchanged.
+- `heurbridge/heuristics/cell/cluster.py` — cell clustering (N_c rule of T2.3): spectral embedding +
+  area-weighted k-means, METIS/KaHyPar hooks.
+- `heurbridge/evolve/llm.py` — DeepSeek client: env-only keys with comma stripping and fallback, JSONL
+  ledger (no key material), per-scope budget with 110% hard stop, 16-token self-test.
+- `scripts/make_manifest.py`, `configs/manifests/*.sha256` — sha256 manifests: IBM-MSwPins bookshelf
+  (108 files) and LEF/DEF (72), ISPD2005 (80 files, header statistics match the published suite).
+- Tests: 61 passing, incl. all T3.10 bridge tests (overfit 1 pair; multimodal: bridge overlap < 1% vs
+  regression > 40%; equivariance 1e-5; masking; determinism; guard monotonicity on 100 cases).
+
+### Changed (deliberate deviation from the task spec, with evidence)
+- The bridge velocity is **not conditioned on the source x^h** (T3.2 lists "x^h position" as a node
+  feature). Conditioning on x^h turns each source into a point mass and the ODE follows the conditional-mean
+  direction, i.e. the bridge degenerates into a regressor. Multimodal toy: 8.2% overlap with x^h
+  conditioning vs 0.1% without (regression 61.5%; Bayes-optimal regression 59.5%). Kept as ablation
+  `use_source=True`.
+- Model widths 144 (small) / 240 (base) to hit the 1.2M / 6M parameter targets with this block design.
+
+### Data notes
+- ISPD2005: original hosts are offline (ispd.cc 404, archive.sigda.org no reply, UT mirror 403); copy taken
+  from the Google Drive folder linked by lamda-bbo/BBOPlace-Bench (archive sha256 bd8d44cc...). Node, net,
+  pin and terminal counts match the published statistics for 7 designs; bigblue3 matches nodes/nets/pins
+  (terminal count 1,298 not independently confirmed).
+- ChipDiffusion (vint-1/chipdiffusion @ 6973e90) has **no licence file**: used only for private evaluation,
+  never copied into this repository. DREAMPlace is BSD-3.
+
 ## [0.2.0] — 2026-09-25 — T2 infrastructure + statistics (local)
 
 ### Added

@@ -1,0 +1,9 @@
+{
+ "suite": "ispd2005",
+ "files": 80,
+ "bytes": 1273048653,
+ "source": "Google Drive folder 1MVIOZp2rihzIFK3C_4RqJs-bUv1TW2YT (linked from github.com/lamda-bbo/BBOPlace-Bench); original ispd.cc/archive.sigda.org hosts are offline",
+ "archive_sha256": "bd8d44cc3a39070fff654c7e6573fa0d207c98435129d818c89559fd5672aa72",
+ "created": "2026-09-25T13:43:12",
+ "host": "local"
+}

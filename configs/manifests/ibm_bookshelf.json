@@ -1,0 +1,9 @@
+{
+ "suite": "ibm_bookshelf",
+ "files": 108,
+ "bytes": 317287877,
+ "source": "http://vlsicad.eecs.umich.edu/BK/ICCAD04bench/ibmMSWpinsICCAD04Bench_BOOKSHELF.tar.gz",
+ "archive_sha256": "fd7e6d0bd76c7c1e31f6d61327ea8762c57a93612c232515e8be6c2323538aed",
+ "created": "2026-09-25T13:43:11",
+ "host": "local"
+}
