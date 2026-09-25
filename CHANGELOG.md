@@ -4,6 +4,18 @@ Every change to the code is recorded here with its version, task and verificatio
 Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 (The task list's `_harness/CHANGELOG.md` does not exist in the current checkout; this file replaces it.)
 
+## [0.9.1] — 2026-09-25 — V3/V5 gates, H8 null injection, ORFS signoff (f3), MMD, report generators
+
+### Added
+- `heurbridge/verify/gates.py` — V5 promotion gate (alpha reserved before the data are read; paired
+  one-sided Wilcoxon with failures as +inf), H8 null injection (placebo promotion rate with Clopper-Pearson
+  bound), V3 recompute consistency.
+- `heurbridge/eval/orfs.py` — f3 `signoff` stage: ORFS `drc` / `lvs` targets (KLayout decks), canonical DRC
+  (signoff count when available, else detailed-route count; METRIC_CONVENTIONS s.8).
+- `heurbridge/stats/paired.py::mmd2` — unbiased MMD^2 with the median heuristic (Algorithm R monitoring).
+- `scripts/report_bridge.py`, `scripts/report_e0.py` — T3 exit and E0 reports through the T7.4 template.
+- `reports/T1_baselines_dev.md` — development baseline table (T1 exit format), f1 runtime per design.
+
 ## [0.9.0] — 2026-09-25 — T2.3 cell seeds, T2.4 pattern router, T7.4 reporting, Track-A OF proxy fix
 
 ### Added
@@ -24,7 +36,7 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
   `archive_dev_v2` (baseline best on ibm01/02/03; seed heuristics 1.8-9.5% worse on the Track-A J).
 - Finding for Track B (decision for the user, weights are frozen): (1+OF)~ normalized by a baseline with
   near-zero GR overflow makes J extremely sensitive to a few overflows (OF 0 -> 20 adds 3.0 to J).
-- Tests: 108 passing.
+- Tests: 107 passing.
 
 ## [0.8.1] — 2026-09-25 — T6.1 online solve, T7.5 originality hygiene, handoff
 

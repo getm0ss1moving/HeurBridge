@@ -105,3 +105,21 @@ def kendall_tau(x, y) -> float:
 
 def spearman(x, y) -> float:
     return float(S.spearmanr(x, y).statistic)
+
+
+def mmd2(X, Y, bandwidth: float | None = None) -> dict:
+    """Unbiased MMD^2 with a Gaussian kernel (median heuristic bandwidth) between samples X (n,d), Y (m,d).
+
+    Used by Algorithm R (T3.7) to compare training conditions with deployment conditions per stage."""
+    X, Y = np.asarray(X, float), np.asarray(Y, float)
+    Z = np.concatenate([X, Y], 0)
+    d2 = ((Z[:, None, :] - Z[None, :, :]) ** 2).sum(-1)
+    if bandwidth is None:
+        med = np.median(d2[np.triu_indices(len(Z), 1)])
+        bandwidth = math.sqrt(0.5 * med) if med > 0 else 1.0
+    K = np.exp(-d2 / (2 * bandwidth ** 2))
+    n, m = len(X), len(Y)
+    kxx, kyy, kxy = K[:n, :n], K[n:, n:], K[:n, n:]
+    t1 = (kxx.sum() - np.trace(kxx)) / (n * (n - 1)) if n > 1 else 0.0
+    t2 = (kyy.sum() - np.trace(kyy)) / (m * (m - 1)) if m > 1 else 0.0
+    return {"mmd2": float(t1 + t2 - 2 * kxy.mean()), "bandwidth": float(bandwidth), "n": n, "m": m}

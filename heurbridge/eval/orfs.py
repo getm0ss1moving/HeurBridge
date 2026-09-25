@@ -30,7 +30,7 @@ from ..core.design import Design, Layout
 from .f1 import parse_f1_log
 
 STAGE_TARGET = {"floorplan": "floorplan", "place": "place", "cts": "cts", "grt": "globalroute",
-                "route": "route", "finish": "finish"}
+                "route": "route", "finish": "finish", "signoff": "finish"}
 
 CANDIDATES = {
     "setup_wns_ns": ["finish__timing__setup__ws", "detailedroute__timing__setup__ws", "globalroute__timing__setup__ws"],
@@ -135,7 +135,7 @@ def run(r: OrfsRun) -> dict:
         tail = ""
     rec["duration_s"] = round(time.time() - t0, 1)
     d = r.dirs()
-    if r.stage in ("route", "finish") and rec["returncode"] == 0:
+    if r.stage in ("route", "finish", "signoff") and rec["returncode"] == 0:
         subprocess.run(["make", "-C", r.flow_dir, "DESIGN_CONFIG=%s" % r.design_config, "FLOW_VARIANT=%s" % r.variant,
                         "metadata"], capture_output=True, text=True, env=env, timeout=1800)
     meta = {}
@@ -156,5 +156,41 @@ def run(r: OrfsRun) -> dict:
         rec.setdefault("gr_wl", g["gr_wl"])
         rec["gr_overflow_total"] = rec.get("gr_overflow_total", g["gr_overflow_total"])
         rec["gr_overflow_max"] = g["gr_overflow_max"]
+    if r.stage == "signoff" and rec["returncode"] == 0:
+        rec.update(run_signoff(r, env, d))
     rec["log_tail"] = tail[-1500:]
+    return rec
+
+
+def run_signoff(r: OrfsRun, env: dict, d: dict) -> dict:
+    """f3: KLayout DRC and LVS via the ORFS ``drc`` / ``lvs`` targets (when the platform ships the decks).
+    Canonical DRC (METRIC_CONVENTIONS s.8): signoff DRC when available, else the detailed-route count."""
+    out = {"drc_detailed_route": None, "drc_klayout": None, "lvs_errors": None, "signoff": {}}
+    for target in ("drc", "lvs"):
+        p = subprocess.run(["make", "-C", r.flow_dir, "DESIGN_CONFIG=%s" % r.design_config,
+                            "FLOW_VARIANT=%s" % r.variant, target], capture_output=True, text=True, env=env, timeout=r.timeout_s)
+        out["signoff"][target] = p.returncode
+    cnt = d["reports"] / "6_drc_count.rpt"
+    if cnt.exists():
+        try:
+            out["drc_klayout"] = int(cnt.read_text().split()[0])
+        except (ValueError, IndexError):
+            pass
+    lvs_log = d["logs"] / "6_lvs.log"
+    if lvs_log.exists():
+        t = lvs_log.read_text(errors="replace")
+        if re.search(r"Congratulations! Netlists match|netlists match", t, re.I):
+            out["lvs_errors"] = 0
+        elif re.search(r"don't match|do not match|mismatch", t, re.I):
+            out["lvs_errors"] = 1
+    return out
+
+
+def canonical_drc(rec: dict) -> dict:
+    """drc_violations = signoff DRC (KLayout; max with Magic when both exist), else the detailed-route count."""
+    rec = dict(rec)
+    rec["drc_detailed_route"] = rec.get("drc_violations")
+    signoff = [v for v in (rec.get("drc_klayout"), rec.get("drc_magic")) if v is not None]
+    if signoff:
+        rec["drc_violations"] = max(signoff)
     return rec
