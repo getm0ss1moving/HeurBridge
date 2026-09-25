@@ -4,6 +4,23 @@ Every change to the code is recorded here with its version, task and verificatio
 Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 (The task list's `_harness/CHANGELOG.md` does not exist in the current checkout; this file replaces it.)
 
+## [0.4.0] — 2026-09-25 — T2.2 macro seed population, T0 scripts, ENV_REPORT draft
+
+### Added
+- `heurbridge/heuristics/macro/` — seed population (T2.2): M2 simulated annealing on Hier-RTLMP cost terms
+  (+ pin-aware orientation pass), M3 boundary-biased mask sampling, M4 clustering + perimeter/block tiling,
+  M5 recursive min-cut (Kernighan-Lin) bisection, M6 ordering policy + greedy placement, M7 random control;
+  2-3 variants each (16 programs); M1 = tool-native placer via cached wrapper. Each program = shared helpers +
+  PARAMS + body, content-addressed. All 16 certify under V0 (AST, run, validation, determinism, MR1).
+- `DesignView` macro-level arrays (canonical macro order, effective sizes, affinity incl. 2-hop via cell
+  clusters, anchor pulls, obstacles).
+- Sandbox audit hook: allows only networkx's own argmap wrapper compilation; all other compile/exec blocked.
+- `scripts/server/` — T0.1 inheritance, T0.2 read-only probe (JSON), T0.3 OpenROAD Tcl probe (reads
+  `sta::cmd_args`) and isolated install (conda/micromamba, litex-hub), T0.5 env setup + GPU smoke test.
+- `ENV_REPORT.md` (draft) and `reports/env/openroad_probe_local_openlane_b16bda7e.txt`: all T0.3 commands and
+  flags present in the local OpenLane OpenROAD build.
+- Tests: 78 passing.
+
 ## [0.3.0] — 2026-09-25 — T3 macro bridge core, T0.4 benchmarks (local), T0.6 client
 
 ### Added

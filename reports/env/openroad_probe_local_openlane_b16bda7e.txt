@@ -1,0 +1,115 @@
+PROBE_VERSION b16bda7e82721d10566ff7e2b68f1ff0be9f9e38
+PROBE rtl_macro_placer 1 /
+HELP_BEGIN rtl_macro_placer
+ -max_num_macro  max_num_macro  -min_num_macro  min_num_macro  -max_num_inst   max_num_inst   -min_num_inst   min_num_inst   -tolerance      tolerance      -max_num_level  max_num_level  -coarsening_ratio coarsening_ratio  -num_bundled_ios  num_bundled_ios   -large_net_threshold large_net_threshold  -signature_net_threshold signature_net_threshold  -halo_width halo_width  -halo_height halo_height  -fence_lx   fence_lx  -fence_ly   fence_ly  -fence_ux   fence_ux  -fence_uy   fence_uy  -area_weight area_weight  -outline_weight outline_weight  -wirelength_weight wirelength_weight  -guidance_weight guidance_weight  -fence_weight fence_weight  -boundary_weight boundary_weight  -notch_weight notch_weight  -macro_blockage_weight macro_blockage_weight  -pin_access_th pin_access_th  -target_util   target_util  -target_dead_space target_dead_space  -min_ar  min_ar  -snap_layer snap_layer  -bus_planning  -report_directory report_directory  -write_macro_placement file_name  
+HELP_END rtl_macro_placer
+PROBE macro_placement 1 /
+HELP_BEGIN macro_placement
+
+  [-halo {halo_x halo_y}]  [-channel {channel_x channel_y}] [-fence_region {lx ly ux uy}] [-snap_layer snap_layer_number] [-style corner_max_wl|corner_min_wl]
+HELP_END macro_placement
+PROBE place_macro 1 /
+HELP_BEGIN place_macro
+-macro_name macro_name  -location location  [-orientation orientation]  
+HELP_END place_macro
+PROBE global_placement 1 -skip_initial_place,-incremental,-routability_driven,-timing_driven,-overflow/-skip_initial_place,-incremental,-routability_driven,-timing_driven,-overflow
+HELP_BEGIN global_placement
+ [-skip_initial_place] [-skip_nesterov_place] [-timing_driven] [-routability_driven] [-disable_timing_driven] [-disable_routability_driven] [-incremental] [-force_cpu] [-skip_io] [-bin_grid_count grid_count] [-density target_density] [-init_density_penalty init_density_penalty] [-init_wirelength_coef init_wirelength_coef] [-min_phi_coef min_phi_coef] [-max_phi_coef max_phi_coef] [-reference_hpwl reference_hpwl] [-overflow overflow] [-initial_place_max_iter initial_place_max_iter] [-initial_place_max_fanout initial_place_max_fanout] [-routability_check_overflow routability_check_overflow] [-routability_max_density routability_max_density] [-routability_max_bloat_iter routability_max_bloat_iter] [-routability_max_inflation_iter routability_max_inflation_iter] [-routability_target_rc_metric routability_target_rc_metric] [-routability_inflation_ratio_coef routability_inflation_ratio_coef] [-routability_max_inflation_ratio routability_max_inflation_ratio] [-routability_rc_coefficients routability_rc_coefficients] [-timing_driven_net_reweight_overflow timing_driven_net_reweight_overflow] [-timing_driven_net_weight_max timing_driven_net_weight_max] [-timing_driven_nets_percentage timing_driven_nets_percentage] [-pad_left pad_left] [-pad_right pad_right] 
+HELP_END global_placement
+PROBE detailed_placement 1 /
+HELP_BEGIN detailed_placement
+  [-max_displacement disp|{disp_x disp_y}]  [-disallow_one_site_gaps]  [-report_file_name file_name]
+HELP_END detailed_placement
+PROBE check_placement 1 /
+HELP_BEGIN check_placement
+[-verbose]  [-disallow_one_site_gaps]  [-report_file_name file_name]
+HELP_END check_placement
+PROBE estimate_parasitics 1 -placement,-global_routing/-placement,-global_routing
+HELP_BEGIN estimate_parasitics
+ -placement|-global_routing 
+HELP_END estimate_parasitics
+PROBE report_wns 1 /
+HELP_BEGIN report_wns
+ [-digits digits]
+HELP_END report_wns
+PROBE report_tns 1 /
+HELP_BEGIN report_tns
+ [-digits digits]
+HELP_END report_tns
+PROBE global_route 1 -congestion_iterations,-congestion_report_file/-congestion_iterations,-congestion_report_file
+HELP_BEGIN global_route
+[-guide_file out_file]  [-congestion_iterations iterations]  [-congestion_report_file file_name]  [-congestion_report_iter_step steps]  [-grid_origin origin]  [-critical_nets_percentage percent]  [-allow_congestion]  [-allow_overflow]  [-overflow_iterations iterations]  [-verbose]  [-start_incremental]  [-end_incremental]
+HELP_END global_route
+PROBE set_global_routing_region_adjustment 1 /
+HELP_BEGIN set_global_routing_region_adjustment
+ region  [-layer layer]  [-adjustment adjustment]  
+HELP_END set_global_routing_region_adjustment
+PROBE set_global_routing_layer_adjustment 1 /
+HELP_BEGIN set_global_routing_layer_adjustment
+ layer adj 
+HELP_END set_global_routing_layer_adjustment
+PROBE detailed_route 1 /
+HELP_BEGIN detailed_route
+
+    [-output_maze filename]
+    [-output_drc filename]
+    [-output_cmap filename]
+    [-output_guide_coverage filename]
+    [-drc_report_iter_step step]
+    [-db_process_node name]
+    [-disable_via_gen]
+    [-droute_end_iter iter]
+    [-via_in_pin_bottom_layer layer]
+    [-via_in_pin_top_layer layer]
+    [-or_seed seed]
+    [-or_k k]
+    [-bottom_routing_layer layer]
+    [-top_routing_layer layer]
+    [-verbose level]
+    [-distributed]
+    [-remote_host rhost]
+    [-remote_port rport]
+    [-shared_volume vol]
+    [-cloud_size sz]
+    [-clean_patches]
+    [-no_pin_access]
+    [-min_access_points count]
+    [-save_guide_updates]
+    [-repair_pdn_vias layer]
+    [-single_step_dr]
+HELP_END detailed_route
+PROBE write_db 1 /
+HELP_BEGIN write_db
+filename
+HELP_END write_db
+PROBE read_db 1 /
+HELP_BEGIN read_db
+filename
+HELP_END read_db
+PROBE write_guides 1 /
+HELP_BEGIN write_guides
+ filename 
+HELP_END write_guides
+PROBE rcx::extract_parasitics 0 /
+PROBE extract_parasitics 1 /
+HELP_BEGIN extract_parasitics
+
+    [-ext_model_file filename]
+    [-corner_cnt count]
+    [-max_res ohms]
+    [-coupling_threshold fF]
+    [-debug_net_id id]
+    [-lef_res]
+    [-cc_model track]
+    [-context_depth depth]
+    [-no_merge_via_res]
+HELP_END extract_parasitics
+PROBE write_def 1 /
+HELP_BEGIN write_def
+[-version version] filename
+HELP_END write_def
+PROBE read_def 1 /
+HELP_BEGIN read_def
+[-floorplan_initialize|-incremental|-child] [-continue_on_errors] [-tech name]  filename
+HELP_END read_def
+PROBE_DONE

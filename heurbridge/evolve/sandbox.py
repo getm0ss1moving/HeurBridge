@@ -70,7 +70,8 @@ class DesignView:
 
     FIELDS = ("size", "is_macro", "is_fixed", "is_io", "movable", "init_pos", "orient", "pin_obj", "pin_off",
               "net_ptr", "pin_idx", "net_weight", "obj_key", "canonical_order", "group", "macro_idx", "cluster",
-              "cluster_area", "core_wh", "misc")
+              "cluster_area", "core_wh", "macro_order", "macro_size", "macro_group", "macro_aff", "io_pull", "io_w",
+              "obstacles", "misc")
 
     def __init__(self, arrays: dict):
         for k, v in arrays.items():
@@ -101,6 +102,73 @@ def stable_key(name: str) -> int:
     return int.from_bytes(hashlib.blake2b(name.encode(), digest_size=8).digest(), "little") >> 1
 
 
+def macro_view(design: Design, layout: Layout, cluster: np.ndarray, keys: np.ndarray) -> dict:
+    """Derived macro-level arrays (trusted code) so programs need not rebuild connectivity.
+
+    macro_order  movable macros sorted by label-free key (canonical order); all macro_* arrays follow it
+    macro_size   (M,2) normalized effective sizes (orientation applied)
+    macro_group  (M,) interchangeable group id (same master and footprint)
+    macro_aff    (M,M) symmetric affinity: direct nets (w/(deg-1)) + 0.5 * normalized 2-hop via cell clusters
+    io_pull      (M,2) weighted mean position of the fixed objects each macro connects to; io_w (M,) weights
+    obstacles    (F,4) fixed-macro rectangles [xl, yl, xh, yh] in normalized coordinates
+    """
+    import scipy.sparse as sp
+    d = design
+    wh = d.core_wh
+    mm = np.flatnonzero(d.is_macro & ~d.is_fixed)
+    mm = mm[np.argsort(keys[mm], kind="stable")]
+    M = len(mm)
+    eff = O.effective_size(d.size, layout.orient) / wh
+    masters = d.masters or ["%.6g_%.6g" % tuple(v) for v in d.size]
+    gid, gmap = np.zeros(M, dtype=np.int64), {}
+    for j, i in enumerate(mm):
+        gid[j] = gmap.setdefault((masters[i], round(float(eff[i, 0]), 9), round(float(eff[i, 1]), 9)), len(gmap))
+    col = -np.ones(d.n_objects, dtype=np.int64)
+    col[mm] = np.arange(M)
+    fixed = np.flatnonzero(d.is_fixed & layout.placed)
+    fcol = -np.ones(d.n_objects, dtype=np.int64)
+    fcol[fixed] = np.arange(len(fixed))
+    ncl = int(cluster.max()) + 1 if (cluster >= 0).any() else 0
+    deg = d.degrees()
+    net_of = d.net_of_pin()
+    objs = d.pin_obj[d.pin_idx]
+    w = (d.net_weight / np.maximum(deg - 1, 1))[net_of]
+    nn = d.n_nets
+
+    def inc(mask, colmap, ncols):
+        r = net_of[mask]
+        c = colmap[objs[mask]]
+        A = sp.coo_matrix((np.ones(len(r)), (r, c)), shape=(nn, max(ncols, 1))).tocsr()
+        A.data[:] = 1.0
+        return A
+    Wn = sp.diags(d.net_weight / np.maximum(deg - 1, 1))
+    Am = inc(col[objs] >= 0, col, M)
+    aff = (Am.T @ Wn @ Am).toarray() if M else np.zeros((0, 0))
+    if ncl and M:
+        Ac = inc(cluster[objs] >= 0, cluster, ncl)
+        mc = (Am.T @ Wn @ Ac)
+        two = (mc @ mc.T).toarray()
+        np.fill_diagonal(two, 0.0)
+        if two.max() > 0:
+            two *= (aff.max() if aff.max() > 0 else 1.0) / two.max()
+        aff = aff + 0.5 * two
+    if M:
+        np.fill_diagonal(aff, 0.0)
+    io_pull, io_w = np.full((M, 2), 0.5), np.zeros(M)
+    if M and len(fixed):
+        Af = inc(fcol[objs] >= 0, fcol, len(fixed))
+        mf = (Am.T @ Wn @ Af).tocsr()
+        fp = layout.pos[fixed]
+        tot = np.asarray(mf.sum(1)).ravel()
+        nz = tot > 0
+        io_pull[nz] = (mf @ fp)[nz] / tot[nz, None]
+        io_w = tot
+    fm = np.flatnonzero(d.is_macro & d.is_fixed & layout.placed)
+    obst = np.c_[layout.pos[fm] - eff[fm] / 2, layout.pos[fm] + eff[fm] / 2] if len(fm) else np.zeros((0, 4))
+    return {"macro_order": mm, "macro_size": eff[mm], "macro_group": gid, "macro_aff": aff.astype(np.float64),
+            "io_pull": io_pull, "io_w": io_w, "obstacles": obst}
+
+
 def make_view(design: Design, layout: Layout, cluster: np.ndarray | None = None, halo: float = 0.0) -> DesignView:
     wh = design.core_wh
     keys = np.array([stable_key(n) for n in design.names], dtype=np.int64)
@@ -116,7 +184,9 @@ def make_view(design: Design, layout: Layout, cluster: np.ndarray | None = None,
     misc = {"row_h": (design.site[1] / wh[1]) if design.site else 0.0,
             "site_w": (design.site[0] / wh[0]) if design.site else 0.0,
             "halo": (halo / wh[0], halo / wh[1]), "aspect": float(wh[0] / wh[1]), "design_id": design.id}
+    mv = macro_view(design, layout, cl, keys)
     return DesignView({
+        **mv,
         "size": design.size / wh, "is_macro": design.is_macro.copy(), "is_fixed": design.is_fixed.copy(),
         "is_io": design.is_io.copy(), "movable": ~design.is_fixed, "init_pos": init,
         "orient": layout.orient.astype(np.int64), "pin_obj": design.pin_obj.copy(), "pin_off": design.pin_off / wh,
@@ -245,6 +315,15 @@ BLOCK = ("open", "os.", "subprocess.", "socket.", "ctypes.", "shutil.", "urllib.
          "sys.settrace", "sys.setprofile", "sys._getframe", "threading.", "_thread.", "code.__new__",
          "function.__code__", "marshal.", "pickle.", "winreg.", "gc.")
 state = {"locked": False}
+NX_ARGMAP = "<class 'networkx.utils.decorators.argmap'> compilation"
+def nx_generated(event, args):
+    # networkx's argmap decorator compiles its own wrapper from a fixed template on first call
+    if event == "compile":
+        fn = args[1] if len(args) > 1 else ""
+        return isinstance(fn, str) and fn.startswith(NX_ARGMAP)
+    if event == "exec":
+        return str(getattr(args[0], "co_filename", "")).startswith(NX_ARGMAP)
+    return False
 def hook(event, args):
     if not state["locked"]:
         return
@@ -252,7 +331,10 @@ def hook(event, args):
         name = args[0]
         if name not in sys.modules or name.split(".")[0] not in ALLOWED:
             raise PermissionError("sandbox: import %s" % name)
-    elif event in ("exec", "compile") or event.startswith(BLOCK):
+    elif event in ("exec", "compile"):
+        if not nx_generated(event, args):
+            raise PermissionError("sandbox: %s" % event)
+    elif event.startswith(BLOCK):
         raise PermissionError("sandbox: %s" % event)
 g = {"__builtins__": {k: __builtins__[k] if isinstance(__builtins__, dict) else getattr(__builtins__, k)
      for k in SAFE_BUILTINS if (k in __builtins__ if isinstance(__builtins__, dict) else hasattr(__builtins__, k))},
