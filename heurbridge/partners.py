@@ -227,7 +227,31 @@ class CotrainedPartner(Partner):
         self.K, self.halo, self.device = K, halo, device
 
     def __call__(self, design, layout, rng, budget_s=None):
-        from .bridge.sample import refine
+        from .bridge.sample import refine, source_nodes
         t0 = time.time()
         r = refine(self.model, self.graph, design, [layout], self.evaluate, K=self.K, halo=self.halo, device=self.device)[0]
+        mv = self.graph.movable
+        disp = float(np.linalg.norm(r.x_bridge[mv] - source_nodes(self.graph, layout)[mv], axis=1).mean()) if mv.any() else 0.0
+        return PartnerResult(r.layout, time.time() - t0, len(r.scores), {"alpha": r.alpha, "scores": r.scores, "disp": disp})
+
+
+class RandomGuardPartner(Partner):
+    """E0 control: the co-trained bridge's guard (same alpha grid, P_M and evaluator) applied along a random
+    displacement of the movable nodes whose mean length matches the bridge's (``scale``, measured on the
+    budget sources).  A bridge that does not beat this control adds nothing beyond guarded perturbation."""
+    name = "random_guard"
+
+    def __init__(self, graph, evaluate, scale: float, halo: float = 0.0):
+        self.graph, self.evaluate, self.scale, self.halo = graph, evaluate, scale, halo
+
+    def __call__(self, design, layout, rng, budget_s=None):
+        from .bridge.sample import guarded, source_nodes
+        t0 = time.time()
+        g = self.graph
+        src = source_nodes(g, layout)
+        d = rng.normal(size=src.shape) * g.movable[:, None]
+        n = np.linalg.norm(d[g.movable], axis=1).mean() if g.movable.any() else 1.0
+        end = src + d * (self.scale / max(n, 1e-12))
+        r = guarded(g, design, layout, src, end, self.evaluate,
+                    project=lambda dd, l: project.legalize_macros(dd, l, halo=self.halo))
         return PartnerResult(r.layout, time.time() - t0, len(r.scores), {"alpha": r.alpha, "scores": r.scores})

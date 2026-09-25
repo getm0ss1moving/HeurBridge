@@ -72,15 +72,19 @@ def refine(model, graph: BridgeGraph, design: Design, layouts: list, evaluate, K
     project = project or (lambda d, l: legalize_macros(d, l, halo=halo))
     src = np.stack([source_nodes(graph, l) for l in layouts]) if sources is None else sources
     ends = bridge_endpoints(model, graph, src, K=K, method=method, device=device)
-    out = []
-    for b, lay in enumerate(layouts):
-        scores, legal, cands = [], [], []
-        for a in alphas:
-            xa = src[b] + a * (ends[b] - src[b])
-            cand, rep = project(design, graph.to_layout(xa, lay))
-            cands.append(cand)
-            legal.append(bool(rep.ok))
-            scores.append(float(evaluate(cand)) if rep.ok else math.inf)
-        i = int(np.argmin(scores))
-        out.append(RefineResult(layout=cands[i], alpha=float(alphas[i]), scores=scores, x_bridge=ends[b], legal=legal))
-    return out
+    return [guarded(graph, design, lay, src[b], ends[b], evaluate, alphas, project) for b, lay in enumerate(layouts)]
+
+
+def guarded(graph: BridgeGraph, design: Design, lay: Layout, src: np.ndarray, end: np.ndarray, evaluate,
+            alphas=ALPHAS, project=None) -> RefineResult:
+    """Guarded partial transport along src -> end: P_M(src + a (end - src)) for every a, argmin of evaluate
+    (a = 0 is the raw heuristic).  Shared by the bridge and by E0's random-direction control."""
+    project = project or (lambda d, l: legalize_macros(d, l))
+    scores, legal, cands = [], [], []
+    for a in alphas:
+        cand, rep = project(design, graph.to_layout(src + a * (end - src), lay))
+        cands.append(cand)
+        legal.append(bool(rep.ok))
+        scores.append(float(evaluate(cand)) if rep.ok else math.inf)
+    i = int(np.argmin(scores))
+    return RefineResult(layout=cands[i], alpha=float(alphas[i]), scores=scores, x_bridge=end, legal=legal)

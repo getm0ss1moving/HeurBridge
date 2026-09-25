@@ -51,7 +51,8 @@ fill, OpenRCX, STA — untested on the tool yet), `scripts/calibrate_dev.py`, `r
 8. E0 protocol (T4, before it is pre-registered): the co-trained bridge's guard sees f1, memetic and
    repertoire decide on f0 only. With a weakly calibrated f0 (Kendall 0.03-0.65 above) the bridge can win
    through the guard's access to f1 alone. Proposal: run E0 with `--equal-guard` (every partner's output
-   kept only if it beats the raw layout at the same fidelity) or add a "random displacement + guard" control.
+   kept only if it beats the raw layout at the same fidelity) and `--random-control` (the bridge's guard along
+   a random displacement of matched length); both are implemented.
 9. Timing gates at f1: with M1 as the reference, most heuristic layouts fail the 0.02 ns setup-WNS gate at
    f1 (pre-CTS, no timing repair), so J = inf for them. The gates are specified for the final cost; applying
    them at f1 discards most of the search signal. Proposal: at f1 report the gates but rank by J before the

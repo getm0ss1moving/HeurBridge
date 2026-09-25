@@ -56,3 +56,15 @@ def test_generator_partners(case):
     res = P.CotrainedPartner(m, g, scorer)(des, h, rng)
     _check(des, res, scorer, h)
     assert res.info["alpha"] in (0.0, 0.25, 0.5, 1.0)
+    assert res.info["disp"] >= 0.0
+
+
+def test_random_guard_control(case):
+    """E0 control: same guard as the bridge along a random displacement of matched length."""
+    des, h, scorer, view, g = case
+    part = P.RandomGuardPartner(g, scorer, scale=0.05)
+    r1 = part(des, h, np.random.default_rng(3))
+    _check(des, r1, scorer, h)                                   # alpha = 0 (raw) is always a candidate
+    assert r1.info["alpha"] in (0.0, 0.25, 0.5, 1.0) and r1.info["scores"][0] == pytest.approx(scorer(h))
+    r2 = part(des, h, np.random.default_rng(3))
+    assert np.array_equal(r1.layout.pos, r2.layout.pos, equal_nan=True)   # deterministic (cells are NaN)

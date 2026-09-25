@@ -45,6 +45,18 @@ def permute_tensors(gt: dict, perm: np.ndarray) -> dict:
 
 # 1 ----------------------------------------------------------------------------------------
 def test_overfit_single_pair():
+    # one thread: parallel float reductions change the 2,000-step trajectory between runs (the test was flaky
+    # under CPU load with the default thread count), and the spec's 1e-3 threshold leaves little room
+    nt = torch.get_num_threads()
+    torch.set_num_threads(1)
+    try:
+        _overfit_single_pair()
+    finally:
+        torch.set_num_threads(nt)
+
+
+def _overfit_single_pair():
+    torch.manual_seed(0)
     des, ref, g = small_case(seed=1)
     rng = np.random.default_rng(0)
     x1 = g.node_positions(ref)
@@ -62,6 +74,7 @@ def test_overfit_single_pair():
     xe = integrate(tr.model.eval(), gt, torch.as_tensor(x0[None], dtype=torch.float32), K=20)[0].numpy()
     a = g.area_w
     err = np.sqrt((a * ((xe - x1) ** 2).sum(-1)).sum() / a.sum())
+    print("overfit terminal error", err)
     assert err < 1e-3, err
 
 

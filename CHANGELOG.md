@@ -4,6 +4,19 @@ Every change to the code is recorded here with its version, task and verificatio
 Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 (The task list's `_harness/CHANGELOG.md` does not exist in the current checkout; this file replaces it.)
 
+## [0.10.3] — 2026-09-26 — E0 random-direction control, deterministic overfit test
+
+### Added
+- `partners.RandomGuardPartner` + `run_e0.py --random-control` — E0 control for open issue 8: the co-trained
+  bridge's guard (same alpha grid, P_M and evaluator) along a random displacement whose mean length matches the
+  bridge's (median over the budget sources). `bridge/sample.guarded` is the shared guard (refine unchanged).
+
+### Fixed
+- `tests/test_bridge.py::test_overfit_single_pair` was flaky under CPU load (default thread count: parallel
+  reductions change the 2,000-step trajectory; the spec's 1e-3 threshold leaves little room). It now runs on
+  one thread with a fixed seed: terminal error 5.9e-4 on every run.
+- Tests: 124 passing.
+
 ## [0.10.2] — 2026-09-26 — staged f2 (ORFS-style), LEF/DEF round trip, OpenROAD pin-geometry check, dev E0 report
 
 ### Changed

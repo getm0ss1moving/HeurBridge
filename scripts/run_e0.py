@@ -63,6 +63,8 @@ def main():
     ap.add_argument("--programs", default="")
     ap.add_argument("--guard-fidelity", default="f1", choices=["f0", "f1"])
     ap.add_argument("--equal-guard", action="store_true")
+    ap.add_argument("--random-control", action="store_true",
+                    help="add the random-direction control partner (the bridge's guard along a random displacement)")
     a = ap.parse_args()
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
@@ -102,11 +104,14 @@ def main():
         cot = P.CotrainedPartner(bridge, b.graph, guard, K=a.K)
         # measure the co-trained partner's median time per call (includes its guard)
         rng = np.random.default_rng(0)
-        times = [cot(b.design, l, rng).wall_s for _, _, l in srcs[:5]]
-        budget = float(np.median(times))
+        probe = [cot(b.design, l, rng) for _, _, l in srcs[:5]]
+        budget = float(np.median([r.wall_s for r in probe]))
+        scale = float(np.median([r.info["disp"] for r in probe]))   # the bridge's typical displacement
         partners = [P.NonePartner(), P.MemeticPartner(b.scorer), P.RepertoirePartner(b.scorer, b.view.macro_aff, b.view.macro_order), cot]
         if frozen is not None:
             partners.append(P.FrozenGenPartner(frozen, b.graph, b.scorer, K=a.K))
+        if a.random_control:
+            partners.append(P.RandomGuardPartner(b.graph, guard, scale))
         for pid, s, lay in srcs:
             for part in partners:
                 key = (b.design.id, pid, s, part.name)
@@ -115,7 +120,7 @@ def main():
                 res = part(b.design, lay, np.random.default_rng(7 + s), budget_s=budget)
                 lp, rep = project.legalize_macros(b.design, res.layout)
                 ok = rep.ok
-                if a.equal_guard and part.name not in ("none", "cotrained"):
+                if a.equal_guard and part.name not in ("none", "cotrained", "random_guard"):
                     raw_p, raw_rep = project.legalize_macros(b.design, lay)
                     keep = ok and guard(lp) < guard(raw_p)       # ties keep the raw layout
                     res.info["equal_guard"] = "kept_output" if keep else "kept_raw"
@@ -167,7 +172,7 @@ def analyse(rows, entry, ledger, out, a):
         res["kendall_vs_raw"][p] = float(np.nanmean(taus)) if taus else None
     pm = res["vs_cotrained"].get("memetic", {}).get("p", 1.0)
     pr = res["vs_cotrained"].get("repertoire", {}).get("p", 1.0)
-    res["guard"] = {"fidelity": a.guard_fidelity, "equal_guard": a.equal_guard}
+    res["guard"] = {"fidelity": a.guard_fidelity, "equal_guard": a.equal_guard, "random_control": a.random_control}
     res["gate_G0prime"] = {"pass": bool(pm < 0.01 and pr < 0.01), "p_memetic": pm, "p_repertoire": pr,
                            "note": "development run (Track-A stand-in final cost); not the pre-registered f2 test"
                            if a.final == "hbgp" else ""}
