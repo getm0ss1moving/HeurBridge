@@ -4,6 +4,16 @@ Every change to the code is recorded here with its version, task and verificatio
 Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 (The task list's `_harness/CHANGELOG.md` does not exist in the current checkout; this file replaces it.)
 
+## [0.8.1] — 2026-09-25 — T6.1 online solve, T7.5 originality hygiene, handoff
+
+### Added
+- `heurbridge/online/solve.py` — online macro-stage solve (T6.1): state card, top-k portfolio programs x seeds,
+  bridge + guard at f1, best b to f2, deploy argmin{baseline, verified candidates} (Lemma 3); zero LLM calls.
+- `heurbridge/verify/originality.py` — rediscovery check (T7.5): AST 5-gram containment for Python
+  references and winnowed normalized-token 8-gram containment for any language; > 0.8 = rediscovery.
+- HANDOFF.md session entry (work done, commands, artifacts, open decisions).
+- CHANGELOG 0.8.0 test count: 103 (not 104).
+
 ## [0.8.0] — 2026-09-25 — E3 calibration + gate G0, V1 metamorphic tests, baseline elites
 
 ### Added
