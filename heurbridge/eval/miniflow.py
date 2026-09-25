@@ -254,41 +254,74 @@ def f1_script(p: Nangate45, d: DesignCfg, fp_odb: Path, macro_tcl: Path | None, 
 FILL_CELLS = "FILLCELL_X1 FILLCELL_X2 FILLCELL_X4 FILLCELL_X8 FILLCELL_X16 FILLCELL_X32"
 
 
-def f2_script(p: Nangate45, d: DesignCfg, fp_odb: Path, macro_tcl: Path | None, work: Path, threads: int = 8,
-              repair_timing: bool = True, hold_margin: float = 0.03) -> str:
-    """f2 (task T1.5) on the ORFS stage sequence: the f1 placement (recomputed; deterministic at a fixed thread
-    count), 4_1 CTS (+ setup/hold repair_timing), 5_1 global route, 5_2 detailed route, 5_3 fill, 6 final:
-    OpenRCX extraction (platform rcx_patterns.rules) and STA on the extracted parasitics with propagated
-    clocks.  Detailed-route DRC count, wirelength and via count come from TritonRoute's summary."""
-    rt = []
-    if repair_timing:          # ORFS repair_timing_helper with the design's margins (bp_fe_top: hold 0.03 ns)
-        rt = ['if {[catch {repair_timing -setup -hold_margin %g -repair_tns 100} msg]} { puts "HB_REPAIR_TIMING_FAIL $msg" }'
-              % hold_margin, "detailed_placement"]
+def _stage_head(p: Nangate45, d: DesignCfg, odb: Path, threads: int) -> list:
+    """Start of a later f2 stage: a fresh process reading the previous stage's database (as ORFS does)."""
+    return ["read_db %s" % odb, "\n".join("read_liberty %s" % l for l in [p.lib] + d.macro_libs),
+            "read_sdc %s" % d.sdc, "set_thread_count %d" % threads,
+            ("set_dont_use {%s}" % " ".join(d.dont_use)) if d.dont_use else "", _route_setup(p, d),
+            "set_propagated_clock [all_clocks]"]
+
+
+def f2_stages(p: Nangate45, d: DesignCfg, fp_odb: Path, macro_tcl: Path | None, work: Path, threads: int = 8,
+              repair_timing: bool = True, hold_margin: float = 0.03) -> list:
+    """f2 (task T1.5) as ORFS runs it: one OpenROAD process per stage, each reading the previous stage's
+    database.  In the local build, repair_timing in the same process as CTS segfaults in the STA arrival
+    search (stale graph after the netlist edits); a fresh process per stage avoids that class of bug.
+
+      cts     f1 placement (recomputed; deterministic at a fixed thread count) + 4_1 CTS + detailed placement
+      rt      setup / hold repair_timing (design hold margin) + detailed placement + check_placement
+      route   5_1 global route + 5_2 detailed route + 5_3 fill (the routes stay in memory between GR and DR)
+      final   6: OpenRCX extraction (platform rcx_patterns.rules), STA on the extracted parasitics, power
+    Returns [(stage, script, done_marker)]."""
     rcx = p.pdir / "rcx_patterns.rules"
-    return "\n".join(_place_steps(p, d, fp_odb, macro_tcl, threads) + [
-        # 4_1 CTS
+    cts = _place_steps(p, d, fp_odb, macro_tcl, threads) + [
         "estimate_parasitics -placement",
         "clock_tree_synthesis -root_buf BUF_X4 -buf_list {BUF_X4} -sink_clustering_enable",
-        "set_propagated_clock [all_clocks]", "repair_clock_nets",
-        "estimate_parasitics -placement", "detailed_placement"] + rt + [
-        'if {[catch {repair_timing -hold -hold_margin %g} msg]} { puts "HB_REPAIR_HOLD_FAIL $msg" }' % hold_margin
-        if repair_timing else "",
-        "detailed_placement", "check_placement",
-        'puts "HB_CTS_DONE"',
-        # 5_1 global route, 5_2 detailed route, 5_3 fill
+        "set_propagated_clock [all_clocks]", "repair_clock_nets", "estimate_parasitics -placement",
+        "detailed_placement", "write_db %s" % (work / "f2_cts.odb"), 'puts "HB_STAGE_DONE cts"']
+    rt_in = work / "f2_cts.odb"
+    stages = [("cts", cts)]
+    if repair_timing:
+        stages.append(("rt", _stage_head(p, d, rt_in, threads) + [
+            "estimate_parasitics -placement",
+            "repair_timing -setup -repair_tns 100", "repair_timing -hold -hold_margin %g" % hold_margin,
+            "detailed_placement", "check_placement", "write_db %s" % (work / "f2_rt.odb"), 'puts "HB_STAGE_DONE rt"']))
+        rt_in = work / "f2_rt.odb"
+    stages.append(("route", _stage_head(p, d, rt_in, threads) + [
         "global_route -congestion_iterations 30 -verbose",
-        'puts "HB_GRT_DONE"',
         "detailed_route -output_drc %s -verbose 1" % (work / "drc.rpt"),
-        'puts "HB_DRT_DONE"',
-        "filler_placement {%s}" % FILL_CELLS,
-        # 6 final report: extracted parasitics
+        "filler_placement {%s}" % FILL_CELLS, "write_db %s" % (work / "f2_route.odb"), 'puts "HB_STAGE_DONE route"']))
+    stages.append(("final", _stage_head(p, d, work / "f2_route.odb", threads) + [
         "extract_parasitics -ext_model_file %s" % rcx, "write_spef %s" % (work / "f2.spef"),
         "read_spef %s" % (work / "f2.spef"),
         'puts "HB_WNS_F2 [sta::worst_slack -max]"', 'puts "HB_TNS_F2 [sta::total_negative_slack -max]"',
         'puts "HB_HOLD_F2 [sta::worst_slack -min]"',
         'puts "HB_POWER_F2_BEGIN"', "report_power", 'puts "HB_POWER_F2_END"',
-        'puts "HB_RUNTIME_MS [expr {[clock milliseconds] - $t0}]"',
-        "write_def %s" % (work / "f2_out.def"), 'puts "HB_F2_DONE"']) + "\n"
+        "write_def %s" % (work / "f2_out.def"), 'puts "HB_F2_DONE"']))
+    return [(name, "\n".join(lines) + "\n", "HB_F2_DONE" if name == "final" else "HB_STAGE_DONE %s" % name)
+            for name, lines in stages]
+
+
+def run_f2(p: Nangate45, d: DesignCfg, fp_odb: Path, macro_tcl: Path | None, work: Path, threads: int = 8,
+           repair_timing: bool = True, docker_image: str | None = DOCKER_IMAGE, timeout: int = 7200) -> tuple:
+    """Run the f2 stages in order (one retry for a crashed stage); stop at the first failed stage.
+    Returns (returncode, concatenated log, wall seconds, per-stage [(stage, rc, wall, failure)])."""
+    logs, done, total = [], [], 0.0
+    rc = 0
+    for name, script, marker in f2_stages(p, d, fp_odb, macro_tcl, work, threads, repair_timing):
+        for attempt in (0, 1):
+            rc, log, wall = run_tool("openroad", script, work / ("f2_%s%s.tcl" % (name, "" if attempt == 0 else "_retry")),
+                                     docker_image=docker_image, timeout=timeout)
+            total += wall
+            ok = rc == 0 and re.search(r"^%s$" % re.escape(marker), log, re.M)
+            failure = None if ok else classify_failure(rc, log)
+            done.append((name, rc, wall, failure))
+            logs.append("### stage %s (attempt %d)\n%s" % (name, attempt, log))
+            if ok or not should_retry(rc, failure):
+                break
+        if not ok:
+            return (rc if rc != 0 else "stage_%s_incomplete" % name), "\n".join(logs), round(total, 1), done
+    return 0, "\n".join(logs), round(total, 1), done
 
 
 def f2_metrics(log: str) -> dict:

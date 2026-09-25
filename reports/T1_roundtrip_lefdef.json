@@ -1,0 +1,182 @@
+[
+ {
+  "design": "ibm01",
+  "suite": "ibm_lefdef",
+  "objects": 12752,
+  "nets": 14111,
+  "identity": true,
+  "unplaced": 383,
+  "hpwl": null,
+  "seconds": 0.7
+ },
+ {
+  "design": "ibm02",
+  "suite": "ibm_lefdef",
+  "objects": 19601,
+  "nets": 19584,
+  "identity": true,
+  "unplaced": 253,
+  "hpwl": null,
+  "seconds": 1.1
+ },
+ {
+  "design": "ibm03",
+  "suite": "ibm_lefdef",
+  "objects": 23136,
+  "nets": 27401,
+  "identity": true,
+  "unplaced": 822,
+  "hpwl": null,
+  "seconds": 1.6
+ },
+ {
+  "design": "ibm04",
+  "suite": "ibm_lefdef",
+  "objects": 27507,
+  "nets": 31970,
+  "identity": true,
+  "unplaced": 877,
+  "hpwl": null,
+  "seconds": 1.5
+ },
+ {
+  "design": "ibm05",
+  "suite": "ibm_lefdef",
+  "objects": 29347,
+  "nets": 28446,
+  "identity": true,
+  "unplaced": 266,
+  "hpwl": null,
+  "seconds": 2.2
+ },
+ {
+  "design": "ibm06",
+  "suite": "ibm_lefdef",
+  "objects": 32498,
+  "nets": 34826,
+  "identity": true,
+  "unplaced": 422,
+  "hpwl": null,
+  "seconds": 1.7
+ },
+ {
+  "design": "ibm07",
+  "suite": "ibm_lefdef",
+  "objects": 45926,
+  "nets": 48117,
+  "identity": true,
+  "unplaced": 984,
+  "hpwl": null,
+  "seconds": 2.9
+ },
+ {
+  "design": "ibm08",
+  "suite": "ibm_lefdef",
+  "objects": 51309,
+  "nets": 50513,
+  "identity": true,
+  "unplaced": 300,
+  "hpwl": null,
+  "seconds": 2.6
+ },
+ {
+  "design": "ibm09",
+  "suite": "ibm_lefdef",
+  "objects": 53395,
+  "nets": 60902,
+  "identity": true,
+  "unplaced": 1646,
+  "hpwl": null,
+  "seconds": 3.5
+ },
+ {
+  "design": "ibm10",
+  "suite": "ibm_lefdef",
+  "objects": 69429,
+  "nets": 75196,
+  "identity": true,
+  "unplaced": 1136,
+  "hpwl": null,
+  "seconds": 5.1
+ },
+ {
+  "design": "ibm11",
+  "suite": "ibm_lefdef",
+  "objects": 70558,
+  "nets": 81454,
+  "identity": true,
+  "unplaced": 2037,
+  "hpwl": null,
+  "seconds": 4.1
+ },
+ {
+  "design": "ibm12",
+  "suite": "ibm_lefdef",
+  "objects": 71076,
+  "nets": 77240,
+  "identity": true,
+  "unplaced": 970,
+  "hpwl": null,
+  "seconds": 5.4
+ },
+ {
+  "design": "ibm13",
+  "suite": "ibm_lefdef",
+  "objects": 84199,
+  "nets": 99666,
+  "identity": true,
+  "unplaced": 2310,
+  "hpwl": null,
+  "seconds": 5.6
+ },
+ {
+  "design": "ibm14",
+  "suite": "ibm_lefdef",
+  "objects": 147605,
+  "nets": 152772,
+  "identity": true,
+  "unplaced": 2044,
+  "hpwl": null,
+  "seconds": 8.1
+ },
+ {
+  "design": "ibm15",
+  "suite": "ibm_lefdef",
+  "objects": 161570,
+  "nets": 186608,
+  "identity": true,
+  "unplaced": 2556,
+  "hpwl": null,
+  "seconds": 11.8
+ },
+ {
+  "design": "ibm16",
+  "suite": "ibm_lefdef",
+  "objects": 183484,
+  "nets": 190048,
+  "identity": true,
+  "unplaced": 1074,
+  "hpwl": null,
+  "seconds": 10.8
+ },
+ {
+  "design": "ibm17",
+  "suite": "ibm_lefdef",
+  "objects": 185495,
+  "nets": 189581,
+  "identity": true,
+  "unplaced": 2463,
+  "hpwl": null,
+  "seconds": 14.5
+ },
+ {
+  "design": "ibm18",
+  "suite": "ibm_lefdef",
+  "objects": 210613,
+  "nets": 201920,
+  "identity": true,
+  "unplaced": 532,
+  "hpwl": null,
+  "seconds": 11.5
+ }
+]

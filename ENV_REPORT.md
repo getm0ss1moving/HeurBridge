@@ -55,7 +55,7 @@ ISPD2005 integrity: node/net/pin/terminal counts in the file headers equal the p
 (adaptec1: 211,447 nodes, 221,142 nets, 944,053 pins; …; bigblue4: 2,177,353 / 2,229,886 / 8,900,078).
 IBM sizes: ibm01 12,752 nodes / 14,111 nets … ibm18 210,613 / 201,920.
 
-Loader checks (T1.1): bookshelf load → write → load is the identity on ibm01, ibm18 and adaptec1 (load 0.1–1.2 s).
+Loader checks (T1.1): load → write → load is the identity on all 26 bookshelf designs (IBM + ISPD2005) and on the 18 IBM LEF/DEF designs (`reports/T1_roundtrip_*.json`). Pin geometry agrees exactly with OpenROAD's (`reports/V3_pin_geometry_vs_openroad.json`).
 
 ## 4. Python/GPU, reference code, LLM (T0.5, T0.6)
 
@@ -79,22 +79,30 @@ Loader checks (T1.1): bookshelf load → write → load is the identity on ibm01
   cost uses the available terms with TNS/power marked `unchecked` (needs your confirmation, see HANDOFF).
 
 
-## 5b. Local Track-B development flow (added later in session 1)
+## 5b. Local Track-B development flow (revised 2026-09-26)
 
 The OpenLane image's OpenROAD (b16bda7e, early 2024) + Yosys 0.38 cannot run current ORFS (no `make`, older
-commands), so `heurbridge/eval/miniflow.py` implements a minimal Nangate45 flow with verified commands only:
-hierarchical Yosys synthesis -> floorplan (utilization, IO exclusions translated to `place_pins -exclude`) ->
-tool-native macro placement `rtl_macro_placer` (M1) -> f1 (our `place_macro` placement, FIRM macros, platform RC,
-routability+timing-driven GP, `repair_design` + tie repair, DP, `check_placement`, placement-stage timing,
-`global_route` 30 iterations, GR-stage timing, power).
+commands), so `heurbridge/eval/miniflow.py` implements the ORFS stage sequence with verified commands only,
+configured from the design's and the platform's `config.mk` with ORFS/Make semantics:
+hierarchical Yosys synthesis (dont-use cells) -> floorplan (utilization, aspect, core margin 1.0, platform
+tracks, IO exclusions) -> M1 = `rtl_macro_placer` -> **f1**: our macro placement (FIRM) -> tapcells ->
+power grid (supply block pins dropped, see below) -> routability + timing-driven GP at the platform density
+(0.30) -> port buffering, `repair_design`, tie cells -> DP -> placement-parasitics timing and power ->
+`global_route -allow_congestion` (30 iterations). **f2** (one process per stage, as ORFS): CTS ->
+`repair_timing` -> GRT + detailed route + fill -> OpenRCX + STA.
 
 | Step on nangate45/bp_fe_top (11 fakeram macros) | Result |
 |---|---|
-| Synthesis (hierarchical) | 15 s (flat synthesis made Hier-RTLMP segfault in TritonPart) |
-| Floorplan | 4 s, 456 rows |
-| M1 `rtl_macro_placer` | 285 s, 11 macros placed |
-| f1 with M1 | 126 s: GR WL 1.758e6 um, overflow 0, setup WNS -2.20 ns / TNS -310.9 ns (1.62 ns clock, pre-CTS), hold +0.086 ns, 0.128 W |
-| f1 determinism (repeat) | placement and GR results identical; the repeat segfaulted after GR (old build) -> the evaluator retries once and records every crash |
+| Synthesis / floorplan / M1 | 10 s / 3 s / 174 s |
+| f1 with M1, 3 runs (6 threads) | bit-identical: GR WL 1,832,439 um, overflow 0, setup WNS -2.336 ns / TNS -113.5 ns (pre-CTS), hold +0.096 ns, 0.151 W; 109 s |
+| f2 with M1 (smoke test, 2 threads) | 782 s (CTS 113 s, repair_timing 148 s, GRT + DRT + fill 506 s, RCX + STA 14 s): DRC 0, detailed WL 1,618,701 um, 264,348 vias, setup WNS -1.979 ns / TNS -57.8 ns, hold +0.096 ns, 0.169 W (CTS 4,774 sinks / 396 leaf buffers; repair_timing left 314 setup endpoints) |
+
+Local-build defects worked around (each bisected on bp_fe_top; details in CHANGELOG 0.10.x):
+`estimate_parasitics -global_routing` fails at random (bad_alloc exit / segfault / OOM kill) -> f1 timing from
+placement parasitics; `report_power` segfaults when pdngen's VDD/VSS block pins exist -> pins dropped after
+pdngen; `repair_timing` after CTS in the same process segfaults -> one process per f2 stage; a deterministic
+gpl assertion on some macro layouts and PDN-0179 on layouts with narrow edge channels are recorded as named
+tool failures. Results depend on the thread count, so a campaign fixes it (6).
 
 This is a development path; the pre-registered experiments use ORFS with a current OpenROAD on the server.
 

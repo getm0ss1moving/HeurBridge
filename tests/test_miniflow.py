@@ -158,19 +158,23 @@ HB_F2_DONE
 """
 
 
-def test_f2_script_order_and_metrics():
+def test_f2_stages_and_metrics():
     p, d = _cfg()
-    s = MF.f2_script(p, d, Path("/w/fp.odb"), Path("/w/macros.tcl"), Path("/w"), threads=6)
-    keys = ["global_placement", "detailed_placement", "clock_tree_synthesis", "set_propagated_clock", "repair_timing",
-            "global_route", "detailed_route", "filler_placement", "extract_parasitics", "read_spef", "HB_WNS_F2",
-            "HB_POWER_F2_BEGIN", "HB_F2_DONE"]
-    i = {k: s.index(k) for k in keys}
-    assert sorted(i, key=i.get) == keys
-    assert "repair_timing" not in MF.f2_script(p, d, Path("/w/fp.odb"), None, Path("/w"), repair_timing=False)
+    st = MF.f2_stages(p, d, Path("/w/fp.odb"), Path("/w/macros.tcl"), Path("/w"), threads=6)
+    assert [n for n, _, _ in st] == ["cts", "rt", "route", "final"]
+    cts, rt, route, final = (x[1] for x in st)
+    assert cts.index("global_placement") < cts.index("clock_tree_synthesis") < cts.index("write_db /w/f2_cts.odb")
+    assert rt.startswith("read_db /w/f2_cts.odb") and "set_propagated_clock" in rt and "repair_timing -setup" in rt
+    assert route.startswith("read_db /w/f2_rt.odb") and route.index("global_route") < route.index("detailed_route") \
+        < route.index("filler_placement")
+    assert final.startswith("read_db /w/f2_route.odb") and final.index("extract_parasitics") < final.index("read_spef") \
+        < final.index("HB_WNS_F2") < final.index("HB_F2_DONE")
+    assert [x[2] for x in st] == ["HB_STAGE_DONE cts", "HB_STAGE_DONE rt", "HB_STAGE_DONE route", "HB_F2_DONE"]
+    st2 = MF.f2_stages(p, d, Path("/w/fp.odb"), None, Path("/w"), repair_timing=False)   # no repair: route reads cts
+    assert [n for n, _, _ in st2] == ["cts", "route", "final"] and st2[1][1].startswith("read_db /w/f2_cts.odb")
     m = MF.f2_metrics(F2_LOG)
     assert m["drc_violations"] == 3 and m["detailed_wirelength_um"] == 2101234 and m["vias"] == 245678
     assert (m["setup_wns_ns"], m["setup_tns_ns"], m["hold_wns_ns"]) == (-0.41, -12.5, 0.031)
     assert m["total_power_w"] == pytest.approx(0.152) and m["gr_overflow_total"] == 12 and m["done"]
-    assert m["runtime_s"] == 1800.0 and m["repair_timing_error"] is None
     m = MF.f2_metrics(F2_LOG.replace("HB_F2_DONE\n", "").replace("Number of violations = 3.", ""))
     assert not m["done"] and m["drc_violations"] == 57     # the last reported count, never a guess

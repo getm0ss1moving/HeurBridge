@@ -4,6 +4,37 @@ Every change to the code is recorded here with its version, task and verificatio
 Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 (The task list's `_harness/CHANGELOG.md` does not exist in the current checkout; this file replaces it.)
 
+## [0.10.2] — 2026-09-26 — staged f2 (ORFS-style), LEF/DEF round trip, OpenROAD pin-geometry check, dev E0 report
+
+### Changed
+- Track-B dev f2 runs as ORFS does: one OpenROAD process per stage (cts, rt = repair_timing, route = GRT +
+  DRT + fill, final = OpenRCX + STA), each reading the previous stage's database. In one process,
+  `repair_timing` after CTS segfaulted in the STA arrival search of the local build (smoke test on M1).
+  A failed stage fails the candidate by name (one retry for crashes); no stage is skipped silently.
+  Smoke test on the M1 layout (2 threads): all four stages pass in 782 s; DRC 0, detailed WL 1,618,701 um,
+  264,348 vias, setup WNS -1.979 ns / TNS -57.8 ns (extracted, propagated clocks), hold +0.096 ns, 0.169 W.
+- Verified end to end on CPU (server jobs, never run before): T3.4 pretraining (`pretrain_bridge.py`, 40
+  steps over both data stages, checkpoint + hash) and E0's frozen-generator partner with that checkpoint on
+  ibm01.
+
+### Added
+- `scripts/roundtrip_all.py --lefdef`, `reports/T1_roundtrip_lefdef.json` — T1.1 round trip on the 18 IBM
+  LEF/DEF designs through the DEF writer: 18/18 identical (HPWL compared NaN-aware: the IBM DEFs leave
+  383-2,463 objects unplaced). With the bookshelf sweep, all 44 local bookshelf / LEF/DEF designs pass.
+- `scripts/verify_pin_geometry.py`, `reports/V3_pin_geometry_vs_openroad.json` — **confirms the 0.1.0 finding
+  on `eda/harness/lef_def.py` with OpenROAD's own pin geometry** (OpenDB `getBBox` of every ITerm/BTerm, local
+  OpenROAD b16bda7e; minimal sky130 technology LEF, connectivity-only DEF copies): on the HA-PR spm placement /
+  cts / routing DEFs OpenROAD's HPWL equals HeurBridge's geometric value exactly (5104.355 / 5519.0625 /
+  5920.3575 um) and `lef_def`'s canonical `hpwl_um` is 5.25% / 5.83% / 5.96% too high. `eda/` is not changed
+  (inherited harness); revising HA-PR numbers is the user's decision.
+- `scripts/report_trackb_dev.py` — Track-B development seeding report (baseline determinism, per-program gate
+  pass rate and J before / after the gates, failures by name, local search, archive top-k).
+- `reports/E0_partner_ablation_dev.md` — dev E0 on held-out ibm04 / ibm06 (160 paired cases, every partner
+  deciding on f0, final J = HB-GP f1): G0' dev FAIL (co-trained vs memetic p = 0.99, vs repertoire p = 0.68;
+  ledger E0_dev#1). `scripts/report_e0.py` adds wins / losses / median dJ / geometric-mean ratio vs the raw
+  layout and the guard configuration.
+- Tests: 123 passing.
+
 ## [0.10.1] — 2026-09-26 — audit fixes: V0 NaN bug, P_M spacing + packing, -allow_congestion, T5 driver, E0 guard options
 
 ### Changed

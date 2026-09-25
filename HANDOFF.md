@@ -32,9 +32,13 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
   Kendall 0.65 / 0.50 / 0.03 on ibm01 / 02 / 03, top-5 recall 0, regret 55% of random: G0 rule not met.
 - T3 dev bridge (`reports/T3_bridge_macro_dev.md`): f0 criterion 2.0125 vs raw 2.0411 on ibm03 (91% of sources
   improved) while the validation residual and terminal error rose.
-- E0 dev on held-out ibm04 / ibm06 (`runs/e0_dev/heldout_r0`, f0 guard for every partner): the bridge's gains
-  are concentrated on catastrophic sources (M5.v1: J 3.45 -> 0.76) with small losses on good ones (the f0
-  guard accepts moves that f1 rejects); interim paired test not significant (see the final report).
+- E0 dev on held-out ibm04 / ibm06 (`reports/E0_partner_ablation_dev.md`; 16 programs x 5 seeds, every partner
+  decides on f0, final J = HB-GP f1): G0' dev **FAIL** (co-trained vs memetic p = 0.99, vs repertoire p = 0.68;
+  ledger E0_dev#1). The bridge's mean J is lower (0.509 vs raw 0.587) only because it rescues catastrophic
+  sources (M5.v1: J 3.45 -> 0.76); paired vs raw it wins 71 / loses 89 (median +0.0004; ibm06: 15 / 40): the
+  f0 guard accepts moves that f1 rejects. Portfolio J (best program per design) is the same for all partners
+  (0.429-0.432). A variant with an f1 guard for the bridge and the equal guard for the others is running
+  (`runs/e0_dev/heldout_r0_f1guard_equal`, ledger E0_dev#2).
 - Track-B dev campaign on bp_fe_top with the corrected flow: see `runs/seed_miniflow/bp_fe_top/` and the
   report added at the end of the session.
 
@@ -126,7 +130,9 @@ ibm02: 0.450 / 0.458 (Track-A partial J = 0.30 rWL~ + 0.15 (1+OF)~ with HPWL and
 3. Track-A cost: bookshelf designs have no timing/power; J uses rWL (HPWL proxy) + OF (RUDY proxy) only,
    and Track-A archives would admit fidelity-1 elites. Needs your confirmation.
 4. HB-GP is a stand-in (not DREAMPlace) and does not converge on ibm18; DREAMPlace must be built on the server.
-5. `eda/harness/lef_def.py` orientation handling (CHANGELOG 0.1.0 findings) -- confirm with OpenROAD on 224.
+5. `eda/harness/lef_def.py` orientation handling (CHANGELOG 0.1.0 findings) -- **confirmed 2026-09-26 with
+   OpenROAD's pin geometry** (`reports/V3_pin_geometry_vs_openroad.json`: OpenROAD = HeurBridge exactly;
+   lef_def +5.25..5.96% on spm). Decision for the user: revise the HA-PR `hpwl_um` numbers or not.
 
 ---
 

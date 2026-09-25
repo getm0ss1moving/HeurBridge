@@ -37,7 +37,29 @@ def main():
             p, s["mean_J"][p] or float("nan"), s["portfolio"][p], s["kendall_vs_raw"].get(p),
             "%.2f" % v["frac_better"] if v else "-", "%.3g" % v["p"] if v else "-", "%.3g" % hp["p_adj"] if hp else "-"))
     g = s["gate_G0prime"]
-    res = "\n".join(tab) + "\n\n**G0' decision (%s):** co-trained vs memetic p = %.3g, vs repertoire p = %.3g -> %s." % (
+    # paired view against the raw layout (partner "none"): where the gains are, not only the means
+    import collections
+    import math
+    import numpy as np
+    by = collections.defaultdict(dict)
+    for r in rows:
+        by[(r["design"], r["program"], r["seed"])][r["partner"]] = float(r["J"])
+    vs = ["| partner | wins vs raw | losses | ties | median dJ vs raw | geometric-mean J ratio vs raw |", "|---|---|---|---|---|---|"]
+    for p in s["partners"]:
+        if p == "none":
+            continue
+        d = [(v[p], v["none"]) for v in by.values() if p in v and "none" in v and math.isfinite(v[p]) and math.isfinite(v["none"])]
+        if not d:
+            continue
+        x = np.array(d)
+        dj = x[:, 0] - x[:, 1]
+        vs.append("| %s | %d | %d | %d | %+.4f | %.4f |" % (p, (dj < -1e-9).sum(), (dj > 1e-9).sum(), (abs(dj) <= 1e-9).sum(),
+                                                         float(np.median(dj)), float(np.exp(np.mean(np.log(x[:, 0] / x[:, 1]))))))
+    guard = s.get("guard") or {"fidelity": "f0 (fixed before v0.10.1)", "equal_guard": False}
+    res = "\n".join(tab) + "\n\n" + "\n".join(vs) + (
+        "\n\nGuard: the co-trained bridge's guard scores its alpha candidates at **%s**; equal guard for the other "
+        "partners: **%s**." % (guard["fidelity"], guard["equal_guard"])) + \
+        "\n\n**G0' decision (%s):** co-trained vs memetic p = %.3g, vs repertoire p = %.3g -> %s." % (
         "development, not the pre-registered test" if a.dev else "pre-registered", g["p_memetic"], g["p_repertoire"],
         "PASS" if g["pass"] else "FAIL")
     cfg = meta.get("config", {})
@@ -51,7 +73,8 @@ def main():
         if fails else "none",
         "commands": "python scripts/run_e0.py " + " ".join("--%s %s" % (k.replace("_", "-"), v) for k, v in cfg.items() if v not in ("", None)),
         "results": res, "alpha_ledger_id": meta.get("alpha_ledger_id") or "-",
-        "notes": "raw rows: %s" % (run / "e0_rows.jsonl")},
+        "notes": "raw rows: %s. Wins / losses count paired cases where the partner's final J is below / above the "
+                 "raw layout's; the geometric-mean ratio < 1 means lower J on average in log terms." % (run / "e0_rows.jsonl")},
         gate_passed=None if a.dev else g["pass"], out=a.out)
     print("REPORT_OK", a.out)
 

@@ -182,21 +182,14 @@ class MiniflowF2Evaluator(Evaluator):
         tcl = work / "macros.tcl"
         tcl.write_text(macro_placement_tcl(design, layout, exact=self.exact))
         p, d = MF.Nangate45(self.flow_dir), MF.from_orfs(self.flow_dir, self.platform_design)
-        crashes = []
-        for attempt in (0, 1):
-            rc, log, wall = MF.run_tool("openroad", MF.f2_script(p, d, Path(self.fp_odb), tcl, work, self.threads,
-                                                                 repair_timing=self.repair_timing),
-                                        work / ("f2.tcl" if attempt == 0 else "f2_retry.tcl"),
-                                        docker_image=self.docker_image, timeout=self.timeout_s)
-            m = MF.f2_metrics(log)
-            failure = None if (rc == 0 and m["done"]) else MF.classify_failure(rc, log)
-            if attempt == 0 and MF.should_retry(rc, failure):
-                crashes.append({"attempt": attempt, "returncode": rc, "wall_s": wall, "failure": failure})
-                continue
-            break
+        rc, log, wall, stages = MF.run_f2(p, d, Path(self.fp_odb), tcl, work, self.threads, self.repair_timing,
+                                          docker_image=self.docker_image, timeout=self.timeout_s)
+        m = MF.f2_metrics(log)
+        failure = None if (rc == 0 and m["done"]) else (next((f for _, _, _, f in reversed(stages) if f), None)
+                                                        or "returncode_%s" % rc)
         rec = {"run_id": run_id, "backend": "miniflow_f2", "returncode": 0 if failure is None else rc, "wall_s": wall,
-               "crashes": crashes, "failure": failure, **{k: v for k, v in m.items() if k != "done"},
-               "unchecked": ["lvs (f3)"]}
+               "stages": [{"stage": n, "returncode": r, "wall_s": w, "failure": f} for n, r, w, f in stages],
+               "failure": failure, **{k: v for k, v in m.items() if k != "done"}, "unchecked": ["lvs (f3)"]}
         if m.get("check_placement_ok") is False:
             rec["returncode"] = "check_placement_failed"
         (work / "record.json").write_text(json.dumps(rec, indent=1, default=str))
