@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+import numpy as np
 import pytest
 
 from heurbridge.eval import f1
@@ -59,3 +60,20 @@ def test_trackA_hbgp_ibm01():
     assert out["backend"] == "hbgp" and out["gp"]["overflow"] < 0.1
     assert 1.5e6 < out["hpwl"] < 4e6                       # reference .pl: 2.44e6
     assert "wns_place" in out["unchecked"] and out["wns_place"] is None
+
+
+def test_hbgp_f1_reproducible_single_thread():
+    """Two HB-GP evaluations of the same layout are bit-identical (the default runs on one thread)."""
+    import torch
+    from heurbridge.core import synth
+    from heurbridge.eval.f1 import run_hbgp_f1
+    from heurbridge.eval.gp import GPConfig
+    des, ref = synth.make_design(seed=3, n_macros=4, n_cells=300, n_io=12)
+    lay = ref.copy()
+    lay.pos[~des.is_macro & ~des.is_io & ~des.is_fixed] = np.nan
+    cfg = GPConfig(iters=150)
+    prev = torch.get_num_threads()
+    a, _ = run_hbgp_f1(des, lay, cfg)
+    b, _ = run_hbgp_f1(des, lay, cfg)
+    assert a["hpwl"] == b["hpwl"] and a["gp"]["threads"] == 1
+    assert torch.get_num_threads() == prev                     # the caller's setting is restored

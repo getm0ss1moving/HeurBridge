@@ -37,8 +37,11 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
   ledger E0_dev#1). The bridge's mean J is lower (0.509 vs raw 0.587) only because it rescues catastrophic
   sources (M5.v1: J 3.45 -> 0.76); paired vs raw it wins 71 / loses 89 (median +0.0004; ibm06: 15 / 40): the
   f0 guard accepts moves that f1 rejects. Portfolio J (best program per design) is the same for all partners
-  (0.429-0.432). A variant with an f1 guard for the bridge and the equal guard for the others is running
-  (`runs/e0_dev/heldout_r0_f1guard_equal`, ledger E0_dev#2).
+  (0.429-0.432). With the bridge's guard at f1 and the equal f1 guard for the others (E0_dev#2), G0' passes
+  (p = 2.1e-5 / 0.0052) — but a random displacement of matched length with the same guard does as well as the
+  bridge (geometric-mean J ratio vs raw 0.933 vs 0.931, bridge vs control p = 0.071; E0_dev#3), and HB-GP was
+  not reproducible in these runs (winner's curse on noise). Deterministic rerun with all controls: E0_dev#4
+  (`runs/e0_dev/det_f1guard_equal_randctl`).
 - Track-B dev campaign on bp_fe_top with the corrected flow: see `runs/seed_miniflow/bp_fe_top/` and the
   report added at the end of the session.
 
@@ -48,11 +51,13 @@ fill, OpenRCX, STA — untested on the tool yet), `scripts/calibrate_dev.py`, `r
 --equal-guard`.
 
 **Open issues / decisions for the user (additions)**
-8. E0 protocol (T4, before it is pre-registered): the co-trained bridge's guard sees f1, memetic and
+8. E0 protocol (T4, before it is pre-registered) — supported by the dev runs above: the co-trained bridge's guard sees f1, memetic and
    repertoire decide on f0 only. With a weakly calibrated f0 (Kendall 0.03-0.65 above) the bridge can win
    through the guard's access to f1 alone. Proposal: run E0 with `--equal-guard` (every partner's output
    kept only if it beats the raw layout at the same fidelity) and `--random-control` (the bridge's guard along
-   a random displacement of matched length); both are implemented.
+   a random displacement of matched length); both are implemented. Also required: reproducible evaluators
+   (fixed thread counts; HB-GP was not) and a final cost evaluated independently of the guard's evaluations
+   (on the server the f1 guard and the f2 final cost are separate runs, which already satisfies this).
 9. Timing gates at f1: with M1 as the reference, most heuristic layouts fail the 0.02 ns setup-WNS gate at
    f1 (pre-CTS, no timing repair), so J = inf for them. The gates are specified for the final cost; applying
    them at f1 discards most of the search signal. Proposal: at f1 report the gates but rank by J before the

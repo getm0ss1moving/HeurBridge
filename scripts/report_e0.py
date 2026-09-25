@@ -22,6 +22,7 @@ def main():
     ap.add_argument("--dev", action="store_true")
     ap.add_argument("--node", default="local (macOS, CPU)")
     ap.add_argument("--track", default="A-dev (HB-GP stand-in final cost; f0 guard)")
+    ap.add_argument("--caveat", default="", help="text placed before the results (e.g. a known defect of the run)")
     a = ap.parse_args()
     run = Path(a.run)
     s = json.loads((run / "e0_summary.json").read_text())
@@ -56,12 +57,20 @@ def main():
         vs.append("| %s | %d | %d | %d | %+.4f | %.4f |" % (p, (dj < -1e-9).sum(), (dj > 1e-9).sum(), (abs(dj) <= 1e-9).sum(),
                                                          float(np.median(dj)), float(np.exp(np.mean(np.log(x[:, 0] / x[:, 1]))))))
     guard = s.get("guard") or {"fidelity": "f0 (fixed before v0.10.1)", "equal_guard": False}
-    res = "\n".join(tab) + "\n\n" + "\n".join(vs) + (
+    res = ("> **Caveat.** %s\n\n" % a.caveat if a.caveat else "") + "\n".join(tab) + "\n\n" + "\n".join(vs) + (
         "\n\nGuard: the co-trained bridge's guard scores its alpha candidates at **%s**; equal guard for the other "
         "partners: **%s**." % (guard["fidelity"], guard["equal_guard"])) + \
         "\n\n**G0' decision (%s):** co-trained vs memetic p = %.3g, vs repertoire p = %.3g -> %s." % (
         "development, not the pre-registered test" if a.dev else "pre-registered", g["p_memetic"], g["p_repertoire"],
         "PASS" if g["pass"] else "FAIL")
+    rc = s["vs_cotrained"].get("random_guard")
+    if rc:
+        res += ("\n\n**Learned-transport check:** co-trained vs the random-direction control (the same guard along a "
+                "random displacement of matched length) p = %.3g (Holm-adjusted %s). %s" % (
+                    rc["p"], "%.3g" % s["holm"]["random_guard"]["p_adj"] if "random_guard" in s.get("holm", {}) else "-",
+                    "The bridge's direction beats a random one." if rc["p"] < 0.01 else
+                    "The bridge's direction is not distinguishable from a random one at this sample size: a G0' pass "
+                    "here cannot be attributed to the learned transport."))
     cfg = meta.get("config", {})
     text = reporting.render({
         "title": "E0 partner-type ablation%s" % (" (development)" if a.dev else ""),

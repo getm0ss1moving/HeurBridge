@@ -179,12 +179,26 @@ def trackA_metrics(design: Design, layout: Layout, f0cfg: F0Config | None = None
                 "density_overflow": float(ctx.density_overflow(p)[0]), "channel_shortage": float(ctx.channel_shortage(p, r)[0])}
 
 
-def run_hbgp_f1(design: Design, layout: Layout, gp_cfg=None, f0cfg: F0Config | None = None) -> dict:
-    """Track-A f1 with the HB-GP stand-in: place cells with macros fixed, then f0 metrics."""
+def run_hbgp_f1(design: Design, layout: Layout, gp_cfg=None, f0cfg: F0Config | None = None,
+                threads: int | None = 1) -> dict:
+    """Track-A f1 with the HB-GP stand-in: place cells with macros fixed, then f0 metrics.
+
+    ``threads`` (default 1): torch's multi-threaded CPU reductions make HB-GP non-reproducible across runs
+    (ibm01, same layout, 3 threads: HPWL 2,646,210 vs 2,651,174; 1 thread: 2,649,741.5 twice), which breaks
+    the T1.4 determinism requirement and turns the guard's min over candidates into a winner's curse when
+    the guard and the final cost share evaluations.  None keeps the caller's setting."""
+    import torch
     from .gp import GPConfig, place
     t0 = time.time()
-    placed, info = place(design, layout, gp_cfg or GPConfig())
-    m = trackA_metrics(design, placed, f0cfg)
+    prev = torch.get_num_threads()
+    if threads:
+        torch.set_num_threads(threads)
+    try:
+        placed, info = place(design, layout, gp_cfg or GPConfig())
+        m = trackA_metrics(design, placed, f0cfg)
+    finally:
+        torch.set_num_threads(prev)
+    info = dict(info, threads=threads or prev)
     out = {k: None for k in KEYS}
     out.update({"hpwl": m["hpwl"], "gr_overflow_total": m["rudy_overflow"], "rudy": m, "gp": info, "backend": "hbgp",
                 "runtime_s": round(time.time() - t0, 2)})

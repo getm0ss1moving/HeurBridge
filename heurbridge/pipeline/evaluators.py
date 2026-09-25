@@ -42,10 +42,11 @@ class HBGPEvaluator(Evaluator):
     gp_cfg: object = None
     f0cfg: object = None
     cluster_of: object = None          # cell -> cluster id; if given, post-placement cluster centroids are recorded
+    threads: int | None = 1            # 1 = bit-reproducible (eval/f1.run_hbgp_f1)
 
     def evaluate(self, design, layout, run_id, workdir):
         from ..eval.f1 import run_hbgp_f1
-        out, placed = run_hbgp_f1(design, layout, self.gp_cfg, self.f0cfg)
+        out, placed = run_hbgp_f1(design, layout, self.gp_cfg, self.f0cfg, threads=self.threads)
         rec = {"run_id": run_id, "backend": "hbgp", "hpwl_um": out["hpwl"],
                "rudy_overflow": out["rudy"]["rudy_overflow"], "rudy_overflow_ratio": out["rudy"]["rudy_overflow_ratio"],
                "rudy_peak": out["rudy"]["rudy_peak"], "density_overflow": out["rudy"]["density_overflow"],

@@ -4,6 +4,28 @@ Every change to the code is recorded here with its version, task and verificatio
 Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 (The task list's `_harness/CHANGELOG.md` does not exist in the current checkout; this file replaces it.)
 
+## [0.10.4] — 2026-09-26 — reproducible HB-GP f1, E0 fairness and control results
+
+### Fixed
+- **HB-GP (Track-A dev f1) was not reproducible** (T1.4 requires determinism): torch's multi-threaded CPU
+  reductions changed the result between runs (ibm01, same layout: HPWL 2,646,210 vs 2,651,174 at 3 threads;
+  2,649,741.5 twice at 1 thread; E0: same-layout J differs by a median of 7e-4, max 3.4e-3, across
+  processes). `run_hbgp_f1` / `HBGPEvaluator` now run on one thread by default (recorded as `gp.threads`;
+  the caller's setting is restored); regression test. Past dev data (ibm01-03 archive, dev bridge labels,
+  E0 dev runs) were computed multi-threaded: gaps of 2-10% between heuristics and the baseline are far above
+  this noise, near-ties are not.
+
+### Added
+- E0 dev with the fairness options (`reports/E0_partner_ablation_dev_f1guard_equal*.md`, ledger E0_dev#2,
+  #3): with the bridge's guard at f1 and the equal f1 guard for memetic / repertoire, G0' passes (p = 2.1e-5
+  and 0.0052), but the random-direction control with the same guard does as well as the bridge (geometric-mean
+  J ratio vs raw 0.933 vs 0.931; bridge vs control p = 0.071), and these runs used the non-reproducible
+  HB-GP, so the guarded partners' wins include selection on noise (winner's curse: the guard's evaluations are
+  the reported final cost in the dev setup). Rerun with the deterministic evaluator: ledger E0_dev#4.
+- `scripts/report_e0.py --caveat`; the learned-transport check (co-trained vs random-direction control) in the
+  report.
+- Tests: 125 passing.
+
 ## [0.10.3] — 2026-09-26 — E0 random-direction control, deterministic overfit test
 
 ### Added

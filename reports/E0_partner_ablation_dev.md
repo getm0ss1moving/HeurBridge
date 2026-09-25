@@ -3,11 +3,11 @@
 | Field | Value |
 |---|---|
 | Report | heldout_r0 |
-| Date | 2026-09-26 04:16 |
+| Date | 2026-09-26 06:39 |
 | Node | local (macOS, CPU) |
 | Track | A-dev (HB-GP stand-in final cost; f0 guard for every partner) |
 | Tool versions | HeurBridge 0.9.1 |
-| HeurBridge version / git | 0.10.1 / b4dd4224721d71a2ca9d3b1f19a6b032fa9c6436+dirty |
+| HeurBridge version / git | 0.10.3 / 9e17205a15599a7a060a7de2d66c9d7c13bd343b+dirty |
 | Metric conventions | timing setup_hold_v1_2026-09-22; metrics_v2_2026-09-22; HPWL centre (pin_offset_v2); cost cost_v1_2026-09-25 |
 | Feeds gate | G0' (co-trained beats memetic AND repertoire at p < 0.01 on the held-out family) |
 | Pre-registered test | paired one-sided Wilcoxon, co-trained < each partner, Holm over the comparisons |
@@ -19,6 +19,8 @@
 160 paired cases (design x program x seed); designs ibm04,ibm06
 
 ## Results
+
+> **Caveat.** HB-GP (the dev final cost) ran multi-threaded (not reproducible across processes; same-layout J differs by a median of 7e-4). Every partner here decides on f0, so the noise affects both sides of each comparison alike and no partner selects on it; the conclusion (no typical improvement over raw) is not affected.
 
 | partner | mean J | portfolio J | Kendall tau vs raw | co-trained better: frac | one-sided p | Holm p_adj |
 |---|---|---|---|---|---|---|
