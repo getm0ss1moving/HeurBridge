@@ -91,7 +91,11 @@ def main():
         progs = [q for q in progs if q["id"] in set(a.programs.split(","))]
     write_meta(rdir, "seed_miniflow_%s" % des.id, des.id, config=vars(a), baseline=baseline.to_dict(),
                track="B-dev (local mini-flow f1, OpenLane OpenROAD b16bda7e)")
-    halo = max(d.halo)
+    # MACRO_PLACE_HALO is a per-side halo (rtl_macro_placer inflates each macro by it and inflated macros do
+    # not overlap: M1 leaves 20 um between RAMs and >= 10 um to the core edge for halo 10).  P_M's halo is
+    # the macro-to-macro spacing, so it is twice the platform value; its footprint then keeps one platform
+    # halo to the core edge (narrower edge channels made pdngen fail: PDN-0179 on metal4).
+    halo = 2 * max(d.halo)
     s = SA.seed_design(des, lay, progs, ev, None, arch, baseline, out, SA.SeedConfig(seeds=a.seeds, top_f2=a.top,
                        ls_steps=a.ls, halo=halo), cluster=cl, log=lambda x: print(x, flush=True))
     print(json.dumps(s), flush=True)

@@ -55,6 +55,7 @@ def test_script_order_and_optional_gr_timing():
     assert sorted(i, key=i.get) == keys
     assert "catch {estimate_parasitics -global_routing" in s     # a GR-parasitics failure is not fatal
     assert "set_thread_count 6" in s and "source /w/macros.tcl" in s
+    assert "-allow_congestion" in s                              # OF is measured at f1, not a failure
     assert "-global_routing" not in MF.f1_script(p, d, Path("/w/fp.odb"), None, Path("/w"))   # opt-in
 
 

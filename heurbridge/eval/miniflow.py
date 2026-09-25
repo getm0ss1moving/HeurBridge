@@ -243,7 +243,10 @@ def f1_script(p: Nangate45, d: DesignCfg, fp_odb: Path, macro_tcl: Path | None, 
         'puts "HB_WNS_PLACE [sta::worst_slack -max]"', 'puts "HB_TNS_PLACE [sta::total_negative_slack -max]"',
         'puts "HB_HOLD_PLACE [sta::worst_slack -min]"',
         'puts "HB_POWER_PLACE_BEGIN"', "report_power", 'puts "HB_POWER_PLACE_END"',
-        "global_route -congestion_iterations 30 -congestion_report_file %s -verbose" % (work / "congestion.rpt"),
+        # -allow_congestion: FastRoute reports the remaining overflow instead of failing (GRT-0119), so the
+        # (1+OF) term of J is measured at f1; f2 keeps the ORFS default (a congested layout fails there)
+        "global_route -congestion_iterations 30 -allow_congestion -congestion_report_file %s -verbose"
+        % (work / "congestion.rpt"),
         'puts "HB_RUNTIME_MS [expr {[clock milliseconds] - $t0}]"',
         "write_def %s" % (work / "f1_out.def"), 'puts "HB_F1_CORE_DONE"'] + tail + ['puts "HB_F1_DONE"']) + "\n"
 

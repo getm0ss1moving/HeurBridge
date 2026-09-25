@@ -76,8 +76,13 @@ def calibrate_rho(pairs: list, site: float) -> float:
 
 
 def structural_groups(design: Design, view, x_h: Layout, structural: np.ndarray, alpha: np.ndarray,
-                      k_g: int = 6, aff_q: float = 0.5, prox: float = 2.0) -> list:
-    """Connected components of structural macros (macro_order indices), ranked by positive attribution."""
+                      k_g: int = 6, aff_q: float = 0.5, prox: float = 2.0, max_group: int = 8) -> list:
+    """Connected components of structural macros (macro_order indices), ranked by positive attribution.
+
+    A component larger than ``max_group`` is split: groups are grown (breadth-first over the same adjacency,
+    higher attribution first) from its highest-attribution ungrouped member, up to ``max_group`` macros.
+    Without the bound, a weak bridge (rho ~ 0: every macro structural) on a dense design yields one
+    component holding every macro (ibm01 dev: 246 of 246), which localizes nothing."""
     mo = view.macro_order
     idx = np.flatnonzero(structural)
     if len(idx) == 0:
@@ -90,7 +95,8 @@ def structural_groups(design: Design, view, x_h: Layout, structural: np.ndarray,
     near = np.linalg.norm(pos[:, None] - pos[None], axis=-1) < reach
     adj = (aff >= thr) | near
     np.fill_diagonal(adj, False)
-    seen, groups = set(), []
+    a_pos = np.clip(alpha[idx], 0, None)
+    seen, comps = set(), []
     for s in range(len(idx)):
         if s in seen:
             continue
@@ -98,14 +104,34 @@ def structural_groups(design: Design, view, x_h: Layout, structural: np.ndarray,
         seen.add(s)
         while stack:
             u = stack.pop()
-            comp.append(int(idx[u]))
+            comp.append(u)
             for v in np.flatnonzero(adj[u]):
                 if v not in seen:
                     seen.add(int(v))
                     stack.append(int(v))
-        groups.append(sorted(comp))
-    groups.sort(key=lambda g: -float(np.clip(alpha[g], 0, None).sum()))
-    return groups[:k_g]
+        comps.append(comp)
+    groups = []
+    for comp in comps:
+        if len(comp) <= max_group:
+            groups.append(comp)
+            continue
+        left = set(comp)
+        while left:
+            seed = max(left, key=lambda u: (a_pos[u], -u))
+            grp, frontier = [seed], [seed]
+            left.discard(seed)
+            while frontier and len(grp) < max_group:
+                nb = sorted({int(v) for u in frontier for v in np.flatnonzero(adj[u]) if int(v) in left},
+                            key=lambda v: (-a_pos[v], v))
+                frontier = []
+                for v in nb[: max_group - len(grp)]:
+                    grp.append(v)
+                    frontier.append(v)
+                    left.discard(v)
+            groups.append(grp)
+    out = [sorted(int(idx[u]) for u in g) for g in groups]
+    out.sort(key=lambda g: -float(np.clip(alpha[g], 0, None).sum()))
+    return out[:k_g]
 
 
 def splice(design: Design, view, x_h: Layout, x_star: Layout, group: list) -> Layout:
@@ -157,6 +183,11 @@ def evidence_text(design, view, x_h, x_star, dg: Diagnosis, max_members: int = 1
              % (100 * dg.structural_share, 100 * dg.reachable_share)]
     if dg.g_star is None:
         lines.append("No structural macro group found: remaining error is bridge-reachable.")
+        return "\n".join(lines)
+    if dg.deltas[dg.g_star] <= 0:
+        lines.append("No structural group improves the post-bridge cost when copied from the elite (best "
+                     "counterfactual gain %.4f over %d groups): the parent's remaining error is not localized in a "
+                     "macro group; change the global strategy rather than a group." % (dg.deltas[dg.g_star], len(dg.groups)))
         return "\n".join(lines)
     g = dg.groups[dg.g_star]
     mo = view.macro_order

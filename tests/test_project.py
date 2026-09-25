@@ -99,14 +99,18 @@ def test_dense_ram_core_needs_fallback_order():
     assert np.array_equal(out.orient, l.orient)
 
 
-def test_dense_ram_core_random_layouts_always_legal():
+@pytest.mark.parametrize("halo", [10.0, 20.0])
+def test_dense_ram_core_random_layouts_always_legal(halo):
+    """halo 20 = twice bp_fe_top's per-side platform halo (the Track-B spacing): 12 footprints fit, and the
+    target-driven orders alone failed on ~2% of random layouts before the bottom-left packing fallback."""
     des, lay = _ram_core()
     rng = np.random.default_rng(0)
     for t in range(300):
         l = lay.copy()
         l.pos[:] = rng.random((des.n_objects, 2))
-        l.orient[:] = rng.integers(0, 8, des.n_objects)
-        out, rep = project.legalize_macros(des, l, halo=10.0)
+        l.orient[:] = rng.choice([O.R0, O.MX, O.MY, O.R180], des.n_objects)
+        out, rep = project.legalize_macros(des, l, halo=halo)
         assert rep.ok, (t, rep.failed, rep.fallback_from)
+        assert project.check_macros(des, out, halo)["ok"]
         if rep.order == "area":
             assert rep.fallback_from == []

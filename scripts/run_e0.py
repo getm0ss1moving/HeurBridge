@@ -9,9 +9,18 @@ server via ORFS; "hbgp" = Track-A development stand-in).  Memetic and repertoire
 bridge's median wall-clock per call (measured first, including its guard).  The alpha-ledger entry is
 reserved before any result is read.  Primary test: paired one-sided Wilcoxon, co-trained < each other
 partner, Holm over the comparisons; G0' passes iff co-trained beats memetic AND repertoire at p < 0.01.
+
+Guard options (recorded in the ledger entry and the summary):
+  --guard-fidelity f1   the co-trained bridge's guard scores its alpha candidates with the final evaluator
+                        (T3.8 default); f0 = the macro-stage surrogate (all partners then decide on f0 only)
+  --equal-guard         every other partner's output is also guarded at the same fidelity: kept only if it
+                        beats the raw layout, else the raw layout is returned.  Without it, a win of the
+                        f1-guarded bridge over f0-driven partners can come from the guard's access to f1
+                        alone, not from the learned transport.
 """
 
 import argparse
+import hashlib
 import json
 import math
 import sys
@@ -52,14 +61,16 @@ def main():
     ap.add_argument("--out", default=str(ROOT / "reports" / "e0_dev"))
     ap.add_argument("--campaign", default="E0_dev")
     ap.add_argument("--programs", default="")
+    ap.add_argument("--guard-fidelity", default="f1", choices=["f0", "f1"])
+    ap.add_argument("--equal-guard", action="store_true")
     a = ap.parse_args()
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
     ledger = AlphaLedger(ROOT / "stats" / "alpha_ledger.jsonl", campaign=a.campaign)
-    import hashlib
     ck = hashlib.sha256(Path(a.bridge).read_bytes()).hexdigest()[:16]
     entry = ledger.reserve("partner_ablation", "%s@%s" % (Path(a.bridge).name, ck), "wilcoxon_less_holm4",
-                           meta={"designs": a.designs, "final": a.final, "bridge": str(a.bridge), "bridge_sha256_16": ck})
+                           meta={"designs": a.designs, "final": a.final, "bridge": str(a.bridge), "bridge_sha256_16": ck,
+                                 "guard_fidelity": a.guard_fidelity, "equal_guard": a.equal_guard})
     progs = all_programs()
     if a.programs:
         progs = [p for p in progs if p["id"] in set(a.programs.split(","))]
@@ -76,7 +87,19 @@ def main():
         bench = project.legalize_macros(b.design, b.base)[0]
         base_recs = [final.evaluate(b.design, bench, "base%d" % s, out) for s in range(3)]
         baseline = cost.Baseline.from_records(b.design.id, base_recs)
-        cot = P.CotrainedPartner(bridge, b.graph, b.scorer, K=a.K)
+        cache = {}
+
+        def final_J(lay, key, _b=b, _final=final, _baseline=baseline, _cache=cache):
+            """Final cost of a projected layout (cached by macro positions/orientations)."""
+            mm = _b.design.is_macro & ~_b.design.is_fixed
+            h = hashlib.sha256(lay.pos[mm].tobytes() + lay.orient[mm].tobytes()).hexdigest()
+            if h not in _cache:
+                rec = _final.evaluate(_b.design, lay, key, out)
+                c = _final.score(rec, _baseline)
+                _cache[h] = (c.J_inf, {t: v.get("raw") for t, v in c.terms.items()})
+            return _cache[h]
+        guard = b.scorer if a.guard_fidelity == "f0" else (lambda lay: final_J(lay, "guard")[0])
+        cot = P.CotrainedPartner(bridge, b.graph, guard, K=a.K)
         # measure the co-trained partner's median time per call (includes its guard)
         rng = np.random.default_rng(0)
         times = [cot(b.design, l, rng).wall_s for _, _, l in srcs[:5]]
@@ -91,10 +114,15 @@ def main():
                     continue
                 res = part(b.design, lay, np.random.default_rng(7 + s), budget_s=budget)
                 lp, rep = project.legalize_macros(b.design, res.layout)
-                if rep.ok:
-                    rec = final.evaluate(b.design, lp, "%s.%s.s%d.%s" % key, out)
-                    c = final.score(rec, baseline)
-                    J, terms = c.J_inf, {t: v.get("raw") for t, v in c.terms.items()}
+                ok = rep.ok
+                if a.equal_guard and part.name not in ("none", "cotrained"):
+                    raw_p, raw_rep = project.legalize_macros(b.design, lay)
+                    keep = ok and guard(lp) < guard(raw_p)       # ties keep the raw layout
+                    res.info["equal_guard"] = "kept_output" if keep else "kept_raw"
+                    if not keep:
+                        lp, ok = raw_p, raw_rep.ok
+                if ok:
+                    J, terms = final_J(lp, "%s.%s.s%d.%s" % key)
                 else:
                     J, terms = math.inf, {}
                 row = {"design": b.design.id, "program": pid, "seed": s, "partner": part.name, "J": J, "terms": terms,
@@ -139,6 +167,7 @@ def analyse(rows, entry, ledger, out, a):
         res["kendall_vs_raw"][p] = float(np.nanmean(taus)) if taus else None
     pm = res["vs_cotrained"].get("memetic", {}).get("p", 1.0)
     pr = res["vs_cotrained"].get("repertoire", {}).get("p", 1.0)
+    res["guard"] = {"fidelity": a.guard_fidelity, "equal_guard": a.equal_guard}
     res["gate_G0prime"] = {"pass": bool(pm < 0.01 and pr < 0.01), "p_memetic": pm, "p_repertoire": pr,
                            "note": "development run (Track-A stand-in final cost); not the pre-registered f2 test"
                            if a.final == "hbgp" else ""}

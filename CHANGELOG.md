@@ -4,6 +4,45 @@ Every change to the code is recorded here with its version, task and verificatio
 Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 (The task list's `_harness/CHANGELOG.md` does not exist in the current checkout; this file replaces it.)
 
+## [0.10.1] — 2026-09-26 — audit fixes: V0 NaN bug, P_M spacing + packing, -allow_congestion, T5 driver, E0 guard options
+
+### Changed
+- Mini-flow f1: `global_route -allow_congestion` (in the local build). Without it FastRoute stops with
+  GRT-0119 when overflow remains, so every routable layout reports OF = 0 and the (1+OF) term of J is never
+  measured; the congested layout (bp_fe_top M2.v0 seed 1) is re-evaluated, its failed row kept in
+  `superseded_no_allow_congestion.jsonl`. f2 keeps the ORFS default (a congested layout fails there).
+- `scripts/run_e0.py`: `--guard-fidelity f0|f1` (the co-trained bridge's guard; T3.8 default f1) and
+  `--equal-guard` (every other partner's output is kept only if it beats the raw layout at the same
+  fidelity), both recorded in the ledger entry and the summary; final costs cached per layout.
+
+- **Track-B P_M spacing = 2 x MACRO_PLACE_HALO** (`scripts/run_seed_miniflow.py`). The platform halo is
+  per side in `rtl_macro_placer` (inflated macros do not overlap: M1 keeps 20 um between RAMs and >= 10 um
+  to the core edge for halo 10); P_M's halo is the macro-to-macro spacing and used the platform value, so
+  macros sat 5 um from the core edge and pdngen failed on 6 of 16 layouts (PDN-0179: 3.5 um metal4 channel
+  at the core edge). 16 rows superseded (`superseded_halo_spacing_10/`); the M1 baseline is unaffected.
+- P_M: bottom-left packing as the last fallback order (targets only order the macros). At spacing 20 the
+  target-driven orders failed on 0.8-2% of random bp_fe_top layouts; with it 1,000/1,000 are legal.
+
+### Fixed
+- **V0 certificate rejected every program on real designs** (`evolve/sandbox.certify`): the determinism
+  check compared two runs with `np.array_equal`, and unplaced cells are NaN rows in every output (NaN != NaN;
+  ibm01: 12,260 rows). The seed programs had only been certified on synthetic designs without NaN, so the
+  bug was invisible until the first end-to-end evolution dry run. Now `equal_nan=True`; regression test.
+- RLCE (`evolve/rlce.py`): structural groups are bounded (`max_group` = 8, grown from the highest-attribution
+  member) — with a weak bridge (rho = 0) every macro is structural and the whole design formed one "group"
+  (ibm01: 246 of 246 macros); the evidence pack no longer names a "decisive group" when no group has a
+  positive counterfactual gain.
+
+### Added
+- `scripts/run_evolution.py` — T5 campaign driver: proposer (heurbridge / eoh / reevo / funsearch /
+  heuragenix) x fitness (refinability / raw) on D_evo; V0 certificate with an MR1 probe design; RLCE evidence
+  (rho calibrated from the population's sources) and HeurAgenix critical-operation analysis; the LLM's inputs
+  saved per generation (`context_g<g>.json`); LLM budget scope per split (B.3). `--llm mock` is a
+  deterministic offline stand-in for dry runs (labelled `dry_run`); all five proposers dry-run end to end on
+  ibm01. Not in the driver yet: promotion of the top 20% to f2 and re-anchoring after bridge promotions.
+- Tests: 123 passing (NaN-cell certification, bounded RLCE groups, evidence without a positive
+  counterfactual, dense RAM core at spacing 20, `-allow_congestion`, f2 script and parser).
+
 ## [0.10.0] — 2026-09-26 — Track-B development flow aligned with ORFS, robust f1, P_M fallback, dev calibration
 
 Covers the two commits after v0.9.1 that had no entry (55531ee, 12b29e1) and the changes of 2026-09-26.

@@ -516,7 +516,8 @@ def certify(src: str, design: Design, layout: Layout, scope: np.ndarray, seeds=(
             return cert
         cert.cpu_s = max(cert.cpu_s, r.cpu_s)
         outs.append(r)
-    det = np.array_equal(outs[0].pos, outs[-1].pos) and np.array_equal(outs[0].orient, outs[-1].orient)
+    # unplaced cells are NaN in every output: NaN must compare equal to NaN here
+    det = np.array_equal(outs[0].pos, outs[-1].pos, equal_nan=True) and np.array_equal(outs[0].orient, outs[-1].orient)
     cert.checks["determinism"] = bool(det)
     if not det:
         cert.reasons.append("non-deterministic for a fixed seed")

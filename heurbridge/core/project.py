@@ -5,8 +5,9 @@ P_M  greedy grid legalization: movable macros, largest area first, each moved to
      prefix-sum occupancy map).  Greedy placement can fragment a dense core so that
      the last macros find no slot (bp_fe_top: nine 153 x 113 um RAMs, at most 15
      halo footprints in a perfect packing); only then are fallback orders tried
-     (sweeps by target y and x, and centre-out) and the legal result with the least
-     displacement is kept.  The primary order's result is unchanged whenever it is legal.  Footprints are the orientation-aware macro size
+     (sweeps by target y and x, centre-out, and as the last resort bottom-left packing
+     that ignores the targets) and the legal result with the least displacement is kept.
+     The primary order's result is unchanged whenever it is legal.  Footprints are the orientation-aware macro size
      plus the halo (minimum macro-to-macro spacing), rounded up to grid cells, so
      legalized macros can never overlap.  Fixed macros are obstacles.  Orientation,
      fixed objects and non-macro objects are never changed.  The grid pitch is a
@@ -88,7 +89,7 @@ def _nearest_free(free: np.ndarray, tx: float, ty: float, px: float, py: float):
         r *= 2
 
 
-FALLBACK_ORDERS = ("y", "x", "centre_out")
+FALLBACK_ORDERS = ("y", "x", "centre_out", "bottom_left")
 
 
 def legalize_macros(design: Design, layout: Layout, halo: float = 0.0, max_cells: int = 512,
@@ -149,6 +150,8 @@ def _legalize(design: Design, layout: Layout, halo: float, max_cells: int, scope
     elif order_by == "centre_out":                                   # macros nearest the core centre first
         r2 = ((target[idx] - np.array([W, H]) / 2) ** 2).sum(1)
         order = idx[np.lexsort((keys, r2))]
+    elif order_by == "bottom_left":      # last resort: packing, targets only order the macros (largest first)
+        order = idx[np.lexsort((keys, ll_t[:, 0], ll_t[:, 1], -design.area[idx]))]
     else:
         raise ValueError("unknown order %r" % order_by)
     disp = np.full(design.n_objects, np.nan)
@@ -164,7 +167,11 @@ def _legalize(design: Design, layout: Layout, halo: float, max_cells: int, scope
         free = _window_free(ps, fw, fh)          # lower-left cell of the footprint (incl. halo cells)
         tx = (target[i, 0] - eff[i, 0] / 2) / px - hx
         ty = (target[i, 1] - eff[i, 1] / 2) / py - hy
-        best = _nearest_free(free, tx, ty, px, py)
+        if order_by == "bottom_left":                                # lowest row, then leftmost free slot
+            ii, jj = np.nonzero(free)
+            best = (int(ii[np.lexsort((ii, jj))[0]]), int(jj[np.lexsort((ii, jj))[0]])) if len(ii) else None
+        else:
+            best = _nearest_free(free, tx, ty, px, py)
         if best is None:
             rep.failed.append(int(i))
             continue

@@ -96,3 +96,16 @@ def test_determinism_and_mr1_failures():
 def test_store_program(tmp_path):
     p = SB.store_program(GOOD, tmp_path, meta={"family": "M7"})
     assert p.name == SB.program_hash(GOOD) + ".py" and p.read_text() == GOOD
+
+
+def test_certify_with_unplaced_cells():
+    """Real designs carry unplaced cells as NaN rows in every output; identical runs must certify
+    (regression: the determinism check compared NaN != NaN and rejected every program)."""
+    lay = LAY.copy()
+    cells = ~DES.is_macro & ~DES.is_io & ~DES.is_fixed
+    lay.pos[cells] = np.nan
+    cert = SB.certify(GOOD, DES, lay, SCOPE, seeds=(0,))
+    assert cert.ok, cert.reasons
+    assert cert.checks["determinism"]
+    cert = SB.certify(NONDET, DES, lay, SCOPE, check_mr1=False)       # a real non-determinism is still caught
+    assert not cert.ok and "non-deterministic" in cert.reasons[0]

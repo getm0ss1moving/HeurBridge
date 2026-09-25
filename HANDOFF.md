@@ -4,6 +4,59 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
+## 2026-09-26 — Session 2: audit of the work so far, Track-B flow fixed and aligned with ORFS, T5 driver
+
+**Server access still blocked** (key-only SSH to 224/227/234: publickey denied), so all work is local.
+
+**Audit findings (each fixed, tested, and in CHANGELOG 0.10.0 / Unreleased)**
+- Track-B mini-flow was not ORFS-faithful: placement density 0.6 (ORFS platform default 0.30), core margin 2,
+  generic tracks, no tapcells / power grid / port buffers / dont-use. Now layered ORFS config + the ORFS stage
+  order (macros -> tapcell -> pdngen -> GP -> resize -> DP -> GRT).
+- f1 lost 7 of 18 evaluations: `estimate_parasitics -global_routing` is broken in the local OpenROAD
+  (bad_alloc exit, segfault, OOM kill) -> timing/power from placement parasitics for every layout; GR timing
+  opt-in. `report_power` segfaulted once the grid existed -> bisected to pdngen's VDD/VSS block pins.
+  Every failure is named; the baseline is evaluated 3x (bit-identical at 6 threads; thread count matters).
+- FastRoute stopped with GRT-0119 on congested layouts, so OF could never be measured -> `-allow_congestion`.
+- P_M: (a) largest-first greedy failed on 0.5% of dense layouts -> fallback orders incl. bottom-left
+  packing (1,000/1,000 legal); (b) Track-B spacing must be 2 x MACRO_PLACE_HALO (per-side halo in
+  rtl_macro_placer); with 1 x the edge channels broke pdngen on 6 of 16 layouts (PDN-0179).
+- V0 certificate rejected every program on real designs (NaN != NaN for unplaced cells) — found by the first
+  end-to-end evolution dry run. RLCE groups were unbounded (one 246-macro "group") -> bounded to 8.
+- The earlier f0-vs-f1 calibration JSON scored one layout per design -> redone (`scripts/calibrate_dev.py`).
+- Run metadata recorded the end-of-run commit with the start-of-run code version -> commit at start.
+- Local absolute paths removed from tracked docs; reports relativize paths; dev archives untracked.
+
+**Development results (no claims; stand-ins for the server experiments)**
+- T1.1: bookshelf load -> write -> load identity on all 26 designs (`reports/T1_roundtrip_bookshelf.json`).
+- E3-lite, Track A (`reports/E3_calibration_dev_ibm.md`): f0 J0 (the guard's scorer) vs HB-GP f1 J —
+  Kendall 0.65 / 0.50 / 0.03 on ibm01 / 02 / 03, top-5 recall 0, regret 55% of random: G0 rule not met.
+- T3 dev bridge (`reports/T3_bridge_macro_dev.md`): f0 criterion 2.0125 vs raw 2.0411 on ibm03 (91% of sources
+  improved) while the validation residual and terminal error rose.
+- E0 dev on held-out ibm04 / ibm06 (`runs/e0_dev/heldout_r0`, f0 guard for every partner): the bridge's gains
+  are concentrated on catastrophic sources (M5.v1: J 3.45 -> 0.76) with small losses on good ones (the f0
+  guard accepts moves that f1 rejects); interim paired test not significant (see the final report).
+- Track-B dev campaign on bp_fe_top with the corrected flow: see `runs/seed_miniflow/bp_fe_top/` and the
+  report added at the end of the session.
+
+**New tools**: `scripts/run_evolution.py` (T5 driver; `--llm mock` dry runs, all five proposers work end to
+end), `scripts/run_f2_miniflow.py` + `MiniflowF2Evaluator` (Track-B dev f2: CTS, repair_timing, GRT, DRT,
+fill, OpenRCX, STA — untested on the tool yet), `scripts/calibrate_dev.py`, `run_e0.py --guard-fidelity
+--equal-guard`.
+
+**Open issues / decisions for the user (additions)**
+8. E0 protocol (T4, before it is pre-registered): the co-trained bridge's guard sees f1, memetic and
+   repertoire decide on f0 only. With a weakly calibrated f0 (Kendall 0.03-0.65 above) the bridge can win
+   through the guard's access to f1 alone. Proposal: run E0 with `--equal-guard` (every partner's output
+   kept only if it beats the raw layout at the same fidelity) or add a "random displacement + guard" control.
+9. Timing gates at f1: with M1 as the reference, most heuristic layouts fail the 0.02 ns setup-WNS gate at
+   f1 (pre-CTS, no timing repair), so J = inf for them. The gates are specified for the final cost; applying
+   them at f1 discards most of the search signal. Proposal: at f1 report the gates but rank by J before the
+   gates; enforce the gates at f2/f3 (needs your decision: it touches frozen rule B.3).
+10. The (1+OF) term (open issue 6) is confirmed on Track B: GR overflow 8 against a zero-overflow baseline
+    raises J from ~0.95 to 2.14.
+
+---
+
 ## 2026-09-25 — Session 1 (later): local Track-B flow, dev bridge training, overflow-proxy fix
 
 **Local Track B (development).** `heurbridge/eval/miniflow.py` runs a minimal Nangate45 flow in the local
