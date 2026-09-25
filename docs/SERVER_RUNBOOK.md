@@ -7,7 +7,8 @@ every background script; long jobs in `tmux`, resumable (completed `run_id`s are
 `/data/dzy/heura_repr/heurbridge/logs/`.  Key-only SSH: `scripts/ssh_run.sh <port> '<cmd>'`.
 
 ```bash
-S=/Users/duanzeyu/Desktop/HeurBridge/scripts
+R=$(git rev-parse --show-toplevel)     # the local clone
+S=$R/scripts
 H=/data/dzy/heura_repr/heurbridge
 ```
 
@@ -15,7 +16,7 @@ H=/data/dzy/heura_repr/heurbridge
 ```bash
 $S/ssh_run.sh 224 'hostname; whoami'
 $S/sync_to_server.sh 224 /data/dzy/heura_repr/heurbridge
-rsync -az -e "ssh -i ~/.ssh/id_ed25519_heurbridge -p 224" /Users/duanzeyu/Desktop/HeurBridge/benchmarks/ibm_bookshelf /Users/duanzeyu/Desktop/HeurBridge/benchmarks/ispd2005 <user>@<host>:/data/dzy/heura_repr/benchmarks/
+rsync -az -e "ssh -i ~/.ssh/id_ed25519_heurbridge -p 224" $R/benchmarks/ibm_bookshelf $R/benchmarks/ispd2005 <user>@<host>:/data/dzy/heura_repr/benchmarks/
 ```
 (only if the server cannot download them itself; then verify with `shasum -a 256 -c configs/manifests/*.sha256`)
 

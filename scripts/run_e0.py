@@ -56,8 +56,10 @@ def main():
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
     ledger = AlphaLedger(ROOT / "stats" / "alpha_ledger.jsonl", campaign=a.campaign)
-    entry = ledger.reserve("partner_ablation", Path(a.bridge).name, "wilcoxon_less_holm4",
-                           meta={"designs": a.designs, "final": a.final})
+    import hashlib
+    ck = hashlib.sha256(Path(a.bridge).read_bytes()).hexdigest()[:16]
+    entry = ledger.reserve("partner_ablation", "%s@%s" % (Path(a.bridge).name, ck), "wilcoxon_less_holm4",
+                           meta={"designs": a.designs, "final": a.final, "bridge": str(a.bridge), "bridge_sha256_16": ck})
     progs = all_programs()
     if a.programs:
         progs = [p for p in progs if p["id"] in set(a.programs.split(","))]

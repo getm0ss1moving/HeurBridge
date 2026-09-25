@@ -29,6 +29,12 @@ def git_sha(short: bool = False) -> str:
         return "unknown"
 
 
+# The code a process runs is the code it imported at start: record the commit at import time, and the
+# commit at write time separately (long runs write meta.json at the end; the two differ if the tree moved).
+_STARTED = time.strftime("%Y-%m-%dT%H:%M:%S")
+_GIT_AT_START = git_sha()
+
+
 def stable_hash(obj) -> str:
     return hashlib.sha256(json.dumps(obj, sort_keys=True, default=str).encode()).hexdigest()[:16]
 
@@ -37,7 +43,8 @@ def write_meta(run_dir: str | Path, run_id: str, design: str, **fields) -> dict:
     """Write run_dir/meta.json; unknown extended fields are recorded as None (never guessed)."""
     run_dir = Path(run_dir)
     run_dir.mkdir(parents=True, exist_ok=True)
-    meta = {"run_id": run_id, "design": design, "heurbridge_version": __version__, "git_sha": git_sha(),
+    meta = {"run_id": run_id, "design": design, "heurbridge_version": __version__, "git_sha": _GIT_AT_START,
+            "process_started": _STARTED, "git_sha_at_write": git_sha(),
             "host": platform.node() if fields.pop("record_host", False) else None,
             "created": time.strftime("%Y-%m-%dT%H:%M:%S")}
     for k in EXTENDED:

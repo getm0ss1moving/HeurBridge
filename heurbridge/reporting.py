@@ -19,6 +19,12 @@ MANDATORY = ("title", "report_id", "node", "track", "tools", "metric_conventions
 METRIC_CONVENTIONS = "timing setup_hold_v1_2026-09-22; metrics_v2_2026-09-22; HPWL centre (pin_offset_v2); cost cost_v1_2026-09-25"
 
 
+def public_paths(text: str) -> str:
+    """Reports go to a public repository: the repo root becomes '.', the home directory '~'."""
+    from .paths import REPO_ROOT
+    return text.replace(str(REPO_ROOT), ".").replace(str(Path.home()), "~")
+
+
 def render(fields: dict, gate_passed: bool | None, out: str | Path | None = None) -> str:
     f = {"date": time.strftime("%Y-%m-%d %H:%M"), "version": __version__, "git_sha": git_sha(),
          "metric_conventions": METRIC_CONVENTIONS, "test": "-", "alpha_ledger_id": "-", "results": "", "notes": ""}
@@ -31,7 +37,7 @@ def render(fields: dict, gate_passed: bool | None, out: str | Path | None = None
     else:
         f["claim_status"] = "gate PASSED: the pre-registered claim may be stated" if gate_passed else \
             "gate FAILED: negative result, no improvement may be claimed"
-    text = TEMPLATE.read_text().format(**f)
+    text = public_paths(TEMPLATE.read_text().format(**f))
     if out:
         Path(out).parent.mkdir(parents=True, exist_ok=True)
         Path(out).write_text(text)

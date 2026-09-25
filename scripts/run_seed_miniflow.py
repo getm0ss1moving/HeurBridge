@@ -40,6 +40,7 @@ def main():
     ap.add_argument("--ls", type=int, default=0)
     ap.add_argument("--programs", default="")
     ap.add_argument("--archive", default=str(ROOT / "archive_dev_trackB"))
+    ap.add_argument("--base-runs", type=int, default=3, help="baseline flow repeats (T1.7: 3, median)")
     a = ap.parse_args()
     name = a.design.split("/")[-1]
     w = ROOT / "runs" / "miniflow" / name
@@ -69,8 +70,14 @@ def main():
     if bpath.exists():
         recs = json.loads(bpath.read_text())["records"]
     else:
-        recs = [ev.evaluate(des, m1, "baseline_m1", rdir / "work")]
-        bpath.write_text(json.dumps({"records": recs}, indent=1, default=str))
+        # M1 and f1 are deterministic at a fixed thread count, so the repeats also test determinism (T1.4)
+        recs = [ev.evaluate(des, m1, "baseline_m1" + ("" if k == 0 else "_r%d" % k), rdir / "work")
+                for k in range(a.base_runs)]
+        keys = ("gr_wl", "gr_overflow_total", "setup_wns_ns", "setup_tns_ns", "hold_wns_ns", "total_power_w")
+        same = all(r.get(k) == recs[0].get(k) for r in recs for k in keys)
+        bpath.write_text(json.dumps({"records": recs, "deterministic": same, "threads": ev.threads}, indent=1, default=str))
+        print(json.dumps({"baseline_runs": len(recs), "deterministic": same,
+                          "values": [{k: r.get(k) for k in keys} for r in recs]}), flush=True)
     baseline = cost.Baseline.from_records(des.id, recs)
     arch = Archive(a.archive, min_fidelity=1)
     c = ev.score(recs[0], baseline)

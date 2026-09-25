@@ -64,11 +64,12 @@ def _eval(ev: Evaluator, design, layout, base, run_id, work, ledger: Ledger, ext
     if row is not None:
         return row
     t0 = time.time()
+    rec = None
     try:
         rec = ev.evaluate(design, layout, run_id, work / run_id)
         rc = rec.get("returncode", 0)
         if rc not in (0, None):
-            raise RuntimeError("tool returncode %s" % rc)
+            raise RuntimeError("tool returncode %s (%s)" % (rc, rec.get("failure") or "no reason parsed"))
         res = ev.score(rec, base)
         row = {"run_id": run_id, "status": "ok", "fidelity": ev.fidelity, "evaluator": ev.name, "J": res.J_inf,
                "J_raw": res.J, "admissible": res.admissible, "partial": res.partial, "terms": res.terms,
@@ -76,6 +77,8 @@ def _eval(ev: Evaluator, design, layout, base, run_id, work, ledger: Ledger, ext
     except Exception as e:
         row = {"run_id": run_id, "status": "eval_failed", "fidelity": ev.fidelity, "evaluator": ev.name,
                "J": math.inf, "error": "%s: %s" % (type(e).__name__, str(e)[:300])}
+        if rec is not None:                     # keep the tool record (partial metrics, failure reason)
+            row["record"] = rec
     row.update(extra)
     row["wall_s"] = round(time.time() - t0, 2)
     row["pos_macros"] = layout.pos[design.is_macro & ~design.is_fixed].tolist()

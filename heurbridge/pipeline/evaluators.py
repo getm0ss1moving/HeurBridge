@@ -107,7 +107,11 @@ F1_B_WEIGHTS = {k: v for k, v in cost.WEIGHTS.items() if k != "via"}     # vias 
 
 @dataclass
 class MiniflowEvaluator(Evaluator):
-    """Track-B f1 through the minimal Nangate45 flow (eval/miniflow.py): GP + repair_design + DP + GRT + timing."""
+    """Track-B f1 through the minimal Nangate45 flow (eval/miniflow.py): GP + repair_design + DP + GRT + timing.
+
+    ``timing_stage`` selects the parasitics behind the canonical timing/power fields: 'place' (default;
+    GR-stage parasitics fail on some layouts in the local OpenROAD build, see eval/miniflow.py) or 'gr'.
+    The baseline and every candidate of a campaign must use the same stage (it is stored in each record)."""
     name: str = "miniflow_f1"
     fidelity: int = 1
     weights: dict = field(default_factory=lambda: dict(F1_B_WEIGHTS))
@@ -119,6 +123,8 @@ class MiniflowEvaluator(Evaluator):
     docker_image: str | None = "efabless/openlane:master-arm64v8"
     timeout_s: int = 7200
     exact: bool = False               # place_macro -exact exists only in newer OpenROAD builds
+    timing_stage: str = "place"
+    gr_timing: bool = False           # GR-parasitics timing (unreliable in the local build; opt-in)
 
     def evaluate(self, design, layout, run_id, workdir):
         from ..eval import miniflow as MF
@@ -129,23 +135,70 @@ class MiniflowEvaluator(Evaluator):
         tcl.write_text(macro_placement_tcl(design, layout, exact=self.exact))
         p, d = MF.Nangate45(self.flow_dir), MF.from_orfs(self.flow_dir, self.platform_design)
         crashes = []
-        for attempt in (0, 1):                     # one retry on a tool crash; every crash is recorded by name
-            rc, log, wall = MF.run_tool("openroad", MF.f1_script(p, d, Path(self.fp_odb), tcl, work, self.threads),
-                                        work / ("f1.tcl" if attempt == 0 else "f1_retry.tcl"),
-                                        docker_image=self.docker_image, timeout=self.timeout_s)
-            if rc in (139, -11, 134, -6):
-                crashes.append({"attempt": attempt, "returncode": rc, "wall_s": wall})
+        for attempt in (0, 1):             # one retry on a crash or bad_alloc; every failure is recorded by name
+            rc_raw, log, wall = MF.run_tool("openroad", MF.f1_script(p, d, Path(self.fp_odb), tcl, work, self.threads,
+                                                                          self.gr_timing or self.timing_stage == "gr"),
+                                            work / ("f1.tcl" if attempt == 0 else "f1_retry.tcl"),
+                                            docker_image=self.docker_image, timeout=self.timeout_s)
+            m, failure, rc = MF.f1_outcome(rc_raw, log, self.timing_stage)
+            if attempt == 0 and MF.should_retry(rc, failure):
+                crashes.append({"attempt": attempt, "returncode": rc_raw, "wall_s": wall, "failure": failure})
                 continue
             break
-        m = MF.f1_metrics(log)
-        rec = {"run_id": run_id, "backend": "miniflow", "returncode": rc, "wall_s": wall, "crashes": crashes,
-               "gr_wl": m.get("gr_wl"),
-               "gr_overflow_total": m.get("gr_overflow_total"), "gr_overflow_max": m.get("gr_overflow_max"),
-               "setup_wns_ns": m.get("wns_gr"), "setup_tns_ns": m.get("tns_gr"), "hold_wns_ns": m.get("hold_gr"),
-               "wns_place": m.get("wns_place"), "tns_place": m.get("tns_place"), "total_power_w": m.get("total_power_w"),
-               "check_placement_ok": m.get("check_placement_ok"), "runtime_s": m.get("runtime_s"),
+        keys = ("gr_wl", "gr_overflow_total", "gr_overflow_max", "setup_wns_ns", "setup_tns_ns", "hold_wns_ns",
+                "total_power_w", "timing_stage", "wns_place", "tns_place", "hold_place", "power_place_w",
+                "wns_gr", "tns_gr", "hold_gr", "power_gr_w", "gr_parasitics_error", "check_placement_ok", "runtime_s")
+        rec = {"run_id": run_id, "backend": "miniflow", "returncode": rc, "returncode_raw": rc_raw, "wall_s": wall,
+               "crashes": crashes, "failure": failure, **{k: m.get(k) for k in keys},
                "unchecked": ["vias", "drc (f2)", "lvs (f3)"]}
         if m.get("check_placement_ok") is False:
             rec["returncode"] = "check_placement_failed"
         (work / "record.json").write_text(json.dumps(rec, indent=1, default=str))
         return rec
+
+
+@dataclass
+class MiniflowF2Evaluator(Evaluator):
+    """Track-B f2 through the mini-flow (eval/miniflow.f2_script): f1 placement, CTS + repair_timing, GRT,
+    detailed route, fill, OpenRCX + STA.  All five J terms; gates setup, hold, DRC (LVS is f3)."""
+    name: str = "miniflow_f2"
+    fidelity: int = 2
+    weights: dict = field(default_factory=lambda: dict(cost.WEIGHTS))
+    required_gates: tuple | None = ("setup", "hold", "drc")
+    flow_dir: str = ""
+    platform_design: str = ""
+    fp_odb: str = ""
+    threads: int = 6
+    docker_image: str | None = "efabless/openlane:master-arm64v8"
+    timeout_s: int = 7200
+    exact: bool = False
+    repair_timing: bool = True
+
+    def evaluate(self, design, layout, run_id, workdir):
+        from ..eval import miniflow as MF
+        from ..eval.orfs import macro_placement_tcl
+        work = Path(workdir) / run_id
+        work.mkdir(parents=True, exist_ok=True)
+        tcl = work / "macros.tcl"
+        tcl.write_text(macro_placement_tcl(design, layout, exact=self.exact))
+        p, d = MF.Nangate45(self.flow_dir), MF.from_orfs(self.flow_dir, self.platform_design)
+        crashes = []
+        for attempt in (0, 1):
+            rc, log, wall = MF.run_tool("openroad", MF.f2_script(p, d, Path(self.fp_odb), tcl, work, self.threads,
+                                                                 repair_timing=self.repair_timing),
+                                        work / ("f2.tcl" if attempt == 0 else "f2_retry.tcl"),
+                                        docker_image=self.docker_image, timeout=self.timeout_s)
+            m = MF.f2_metrics(log)
+            failure = None if (rc == 0 and m["done"]) else MF.classify_failure(rc, log)
+            if attempt == 0 and MF.should_retry(rc, failure):
+                crashes.append({"attempt": attempt, "returncode": rc, "wall_s": wall, "failure": failure})
+                continue
+            break
+        rec = {"run_id": run_id, "backend": "miniflow_f2", "returncode": 0 if failure is None else rc, "wall_s": wall,
+               "crashes": crashes, "failure": failure, **{k: v for k, v in m.items() if k != "done"},
+               "unchecked": ["lvs (f3)"]}
+        if m.get("check_placement_ok") is False:
+            rec["returncode"] = "check_placement_failed"
+        (work / "record.json").write_text(json.dumps(rec, indent=1, default=str))
+        return rec
+

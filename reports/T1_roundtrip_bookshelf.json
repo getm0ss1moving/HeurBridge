@@ -1,0 +1,236 @@
+[
+ {
+  "design": "ibm01",
+  "suite": "ibm_bookshelf",
+  "objects": 12752,
+  "nets": 14111,
+  "identity": true,
+  "hpwl": 2440189.189554,
+  "seconds": 0.4
+ },
+ {
+  "design": "ibm02",
+  "suite": "ibm_bookshelf",
+  "objects": 19601,
+  "nets": 19584,
+  "identity": true,
+  "hpwl": 5236665.316695999,
+  "seconds": 0.5
+ },
+ {
+  "design": "ibm03",
+  "suite": "ibm_bookshelf",
+  "objects": 23136,
+  "nets": 27401,
+  "identity": true,
+  "hpwl": 8077010.514664,
+  "seconds": 0.6
+ },
+ {
+  "design": "ibm04",
+  "suite": "ibm_bookshelf",
+  "objects": 27507,
+  "nets": 31970,
+  "identity": true,
+  "hpwl": 8900184.956891,
+  "seconds": 0.7
+ },
+ {
+  "design": "ibm05",
+  "suite": "ibm_bookshelf",
+  "objects": 29347,
+  "nets": 28446,
+  "identity": true,
+  "hpwl": 10728133.901817,
+  "seconds": 0.7
+ },
+ {
+  "design": "ibm06",
+  "suite": "ibm_bookshelf",
+  "objects": 32498,
+  "nets": 34826,
+  "identity": true,
+  "hpwl": 7205426.077707,
+  "seconds": 0.8
+ },
+ {
+  "design": "ibm07",
+  "suite": "ibm_bookshelf",
+  "objects": 45926,
+  "nets": 48117,
+  "identity": true,
+  "hpwl": 11785925.3139104,
+  "seconds": 1.1
+ },
+ {
+  "design": "ibm08",
+  "suite": "ibm_bookshelf",
+  "objects": 51309,
+  "nets": 50513,
+  "identity": true,
+  "hpwl": 14141082.459902,
+  "seconds": 1.3
+ },
+ {
+  "design": "ibm09",
+  "suite": "ibm_bookshelf",
+  "objects": 53395,
+  "nets": 60902,
+  "identity": true,
+  "hpwl": 13992608.983164001,
+  "seconds": 1.5
+ },
+ {
+  "design": "ibm10",
+  "suite": "ibm_bookshelf",
+  "objects": 69429,
+  "nets": 75196,
+  "identity": true,
+  "hpwl": 32466692.548625004,
+  "seconds": 2.1
+ },
+ {
+  "design": "ibm11",
+  "suite": "ibm_bookshelf",
+  "objects": 70558,
+  "nets": 81454,
+  "identity": true,
+  "hpwl": 20988938.797785,
+  "seconds": 1.9
+ },
+ {
+  "design": "ibm12",
+  "suite": "ibm_bookshelf",
+  "objects": 71076,
+  "nets": 77240,
+  "identity": true,
+  "hpwl": 40530402.83216201,
+  "seconds": 2.4
+ },
+ {
+  "design": "ibm13",
+  "suite": "ibm_bookshelf",
+  "objects": 84199,
+  "nets": 99666,
+  "identity": true,
+  "hpwl": 25724731.113316,
+  "seconds": 2.2
+ },
+ {
+  "design": "ibm14",
+  "suite": "ibm_bookshelf",
+  "objects": 147605,
+  "nets": 152772,
+  "identity": true,
+  "hpwl": 40731228.7276236,
+  "seconds": 4.1
+ },
+ {
+  "design": "ibm15",
+  "suite": "ibm_bookshelf",
+  "objects": 161570,
+  "nets": 186608,
+  "identity": true,
+  "hpwl": 54504539.4643908,
+  "seconds": 5.3
+ },
+ {
+  "design": "ibm16",
+  "suite": "ibm_bookshelf",
+  "objects": 183484,
+  "nets": 190048,
+  "identity": true,
+  "hpwl": 63224175.509056,
+  "seconds": 6.4
+ },
+ {
+  "design": "ibm17",
+  "suite": "ibm_bookshelf",
+  "objects": 185495,
+  "nets": 189581,
+  "identity": true,
+  "hpwl": 77257427.182219,
+  "seconds": 6.0
+ },
+ {
+  "design": "ibm18",
+  "suite": "ibm_bookshelf",
+  "objects": 210613,
+  "nets": 201920,
+  "identity": true,
+  "hpwl": 48850664.891321,
+  "seconds": 6.8
+ },
+ {
+  "design": "adaptec1",
+  "suite": "ispd2005",
+  "objects": 211447,
+  "nets": 221142,
+  "identity": true,
+  "hpwl": 104924229.0,
+  "seconds": 6.7
+ },
+ {
+  "design": "adaptec2",
+  "suite": "ispd2005",
+  "objects": 255023,
+  "nets": 266009,
+  "identity": true,
+  "hpwl": 147771030.0,
+  "seconds": 7.5
+ },
+ {
+  "design": "adaptec3",
+  "suite": "ispd2005",
+  "objects": 451650,
+  "nets": 466758,
+  "identity": true,
+  "hpwl": 390424154.0,
+  "seconds": 13.6
+ },
+ {
+  "design": "adaptec4",
+  "suite": "ispd2005",
+  "objects": 496045,
+  "nets": 515951,
+  "identity": true,
+  "hpwl": 397885362.0,
+  "seconds": 17.9
+ },
+ {
+  "design": "bigblue1",
+  "suite": "ispd2005",
+  "objects": 278164,
+  "nets": 284479,
+  "identity": true,
+  "hpwl": 110538515.0,
+  "seconds": 10.5
+ },
+ {
+  "design": "bigblue2",
+  "suite": "ispd2005",
+  "objects": 557866,
+  "nets": 577235,
+  "identity": true,
+  "hpwl": 769209419.0,
+  "seconds": 20.5
+ },
+ {
+  "design": "bigblue3",
+  "suite": "ispd2005",
+  "objects": 1096812,
+  "nets": 1123170,
+  "identity": true,
+  "hpwl": 644082834.0,
+  "seconds": 33.9
+ },
+ {
+  "design": "bigblue4",
+  "suite": "ispd2005",
+  "objects": 2177353,
+  "nets": 2229886,
+  "identity": true,
+  "hpwl": 1831210854.0,
+  "seconds": 77.2
+ }
+]

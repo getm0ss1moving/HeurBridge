@@ -14,7 +14,7 @@ authorization (password login is not used by the agent). All server scripts are 
 | Tests | `.venv/bin/python -m pytest -q tests` |
 | Docker | colima (Virtualization.Framework, aarch64) with `efabless/openlane:master-arm64v8` |
 | EDA tools in that image | OpenROAD `b16bda7e82721d10566ff7e2b68f1ff0be9f9e38`, Yosys, Magic, KLayout, Netgen |
-| HA-PR harness | `/Users/duanzeyu/Desktop/heura_repro_en/eda` (English copy; the task list's `papers/heura_repro` path no longer exists) |
+| HA-PR harness | English copy `heura_repro_en/eda` next to the repo, `$HEURA_EDA_BASE` (the task list's `papers/heura_repro` path no longer exists) |
 
 **T0.1 (local): PASS** — `SMOKE_TEST_PASS`; 222 v2 records, control coverage 46/46; `VALIDATE_REPLAY_V2_PASS`;
 dataset 46 decisions / 176 samples / 0 errors.

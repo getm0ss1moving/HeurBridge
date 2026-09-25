@@ -1,0 +1,1 @@
+{"event": "reserve", "campaign": "E0_dev", "j": 1, "alpha": 0.05, "alpha_j": 0.025, "kind": "partner_ablation", "artifact": "best.pt", "test": "wilcoxon_less_holm4", "meta": {"designs": "ibm04,ibm06", "final": "hbgp"}, "time": "2026-09-26T02:19:55", "ledger_id": "E0_dev#1"}

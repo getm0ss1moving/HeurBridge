@@ -61,3 +61,52 @@ def test_fixed_obstacles_and_infeasible_report():
     lay.schema = des2.schema_hash()
     out, rep = project.legalize_macros(des2, lay)
     assert rep.ok and project.check_macros(des2, out)["ok"]
+
+
+def _ram_core():
+    """bp_fe_top's macro set on its core (nine 152.57 x 113.4 um RAMs + two small ones), no netlist."""
+    sizes = [(152.57, 113.4)] * 9 + [(54.53, 89.4), (10.64, 36.4)]
+    n = len(sizes)
+    names = ["icache_1/data_mem_banks_%d__data_mem_bank/macro_mem/mem" % k for k in range(8)] + [
+        "bp_fe_pc_gen_1/genblk1_branch_prediction_1/btb_1/btb_mem/macro_mem/mem", "icache_1/tag_mem/macro_mem/mem",
+        "icache_1/metadata_mem/macro_mem/mem"]          # real names: equal-size ties are broken by a name hash
+    des = Design(id="ram_core", family="synth", tech="nangate45", names=names,
+                 size=np.array(sizes), is_macro=np.ones(n, bool), is_fixed=np.zeros(n, bool), is_io=np.zeros(n, bool),
+                 pin_obj=np.zeros(0, np.int64), pin_off=np.zeros((0, 2)), net_ptr=np.zeros(1, np.int64),
+                 pin_idx=np.zeros(0, np.int64), net_weight=np.zeros(0), die=(0.0, 0.0, 645.055, 645.055),
+                 core=(2.09, 2.8, 642.96, 642.6), masters=["ram"] * 9 + ["tag", "meta"], site=(0.19, 1.4))
+    from heurbridge.core.design import Layout
+    lay = Layout(pos=np.full((n, 2), 0.5), orient=np.zeros(n, np.int8), schema=des.schema_hash())
+    return des, lay
+
+
+def test_dense_ram_core_needs_fallback_order():
+    """Largest-first greedy fragments this core (the M2.v0 seed-3 output on bp_fe_top); a fallback order
+    must legalize it, and the primary order's result is kept whenever it is legal."""
+    des, lay = _ram_core()
+    ll = np.array(des.core[:2])
+    centres = [(89.1, 132.57), (92.09, 245.98), (402.66, 310.01), (245.02, 421.77), (250.52, 182.08), (86.64, 360.61),
+               (245.01, 303.73), (90.01, 474.31), (409.32, 527.02), (435.27, 415.18), (289.63, 564.82)]   # um
+    orients = [O.R180, O.R180, O.R0, O.R0, O.MX, O.MY, O.R0, O.MY, O.R0, O.R0, O.MX]
+    l = lay.copy()
+    l.pos[:] = (np.array(centres) - ll) / des.core_wh
+    l.orient[:] = orients
+    out, rep = project.legalize_macros(des, l, halo=10.0, fallback=False)
+    assert not rep.ok and rep.order == "area"
+    out, rep = project.legalize_macros(des, l, halo=10.0)
+    assert rep.ok and rep.order != "area" and rep.fallback_from[0]["order"] == "area"
+    assert project.check_macros(des, out, 10.0)["ok"]
+    assert np.array_equal(out.orient, l.orient)
+
+
+def test_dense_ram_core_random_layouts_always_legal():
+    des, lay = _ram_core()
+    rng = np.random.default_rng(0)
+    for t in range(300):
+        l = lay.copy()
+        l.pos[:] = rng.random((des.n_objects, 2))
+        l.orient[:] = rng.integers(0, 8, des.n_objects)
+        out, rep = project.legalize_macros(des, l, halo=10.0)
+        assert rep.ok, (t, rep.failed, rep.fallback_from)
+        if rep.order == "area":
+            assert rep.fallback_from == []

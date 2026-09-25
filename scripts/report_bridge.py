@@ -56,12 +56,33 @@ def main():
            "MMD per round: single round (round 0; the macro stage has no upstream)."
            % (png.name, rows, last.get("improved_frac")))
     cfg = meta.get("config", {})
+    log_rows = [json.loads(l) for l in (run / "train.log").read_text().splitlines() if l.startswith("{")]
+    summ = next((r for r in log_rows if "params" in r), {})
+    per_design = ", ".join("%s %s: %d pairs" % (r["split"], r["design"], r["pairs"]) for r in log_rows
+                           if "split" in r and "pairs" in r and r.get("prep_s", 0) > 10) or "see train.log"
+    trend = ""
+    if len(h["val"]) >= 2:
+        v0, v1 = h["val"][0], h["val"][-1]
+        up = [k for k in ("residual", "terminal") if v1.get(k, 0) > v0.get(k, 0)]
+        if up and v1.get("criterion", 1e9) < v0.get("criterion", -1e9):
+            trend = ("\n\n**Caveat.** On the validation design the %s rose from the first to the last validation "
+                     "(%s) while the guarded f0 criterion improved: the model moves the held-out sources further and "
+                     "the guard keeps the moves that lower f0, but the velocity field does not approach the held-out "
+                     "elites more closely. The criterion (post-guard cost) is the model-selection rule of T3.6; the "
+                     "residual trend is reported so that it is not mistaken for convergence." % (
+                         " and ".join({"residual": "velocity residual", "terminal": "terminal error"}[k] for k in up),
+                         "; ".join("%s %.4f -> %.4f" % (k, v0[k], v1[k]) for k in up)))
+    res += trend
     text = reporting.render({
         "title": "T3 macro-stage bridge — validation report%s" % (" (development)" if a.dev else ""),
         "report_id": run.name, "node": a.node, "track": a.track,
-        "tools": "torch %s; HeurBridge %s" % (__import__("torch").__version__, meta.get("heurbridge_version")),
+        "tools": "torch %s; run: HeurBridge %s (package loaded at process start %s, git %s; meta written at git %s)" % (
+            __import__("torch").__version__, meta.get("heurbridge_version"), meta.get("process_started", "not recorded"),
+            meta.get("git_sha") if "process_started" in meta else "not recorded",
+            meta.get("git_sha_at_write", meta.get("git_sha"))),
         "gate": "T3 exit (post-guard f1 cost < raw on validation, paired p < 0.05)" + (" — NOT evaluated in a development run" if a.dev else ""),
-        "samples": "train designs %s; validation design(s) %s; pairs: see train.log; seeds %s" % (cfg.get("train"), cfg.get("val"), cfg.get("seeds")),
+        "samples": "train designs %s; validation design(s) %s; %s (training total %s); seeds %s; %s model parameters" % (
+            cfg.get("train"), cfg.get("val"), per_design, summ.get("pairs", "?"), cfg.get("seeds"), summ.get("params", "?")),
         "failures": "none recorded in train.log" if "Traceback" not in (run / "train.log").read_text() else "see train.log",
         "commands": "python scripts/train_bridge.py " + " ".join("--%s %s" % (k.replace("_", "-"), v) for k, v in cfg.items() if v not in ("", None)),
         "results": res, "alpha_ledger_id": meta.get("alpha_ledger_id") or "-",

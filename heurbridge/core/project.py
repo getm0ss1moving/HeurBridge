@@ -2,7 +2,11 @@
 
 P_M  greedy grid legalization: movable macros, largest area first, each moved to
      the free grid slot nearest its target (a windowed "spiral" search over a
-     prefix-sum occupancy map).  Footprints are the orientation-aware macro size
+     prefix-sum occupancy map).  Greedy placement can fragment a dense core so that
+     the last macros find no slot (bp_fe_top: nine 153 x 113 um RAMs, at most 15
+     halo footprints in a perfect packing); only then are fallback orders tried
+     (sweeps by target y and x, and centre-out) and the legal result with the least
+     displacement is kept.  The primary order's result is unchanged whenever it is legal.  Footprints are the orientation-aware macro size
      plus the halo (minimum macro-to-macro spacing), rounded up to grid cells, so
      legalized macros can never overlap.  Fixed macros are obstacles.  Orientation,
      fixed objects and non-macro objects are never changed.  The grid pitch is a
@@ -40,6 +44,8 @@ class LegalizeReport:
     failed: list = field(default_factory=list)
     grid: tuple = ()
     check: dict = field(default_factory=dict)
+    order: str = "area"                         # macro order that produced this result
+    fallback_from: list = field(default_factory=list)   # failed attempts before a fallback order succeeded
 
 
 def _pitch(design: Design, max_cells: int) -> tuple[float, float]:
@@ -82,9 +88,29 @@ def _nearest_free(free: np.ndarray, tx: float, ty: float, px: float, py: float):
         r *= 2
 
 
+FALLBACK_ORDERS = ("y", "x", "centre_out")
+
+
 def legalize_macros(design: Design, layout: Layout, halo: float = 0.0, max_cells: int = 512,
-                    scope: np.ndarray | None = None) -> tuple[Layout, LegalizeReport]:
+                    scope: np.ndarray | None = None, fallback: bool = True) -> tuple[Layout, LegalizeReport]:
     """P_M.  Returns a new Layout (macros in ``scope`` legalized) and a report; never raises on infeasibility."""
+    out, rep = _legalize(design, layout, halo, max_cells, scope, "area")
+    if rep.ok or not fallback or not len(rep.failed):
+        return out, rep
+    tried = [rep]
+    best = None
+    for order in FALLBACK_ORDERS:
+        o2, r2 = _legalize(design, layout, halo, max_cells, scope, order)
+        tried.append(r2)
+        if r2.ok and (best is None or r2.mean_disp < best[1].mean_disp - 1e-12):
+            best = (o2, r2)
+    if best is None:
+        return out, rep                              # every order failed: report the primary attempt
+    best[1].fallback_from = [{"order": t.order, "failed": t.failed} for t in tried if not t.ok]
+    return best
+
+
+def _legalize(design: Design, layout: Layout, halo: float, max_cells: int, scope, order_by: str):
     out = layout.copy()
     mov = design.is_macro & ~design.is_fixed
     if scope is not None:
@@ -93,7 +119,7 @@ def legalize_macros(design: Design, layout: Layout, halo: float = 0.0, max_cells
     px, py = _pitch(design, max_cells)
     W, H = design.core_wh
     nx, ny = int(math.floor(W / px + 1e-9)), int(math.floor(H / py + 1e-9))
-    rep = LegalizeReport(ok=True, grid=(nx, ny, px, py))
+    rep = LegalizeReport(ok=True, grid=(nx, ny, px, py), order=order_by)
     if len(idx) == 0:
         rep.check = check_macros(design, out, halo)
         return out, rep
@@ -109,11 +135,22 @@ def legalize_macros(design: Design, layout: Layout, halo: float = 0.0, max_cells
         j0, j1 = max(0, int(math.floor(yl / py))), min(ny, int(math.ceil(yh / py)))
         if i1 > i0 and j1 > j0:
             occ[i0:i1, j0:j1] = 1
-    # largest first; ties broken by a label-free key (object name) so that relabelling permutes the output
+    # ties broken by a label-free key (object name) so that relabelling permutes the output
     keys = np.array([_name_key(design.names[i]) for i in idx], dtype=np.int64)
-    order = idx[np.lexsort((keys, -design.area[idx]))]
     target = design.to_abs(layout.pos) - ll0
     target = np.where(np.isfinite(target), target, np.array([W, H]) / 2)
+    ll_t = target[idx] - eff[idx] / 2                                # target lower-left corners
+    if order_by == "area":                                           # largest first
+        order = idx[np.lexsort((keys, -design.area[idx]))]
+    elif order_by == "y":                                            # bottom-up sweep (Tetris-like)
+        order = idx[np.lexsort((keys, ll_t[:, 0], ll_t[:, 1]))]
+    elif order_by == "x":                                            # left-to-right sweep
+        order = idx[np.lexsort((keys, ll_t[:, 1], ll_t[:, 0]))]
+    elif order_by == "centre_out":                                   # macros nearest the core centre first
+        r2 = ((target[idx] - np.array([W, H]) / 2) ** 2).sum(1)
+        order = idx[np.lexsort((keys, r2))]
+    else:
+        raise ValueError("unknown order %r" % order_by)
     disp = np.full(design.n_objects, np.nan)
     for i in order:
         mw = int(math.ceil(eff[i, 0] / px - 1e-9))

@@ -4,6 +4,42 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
+## 2026-09-25 — Session 1 (later): local Track-B flow, dev bridge training, overflow-proxy fix
+
+**Local Track B (development).** `heurbridge/eval/miniflow.py` runs a minimal Nangate45 flow in the local
+OpenLane container (OpenROAD b16bda7e, Yosys 0.38; current ORFS does not run there). On `nangate45/bp_fe_top`:
+hierarchical synthesis 15 s, floorplan 4 s, tool-native `rtl_macro_placer` (M1) 285 s, f1 126 s (GR WL 1.758e6 um,
+overflow 0, setup WNS -2.20 ns / TNS -310.9 ns pre-CTS, hold +0.086 ns, 0.128 W). Placement/GR results are
+deterministic across repeats; the old build segfaults intermittently after GR (evaluator retries once and
+records the crash). `place_macro -exact` is not available in this build (made optional).
+*[2026-09-26: these are flow-v1 values (density 0.6, no tapcells/power grid, GR-stage timing); superseded —
+see the 2026-09-26 entry.]*
+```bash
+nohup .venv/bin/python scripts/run_seed_miniflow.py --design nangate45/bp_fe_top --seeds 2 > logs/seed_miniflow_bp_fe_top.log 2>&1 &
+```
+The first attempt failed on every candidate because of `-exact` (a harness bug, recorded as eval_failed);
+its records are kept in `runs/seed_miniflow/bp_fe_top/failed_attempt_1/`.
+
+**Track-A overflow proxy fixed.** Raw RUDY overflow in microns made (1+OF)~ explode against zero-overflow
+baselines (ibm02 J up to 2e4; an artificial 25% "gain" on ibm03). Proxy is now `rudy_of_pct`; the development
+archive was rebuilt from stored records: `archive_dev_v2` (`scripts/rescore_archive.py`). With it the benchmark
+macro positions are the best layout on ibm01-03 and the seed heuristics are 1.8-9.5% worse.
+
+**Dev bridge (round 0).** `scripts/train_bridge.py --train ibm01,ibm02 --val ibm03 --archive archive_dev_v2`
+(CPU, 1.13M params, 256 pairs). Guarded post-projection f0 on held-out ibm03: 2.0393 / 2.0389 / 2.0322 vs raw
+2.0411 at steps 400 / 800 / 1200 (up to 0.44% better; the guard picks alpha > 0 for 40-53% of sources).
+Development evidence only (two training designs, f0 criterion); not the T3 exit gate.
+
+**Also added:** ODB loader (verified on nangate45 gcd), V5 promotion gate + H8 null injection, ORFS signoff
+stage (f3), MMD^2, Algorithm R driver, report generators, `docs/SERVER_RUNBOOK.md`, T1 baseline table (dev).
+
+**Open issues (additions)**
+6. The (1+OF)~ normalization also makes the Track-B J very sensitive when the baseline GR overflow is ~0
+   (decision for the user: keep frozen weights, or use e.g. log(1+OF) / an absolute cap).
+7. The bridge is not conditioned on x^h (deviation from T3.2, evidence in CHANGELOG 0.3.0).
+
+---
+
 ## 2026-09-25 — Session 1 (continued): T0.4 local, T1-T7 software, first development campaign
 
 **Server access is still blocked** (key not authorized), so everything below ran on the Mac. Versions v0.2.0 ..
@@ -43,14 +79,13 @@ ibm02: 0.450 / 0.458 (Track-A partial J = 0.30 rWL~ + 0.15 (1+OF)~ with HPWL and
 
 ## 2026-09-25 — Session 1: T0.1 (local), T1 foundations
 
-**Environment.** Local repo `/Users/duanzeyu/Desktop/HeurBridge` (git `main`, remote
-`github.com/getm0ss1moving/HeurBridge`). HA-PR harness used from `/Users/duanzeyu/Desktop/heura_repro_en/eda`
-(the task list's `/Users/duanzeyu/Desktop/papers/heura_repro` no longer exists; the English copy is the only
-local checkout). Local venv: Python 3.11, torch 2.14 (CPU), PyG 2.8.
+**Environment.** Local clone of `github.com/getm0ss1moving/HeurBridge` (git `main`). HA-PR harness: the
+English copy `heura_repro_en/eda` next to the repo on the Mac, exported as `$HEURA_EDA_BASE` (the task list's
+`papers/heura_repro` no longer exists). Local venv: Python 3.11, torch 2.14 (CPU), PyG 2.8.
 
 **T0.1 inherit state (local): PASS.**
 ```bash
-cd /Users/duanzeyu/Desktop/heura_repro_en/eda && export HEURA_EDA_BASE=$PWD
+cd "$HEURA_EDA_BASE"    # the HA-PR harness (English copy)
 python3 harness/smoke_test.py            # SMOKE_TEST_PASS
 python3 harness/session_status.py        # v2=222, control coverage 46/46
 python3 harness/validate_replay_v2.py    # VALIDATE_REPLAY_V2_PASS

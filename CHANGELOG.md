@@ -4,6 +4,73 @@ Every change to the code is recorded here with its version, task and verificatio
 Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 (The task list's `_harness/CHANGELOG.md` does not exist in the current checkout; this file replaces it.)
 
+## [0.10.0] — 2026-09-26 — Track-B development flow aligned with ORFS, robust f1, P_M fallback, dev calibration
+
+Covers the two commits after v0.9.1 that had no entry (55531ee, 12b29e1) and the changes of 2026-09-26.
+
+### Added (55531ee, 12b29e1 — 2026-09-25)
+- `heurbridge/eval/miniflow.py` — minimal Nangate45 flow for the local OpenLane OpenROAD (b16bda7e), which
+  cannot run current ORFS: hierarchical Yosys synthesis, floorplan, tool-native `rtl_macro_placer` (M1), f1.
+- `heurbridge/core/odb.py` — ODB -> DEF -> `Design` loader (verified on nangate45 gcd: 304 objects, 54 IO).
+- `heurbridge/pipeline/evaluators.py::MiniflowEvaluator` (one retry on a tool crash, crashes recorded);
+  `place_macro -exact` made optional (absent in the local build; its use failed the whole first campaign,
+  recorded in `runs/seed_miniflow/bp_fe_top/failed_attempt_1/`).
+- `scripts/run_seed_miniflow.py` (Track-B development seeding), `scripts/algorithm_r.py` (T3.7 driver),
+  `docs/SERVER_RUNBOOK.md` (exact command sequence for T0-T4 once SSH works).
+
+### Changed (2026-09-26)
+- **Mini-flow aligned with ORFS** (all earlier Track-B development rows superseded, kept under
+  `runs/seed_miniflow/bp_fe_top/superseded_*`): configuration read with ORFS/Make semantics (design
+  `config.mk`, then the platform's; `?=` fills gaps) — global placement density is now the platform default
+  0.30 (was a hard-coded fallback of 0.6), core margin 1.0 (was 2), platform `make_tracks.tcl`, dont-use cells
+  in synthesis (`abc`) and sizing, the design's `fastroute.tcl`; f1 now inserts tapcells and the power grid
+  after the macros are placed (ORFS 2_3/2_4) and buffers the ports (ORFS 3_4).
+- **Mini-flow f1 robustness** (the first campaign lost 7 of 18 evaluations): timing and power come from
+  placement-stage parasitics, for the baseline and every candidate alike. In the local build,
+  `estimate_parasitics -global_routing` fails at random (bad_alloc "out of memory" and process exit, segfault,
+  or an OOM kill), so GR-stage timing is opt-in (`gr_timing`). `report_power` segfaulted once the power grid
+  existed: bisected to the VDD/VSS block terminals `pdngen -pins` creates (vertex-less ports corrupt
+  OpenSTA's power seeding during placement); they are removed right after `pdngen` (nets and straps stay).
+  Every failure is named (`classify_failure`: tool_oom, tool_assertion, segfault, timeout, tool_error); one
+  retry for crashes and bad_alloc; a failed row keeps its tool record. A deterministic gpl assertion
+  (`std::vector<gpl::Bin>` index out of range, macro layout M4.v1) is recorded as a tool failure.
+- M1 baseline flow evaluated 3 times (T1.7 median; the repeats test determinism, T1.4). Finding: f1 is
+  identical across repeats at a fixed thread count but not across thread counts (setup TNS -113.5 ns with 6
+  threads, -86.9 ns with 3 on the M1 layout), so a campaign fixes the count.
+- **P_M fallback orders** (`core/project.py`): largest-first greedy legalization can fragment a dense core
+  (bp_fe_top: nine 153 x 113 um RAMs, at most 15 halo footprints in a perfect packing) and failed on 0.5% of
+  random layouts and on one heuristic output. Only when the primary order fails, sweeps by target y, target x
+  and centre-out are tried and the legal result with the least displacement is kept; the primary result is
+  unchanged whenever it is legal. 1,000/1,000 random bp_fe_top layouts legal (was 995).
+- `heurbridge/meta.py`: `git_sha` is the commit at process start (the code the run imported);
+  `git_sha_at_write` and `process_started` are added. (The dev bridge run's meta shows 0.8.1 code with the
+  end-of-run commit — the inconsistency that motivated this.)
+- `heurbridge/reporting.py`: reports go to a public repository — the repo root becomes `.`, the home
+  directory `~`. Local absolute paths removed from ENV_REPORT, HANDOFF, docs/SERVER_RUNBOOK.
+- `scripts/report_bridge.py`: pairs per design, parameter count, run-vs-report versions, and a caveat when the
+  validation residual rises while the guarded criterion improves.
+- `.gitignore`: `archive_dev*/`; the development archive SQLite files are no longer tracked.
+- Removed `reports/env/dev_calibration_f0_vs_hbgp.json`: it scored one layout per design (a harness error)
+  and used the raw RUDY overflow; superseded by `reports/E3_calibration_dev_ibm.md`.
+
+### Added (2026-09-26)
+- `scripts/roundtrip_all.py`, `reports/T1_roundtrip_bookshelf.json` — T1.1 load -> write -> load identity on
+  all 26 bookshelf designs (ibm01-18, adaptec1-4, bigblue1-4): 26/26.
+- `scripts/calibrate_dev.py`, `reports/E3_calibration_dev_ibm.md` — E3-lite: f0 proxy (the bridge-guard
+  scorer) vs HB-GP f1 on the stored campaign rows. Kendall 0.65 / 0.50 / 0.03 on ibm01 / 02 / 03, top-5
+  recall 0 on all three, regret 55% of random: the G0 rule is not met for (M, f0).
+- `reports/T3_bridge_macro_dev.md` — dev bridge round 0 (ibm01+02 -> ibm03, 2,000 CPU steps): guarded f0
+  2.0125 vs raw 2.0411 (-1.4%), 91% of held-out sources improved; validation residual and terminal error
+  rose over training (reported as a caveat). Development evidence, no gate claim.
+- `scripts/run_f2_miniflow.py`, `MiniflowF2Evaluator`, `miniflow.f2_script` — Track-B development f2 (T1.5) on
+  the ORFS stage sequence: f1 placement, CTS + setup/hold `repair_timing` (design hold margin), GRT, detailed
+  route, fill, OpenRCX extraction + STA; DRC count, wirelength and vias from TritonRoute. Selects the f1 top-k
+  (T2.7) and an even spread over the f1 range (f1 -> f2 calibration); fidelity-2 archive insertion.
+- M1 baseline at f1 evaluated 3 times: bit-identical (GR WL 1,832,439 um, setup WNS -2.336 ns, TNS -113.48 ns,
+  hold +0.096 ns, 0.151 W; 109 s).
+- `scripts/run_e0.py` records the bridge checkpoint's sha256 in the alpha-ledger entry.
+- Tests: `tests/test_miniflow.py` (8), dense-RAM-core P_M tests (2); 119 passing.
+
 ## [0.9.1] — 2026-09-25 — V3/V5 gates, H8 null injection, ORFS signoff (f3), MMD, report generators
 
 ### Added
