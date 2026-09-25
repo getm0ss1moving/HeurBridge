@@ -4,6 +4,26 @@ Every change to the code is recorded here with its version, task and verificatio
 Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 (The task list's `_harness/CHANGELOG.md` does not exist in the current checkout; this file replaces it.)
 
+## [0.7.0] — 2026-09-25 — T5 evolution machinery (prompts, RLCE, fitness, population, engine + baselines)
+
+### Added
+- `heurbridge/evolve/prompts.py` + `prompts/skill_v0.md` — EVOLVE-BLOCK template (AlphaEvolve convention),
+  system prompt (contract, DesignView API, EDA invariants, skill doc S v0 written from reply_Q1_Q3 s.1.4 and
+  the pilot lessons), user prompt with the RLCE evidence, strict parser (one retry, then discard + log).
+- `heurbridge/evolve/rlce.py` — RLCE diagnosis: integrated gradients of J0 along x*->x_hat (completeness gap
+  reported; measured O(1/steps) convergence because J0 has ReLU kinks), reachability split with rho_M
+  calibration, structural groups (netlist affinity + proximity), counterfactual splices through bridge +
+  guard, evidence pack (text for the LLM, PNG/JSON for humans).
+- `heurbridge/evolve/fitness.py` — refinability fitness F(h|H) (portfolio gain - 0.2 standalone - 0.01/s over
+  30 s), facility-location portfolio value with greedy (1-1/e) pruning (checked against brute force),
+  leave-one-design-out ridge predictability probe pi(h).
+- `heurbridge/evolve/population.py` — MAP-Elites over (family, decision type, runtime class), 4 islands,
+  ring migration, portfolio, fitness re-anchoring.
+- `heurbridge/evolve/engine.py` — generation loop with pluggable proposers (HeurBridge/RLCE, EoH 5 operators,
+  ReEvo reflections, FunSearch best-shot, HeurAgenix Algorithm 1) and fitness (refinability or raw);
+  every discard/rejection/failure logged by name; LLM budget ledger enforced.
+- Tests: 95 passing.
+
 ## [0.6.0] — 2026-09-25 — T2.7 seeding driver, Track-B ORFS glue, E0 partners/driver, bridge training + pretraining scripts
 
 ### Added
