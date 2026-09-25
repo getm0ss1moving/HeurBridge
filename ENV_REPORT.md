@@ -78,6 +78,26 @@ Loader checks (T1.1): bookshelf load → write → load is the identity on ibm01
   IBM LEF/DEF designs get a routing-level fidelity via OpenROAD (global placement + `global_route`), and their
   cost uses the available terms with TNS/power marked `unchecked` (needs your confirmation, see HANDOFF).
 
+
+## 5b. Local Track-B development flow (added later in session 1)
+
+The OpenLane image's OpenROAD (b16bda7e, early 2024) + Yosys 0.38 cannot run current ORFS (no `make`, older
+commands), so `heurbridge/eval/miniflow.py` implements a minimal Nangate45 flow with verified commands only:
+hierarchical Yosys synthesis -> floorplan (utilization, IO exclusions translated to `place_pins -exclude`) ->
+tool-native macro placement `rtl_macro_placer` (M1) -> f1 (our `place_macro` placement, FIRM macros, platform RC,
+routability+timing-driven GP, `repair_design` + tie repair, DP, `check_placement`, placement-stage timing,
+`global_route` 30 iterations, GR-stage timing, power).
+
+| Step on nangate45/bp_fe_top (11 fakeram macros) | Result |
+|---|---|
+| Synthesis (hierarchical) | 15 s (flat synthesis made Hier-RTLMP segfault in TritonPart) |
+| Floorplan | 4 s, 456 rows |
+| M1 `rtl_macro_placer` | 285 s, 11 macros placed |
+| f1 with M1 | 126 s: GR WL 1.758e6 um, overflow 0, setup WNS -2.20 ns / TNS -310.9 ns (1.62 ns clock, pre-CTS), hold +0.086 ns, 0.128 W |
+| f1 determinism (repeat) | placement and GR results identical; the repeat segfaulted after GR (old build) -> the evaluator retries once and records every crash |
+
+This is a development path; the pre-registered experiments use ORFS with a current OpenROAD on the server.
+
 ## 6. Pending (blocked on server access)
 
 1. T0.1 on 224 (`scripts/server/t0_inherit.sh`).
