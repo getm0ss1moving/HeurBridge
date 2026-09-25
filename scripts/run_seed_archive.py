@@ -42,6 +42,23 @@ def macro_stage_layout(design, layout):
     return l
 
 
+def insert_baseline_elite(arch, design, layout, records, baseline, ev):
+    """Strong baselines are initial elites (proposal s.3.5: the archive can only improve on the tools)."""
+    from heurbridge.archive.store import Candidate
+    import statistics
+    scored = [ev.score(r, baseline) for r in records]
+    J = statistics.median(c.J_inf for c in scored)
+    rec = dict(records[0])
+    lay = layout.copy()
+    if rec.get("cluster_pos") is not None:
+        lay.routes = {"cluster_pos": np.asarray(rec["cluster_pos"], dtype=np.float64)}
+    ok, why = arch.insert(Candidate(design_id=design.id, stage="M", layout=lay, fidelity=ev.fidelity, J=J,
+                                    admissible=all(c.admissible for c in scored),
+                                    metrics={k: v for k, v in rec.items() if k != "cluster_pos"},
+                                    provenance={"program": "BASELINE", "evaluator": ev.name, "seeds": len(records)}))
+    print(json.dumps({"baseline_elite": design.id, "J": J, "admitted": ok, "reason": why}), flush=True)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--suite", default="ibm", choices=sorted(SUITES))
@@ -85,6 +102,7 @@ def main():
             bl = {"records": recs, "pm_ok": rep.ok}
             bpath.write_text(json.dumps(bl, indent=1, default=str))
         baseline = cost.Baseline.from_records(d.id, bl["records"])
+        insert_baseline_elite(arch, d, bench, bl["records"], baseline, ev)
         write_meta(out, "seed_%s" % d.id, d.id, config=vars(a), seed=0, evaluator=ev.name,
                    baseline=baseline.to_dict(), programs=[p["sha256"] for p in progs], track="A-dev (HB-GP stand-in)")
         cfg = SA.SeedConfig(seeds=a.seeds, top_f2=a.top, ls_steps=a.ls)

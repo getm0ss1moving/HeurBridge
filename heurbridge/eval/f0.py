@@ -77,8 +77,9 @@ class F0Context:
         ca = d.area[cell]
         b = float(math.sqrt(ca.mean()) * self.cfg.bin_factor) if len(ca) and ca.mean() > 0 else float(d.core_wh.min() / 64)
         self.bin = b
-        self.nbx = max(1, int(math.ceil(d.core_wh[0] / b)))
-        self.nby = max(1, int(math.ceil(d.core_wh[1] / b)))
+        # grid counts tolerate round-off in the core size (e.g. a translated core of height 1000.0000000000001)
+        self.nbx = max(1, int(math.ceil(d.core_wh[0] / b - 1e-9)))
+        self.nby = max(1, int(math.ceil(d.core_wh[1] / b - 1e-9)))
         # GCells
         g = self.cfg.gcell
         if g is None and d.gcell_grid and d.gcell_grid.get("X"):
@@ -86,8 +87,8 @@ class F0Context:
         if g is None:
             g = float(d.core_wh.max() / 64)
         self.g = float(g)
-        self.ngx = max(1, int(math.ceil(d.core_wh[0] / self.g)))
-        self.ngy = max(1, int(math.ceil(d.core_wh[1] / self.g)))
+        self.ngx = max(1, int(math.ceil(d.core_wh[0] / self.g - 1e-9)))
+        self.ngy = max(1, int(math.ceil(d.core_wh[1] / self.g - 1e-9)))
         th, tv = self.cfg.tracks_per_unit_h, self.cfg.tracks_per_unit_v
         if th is None or tv is None:
             lay = (d.gcell_grid or {}).get("layers") or d.source.get("layers") or []

@@ -26,6 +26,11 @@ from . import orient as O
 from .design import Design, Layout
 
 
+def _name_key(name: str) -> int:
+    import hashlib
+    return int.from_bytes(hashlib.blake2b(name.encode(), digest_size=8).digest(), "little") >> 1
+
+
 @dataclass
 class LegalizeReport:
     ok: bool
@@ -104,7 +109,9 @@ def legalize_macros(design: Design, layout: Layout, halo: float = 0.0, max_cells
         j0, j1 = max(0, int(math.floor(yl / py))), min(ny, int(math.ceil(yh / py)))
         if i1 > i0 and j1 > j0:
             occ[i0:i1, j0:j1] = 1
-    order = idx[np.argsort(-(design.area[idx]), kind="stable")]
+    # largest first; ties broken by a label-free key (object name) so that relabelling permutes the output
+    keys = np.array([_name_key(design.names[i]) for i in idx], dtype=np.int64)
+    order = idx[np.lexsort((keys, -design.area[idx]))]
     target = design.to_abs(layout.pos) - ll0
     target = np.where(np.isfinite(target), target, np.array([W, H]) / 2)
     disp = np.full(design.n_objects, np.nan)

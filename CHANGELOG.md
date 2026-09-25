@@ -4,6 +4,24 @@ Every change to the code is recorded here with its version, task and verificatio
 Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 (The task list's `_harness/CHANGELOG.md` does not exist in the current checkout; this file replaces it.)
 
+## [0.8.0] — 2026-09-25 — E3 calibration + gate G0, V1 metamorphic tests, baseline elites
+
+### Added
+- `heurbridge/stats/calibration.py` — E3 analysis (T6.2): per-design Spearman/Kendall, top-5 recall, decision
+  regret vs random; isotonic maps with split-conformal 90% intervals (coverage checked); gate G0 per
+  (stage, fidelity); writer for `configs/fidelity_admissible.yaml`.
+- `heurbridge/verify/metamorphic.py` + `tests/test_metamorphic.py` — V1 relations MR1-MR6 as hypothesis
+  property tests (50 cases each): relabel, mirror (orientation composed with MY), translate, zero-weight
+  dummy net, tightened GCell capacity, side-by-side duplicate.
+- `scripts/run_seed_archive.py` admits the baseline layout as an initial elite (proposal s.3.5).
+
+### Fixed
+- f0 grid counts (density bins, GCells) now tolerate round-off in the core size (found by MR3: a translated
+  core of height 1000.0000000000001 produced 21 instead of 20 GCells).
+- P_M breaks equal-area ties with a label-free key (MR1 equivariance of the projection).
+- CHANGELOG 0.7.0 test count: 94 (not 95).
+- Tests: 104 passing.
+
 ## [0.7.0] — 2026-09-25 — T5 evolution machinery (prompts, RLCE, fitness, population, engine + baselines)
 
 ### Added
