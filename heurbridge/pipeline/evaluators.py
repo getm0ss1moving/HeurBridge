@@ -49,6 +49,7 @@ class HBGPEvaluator(Evaluator):
         rec = {"run_id": run_id, "backend": "hbgp", "hpwl_um": out["hpwl"],
                "rudy_overflow": out["rudy"]["rudy_overflow"], "rudy_overflow_ratio": out["rudy"]["rudy_overflow_ratio"],
                "rudy_peak": out["rudy"]["rudy_peak"], "density_overflow": out["rudy"]["density_overflow"],
+               "rudy_of_pct": 100.0 * out["rudy"]["rudy_overflow_ratio"],     # bounded OF proxy (percent of demand)
                "gp_overflow": out["gp"]["overflow"], "lg_failed": out["gp"].get("lg_failed"),
                "runtime_s": out["runtime_s"], "unchecked": out["unchecked"], "returncode": 0}
         if self.cluster_of is not None:

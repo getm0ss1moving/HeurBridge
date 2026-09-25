@@ -27,7 +27,7 @@ class F0Eval(Evaluator):
         ctx = f0.F0Context(design, layout.orient)
         p = torch.as_tensor(layout.pos, dtype=torch.float32)
         r = ctx.rudy(p)
-        return {"hpwl_um": float(ctx.hpwl_exact(p)[0]), "rudy_overflow": float(r["overflow"][0]), "returncode": 0}
+        return {"hpwl_um": float(ctx.hpwl_exact(p)[0]), "rudy_of_pct": 100.0 * float(r["overflow_ratio"][0]), "returncode": 0}
 
 
 def test_seed_campaign_dev(tmp_path):

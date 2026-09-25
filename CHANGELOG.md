@@ -4,6 +4,28 @@ Every change to the code is recorded here with its version, task and verificatio
 Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 (The task list's `_harness/CHANGELOG.md` does not exist in the current checkout; this file replaces it.)
 
+## [0.9.0] — 2026-09-25 — T2.3 cell seeds, T2.4 pattern router, T7.4 reporting, Track-A OF proxy fix
+
+### Added
+- `heurbridge/heuristics/cell/seeds.py` — cell-stage seeds on cluster centroids (T2.3): quadratic with macros
+  fixed, rank-based spreading (alpha 0.3 / 0.6), dataflow region assignment.
+- `heurbridge/heuristics/route/pattern.py` — vectorized congestion-aware pattern router (T2.4): MST 2-pin
+  decomposition, L/Z candidates costed in O(1) with prefix sums, batched usage updates with difference
+  arrays, net orders (HPWL, criticality) and edge-cost functions (linear, quadratic, exp); demand tensors.
+  Tests: exact H/V demand conservation; batch-1 routing spreads usage over both L-shapes.
+- `heurbridge/reporting.py`, `reports/templates/experiment_report.md` — T7.4 mandatory report fields; a
+  report can claim an improvement only if its gate passed.
+- `scripts/rescore_archive.py` — rebuild a development archive from stored records after a proxy change.
+
+### Changed
+- **Track-A overflow proxy**: `rudy_of_pct` = 100 x (RUDY overflow / RUDY demand) replaces the raw RUDY
+  overflow in microns. With the raw value, (1+OF)/(1+OF_base) exploded (J up to 2e4 on ibm02 because the
+  baseline overflow was 0) and produced an artificial 25% "gain" on ibm03. Rescored development archive:
+  `archive_dev_v2` (baseline best on ibm01/02/03; seed heuristics 1.8-9.5% worse on the Track-A J).
+- Finding for Track B (decision for the user, weights are frozen): (1+OF)~ normalized by a baseline with
+  near-zero GR overflow makes J extremely sensitive to a few overflows (OF 0 -> 20 adds 3.0 to J).
+- Tests: 108 passing.
+
 ## [0.8.1] — 2026-09-25 — T6.1 online solve, T7.5 originality hygiene, handoff
 
 ### Added

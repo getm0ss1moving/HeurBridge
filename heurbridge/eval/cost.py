@@ -26,7 +26,7 @@ REQUIRED_GATES = {0: (), 1: ("setup", "hold"), 2: ("setup", "hold", "drc"), 3: (
 FIELDS = {
     "rwl": ("detailed_wirelength_um", "wirelength_um", "gr_wl", "hpwl_um"),       # hpwl_um: Track-A proxy only
     "via": ("vias", "gr_vias"),
-    "of": ("gr_overflow_total", "rudy_overflow"),                                 # rudy_overflow: Track-A proxy only
+    "of": ("gr_overflow_total", "rudy_of_pct"),        # rudy_of_pct = 100 * overflow share of RUDY demand: Track-A proxy
     "tns": ("setup_tns_ns",),
     "power": ("total_power_w",),
 }
