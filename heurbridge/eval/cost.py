@@ -24,9 +24,9 @@ REQUIRED_GATES = {0: (), 1: ("setup", "hold"), 2: ("setup", "hold", "drc"), 3: (
 
 # canonical record field for each J term (first present wins)
 FIELDS = {
-    "rwl": ("detailed_wirelength_um", "wirelength_um", "gr_wl"),
+    "rwl": ("detailed_wirelength_um", "wirelength_um", "gr_wl", "hpwl_um"),       # hpwl_um: Track-A proxy only
     "via": ("vias", "gr_vias"),
-    "of": ("gr_overflow_total",),
+    "of": ("gr_overflow_total", "rudy_overflow"),                                 # rudy_overflow: Track-A proxy only
     "tns": ("setup_tns_ns",),
     "power": ("total_power_w",),
 }
@@ -117,7 +117,10 @@ def _timing_gate(cand, base, guard=GUARD_NS):
     return {"status": "pass" if ok else "fail", "candidate": cand, "base": base, "guard_ns": guard, "reason": reason}
 
 
-def evaluate(record: dict, base: Baseline, fidelity: int = 2, weights: dict | None = None) -> CostResult:
+def evaluate(record: dict, base: Baseline, fidelity: int = 2, weights: dict | None = None,
+             required_gates: tuple | None = None) -> CostResult:
+    """weights: subset of WEIGHTS (e.g. Track A: rwl + of); required_gates overrides REQUIRED_GATES[fidelity]
+    (Track A has no timing: pass ()).  Gates that are not required but missing stay 'unchecked'."""
     w = weights or WEIGHTS
     r = canonical(record)
     terms, unchecked, total, wsum = {}, [], 0.0, 0.0
@@ -146,7 +149,7 @@ def evaluate(record: dict, base: Baseline, fidelity: int = 2, weights: dict | No
     if r.get("returncode") not in (None, 0):
         gates["flow"] = {"status": "fail", "returncode": r.get("returncode")}
     failed = any(g["status"] == "fail" for g in gates.values())
-    required = REQUIRED_GATES.get(fidelity, ())
+    required = REQUIRED_GATES.get(fidelity, ()) if required_gates is None else tuple(required_gates)
     missing_req = [g for g in required if gates[g]["status"] == "unchecked"]
     unchecked += ["gate:" + g for g in missing_req]
     partial = bool([t for t in w if terms[t]["norm"] is None])

@@ -4,6 +4,27 @@ Every change to the code is recorded here with its version, task and verificatio
 Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 (The task list's `_harness/CHANGELOG.md` does not exist in the current checkout; this file replaces it.)
 
+## [0.6.0] — 2026-09-25 — T2.7 seeding driver, Track-B ORFS glue, E0 partners/driver, bridge training + pretraining scripts
+
+### Added
+- `heurbridge/eval/orfs.py` — Track B via OpenROAD-flow-scripts: our macro layout as `place_macro -exact`
+  commands through `MACRO_PLACEMENT_TCL` (rtl_macro_placer then only places unplaced macros); stage `grt`
+  = f1, `finish` + `make metadata` = f2; ORFS metric keys mapped to canonical fields with candidates and
+  recorded sources; parser for ORFS' own `2_2_floorplan_macro.tcl` (tool-native M1 layouts).
+- `heurbridge/pipeline/` — evaluator adapters (HB-GP Track-A stand-in, ORFS), T2.7 archive-seeding driver
+  (seeds x programs -> P_M -> contract -> f1 -> top-10 -> f2 -> archive -> 8-step local search with the
+  T2.7 move set; resumable JSONL; failures recorded by name with J = +inf), on-policy bridge data
+  (sources, archive elites as graph nodes, symmetry-matched pairs).
+- `heurbridge/core/cluster_design.py` — clustered design + macro-stage f0 scorer (cells unplaced).
+- `heurbridge/partners.py` — E0 partners: none, memetic (T2.7 moves, f0, time-capped), repertoire (SpecAHD-
+  style checked repair per macro-cluster region with rollback), frozen generator (partial noising), co-trained
+  bridge (guarded).
+- `heurbridge/meta.py` — meta.json with git_sha, config_hash, program/bridge/skill hashes, seed, archive
+  snapshot, alpha-ledger id.
+- `scripts/run_seed_archive.py`, `scripts/train_bridge.py`, `scripts/run_e0.py`, `scripts/pretrain_bridge.py`.
+- `cost.evaluate(..., required_gates=...)`, `Archive(min_fidelity=...)` (development archives are labelled).
+- Tests: 87 passing.
+
 ## [0.5.0] — 2026-09-25 — f1 evaluator backends, HB-GP development placer
 
 ### Added

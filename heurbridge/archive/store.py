@@ -99,14 +99,19 @@ def load_layout(path: str | Path) -> Layout:
 
 
 class Archive:
-    def __init__(self, root: str | Path, k: int = K_DEFAULT):
+    def __init__(self, root: str | Path, k: int = K_DEFAULT, min_fidelity: int = MIN_FIDELITY):
+        """min_fidelity < 2 is for development archives only (Track-A stand-ins); such archives are labelled."""
         self.root = Path(root)
+        self.min_fidelity = min_fidelity
         (self.root / "db").mkdir(parents=True, exist_ok=True)
         (self.root / "blobs").mkdir(parents=True, exist_ok=True)
         self.db_path = self.root / "db" / "archive.sqlite"
         self.k = k
         with self._db() as c:
             c.executescript(_SCHEMA)
+        if min_fidelity < MIN_FIDELITY:
+            (self.root / ("DEV_ARCHIVE_MIN_FIDELITY_%d" % min_fidelity)).write_text(
+                "Development archive: admits fidelity >= %d (task spec requires >= 2).\n" % min_fidelity)
 
     @contextmanager
     def _db(self):
@@ -128,8 +133,8 @@ class Archive:
         """Atomic admission test + insert.  Returns (admitted, reason); every rejection is logged."""
         up = upstream_key(cand.upstream_ids)
         reason = None
-        if cand.fidelity < MIN_FIDELITY:
-            reason = "fidelity<%d" % MIN_FIDELITY
+        if cand.fidelity < self.min_fidelity:
+            reason = "fidelity<%d" % self.min_fidelity
         elif not cand.admissible or cand.J is None or not math.isfinite(float(cand.J)):
             reason = "inadmissible"
         lh = layout_hash(cand.layout)

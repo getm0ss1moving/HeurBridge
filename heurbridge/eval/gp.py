@@ -300,7 +300,7 @@ def place(design: Design, layout: Layout, cfg: GPConfig | None = None, f0cfg: F0
             rho, cc, ov = density(p_full[cidx])
             _, fx, fy = pois.solve(rho + cfg.target_density * rho_fix)   # DREAMPlace: fixed charge at target density
             gd = torch.stack([-q * field_at(fx, cc) * nb, -q * field_at(fy, cc) * nb], 1)
-        return g_wl, gd, float(wl), ov
+        return g_wl, gd, float(wl.detach()), ov
 
     pos = pos.detach()
     lam, ovf = None, 1.0

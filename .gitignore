@@ -48,3 +48,7 @@ checkpoints/
 
 # external code (cloned, not redistributed)
 third_party/
+
+# development archives and experiment outputs (reports summarize them)
+archive_dev/
+reports/e0_dev/
