@@ -9,6 +9,12 @@ Admission (Lemma 3 / proposal s.3.5): a candidate enters only if
 Entries are never deleted, so the best J of every key is non-increasing over any
 insertion sequence.  ``snapshot()`` returns a content hash of the active top-k
 sets and copies the index to ``snapshots/<id>.sqlite``.
+
+Fidelities are ranked separately: J at f1 and J at f2 are normalized by different baselines over different
+terms, so a candidate competes with the k-th best of its own fidelity, and the queries (``topk``,
+``conditional``, ``best_J``) use the highest fidelity present for the key unless ``fidelity`` is given.
+(Mixed ranking kept every f2-verified bp_fe_top layout, J ~0.96-0.99 at f2, out of a top-5 of f1 entries with
+J ~0.86-0.88 at f1.)  A development archive holding only f1 entries behaves as a single-fidelity archive.
 """
 
 from __future__ import annotations
@@ -46,14 +52,32 @@ CREATE TABLE IF NOT EXISTS elites (
   provenance_json TEXT NOT NULL,
   verified_at TEXT NOT NULL,
   inserted_at REAL NOT NULL,
-  UNIQUE(design_id, stage, upstream, layout_hash)
+  UNIQUE(design_id, stage, upstream, layout_hash, fidelity)
 );
-CREATE INDEX IF NOT EXISTS elites_key ON elites(design_id, stage, upstream, J);
+CREATE INDEX IF NOT EXISTS elites_key ON elites(design_id, stage, upstream, fidelity, J);
 CREATE TABLE IF NOT EXISTS rejections (
   id INTEGER PRIMARY KEY AUTOINCREMENT, design_id TEXT, stage TEXT, upstream TEXT, J REAL,
   fidelity INTEGER, reason TEXT, provenance_json TEXT, at REAL
 );
 """
+
+
+def _migrate_unique_fidelity(c) -> None:
+    """Archives created before 0.10.7 made (design, stage, upstream, layout) unique, so a layout verified at a
+    higher fidelity could not be stored in that fidelity's tier.  Rebuild the table with fidelity in the key
+    (rows, ids and blobs unchanged)."""
+    sql = c.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='elites'").fetchone()[0]
+    if "layout_hash, fidelity)" in sql.replace("\n", " "):
+        return
+    c.executescript("""
+BEGIN IMMEDIATE;
+ALTER TABLE elites RENAME TO elites_pre_0_10_7;
+DROP INDEX IF EXISTS elites_key;
+""" + _SCHEMA.split("CREATE TABLE IF NOT EXISTS rejections")[0] + """
+INSERT INTO elites SELECT * FROM elites_pre_0_10_7;
+DROP TABLE elites_pre_0_10_7;
+COMMIT;
+""")
 
 
 @dataclass
@@ -109,6 +133,7 @@ class Archive:
         self.k = k
         with self._db() as c:
             c.executescript(_SCHEMA)
+            _migrate_unique_fidelity(c)
         if min_fidelity < MIN_FIDELITY:
             (self.root / ("DEV_ARCHIVE_MIN_FIDELITY_%d" % min_fidelity)).write_text(
                 "Development archive: admits fidelity >= %d (task spec requires >= 2).\n" % min_fidelity)
@@ -142,13 +167,14 @@ class Archive:
         try:
             c.execute("BEGIN IMMEDIATE")
             if reason is None:
-                dup = c.execute("SELECT 1 FROM elites WHERE design_id=? AND stage=? AND upstream=? AND layout_hash=?",
-                                (cand.design_id, cand.stage, up, lh)).fetchone()
+                dup = c.execute("SELECT 1 FROM elites WHERE design_id=? AND stage=? AND upstream=? AND layout_hash=? "
+                                "AND fidelity=?", (cand.design_id, cand.stage, up, lh, int(cand.fidelity))).fetchone()
                 if dup:
                     reason = "duplicate"
             if reason is None:
-                row = c.execute("SELECT J FROM elites WHERE design_id=? AND stage=? AND upstream=? ORDER BY J ASC, id ASC "
-                                "LIMIT 1 OFFSET ?", (cand.design_id, cand.stage, up, self.k - 1)).fetchone()
+                row = c.execute("SELECT J FROM elites WHERE design_id=? AND stage=? AND upstream=? AND fidelity=? "
+                                "ORDER BY J ASC, id ASC LIMIT 1 OFFSET ?",
+                                (cand.design_id, cand.stage, up, int(cand.fidelity), self.k - 1)).fetchone()
                 if row is not None and not float(cand.J) < float(row["J"]):
                     reason = "not_better_than_kth(%.6g)" % float(row["J"])
             if reason is not None:
@@ -180,25 +206,40 @@ class Archive:
             c.close()
 
     # ------------------------------------------------------------------ reads
-    def topk(self, design_id: str, stage: str, k: int | None = None, upstream_ids=()) -> list[dict]:
+    def _tier(self, c, design_id: str, stage: str, up: str, fidelity) -> int | None:
+        """The fidelity to rank in: the one requested, else the highest present for the key."""
+        if fidelity is not None:
+            return int(fidelity)
+        r = c.execute("SELECT MAX(fidelity) AS f FROM elites WHERE design_id=? AND stage=? AND upstream=?",
+                      (design_id, stage, up)).fetchone()
+        return None if r["f"] is None else int(r["f"])
+
+    def topk(self, design_id: str, stage: str, k: int | None = None, upstream_ids=(), fidelity: int | None = None) -> list[dict]:
+        up = upstream_key(upstream_ids)
         with self._db() as c:
-            rows = c.execute("SELECT * FROM elites WHERE design_id=? AND stage=? AND upstream=? ORDER BY J ASC, id ASC LIMIT ?",
-                             (design_id, stage, upstream_key(upstream_ids), k or self.k)).fetchall()
+            f = self._tier(c, design_id, stage, up, fidelity)
+            rows = c.execute("SELECT * FROM elites WHERE design_id=? AND stage=? AND upstream=? AND fidelity=? "
+                             "ORDER BY J ASC, id ASC LIMIT ?", (design_id, stage, up, f, k or self.k)).fetchall() if f is not None else []
         return [self._row(r) for r in rows]
 
-    def conditional(self, design_id: str, stage: str, upstream_id: int, k: int | None = None) -> list[dict]:
-        """Top-k elites of ``stage`` whose upstream set contains ``upstream_id``."""
+    def conditional(self, design_id: str, stage: str, upstream_id: int, k: int | None = None,
+                    fidelity: int | None = None) -> list[dict]:
+        """Top-k elites of ``stage`` whose upstream set contains ``upstream_id`` (highest fidelity present)."""
         with self._db() as c:
             rows = c.execute("SELECT * FROM elites WHERE design_id=? AND stage=? ORDER BY J ASC, id ASC",
                              (design_id, stage)).fetchall()
-        out = [self._row(r) for r in rows if str(int(upstream_id)) in r["upstream"].split(",")]
+        rows = [r for r in rows if str(int(upstream_id)) in r["upstream"].split(",")]
+        f = fidelity if fidelity is not None else max((int(r["fidelity"]) for r in rows), default=None)
+        out = [self._row(r) for r in rows if int(r["fidelity"]) == f]
         return out[: (k or self.k)]
 
-    def best_J(self, design_id: str, stage: str, upstream_ids=()) -> float:
+    def best_J(self, design_id: str, stage: str, upstream_ids=(), fidelity: int | None = None) -> float:
+        up = upstream_key(upstream_ids)
         with self._db() as c:
-            r = c.execute("SELECT MIN(J) AS j FROM elites WHERE design_id=? AND stage=? AND upstream=?",
-                          (design_id, stage, upstream_key(upstream_ids))).fetchone()
-        return math.inf if r["j"] is None else float(r["j"])
+            f = self._tier(c, design_id, stage, up, fidelity)
+            r = c.execute("SELECT MIN(J) AS j FROM elites WHERE design_id=? AND stage=? AND upstream=? AND fidelity=?",
+                          (design_id, stage, up, f)).fetchone() if f is not None else None
+        return math.inf if r is None or r["j"] is None else float(r["j"])
 
     def count(self, design_id: str | None = None) -> int:
         with self._db() as c:
@@ -219,13 +260,13 @@ class Archive:
     # ------------------------------------------------------------------ snapshots
     def snapshot(self, label: str = "") -> str:
         with self._db() as c:
-            keys = c.execute("SELECT DISTINCT design_id, stage, upstream FROM elites ORDER BY 1, 2, 3").fetchall()
+            keys = c.execute("SELECT DISTINCT design_id, stage, upstream, fidelity FROM elites ORDER BY 1, 2, 3, 4").fetchall()
             h = hashlib.sha256()
             for key in keys:
                 rows = c.execute("SELECT id, J, layout_hash FROM elites WHERE design_id=? AND stage=? AND upstream=? "
-                                 "ORDER BY J ASC, id ASC LIMIT ?", (*tuple(key), self.k)).fetchall()
+                                 "AND fidelity=? ORDER BY J ASC, id ASC LIMIT ?", (*tuple(key), self.k)).fetchall()
                 for r in rows:
-                    h.update(("%s|%s|%s|%d|%.17g|%s\n" % (*tuple(key), r["id"], r["J"], r["layout_hash"])).encode())
+                    h.update(("%s|%s|%s|f%d|%d|%.17g|%s\n" % (*tuple(key), r["id"], r["J"], r["layout_hash"])).encode())
             c.execute("PRAGMA wal_checkpoint(FULL)")
         sid = (label + "_" if label else "") + h.hexdigest()[:12]
         snap = self.root / "snapshots"

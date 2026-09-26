@@ -89,6 +89,9 @@ def main():
     pick = select(rows, a.top, a.spread)
     ledger = Ledger(rdir / "evals_f2.jsonl")
     arch = Archive(a.archive, min_fidelity=1)
+    bc = ev.score(ok_base[0], baseline)                  # the baseline flow is the first elite of its fidelity (T1.7)
+    arch.insert(Candidate(design_id=des.id, stage="M", layout=m1, fidelity=2, J=bc.J_inf, admissible=bc.admissible,
+                          metrics=ok_base[0], gates=bc.gates, provenance={"program": "M1_rtl_macro_placer", "run_id": "baseline_m1_f2"}))
     out = []
     for r in pick:
         lay_r = _layout_from_row(des, lay, r)

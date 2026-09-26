@@ -1,0 +1,32 @@
+[
+ {
+  "stage": "placement",
+  "openroad_um": 5104.355,
+  "heurbridge_centre_um": 5104.355,
+  "heurbridge_lef_def_v1_um": 5372.5525,
+  "lef_def_um": 5372.552,
+  "rel_centre_vs_openroad": 0.0,
+  "rel_lef_def_vs_openroad": 0.05254277964600819,
+  "openroad_rc": 0
+ },
+ {
+  "stage": "cts",
+  "openroad_um": 5519.0625,
+  "heurbridge_centre_um": 5519.0625,
+  "heurbridge_lef_def_v1_um": 5840.72,
+  "lef_def_um": 5840.72,
+  "rel_centre_vs_openroad": 0.0,
+  "rel_lef_def_vs_openroad": 0.05828118453088731,
+  "openroad_rc": 0
+ },
+ {
+  "stage": "routing",
+  "openroad_um": 5920.3575,
+  "heurbridge_centre_um": 5920.3575,
+  "heurbridge_lef_def_v1_um": 6273.397499999999,
+  "lef_def_um": 6273.397,
+  "rel_centre_vs_openroad": 0.0,
+  "rel_lef_def_vs_openroad": 0.059631449621074376,
+  "openroad_rc": 0
+ }
+]

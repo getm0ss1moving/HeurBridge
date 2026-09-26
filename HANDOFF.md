@@ -42,12 +42,18 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
   (0.429-0.432). With the bridge's guard at f1 and the equal f1 guard for the others (E0_dev#2), G0' passes
   (p = 2.1e-5 / 0.0052) — but a random displacement of matched length with the same guard does as well as the
   bridge (geometric-mean J ratio vs raw 0.933 vs 0.931, bridge vs control p = 0.071; E0_dev#3), and HB-GP was
-  not reproducible in these runs (winner's curse on noise). Deterministic rerun with all controls: E0_dev#4
-  (`runs/e0_dev/det_f1guard_equal_randctl`).
+  not reproducible in these runs (winner's curse on noise). **Deterministic rerun with all controls**
+  (`reports/E0_partner_ablation_dev_deterministic.md`, E0_dev#4): G0' criterion met (p = 8.6e-5 / 0.0061), the
+  learned-transport check inconclusive (bridge vs random direction p = 0.056: 22 : 1 for the bridge on ibm06,
+  6 : 11 on ibm04). With a CPU-trained 2-design bridge this is suggestive only; the server E0 decides.
 - Track-B dev seeding on bp_fe_top with the corrected flow (`reports/T2_trackB_dev_bp_fe_top.md`): 80/80
   evaluations completed, gates passed on 62% (all failures setup WNS), 15 distinct gated layouts beat the M1
-  baseline (J 0.95); best M5.v0 0.8559; dev archive top-5 0.856-0.879 (fidelity 1). f2 verification of the
-  f1 top 8 + 6 spread layouts: `runs/seed_miniflow/bp_fe_top/evals_f2.jsonl` (see the next entry / report).
+  baseline (J 0.95); best M5.v0 0.8559; dev archive top-5 0.856-0.879 (fidelity 1).
+- Track-B f2 verification (`reports/E3_calibration_dev_bp_fe_top_f1f2.md`; ORFS-style staged f2: CTS,
+  repair_timing, DRT, OpenRCX): 14/14 layouts routed with DRC 0. f1 -> f2 Kendall 0.50; the f1 gates predict
+  the f2 gates badly (10 of 12 f1-passing layouts fail at f2; one f1-failing layout passes). Two layouts beat
+  M1 with every f2 gate passed: M4.v2 J 0.959 (gated out at f1) and M3.v0 0.989. The best f2 J (M3.v2 0.9445,
+  better setup WNS than M1) fails only because its met hold slack (+0.074 ns) is > 0.02 ns below M1's (+0.095).
 
 **New tools**: `scripts/run_evolution.py` (T5 driver; `--llm mock` dry runs, all five proposers work end to
 end), `scripts/run_f2_miniflow.py` + `MiniflowF2Evaluator` (Track-B dev f2: CTS, repair_timing, GRT, DRT,
@@ -62,10 +68,13 @@ fill, OpenRCX, STA — untested on the tool yet), `scripts/calibrate_dev.py`, `r
    a random displacement of matched length); both are implemented. Also required: reproducible evaluators
    (fixed thread counts; HB-GP was not) and a final cost evaluated independently of the guard's evaluations
    (on the server the f1 guard and the f2 final cost are separate runs, which already satisfies this).
-9. Timing gates at f1: with M1 as the reference, most heuristic layouts fail the 0.02 ns setup-WNS gate at
-   f1 (pre-CTS, no timing repair), so J = inf for them. The gates are specified for the final cost; applying
-   them at f1 discards most of the search signal. Proposal: at f1 report the gates but rank by J before the
-   gates; enforce the gates at f2/f3 (needs your decision: it touches frozen rule B.3).
+9. Timing gates at f1 — now with f2 evidence: at f1 (pre-CTS, no timing repair) 38% of bp_fe_top layouts fail
+   the 0.02 ns setup-WNS gate against M1, but the f1 gates predict the f2 gates badly (10 of 12 f1-passing
+   layouts fail at f2, and the best gated f2 layout, M4.v2, was gated out at f1). Proposal: at f1 report the
+   gates but rank by J before the gates; enforce the gates at f2/f3 (needs your decision: frozen rule B.3).
+   Related: the frozen guard also fails a *met* check whose slack shrinks by > 0.02 ns (hold +0.095 -> +0.074
+   ns keeps the best f2 layout out). If that is not intended, a "met stays met" rule for positive baselines is
+   the alternative — your call; nothing was changed.
 10. The (1+OF) term (open issue 6) is confirmed on Track B: GR overflow 8 against a zero-overflow baseline
     raises J from ~0.95 to 2.14.
 

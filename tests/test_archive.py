@@ -53,3 +53,27 @@ def test_best_J_non_increasing(tmp_path_factory, seq):
             assert b <= best[dd]
             best[dd] = b
         assert len(a.topk("d%d" % d, "M")) <= 5
+
+
+def test_fidelities_ranked_separately(tmp_path):
+    """J at f1 and f2 have different baselines: a verified f2 elite never competes with f1 entries, and the
+    queries use the highest fidelity present unless asked otherwise."""
+    from heurbridge.archive.store import Archive, Candidate
+    from heurbridge.core import synth
+    des, lay = synth.make_design(seed=4, n_macros=3, n_cells=10, n_io=4)
+    arch = Archive(tmp_path / "a", k=2, min_fidelity=1)
+
+    def cand(J, fid, shift):
+        l = lay.copy()
+        l.pos[0, 0] = 0.1 + shift
+        return Candidate(design_id=des.id, stage="M", layout=l, fidelity=fid, J=J, admissible=True, metrics={},
+                         gates={}, provenance={})
+    assert arch.insert(cand(0.80, 1, 0.01))[0] and arch.insert(cand(0.81, 1, 0.02))[0]
+    assert arch.topk(des.id, "M")[0]["fidelity"] == 1 and arch.best_J(des.id, "M") == 0.80
+    assert arch.insert(cand(0.99, 2, 0.03))[0]                    # admitted although 0.99 > the f1 top-2
+    assert [e["fidelity"] for e in arch.topk(des.id, "M")] == [2] and arch.best_J(des.id, "M") == 0.99
+    assert [e["J"] for e in arch.topk(des.id, "M", fidelity=1)] == [0.80, 0.81]
+    assert arch.insert(cand(0.97, 2, 0.04))[0] and not arch.insert(cand(0.995, 2, 0.05))[0]   # f2 top-2 is full
+    arch3 = Archive(tmp_path / "b", k=5, min_fidelity=1)                 # the same layout verified at a higher fidelity
+    assert arch3.insert(cand(0.80, 1, 0.01))[0] and arch3.insert(cand(0.98, 2, 0.01))[0]
+    assert arch3.insert(cand(0.98, 2, 0.01)) == (False, "duplicate")

@@ -113,7 +113,21 @@ def connectivity_only(def_text: str, masters: set) -> str:
     return t
 
 
+def keep_known_components(def_text: str, masters: set) -> str:
+    """Only the component filter of connectivity_only (for a run with the full technology LEF)."""
+    m = re.search(r"^COMPONENTS \d+ ;(.*?)^END COMPONENTS", def_text, re.M | re.S)
+    if not m:
+        return def_text
+    comps = [x for x in m.group(1).split(";") if x.strip()]
+    keep = [x for x in comps if x.split()[2] in masters]
+    return def_text[:m.start()] + "COMPONENTS %d ;" % len(keep) + "".join(x + ";" for x in keep) + "\n" + def_text[m.end(1):]
+
+
 def main():
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--tech-lef", default="", help="a full technology LEF (then the DEFs keep their vias and routes)")
+    a = ap.parse_args()
     eda = eda_dir()
     if not eda:
         sys.exit("HA-PR eda/ directory not found (HEURA_EDA_BASE)")
@@ -122,13 +136,16 @@ def main():
     work.mkdir(parents=True, exist_ok=True)
     tech = work / "sky130_min_tech.lef"
     tech.write_text(TECH)
+    if a.tech_lef:
+        tech = Path(a.tech_lef)
     from heurbridge._eda import harness
     lef_def = harness("lef_def")
     rows = []
     for stage in ("placement", "cts", "routing"):
         dp = eda / "openlane_runs" / "spm_phase0_0001_src" / "results" / stage / "spm.def"
         conn = work / ("spm_%s_conn.def" % stage)
-        conn.write_text(connectivity_only(dp.read_text(), set(re.findall(r"^MACRO (\S+)", lef.read_text(), re.M))))
+        masters = set(re.findall(r"^MACRO (\S+)", lef.read_text(), re.M))
+        conn.write_text(keep_known_components(dp.read_text(), masters) if a.tech_lef else connectivity_only(dp.read_text(), masters))
         rc, log, wall = run_tool("openroad", TCL % {"tech": tech, "lef": lef, "def": conn}, work / ("hpwl_%s.tcl" % stage),
                                  mount=str(Path.home()))
         m = re.findall(r"^HB_HPWL_UM\s+(\S+)", log, re.M)
@@ -142,7 +159,7 @@ def main():
                      "lef_def_um": ref, "rel_centre_vs_openroad": (ours - orr) / orr if orr else None,
                      "rel_lef_def_vs_openroad": (ref - orr) / orr if orr else None, "openroad_rc": rc})
         print(json.dumps(rows[-1]), flush=True)
-    out = ROOT / "reports" / "V3_pin_geometry_vs_openroad.json"
+    out = ROOT / "reports" / ("V3_pin_geometry_vs_openroad%s.json" % ("_full_tech" if a.tech_lef else ""))
     out.write_text(json.dumps(rows, indent=1))
     print("wrote", out.relative_to(ROOT))
 

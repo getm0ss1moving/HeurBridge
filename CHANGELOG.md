@@ -4,6 +4,40 @@ Every change to the code is recorded here with its version, task and verificatio
 Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 (The task list's `_harness/CHANGELOG.md` does not exist in the current checkout; this file replaces it.)
 
+## [0.10.7] — 2026-09-26 — fidelity-tiered archive, Track-B f2 verification, deterministic E0
+
+### Fixed
+- **Elite archive ranked J across fidelities** (`archive/store.py`): J at f1 and at f2 have different baselines
+  and terms, so the f2-verified bp_fe_top layouts (J 0.96-0.99 at f2) were rejected against a top-5 of f1
+  entries (J 0.86-0.88 at f1), and the same layout could not be stored at two fidelities (unique key without
+  fidelity). Admission now compares within the candidate's fidelity; `topk` / `conditional` / `best_J` use the
+  highest fidelity present unless `fidelity=` is given; the snapshot hashes each fidelity's top-k; the unique
+  key includes fidelity, and existing archives are migrated in place on open (rows, ids and blobs unchanged;
+  checked on both dev archives). Test for separate tiers and cross-fidelity duplicates.
+
+### Added
+- **Track-B dev f2 verification** (`reports/E3_calibration_dev_bp_fe_top_f1f2.md`): M1 at f2 twice
+  (bit-identical at 6 threads: setup WNS -1.794 ns, TNS -62.0 ns, hold +0.095 ns, DRC 0, 1,618,921 um,
+  264,712 vias) and 14 layouts (the f1 top 8 by J before the gates + 6 spread): 14/14 completed, DRC 0 on all.
+  f1 -> f2 rank agreement: Kendall 0.50, Spearman 0.60, top-5 recall 0.6. Gate agreement is poor: of 12
+  layouts passing the f1 gates, 10 fail at f2 (8 setup, 2 hold); of 2 failing at f1, one passes at f2. Two
+  layouts pass every f2 gate and beat M1: M4.v2 (J 0.959; gated out at f1) and M3.v0 (0.989). The best f2 J
+  before the gates (M3.v2, 0.9445, better setup WNS than M1) fails only on hold: +0.074 ns against M1's
+  +0.095 ns (met, but more than 0.02 ns below the baseline — the frozen HA-PR rule, METRIC_CONVENTIONS s.2).
+  The f2-verified layouts and M1 at f2 form the f2 tier of the dev archive.
+- `reports/E0_partner_ablation_dev_deterministic.md` (ledger E0_dev#4) — the dev E0 with every control and the
+  reproducible evaluator (single-threaded HB-GP, all partners in one process, 64 paired cases on held-out ibm04 /
+  ibm06, bridge guard at f1, equal f1 guard): G0' criterion met (co-trained vs memetic p = 8.6e-5, vs repertoire
+  p = 0.0061; not "promoted" in the ledger because the 4th dev test's alpha_j is 0.0031). Learned-transport check
+  inconclusive: co-trained vs the random-direction control p = 0.056 — the learned direction wins 22 : 1 on
+  ibm06 (geometric-mean J ratio vs raw 0.965 vs 0.987) but loses 6 : 11 on ibm04 (0.897 vs 0.883). Without
+  evaluator noise the random control improves on raw in 24 cases (50 in the noisy run).
+- `scripts/calibrate_f1_f2.py` — E3-lite f1 -> f2 on a Track-B design (rank agreement, gate agreement, per-term).
+- `verify_pin_geometry.py --tech-lef`: the pin-geometry check repeated with the real sky130 technology LEF and
+  the unmodified DEFs (vias and routes kept; only the fill cells without a LEF dropped): identical result
+  (`reports/V3_pin_geometry_vs_openroad_full_tech.json`).
+- Tests: 128 passing.
+
 ## [0.10.6] — 2026-09-26 — Algorithm R end to end: DAgger fix, ledger reservation order, MMD fix
 
 ### Fixed
