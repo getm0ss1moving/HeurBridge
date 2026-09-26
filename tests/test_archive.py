@@ -44,15 +44,19 @@ def test_admission_rules(tmp_path):
 @settings(max_examples=40, deadline=None)
 @given(st.lists(st.tuples(st.floats(0.5, 2.0), st.integers(0, 3), st.booleans(), st.integers(0, 2)), min_size=1, max_size=40))
 def test_best_J_non_increasing(tmp_path_factory, seq):
+    """Lemma 3 within each fidelity (J at different fidelities has different baselines; the default query
+    follows the highest fidelity present and may switch tiers when a verified elite arrives)."""
     a = Archive(tmp_path_factory.mktemp("arch"), k=5)
-    best = {d: math.inf for d in range(3)}
+    best = {(d, f): math.inf for d in range(3) for f in (2, 3)}
     for t, (J, fid, ok, d) in enumerate(seq):
         a.insert(cand(J, fid=fid, ok=ok, jitter=1e-4 * t, design="d%d" % d))
         for dd in range(3):
-            b = a.best_J("d%d" % dd, "M")
-            assert b <= best[dd]
-            best[dd] = b
-        assert len(a.topk("d%d" % d, "M")) <= 5
+            for f in (2, 3):
+                b = a.best_J("d%d" % dd, "M", fidelity=f)
+                assert b <= best[(dd, f)]
+                best[(dd, f)] = b
+        for f in (2, 3):
+            assert len(a.topk("d%d" % d, "M", fidelity=f)) <= 5
 
 
 def test_fidelities_ranked_separately(tmp_path):

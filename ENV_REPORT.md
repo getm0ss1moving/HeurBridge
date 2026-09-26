@@ -1,9 +1,9 @@
 # ENV_REPORT — T0 environment and feasibility
 
-**Status (2026-09-25): DRAFT — local part complete, server part blocked.** Server probing (T0.2), the recent
-OpenROAD install on 224 (T0.3), the `hb` GPU env (T0.5) and the server-side T0.1 are waiting for SSH key
-authorization (password login is not used by the agent). All server scripts are ready in `scripts/server/`.
-**Track decision: provisional (see §5).**
+**Status (2026-09-27): T0 run on the servers (224) through the encrypted workflow — see §6.** T0.1, T0.4 and
+T0.6 pass on 224; T0.5 builds the environment but CUDA cannot initialize on 224 (host GPU fault, §6); T0.3 found
+no complete recent OpenROAD in conda (a full prebuilt one awaits approval). **Track A proceeds; Track B waits for
+a complete OpenROAD.**
 
 ## 1. Local machine (development)
 
@@ -106,10 +106,33 @@ tool failures. Results depend on the thread count, so a campaign fixes it (6).
 
 This is a development path; the pre-registered experiments use ORFS with a current OpenROAD on the server.
 
-## 6. Pending (blocked on server access)
+## 6. Servers (T0 on 224, 2026-09-27)
 
-1. T0.1 on 224 (`scripts/server/t0_inherit.sh`).
-2. T0.2 probe on 224 and 227 (`scripts/server/probe_env.sh` → `reports/env/probe_<port>.json`).
-3. T0.3 install + probe of the new OpenROAD; OpenROAD 2022 probe; ariane133 to detailed route.
-4. T0.5 `hb` env, GPU smoke test, ChipDiffusion ibm01 reproduction, DREAMPlace build.
-5. T0.6 DeepSeek 16-token self-test (needs `DEEPSEEK_LAB_API_KEY` in the server environment).
+Key-only SSH works on 6 of the 12 lab ports. The lab login is shared, so everything of ours on the servers is
+encrypted at rest (`scripts/hbv.py`, `docs/SERVER_RUNBOOK.md`): ciphertext-only vault, key on the Mac, jobs in a RAM
+workspace that is wiped at exit. The account's home directory is on a NAS whose quota is exhausted: all tool caches
+go to local disks.
+
+| Node | CPU / RAM | GPUs | CUDA from a job | Storage for us |
+|---|---|---|---|---|
+| 224 (EDA node) | 64 cores / 125 GB | 3x RTX 3090, GPU 0 "Unknown Error" | **fails** (`cuInit` error 3 on every device: the faulty GPU breaks the driver; needs an admin) | `/data` 3.6 TB, 300 GB free |
+| 227 | 64 / 125 GB | 3x RTX 3090, GPU 0 faulty | fails the same way | `/data` not writable; `/tmp` |
+| 225 | 24 / 125 GB | 4x RTX 3090, idle | works (driver 510.54) | `/data` 99 % full — **use needs approval (A.2)** |
+| 231 | — | 5x RTX 4090, all busy | works | `/tmp` 5 GB free — **use needs approval (A.2)** |
+| 232 | — | — | host does not answer commands | — |
+| 234 | — | — | NVIDIA driver not running | `/tmp` |
+
+| Item | Result on 224 |
+|---|---|
+| T0.1 inherit (on a copy of `eda/`) | **PASS**: `SMOKE_TEST_PASS`; v2 = 222, control coverage 46/46; `VALIDATE_REPLAY_V2_PASS`; 46 decisions / 176 samples / 0 errors |
+| T0.2 probe | Ubuntu 20.04, Python 3.8 system, gcc 9.4, cmake; no Docker access (not in the `docker` group; Docker Hub unreachable); no conda on PATH; GitHub, PyPI, conda (TUNA mirror) and the DeepSeek API reachable |
+| T0.3 OpenROAD 2022 (HA-PR binary) | runs with its bundled libraries; `rtl_macro_placer` yes, `place_macro` no, `global_route -congestion_report_file` no |
+| T0.3 conda (litex-hub) | unpinned: 2022-03 build `f12e2f47` (no `place_macro`). Pinned `2.0-12381-g01bba3695` (2024-03, needs Anaconda `main` before conda-forge): every GP/GR/DRT/RCX command and flag, but **no `rtl_macro_placer` and no `place_macro`**. Yosys 0.38+92. |
+| T0.3 candidate | prebuilt `openroad_2.0-17598-ga008522d8_amd64-ubuntu-20.04.deb` (2024-12, Precision Innovations, 53 MB), unpackable without root — waiting for approval to download |
+| T0.4 benchmarks | IBM bookshelf + LEF/DEF, ISPD2005 and the ORFS checkout uploaded (public data, plaintext); **all 260 files match** the sha256 manifests |
+| T0.5 env `hb` | Python 3.11, torch 2.7.1+cu118, PyG 2.8.0, pymetis, kahypar. GPU smoke test **FAIL** on 224 (CUDA cannot initialize; CPU fallback 8.1 s/step) |
+| T0.6 LLM | **PASS**: DeepSeek reachable with the lab key (read by the client from the key file); models `deepseek-flash`, `deepseek-v4-pro`; the old names `deepseek-reasoner` / `deepseek-chat` are answered by `deepseek-flash` |
+
+**Track decision.** Track A (bookshelf, HB-GP as the f1 stand-in; DREAMPlace not built yet) proceeds on 224's CPUs.
+Track B needs an OpenROAD with Hier-RTLMP (M1) and ORFS-compatible commands: the conda builds lack them; the
+prebuilt 2024-12 package is the next step (approval pending), a source build the fallback.

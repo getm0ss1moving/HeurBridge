@@ -10,12 +10,17 @@ if [ -z "$MM" ] && [ -x "$TOOLS/micromamba/bin/micromamba" ]; then MM="$TOOLS/mi
 [ -n "$MM" ] || { echo "ENV_FAIL no conda/mamba/micromamba (run install_openroad.sh first to bootstrap micromamba)"; exit 1; }
 [ -x "$ENV/bin/python" ] || "$MM" create -y -p "$ENV" -c conda-forge python=3.11 pip 2>&1 | tail -2
 PY="$ENV/bin/python"
-# CUDA wheel index from the driver's max CUDA version
-CU=$(nvidia-smi 2>/dev/null | grep -o 'CUDA Version: [0-9]*\.[0-9]*' | awk '{print $3}')
+# CUDA wheel index from the driver's max CUDA version.  Plain `nvidia-smi` aborts when one GPU is faulty
+# (224 and 227: GPU 0 "Unknown Error"), so ask each device in turn and take the first answer.
+CU=""
+for i in 0 1 2 3 4 5 6 7; do
+  CU=$(nvidia-smi -i $i 2>/dev/null | grep -o 'CUDA Version: [0-9]*\.[0-9]*' | awk '{print $3}')
+  [ -n "$CU" ] && break
+done
 case "$CU" in
   12.[4-9]*|13.*) IDX=https://download.pytorch.org/whl/cu124 ;;
   12.[1-3]*)      IDX=https://download.pytorch.org/whl/cu121 ;;
-  11.8*|12.0*)    IDX=https://download.pytorch.org/whl/cu118 ;;
+  11.[4-9]*|12.0*) IDX=https://download.pytorch.org/whl/cu118 ;;   # CUDA 11 minor-version compatibility (driver >= 450.80)
   *)              IDX=https://download.pytorch.org/whl/cpu ;;
 esac
 echo "DRIVER_CUDA=$CU TORCH_INDEX=$IDX"

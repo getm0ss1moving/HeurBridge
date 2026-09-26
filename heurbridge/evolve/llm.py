@@ -5,6 +5,10 @@ then DEEPSEEK_API_KEY, DEEPSEEK_API_KEY_2, ...  A variable may hold several
 comma-separated keys; whitespace and trailing commas are stripped.  Keys are
 never logged: the ledger records the key's index only.
 
+DEEPSEEK_API_KEY_FILE names a KEY=VALUE file (the lab's key file, mode 0600) that the client reads
+itself, so the key never enters a process environment (/proc/<pid>/environ is readable by every login of
+the shared lab account); API_KEY and the variable names above are accepted there.
+
 Ledger (logs/llm_ledger.jsonl), one line per call:
   time, model, tokens_in, tokens_out, reasoning_tokens, purpose, program_id,
   budget_scope, key_index, latency_s, status
@@ -38,17 +42,38 @@ class NoAPIKey(RuntimeError):
     pass
 
 
+def _key_file_vars(path: str) -> dict:
+    """KEY=VALUE pairs of a key file (``export`` prefixes and quotes allowed); values are never logged."""
+    out = {}
+    try:
+        text = Path(path).read_text()
+    except OSError:
+        return out
+    for line in text.splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        name, _, value = (line[7:] if line.startswith("export ") else line).partition("=")
+        out[name.strip()] = value.strip().strip("'\"")
+    return out
+
+
 def load_keys(env=None) -> list:
     env = os.environ if env is None else env
+    sources = [env]
+    if env.get("DEEPSEEK_API_KEY_FILE"):
+        fv = _key_file_vars(env["DEEPSEEK_API_KEY_FILE"])
+        sources.append({**fv, "DEEPSEEK_LAB_API_KEY": fv.get("DEEPSEEK_LAB_API_KEY") or fv.get("API_KEY", "")})
     keys = []
-    for var in KEY_VARS:
-        raw = env.get(var)
-        if not raw:
-            continue
-        for k in raw.split(","):
-            k = k.strip().rstrip(",").strip()
-            if k and k not in keys:
-                keys.append(k)
+    for src in sources:
+        for var in KEY_VARS:
+            raw = src.get(var)
+            if not raw:
+                continue
+            for k in raw.split(","):
+                k = k.strip().rstrip(",").strip()
+                if k and k not in keys:
+                    keys.append(k)
     return keys
 
 

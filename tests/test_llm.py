@@ -81,3 +81,12 @@ def test_no_key(monkeypatch, tmp_path):
     c = llm.LLMClient(ledger_path=tmp_path / "l.jsonl")
     with pytest.raises(llm.NoAPIKey):
         c.chat([{"role": "user", "content": "x"}])
+
+
+def test_load_keys_from_file(tmp_path):
+    """The lab key file (API_KEY=...) is read by the client; nothing needs to be exported."""
+    f = tmp_path / "api.env"
+    f.write_text("# lab key\nexport API_KEY='sk-file-1'\nOTHER=x\n")
+    assert llm.load_keys({"DEEPSEEK_API_KEY_FILE": str(f)}) == ["sk-file-1"]
+    assert llm.load_keys({"DEEPSEEK_API_KEY_FILE": str(f), "DEEPSEEK_LAB_API_KEY": "sk-env"}) == ["sk-env", "sk-file-1"]
+    assert llm.load_keys({"DEEPSEEK_API_KEY_FILE": str(tmp_path / "missing.env")}) == []

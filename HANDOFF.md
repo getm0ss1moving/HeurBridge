@@ -4,6 +4,26 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
+## 2026-09-27 — Session 3: server access, encrypted workflow, T0 on 224
+
+**Access.** Key-only SSH works on ports 224, 225, 227, 231, 232, 234 (the lab note `LAB_PORTS_AND_API_KEY.md`
+is local-only). The login is shared by several people: everything of ours on the servers goes through
+`scripts/hbv.py` (encrypted vault, key on the Mac, RAM workspaces wiped at job end) — see `docs/SERVER_RUNBOOK.md`.
+Back up `~/.config/heurbridge/vault.key`: without it the vault cannot be decrypted.
+
+**T0 on 224** (details in ENV_REPORT s.6): T0.1 PASS; T0.4 benchmarks uploaded and verified; T0.6 DeepSeek PASS;
+T0.5 env built but **CUDA fails on 224 and 227** (faulty GPU 0 breaks the driver: report to the admin);
+**225's four RTX 3090 work but need the user's approval** (A.2); T0.3: conda OpenROAD builds lack Hier-RTLMP and
+`place_macro` — a prebuilt 2024-12 package (.deb, unpacked without root) awaits approval to download.
+
+**Running:** `seedA_ibm` on 224 — T1.7/T2.7 Track-A seeding of 17 IBM designs with the deterministic HB-GP f1
+(outputs in the vault; `python scripts/hbv.py fetch --port 224 --run seedA_ibm` when done).
+
+**Decisions for the user:** (a) GPU 225 for T3.4 pretraining / T3.7 training; (b) download the prebuilt OpenROAD
+package for Track B; (c) ask the admin to reset the faulty GPUs on 224/227.
+
+---
+
 ## 2026-09-26 — Session 2: audit of the work so far, Track-B flow fixed and aligned with ORFS, T5 driver
 
 **Server access still blocked** (key-only SSH to 224/227/234: publickey denied), so all work is local.

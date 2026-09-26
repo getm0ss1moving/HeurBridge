@@ -4,6 +4,37 @@ Every change to the code is recorded here with its version, task and verificatio
 Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 (The task list's `_harness/CHANGELOG.md` does not exist in the current checkout; this file replaces it.)
 
+## [0.11.0] — 2026-09-27 — server access, encrypted workflow on the shared lab account, T0 on 224
+
+### Added
+- `scripts/hbv.py` — encrypted workspace for the shared lab login: the server holds ciphertext only
+  (`vault/{code,data,runs}/*.tgz.enc`, AES-256-CBC + PBKDF2-SHA256, same format on OpenSSL 3 and 1.1.1 — tested
+  both ways); the key stays on the Mac and reaches a job only through its SSH session's stdin (never a server
+  file, command line or environment variable; with `ptrace_scope=1` other logins cannot read job memory); jobs run
+  detached in a RAM workspace, encrypt what they created back into the vault at exit (and every `--snapshot`
+  seconds) and wipe the workspace. Code pushes contain tracked / non-ignored files only. Verified on 224: no key
+  in any readable `/proc/*/cmdline` or `/proc/*/environ` during a job; vault ciphertext only; workspace wiped.
+- `scripts/server/t0_server.sh` — T0.1 (on a temporary copy of `eda/`, never written), T0.3, T0.5, T0.6 as jobs.
+- LLM client: `DEEPSEEK_API_KEY_FILE` (a KEY=VALUE key file read by the client; `API_KEY` accepted), so the key
+  never enters a process environment on the shared account.
+- `ENV_REPORT.md` s.6: T0 on 224 — T0.1 PASS (same numbers as locally), benchmarks uploaded and all 260 files
+  verified, DeepSeek self-test PASS (models `deepseek-flash`, `deepseek-v4-pro`), env `hb` built (torch 2.7.1+cu118,
+  PyG 2.8.0); CUDA cannot initialize on 224 or 227 (faulty GPU 0 breaks the driver), 225 works (needs approval);
+  conda OpenROAD builds lack `rtl_macro_placer` / `place_macro`.
+
+### Changed
+- Removed `scripts/sync_to_server.sh` (plaintext copies on a shared account; it also did not exclude every
+  unpublished document). `docs/SERVER_RUNBOOK.md` rewritten for the encrypted workflow.
+- `.gitignore`: local lab notes (`LAB_*`: host, account, ports, people) are never published.
+- `setup_env.sh`: the CUDA version is read per device (plain `nvidia-smi` aborts on the faulty GPU 0 and the
+  script silently chose CPU PyTorch); driver CUDA 11.4-11.8 maps to the cu118 wheels.
+- `install_openroad.sh`: `OPENROAD_SPEC`, `CHANNELS`, `EXTRA_SPECS` (the unpinned solve picks litex-hub's 2022 build;
+  the 2024 build needs Anaconda `main` before conda-forge with strict priority).
+- hbv jobs put tool caches (conda, pip, XDG, matplotlib, torch) on a local disk: the account's home is on a NAS
+  whose quota is exhausted (the first install failed with EDQUOT).
+- Lemma-3 property test checks monotonicity within each fidelity (the default query follows the highest fidelity
+  present); it failed on a generated sequence after the tiered archive of 0.10.7.
+
 ## [0.10.7] — 2026-09-26 — fidelity-tiered archive, Track-B f2 verification, deterministic E0
 
 ### Fixed
