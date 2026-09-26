@@ -120,6 +120,12 @@ def mmd2(X, Y, bandwidth: float | None = None) -> dict:
     K = np.exp(-d2 / (2 * bandwidth ** 2))
     n, m = len(X), len(Y)
     kxx, kyy, kxy = K[:n, :n], K[n:, n:], K[:n, n:]
-    t1 = (kxx.sum() - np.trace(kxx)) / (n * (n - 1)) if n > 1 else 0.0
-    t2 = (kyy.sum() - np.trace(kyy)) / (m * (m - 1)) if m > 1 else 0.0
-    return {"mmd2": float(t1 + t2 - 2 * kxy.mean()), "bandwidth": float(bandwidth), "n": n, "m": m}
+    biased = float(kxx.mean() + kyy.mean() - 2 * kxy.mean())         # V-statistic, >= 0, defined for any n, m
+    if n > 1 and m > 1:
+        unbiased = float((kxx.sum() - np.trace(kxx)) / (n * (n - 1)) + (kyy.sum() - np.trace(kyy)) / (m * (m - 1))
+                         - 2 * kxy.mean())
+    else:
+        # the unbiased U-statistic needs two samples per side; dropping the missing within-sample term (the earlier
+        # behaviour) biased it downward, e.g. -0.26 for 2 training designs vs 1 validation design
+        unbiased = float("nan")
+    return {"mmd2": unbiased, "mmd2_biased": biased, "bandwidth": float(bandwidth), "n": n, "m": m}

@@ -4,6 +4,29 @@ Every change to the code is recorded here with its version, task and verificatio
 Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 (The task list's `_harness/CHANGELOG.md` does not exist in the current checkout; this file replaces it.)
 
+## [0.10.6] — 2026-09-26 — Algorithm R end to end: DAgger fix, ledger reservation order, MMD fix
+
+### Fixed
+- **Algorithm R never trained on the DAgger aggregate** (`scripts/algorithm_r.py`, T3.7 step 4): it aggregated
+  earlier rounds' pairs *after* each round into a directory that `train_bridge.py` never read, so every round
+  trained on its own pairs only. Now the aggregate of rounds 0..r-1 is built before round r and passed as
+  `train_bridge.py --prior-pairs` (merged before the round's pairs, cap 4,000 newest per design).
+- Promotion tests reserve their alpha-ledger entry before any cost is computed (`verify.gates.promote(entry=)`;
+  Algorithm R reserves at the start of each round's test).
+- `stats.paired.mmd2`: with fewer than two samples on a side the unbiased statistic is undefined; the missing
+  within-sample term was silently set to 0, which biased it downward (Algorithm R, 2 training vs 1 validation
+  design: -0.26). It now returns NaN there and always reports the biased V-statistic (`mmd2_biased`).
+
+### Added
+- `algorithm_r.py --round0-dir` (reuse an existing round-0 run), `--guard f0|f1` (the promotion test's guard,
+  default f1 as in T3.8; cached deterministic HB-GP), `--val-every` passed to training.
+- `reports/T3_algorithmR_dev.md`, `scripts/report_algr.py` — first end-to-end Algorithm R run (dev: ibm01+02 ->
+  ibm03, 16 validation sources, f1 guard, deterministic HB-GP): round 0 (the T3 exit test, bridge + guard vs raw)
+  mean J 0.558 vs 0.601, p = 0.0005, promoted (algR_dev#1) — <= raw by construction of the guard, so it does not
+  isolate the learned transport; round 1 (DAgger 256 pairs per design, 400 steps) vs round 0: p = 0.39, not
+  promoted, stop (algR_dev#2).
+- Tests: 127 passing.
+
 ## [0.10.5] — 2026-09-26 — Track-B dev seeding results, distinct top-k, calibration on distinct layouts
 
 ### Fixed

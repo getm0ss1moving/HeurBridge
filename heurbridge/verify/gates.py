@@ -19,9 +19,10 @@ from ..stats.paired import wilcoxon_less
 
 
 def promote(ledger: AlphaLedger, kind: str, artifact: str, candidate: list, incumbent: list, meta: dict | None = None,
-            min_pairs: int = 6) -> dict:
-    """candidate/incumbent: paired costs (lower is better), +inf for failures.  Returns the decision record."""
-    entry = ledger.reserve(kind, artifact, "wilcoxon_less_paired", meta=meta)      # before looking at data
+            min_pairs: int = 6, entry: dict | None = None) -> dict:
+    """candidate/incumbent: paired costs (lower is better), +inf for failures.  Returns the decision record.
+    ``entry``: a reservation made before the costs were computed (preferred); otherwise one is made here."""
+    entry = entry or ledger.reserve(kind, artifact, "wilcoxon_less_paired", meta=meta)
     cand, inc = np.asarray(candidate, float), np.asarray(incumbent, float)
     if len(cand) != len(inc):
         raise ValueError("unpaired data")

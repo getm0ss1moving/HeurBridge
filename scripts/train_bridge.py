@@ -88,6 +88,8 @@ def main():
     ap.add_argument("--K", type=int, default=20)
     ap.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
     ap.add_argument("--pretrained", default="")
+    ap.add_argument("--prior-pairs", default="", help="DAgger: directory of earlier rounds' aggregated pair shards "
+                                                      "(<design>.pt), merged before this round's pairs, cap 4,000 newest")
     ap.add_argument("--seed", type=int, default=0)
     a = ap.parse_args()
     out = Path(a.out)
@@ -118,6 +120,12 @@ def main():
                             "pairs": len(ps), "nodes": b.graph.n, "edges": int(b.graph.edge_index.shape[1]),
                             "prep_s": round(time.time() - t0, 1)}))
             if split == "train":
+                prior = Path(a.prior_pairs) / (b.design.id + ".pt") if a.prior_pairs else None
+                if prior is not None and prior.exists():              # T3.7 step 4: aggregate rounds 0..r
+                    n_new = len(ps)
+                    ps = BD.PairSet.load(prior).extend(ps).cap(4000)
+                    log(json.dumps({"design": name, "dagger_prior": len(ps) - min(n_new, len(ps)), "round_pairs": n_new,
+                                    "train_pairs": len(ps)}))
                 sets.append(ps)
             else:
                 rng = np.random.default_rng(0)

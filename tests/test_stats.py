@@ -62,3 +62,17 @@ def test_alpha_ledger(tmp_path):
     assert other.reserve("program", "x", "t")["j"] == 1          # campaigns are independent
     s = L.summary()
     assert s["tests"] == 2 and s["promoted"] == 1 and s["spent"] < 0.05 and s["open"] == []
+
+
+def test_mmd2_small_samples():
+    import math
+    from heurbridge.stats.paired import mmd2
+    X = np.array([[0.0, 0.0], [1.0, 0.0]])
+    r = mmd2(X, np.array([[0.5, 3.0]]))                  # one sample on one side: the U-statistic is undefined
+    assert math.isnan(r["mmd2"]) and r["mmd2_biased"] >= 0.0
+    r = mmd2(X, X + 0.0)                                  # identical samples
+    assert abs(r["mmd2_biased"]) < 1e-12 and r["mmd2"] <= 1e-12
+    rng = np.random.default_rng(0)
+    far = mmd2(rng.normal(0, 1, (30, 3)), rng.normal(3, 1, (30, 3)))
+    near = mmd2(rng.normal(0, 1, (30, 3)), rng.normal(0, 1, (30, 3)))
+    assert far["mmd2"] > near["mmd2"] and far["mmd2_biased"] > near["mmd2_biased"]

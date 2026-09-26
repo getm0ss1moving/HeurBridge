@@ -52,6 +52,20 @@ def card_vec(b):
     return np.array([np.log1p(c[k]) if k in ("objects", "macros", "nets") else c[k] for k in CARD_KEYS], float)
 
 
+_F1 = {}
+
+
+def guard_f1(bundle, runs):
+    """The T3.8 guard at f1 (HB-GP stand-in; deterministic, cached per layout)."""
+    def g(lay):
+        mm = bundle.design.is_macro & ~bundle.design.is_fixed
+        key = (bundle.design.id, lay.pos[mm].tobytes(), lay.orient[mm].tobytes())
+        if key not in _F1:
+            _F1[key] = final_costs(bundle, [lay], runs)[0]
+        return _F1[key]
+    return g
+
+
 def final_costs(bundle, layouts, runs):
     """Final (f1) cost of each layout on its design (HB-GP stand-in), J vs the design's dev baseline."""
     base = json.loads((Path(runs) / bundle.design.id / "baseline.json").read_text())["records"]
@@ -82,6 +96,9 @@ def main():
     ap.add_argument("--pretrained", default="")
     ap.add_argument("--campaign", default="algR_dev")
     ap.add_argument("--device", default="cpu")
+    ap.add_argument("--round0-dir", default="", help="reuse an existing round-0 training run (best.pt, pairs/round0)")
+    ap.add_argument("--guard", default="f1", choices=["f0", "f1"], help="the bridge's guard in the promotion test (T3.8)")
+    ap.add_argument("--val-every", type=int, default=0)
     a = ap.parse_args()
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
@@ -91,39 +108,53 @@ def main():
     tr_b = [load_bundle(a.suite, n, a.runs) for n in a.train.split(",")]
     mm = mmd2(np.stack([card_vec(b) for b in tr_b]), np.stack([card_vec(b) for b in val_b]))
     progs = all_programs()
+    rdirs = []
     for r in range(a.rounds + 1):
         rdir = out / ("round%d" % r)
-        cmd = [sys.executable, str(ROOT / "scripts" / "train_bridge.py"), "--suite", a.suite, "--train", a.train, "--val", a.val,
-               "--archive", a.archive, "--runs", a.runs, "--out", str(rdir), "--steps", str(a.steps), "--round", str(r),
-               "--device", a.device, "--lr", "1e-4" if prev_ckpt else "2e-4"]
-        if prev_ckpt:
-            cmd += ["--pretrained", prev_ckpt]
-        subprocess.run(cmd, check=True)
-        # DAgger: aggregate this round's pairs with earlier rounds (cap 4,000 per design, newest first)
-        for p in (rdir / "pairs" / ("round%d" % r)).glob("*.pt"):
-            agg = PairSet.load(p)
-            for q in range(r - 1, -1, -1):
-                old = out / ("round%d" % q) / "pairs" / ("round%d" % q) / p.name
-                if old.exists():
-                    agg = PairSet.load(old).extend(agg)
-            agg.cap(4000).save(out / "dagger" / p.name, r)
+        if r == 0 and a.round0_dir:
+            rdir = Path(a.round0_dir)                    # an existing round-0 run: its checkpoint and pairs
+        else:
+            cmd = [sys.executable, str(ROOT / "scripts" / "train_bridge.py"), "--suite", a.suite, "--train", a.train,
+                   "--val", a.val, "--archive", a.archive, "--runs", a.runs, "--out", str(rdir), "--steps", str(a.steps),
+                   "--round", str(r), "--device", a.device, "--lr", "1e-4" if prev_ckpt else "2e-4",
+                   "--val-every", str(a.val_every or max(1, a.steps // 5))]
+            if prev_ckpt:
+                cmd += ["--pretrained", prev_ckpt]
+            if rdirs:                                    # DAgger (T3.7 step 4): rounds 0..r-1, newest last, cap 4,000
+                prior = out / ("dagger_r%d" % r)
+                names = sorted({f.name for q, d in enumerate(rdirs) for f in (d / "pairs" / ("round%d" % q)).glob("*.pt")})
+                for n in names:
+                    agg = None
+                    for q, d in enumerate(rdirs):
+                        f = d / "pairs" / ("round%d" % q) / n
+                        if f.exists():
+                            agg = PairSet.load(f) if agg is None else agg.extend(PairSet.load(f))
+                    agg.cap(4000).save(prior / n, r)
+                cmd += ["--prior-pairs", str(prior)]
+            subprocess.run(cmd, check=True)
+        rdirs.append(rdir)
         ckpt = rdir / "best.pt"
         model = load_bridge(ckpt)
         inc_model = load_bridge(prev_ckpt) if (prev_ckpt and r > 0) else None
         cand, inc = [], []
+        # V5: the ledger entry is reserved before any cost of this round's test is computed
+        entry = ledger.reserve("bridge_round", "%s#r%d" % (out.name, r), "wilcoxon_less_paired",
+                               meta={"round": r, "incumbent": prev_ckpt or "raw heuristic", "val": a.val, "guard": a.guard})
         for b in val_b:
-            srcs = BD.run_sources(b, progs, 8, cache=rdir / "cache")
+            srcs = BD.run_sources(b, progs, 8, cache=out / "cache")
             pick = np.random.default_rng(0).choice(len(srcs), size=min(a.val_sources, len(srcs)), replace=False)
             lays = [srcs[i][2] for i in sorted(pick)]
-            new = [x.layout for x in refine(model, b.graph, b.design, lays, b.scorer)]
-            old = [x.layout for x in refine(inc_model, b.graph, b.design, lays, b.scorer)] if inc_model else lays
+            g = b.scorer if a.guard == "f0" else guard_f1(b, a.runs)
+            new = [x.layout for x in refine(model, b.graph, b.design, lays, g)]
+            old = [x.layout for x in refine(inc_model, b.graph, b.design, lays, g)] if inc_model else lays
             cand += final_costs(b, new, a.runs)
             inc += final_costs(b, old, a.runs)
-        rec = promote(ledger, "bridge_round", "%s#r%d" % (out.name, r), cand, inc,
-                      meta={"round": r, "incumbent": prev_ckpt or "raw heuristic", "val": a.val})
+        rec = promote(ledger, "bridge_round", "%s#r%d" % (out.name, r), cand, inc, entry=entry)
         Jc, Ji = float(np.mean([c for c in cand if np.isfinite(c)])), float(np.mean([c for c in inc if np.isfinite(c)]))
         row = {"round": r, "ckpt": str(ckpt), "mean_J_candidate": Jc, "mean_J_incumbent": Ji, "promoted": rec["promoted"],
-               "p": rec["p"], "alpha_j": rec["alpha_j"], "ledger_id": rec["ledger_id"], "mmd2_train_vs_val_cards": mm["mmd2"]}
+               "p": rec["p"], "alpha_j": rec["alpha_j"], "ledger_id": rec["ledger_id"],
+               "mmd2_train_vs_val_cards": mm["mmd2"] if mm["mmd2"] == mm["mmd2"] else None,
+               "mmd2_biased_train_vs_val_cards": mm["mmd2_biased"], "mmd_n_m": [mm["n"], mm["m"]]}
         history.append(row)
         print(json.dumps(row), flush=True)
         if rec["promoted"]:
