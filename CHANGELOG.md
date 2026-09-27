@@ -12,6 +12,15 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
   the package's -- routed WL 2,376,571 um, setup WNS -0.077 ns). `scripts/server/patch_orfs.py` also requires
   `gui::show` there (applied to the checkout on 224); the metrics are untouched. bp_fe_top / bp_be_top restarted
   (`seedB_orfs3_*`).
+- **ariane133's tool-native macro placement does not converge at 8 threads** -- with the package (a008522d8) and with
+  the ORFS pin built from source (676f8451) alike: `MPL-0040 Failed on cluster (i_cache_subsystem/i_nbdcache)
+  _glue_logic` after 14-15 minutes. Hier-RTLMP's annealing depends on the thread count (ORFS runs with all cores;
+  red line A.2 caps us at 8), and upstream ORFS later changed ariane133's settings repeatedly for MPL convergence
+  ("workaround on nangate45/ariane due to mpl issues" 2025-12, "decrease macros halos to ease MPL convergence"
+  2026-01, "Use bigger macro clusters" 2026-04). **Deviation, ariane133 only:** M1 is still ORFS's own
+  rtl_macro_placer, with those later upstream settings (max level 1, 10-30 macros and 8k-80k instances per
+  cluster, halo 8 x 8) on the 2024-12 flow and floorplan; `run_seed_orfs.py --make-var KEY=VALUE` passes such
+  overrides to every run of a design (recorded in meta.json; P_M's spacing follows the halo).
 
 ## [0.13.1] — 2026-09-27 — OpenROAD 676f8451 from source (ORFS pin); Track-A campaign and E3 on the spec tools
 

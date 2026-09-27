@@ -103,6 +103,7 @@ class OrfsRun:
     work_home: str | None = None      # ORFS WORK_HOME: results/logs/reports/objects go here (the encrypted workspace)
     base_variant: str | None = None   # reuse this variant's synthesis and pre-macro floorplan (stages 1 - 2_2)
     yosys: str | None = None          # YOSYS_EXE (default: tools.binary('yosys'))
+    make_vars_extra: tuple = ()       # KEY=VALUE overrides of the design config (make command line wins)
 
     def make_vars(self, variant: str | None = None) -> list:
         from .. import tools
@@ -111,6 +112,7 @@ class OrfsRun:
              "YOSYS_EXE=%s" % (self.yosys or tools.binary("yosys"))]
         if self.work_home:
             v.append("WORK_HOME=%s" % self.work_home)
+        v += list(self.make_vars_extra)
         if self.macro_tcl and variant in (None, self.variant):
             v.append("MACRO_PLACEMENT_TCL=%s" % self.macro_tcl)
         return v

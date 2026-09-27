@@ -132,6 +132,7 @@ class OrfsEvaluator(Evaluator):
     base_variant: str | None = "base"
     yosys: str | None = None
     keep_results: bool = False          # False: delete the variant's results/objects after reading (RAM workspace)
+    make_vars_extra: tuple = ()          # design-config overrides (e.g. ariane133's RTLMP settings)
 
     def __post_init__(self):
         if self.fidelity < 2 and self.weights == cost.WEIGHTS:
@@ -147,7 +148,7 @@ class OrfsEvaluator(Evaluator):
         run = orfs.OrfsRun(flow_dir=self.flow_dir, design_config=self.design_config, variant=run_id,
                            macro_tcl=str(tcl.resolve()), stage=stage, threads=self.threads, timeout_s=self.timeout_s,
                            work_home=self.work_home, base_variant=self.base_variant, yosys=self.yosys,
-                           env={"EDA_THREADS": self.threads})
+                           make_vars_extra=tuple(self.make_vars_extra), env={"EDA_THREADS": self.threads})
         rec = orfs.run(run)
         if not self.keep_results:           # logs and reports (every metric) stay; databases go
             import shutil

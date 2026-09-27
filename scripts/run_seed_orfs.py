@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Track-B seeding on the ORFS flow (T1.7 baselines, T2.7 seeding, f2 verification).
 
-OpenROAD-flow-scripts at 2024-12-13 (8ae3ae36) with the OpenROAD build of 2024-12-11 (a008522d8) and the Yosys it
-pins (0.48): the tool-native flow of the task spec, instead of the mini-flow approximation.
+OpenROAD-flow-scripts at 2024-12-13 (8ae3ae36) with the OpenROAD commit it pins (676f8451, built from source:
+scripts/server/build_openroad.sh) and its Yosys (0.48): the tool-native flow of the task spec.  --make-var overrides
+a design-config value for every run (ariane133: the RTLMP settings upstream adopted later for MPL convergence).
 
   python scripts/run_seed_orfs.py --flow <ORFS>/flow --design nangate45/bp_fe_top --seeds 5 --top 10 --ls 8 \
       --spread 10 [--base-runs 2] [--work-home runs/orfs_work] [--phase f1|f2|all]
@@ -53,7 +54,8 @@ def base_runs(a, cfg, work_home, n):
     for k in range(n):
         v = "base" if k == 0 else "base_r%d" % k
         r = orfs.OrfsRun(flow_dir=a.flow, design_config=cfg, variant=v, stage="finish", threads=tools.eda_threads(8),
-                         timeout_s=a.base_timeout, work_home=str(work_home), yosys=a.yosys)
+                         timeout_s=a.base_timeout, work_home=str(work_home), yosys=a.yosys,
+                         make_vars_extra=tuple(a.make_var))
         rec2 = orfs.run(r)
         rec2["run_id"] = v + ".f2"
         r.stage = "grt"
@@ -80,7 +82,7 @@ def load_design(a, name, rdir, base_run_dirs):
     m1_tcl = rdir / "m1_macros.tcl"
     if not m1_tcl.exists():
         r = orfs.OrfsRun(flow_dir=a.flow, design_config="./designs/%s/config.mk" % a.design, variant="base",
-                         work_home=a.work_home_abs, yosys=a.yosys)
+                         work_home=a.work_home_abs, yosys=a.yosys, make_vars_extra=tuple(a.make_var))
         orfs.extract_macros(r, base_run_dirs, m1_tcl)
     cmds = orfs.parse_macro_tcl(m1_tcl.read_text())
     if len(cmds) != int(des.is_macro.sum()):
@@ -122,6 +124,8 @@ def main():
     ap.add_argument("--phase", default="all", choices=["base", "f1", "f2", "all"])
     ap.add_argument("--base-timeout", type=int, default=4 * 7200, help="whole unmodified flow (each step < 7,200 s)")
     ap.add_argument("--timeout", type=int, default=7200, help="one candidate evaluation")
+    ap.add_argument("--make-var", action="append", default=[],
+                    help="KEY=VALUE override of the design config for every run (recorded in meta.json)")
     a = ap.parse_args()
     a.flow = str(Path(a.flow).resolve())
     a.work_home_abs = str(Path(a.work_home).resolve())
@@ -148,12 +152,16 @@ def main():
                          default=str)[:3000], flush=True)
         sys.exit(1)
     base_dirs = orfs.OrfsRun(flow_dir=a.flow, design_config=cfg, variant="base", work_home=a.work_home_abs,
-                             yosys=a.yosys).dirs()
+                             yosys=a.yosys, make_vars_extra=tuple(a.make_var)).dirs()
     des, lay, m1, d = load_design(a, name, rdir, base_dirs)
+    for kv in a.make_var:                               # P_M spacing follows an overridden halo too
+        k, _, v = kv.partition("=")
+        if k == "MACRO_PLACE_HALO":
+            d.halo = tuple(float(x) for x in v.split()[:2])
     ev1 = OrfsEvaluator(fidelity=1, flow_dir=a.flow, design_config=cfg, work_home=a.work_home_abs, base_variant="base",
-                        yosys=a.yosys, timeout_s=a.timeout)
+                        yosys=a.yosys, timeout_s=a.timeout, make_vars_extra=tuple(a.make_var))
     ev2 = OrfsEvaluator(fidelity=2, flow_dir=a.flow, design_config=cfg, work_home=a.work_home_abs, base_variant="base",
-                        yosys=a.yosys, timeout_s=a.timeout)
+                        yosys=a.yosys, timeout_s=a.timeout, make_vars_extra=tuple(a.make_var))
     base1, base2 = cost.Baseline.from_records(des.id, recs1), cost.Baseline.from_records(des.id, recs2)
     arch = Archive(a.archive, min_fidelity=1)
     for ev, rec, fid in ((ev1, recs1[0], 1), (ev2, recs2[0], 2)):
