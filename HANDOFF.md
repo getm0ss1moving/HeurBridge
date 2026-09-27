@@ -4,6 +4,30 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
+## 2026-09-27 — Session 3 (late night): ariane133 deviation narrowed; ISPD2005 Track-A campaign started
+
+**ariane133**: the halo-8 settings made its M1 converge but failed the 2024-12 PDN (PDN-0179, 6-um channels at the
+core edge). `scripts/orfs_probe.py` (floorplan-only probe on 224) shows `RTLMP_MAX_LEVEL=1` alone converges (6 min)
+and passes the PDN with every other value from 2024-12; that single setting (upstream 98b961bb3c) is now the
+deviation. `seedB_orfs3_ariane133` stopped (logs in `runs/remote/`), `seedB_orfs4_ariane133` running (CHANGELOG).
+
+**ISPD2005 Track A** (T1.7/T2.7, spec tools) on 225 GPU 1, which the IBM campaign freed (so no third GPU is
+needed): `seedA_ispd_s1` (adaptec1, bigblue1, bigblue4) and `seedA_ispd_s2` (adaptec2-4, bigblue2, bigblue3), MMS
+convention (all 543-23,084 macros movable), `--out runs/seed_trackA_ispd --archive archive_A0_ispd_s{1,2}`.
+Estimate ~12 h (IBM18: 23 s per f1; bigblue4 is 10x larger). bigblue2's 23k macros will hit program time caps
+(recorded as failures).
+
+**Running**
+- 225 GPU 0: `algR_trackA` (T3.7; data preparation at ibm16 of 13 training + 2 validation designs, CPU; then
+  3 rounds x 20k steps on the GPU).
+- 225 GPU 1: `seedA_ispd_s1`, `seedA_ispd_s2`.
+- 224: `seedB_orfs3_{bp_fe_top,bp_be_top}`, `seedB_orfs2_{swerv_wrapper,ariane136}`, `seedB_orfs4_ariane133`.
+
+**Next**: as in the entry below, plus the ISPD2005 report (`report_trackA.py --label ispd_dreamplace`) and merge of
+`archive_A0_ispd_s{1,2}`. Open user decisions: T5 LLM model, E0 protocol (open issue 8), timing gates at f1 (9).
+
+---
+
 ## 2026-09-27 — Session 3 (night): OpenROAD built from source; Track-A campaign, E3, T3.7 running
 
 **Track A (spec tools) done**: `reports/T2_trackA_ibm_dreamplace.md` (DREAMPlace M1 is strong: programs win only on

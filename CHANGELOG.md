@@ -39,6 +39,12 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
   variant with the return code, step times, MPL/PDN/PPL/GPL messages and the macro geometry (distance to the core
   edge, smallest facing gap).
 
+### Running
+- ISPD2005 Track-A campaign (T1.7/T2.7 on the spec tools) on 225 GPU 1: `seedA_ispd_s1` (adaptec1, bigblue1,
+  bigblue4) and `seedA_ispd_s2` (adaptec2-4, bigblue2, bigblue3); M1 = DREAMPlace mixed-size, f1 = DREAMPlace with the
+  macros fixed, MMS convention (macros movable).
+- `seedB_orfs4_ariane133` on 224 (above).
+
 ## [0.13.1] — 2026-09-27 — OpenROAD 676f8451 from source (ORFS pin); Track-A campaign and E3 on the spec tools
 
 ### Added
