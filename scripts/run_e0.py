@@ -40,7 +40,7 @@ from heurbridge.eval import cost  # noqa: E402
 from heurbridge.heuristics.macro.registry import all_programs  # noqa: E402
 from heurbridge.meta import write_meta  # noqa: E402
 from heurbridge.pipeline import bridge_data as BD  # noqa: E402
-from heurbridge.pipeline.evaluators import HBGPEvaluator  # noqa: E402
+from heurbridge.pipeline.evaluators import track_a_final  # noqa: E402
 from heurbridge.stats import paired as ST  # noqa: E402
 from heurbridge.stats.alpha_ledger import AlphaLedger  # noqa: E402
 
@@ -55,7 +55,9 @@ def main():
     ap.add_argument("--runs", default=str(ROOT / "runs" / "seed_dev"))
     ap.add_argument("--bridge", required=True)
     ap.add_argument("--frozen", default="")
-    ap.add_argument("--final", default="hbgp", choices=["hbgp"])
+    ap.add_argument("--final", default="hbgp", choices=["hbgp", "dreamplace"],
+                    help="dreamplace: the spec's Track-A f1, J vs the M1 baseline of the --runs campaign; "
+                         "hbgp: development stand-in, baseline = the benchmark macro positions (3 GP seeds)")
     ap.add_argument("--seeds", type=int, default=5)
     ap.add_argument("--K", type=int, default=20)
     ap.add_argument("--out", default=str(ROOT / "reports" / "e0_dev"))
@@ -85,9 +87,12 @@ def main():
     for name in a.designs.split(","):
         b = load_bundle(a.suite, name, a.runs)
         srcs = BD.run_sources(b, progs, a.seeds, cache=out / "cache")
-        final = HBGPEvaluator(cluster_of=b.cluster_of)
-        bench = project.legalize_macros(b.design, b.base)[0]
-        base_recs = [final.evaluate(b.design, bench, "base%d" % s, out) for s in range(3)]
+        final = track_a_final(a.final, cluster_of=b.cluster_of)
+        if a.final == "dreamplace":             # the campaign's M1 baseline: the archive's J scale
+            base_recs = json.loads((Path(a.runs) / b.design.id / "baseline.json").read_text())["records"]
+        else:
+            bench = project.legalize_macros(b.design, b.base)[0]
+            base_recs = [final.evaluate(b.design, bench, "base%d" % s, out) for s in range(3)]
         baseline = cost.Baseline.from_records(b.design.id, base_recs)
         cache = {}
 
@@ -175,7 +180,8 @@ def analyse(rows, entry, ledger, out, a):
     res["guard"] = {"fidelity": a.guard_fidelity, "equal_guard": a.equal_guard, "random_control": a.random_control}
     res["gate_G0prime"] = {"pass": bool(pm < 0.01 and pr < 0.01), "p_memetic": pm, "p_repertoire": pr,
                            "note": "development run (Track-A stand-in final cost); not the pre-registered f2 test"
-                           if a.final == "hbgp" else ""}
+                           if a.final == "hbgp" else "Track-A final cost = DREAMPlace f1 (spec T1.4); the E0 protocol "
+                           "is pre-registered only after the user's decision (HANDOFF open issue 8)"}
     ledger.record(entry, p_value=max(pm, pr), n=len(keys), extra={"gate": "G0prime", **res["gate_G0prime"]})
     (out / "e0_summary.json").write_text(json.dumps(res, indent=1, default=str))
     write_meta(out, "e0", a.designs, config=vars(a), alpha_ledger_id=entry["ledger_id"], summary=res)

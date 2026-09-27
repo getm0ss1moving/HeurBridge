@@ -164,9 +164,16 @@ def synth_script(p: Nangate45, d: DesignCfg, out_v: Path, flatten: bool = False)
     lines += ["hierarchy -top %s" % d.top, "synth -top %s%s" % (d.top, " -flatten" if flatten else "")]
     if p.latch_map.exists():                               # ORFS: latches to the platform's latch cells
         lines.append("techmap -map %s" % p.latch_map)
-    lines += ["dfflibmap -liberty %s" % p.lib, "abc -liberty %s%s" % (p.lib, du),   # (no dont-use flip-flops)
-              "hilomap -singleton -hicell LOGIC1_X1 Z -locell LOGIC0_X1 Z", "setundef -zero", "splitnets",
-              "opt_clean -purge", "write_verilog -noattr -noexpr -nohex -nodec %s" % out_v]
+    # ORFS synth.tcl order after mapping: opt, setundef -zero before abc, then splitnets, opt_clean -purge, hilomap,
+    # and insbuf (SYNTH_INSBUF=1).  The earlier order (hilomap before setundef) left the constants that setundef creates
+    # without tie cells: bp_be_top's be_calculator/zero_ reached OpenROAD as a GROUND net that detailed routing
+    # refuses (DRT-0305); without insbuf, output ports were driven through assigns.
+    lines += ["dfflibmap -liberty %s" % p.lib, "opt", "setundef -zero",
+              "abc -liberty %s%s" % (p.lib, du),                      # (no dont-use flip-flops)
+              "splitnets", "opt_clean -purge",
+              "hilomap -singleton -hicell LOGIC1_X1 Z -locell LOGIC0_X1 Z",
+              "insbuf -buf BUF_X1 A Z",
+              "write_verilog -noattr -noexpr -nohex -nodec %s" % out_v]
     return "\n".join(lines) + "\n"
 
 

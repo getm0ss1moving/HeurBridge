@@ -9,25 +9,31 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 **User decisions received:** 225's GPUs may be used; the prebuilt OpenROAD 2024-12 package may be downloaded.
 (c) — the faulty GPUs on 224/227 — still needs the admin.
 
-**Done (0.11.1 and Unreleased in CHANGELOG):**
-- T0.3: OpenROAD 2.0-17598-ga008522d8 unpacked without root on 224; every required command incl. Hier-RTLMP and
-  `place_macro`. Its timing-driven global placement *keeps* resizer buffers by default and then diverged on
-  bp_fe_top -> the mini-flow keeps timing-driven repairs virtual (`-keep_resize_below_overflow 0`); bp_fe_top M1
-  at f1 now matches the local dev flow closely (numbers in CHANGELOG).
-- 225: env in `/tmp/.hbenv/hb`, GPU smoke PASS; a bf16-autocast bug that would have stopped all GPU training fixed.
-- Unintended write found and fixed: one `.pyc` in the HA-PR harness tree on 224 (to be removed after `seedA_ibm`).
-- Server runs record the commit (`CODE_VERSION` stamp); tool versions come from `tools.describe()`.
-- Track-A f1 per spec (DREAMPlace, macros FIXED): `eval/dreamplace.py` with orientation baking (tested); the
-  build on 225 is `scripts/server/build_dreamplace.sh`.
+**Done (0.11.1 - 0.12.1, CHANGELOG):**
+- T0.3: OpenROAD 2.0-17598-ga008522d8 unpacked without root on 224; every required command incl. Hier-RTLMP.
+  Flow fixes for this build: virtual timing-driven GPL (it diverged), ORFS density rule (LB_ADDON designs), OpenMP
+  capped at 8 threads (**one run exceeded the red line before the cap — disclosed in CHANGELOG 0.12.0**), M1 with 8
+  threads as ORFS (bp_fe_top's M1 is identical either way), clock-gate map for swerv_wrapper, fail-fast steps.
+- Track B on 224: bp_fe_top M1 at f2 twice, bit-identical, DRC 0 (setup WNS -1.905 ns, TNS -54.9 ns, hold +0.096).
+- 225: env `/tmp/.hbenv/hb` (torch 2.6.0+cu118), GPU smoke PASS; a bf16 bug that would have stopped all GPU
+  training fixed. **DREAMPlace 4.3.1 built on 225** (`/tmp/.hbtools/dreamplace`); Track-A f1 per spec
+  (`DreamplaceEvaluator`, orientations baked, macros FIXED) and M1 = DREAMPlace mixed-size; smoke PASS on ibm01.
+- `--final dreamplace` in `algorithm_r.py` / `run_e0.py`; `scripts/report_trackA.py`.
+- Unintended write found and fixed: one `.pyc` in the HA-PR harness tree on 224 (remove after `seedA_ibm`).
 
-**Running:** `pretrain_small` (T3.4) on 225 GPU 0 (~4-5 h); Track B on 224: `tb_bp_fe_top_f2` (M1 at f2, twice),
-ariane133 M1 (the T0.3 Track-B condition needs ariane133 through detailed routing); `seedA_ibm` (ibm18 left);
-`dp_build3` (DREAMPlace on 225).
+**Running:** 225 GPU 0 `pretrain_small` (T3.4, 200k steps, ~0.048 s/step); 225 GPU 1 `seedA_dp_s1`/`_s2` (Track-A
+T1.7/T2.7 with DREAMPlace, 17 IBM designs, ~12 h); 224 `tb3_{ariane133,bp_fe_top,bp_be_top,swerv_wrapper}` (M1 ->
+f1 -> f2 x2; ariane133 through detailed routing = the T0.3 Track-B condition); 224 `seedA_ibm` (HB-GP dev
+campaign, ibm18 left).
 
-**Next:** ariane133 f1 + f2 (T0.3 exit); Track-B T1.7 baselines at f2 for the five ORFS designs; DREAMPlace smoke
-test on ibm01, then Track-A M1 (DREAMPlace mixed-size) and f1 = DREAMPlace for the server campaigns (the HB-GP
-campaign stays as development data); T3.7 Algorithm R on 225 after pretraining; LLM model choice for T5
-(`deepseek-v4-pro` vs `deepseek-flash`; the old names alias to flash).
+**Next:** ariane136 Track-B baseline; Track-A reports (`report_trackA.py`) when the campaigns end; T3.7 Algorithm R
+on 225 with `--final dreamplace --pretrained checkpoints/pretrain_small/pretrain_small.pt` (validation designs to be
+fixed in the run's config, e.g. ibm03/ibm06); ISPD2005 Track-A campaign (upload the benchmarks to 225; bigblue4 is
+2.2M objects); T2.7 Track-B seeding (programs x seeds at f1, top-10 at f2) once the five baselines exist.
+
+**Decisions for the user:** (1) T5 LLM: `deepseek-v4-pro` (flagship, ~4x the price) or `deepseek-flash` — both think by
+default; the old `deepseek-reasoner` name silently maps to flash. (2) The E0 protocol (open issue 8 below) before
+T4 is pre-registered. (3) A third 225 GPU for the ISPD2005 campaign (only GPUs 0 and 1 are in use now).
 
 ---
 

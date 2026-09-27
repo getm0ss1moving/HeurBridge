@@ -38,7 +38,7 @@ from heurbridge.heuristics.macro.registry import all_programs  # noqa: E402
 from heurbridge.meta import write_meta  # noqa: E402
 from heurbridge.online.solve import state_card  # noqa: E402
 from heurbridge.pipeline import bridge_data as BD  # noqa: E402
-from heurbridge.pipeline.evaluators import HBGPEvaluator  # noqa: E402
+from heurbridge.pipeline.evaluators import track_a_final  # noqa: E402
 from heurbridge.stats.alpha_ledger import AlphaLedger  # noqa: E402
 from heurbridge.stats.paired import mmd2  # noqa: E402
 from heurbridge.verify.gates import promote  # noqa: E402
@@ -55,23 +55,24 @@ def card_vec(b):
 _F1 = {}
 
 
-def guard_f1(bundle, runs):
-    """The T3.8 guard at f1 (HB-GP stand-in; deterministic, cached per layout)."""
+def guard_f1(bundle, runs, final="hbgp"):
+    """The T3.8 guard at f1 (deterministic, cached per layout)."""
     def g(lay):
         mm = bundle.design.is_macro & ~bundle.design.is_fixed
-        key = (bundle.design.id, lay.pos[mm].tobytes(), lay.orient[mm].tobytes())
+        key = (final, bundle.design.id, lay.pos[mm].tobytes(), lay.orient[mm].tobytes())
         if key not in _F1:
-            _F1[key] = final_costs(bundle, [lay], runs)[0]
+            _F1[key] = final_costs(bundle, [lay], runs, final)[0]
         return _F1[key]
     return g
 
 
-def final_costs(bundle, layouts, runs):
-    """Final (f1) cost of each layout on its design (HB-GP stand-in), J vs the design's dev baseline."""
+def final_costs(bundle, layouts, runs, final="hbgp"):
+    """Final (f1) cost of each layout on its design, J vs the baseline of the seeding campaign in ``runs`` (which
+    must have used the same evaluator: 'dreamplace' = the spec's Track-A f1, 'hbgp' = the development stand-in)."""
     base = json.loads((Path(runs) / bundle.design.id / "baseline.json").read_text())["records"]
     for r in base:
         r.setdefault("rudy_of_pct", 100.0 * r.get("rudy_overflow_ratio", 0.0))
-    ev = HBGPEvaluator()
+    ev = track_a_final(final)
     bl = cost.Baseline.from_records(bundle.design.id, base)
     out = []
     for k, l in enumerate(layouts):
@@ -99,6 +100,8 @@ def main():
     ap.add_argument("--round0-dir", default="", help="reuse an existing round-0 training run (best.pt, pairs/round0)")
     ap.add_argument("--guard", default="f1", choices=["f0", "f1"], help="the bridge's guard in the promotion test (T3.8)")
     ap.add_argument("--val-every", type=int, default=0)
+    ap.add_argument("--final", default="hbgp", choices=["hbgp", "dreamplace"],
+                    help="Track-A f1 of the guard and the promotion test (the evaluator of the --runs campaign)")
     a = ap.parse_args()
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
@@ -144,11 +147,11 @@ def main():
             srcs = BD.run_sources(b, progs, 8, cache=out / "cache")
             pick = np.random.default_rng(0).choice(len(srcs), size=min(a.val_sources, len(srcs)), replace=False)
             lays = [srcs[i][2] for i in sorted(pick)]
-            g = b.scorer if a.guard == "f0" else guard_f1(b, a.runs)
+            g = b.scorer if a.guard == "f0" else guard_f1(b, a.runs, a.final)
             new = [x.layout for x in refine(model, b.graph, b.design, lays, g)]
             old = [x.layout for x in refine(inc_model, b.graph, b.design, lays, g)] if inc_model else lays
-            cand += final_costs(b, new, a.runs)
-            inc += final_costs(b, old, a.runs)
+            cand += final_costs(b, new, a.runs, a.final)
+            inc += final_costs(b, old, a.runs, a.final)
         rec = promote(ledger, "bridge_round", "%s#r%d" % (out.name, r), cand, inc, entry=entry)
         Jc, Ji = float(np.mean([c for c in cand if np.isfinite(c)])), float(np.mean([c for c in inc if np.isfinite(c)]))
         row = {"round": r, "ckpt": str(ckpt), "mean_J_candidate": Jc, "mean_J_incumbent": Ji, "promoted": rec["promoted"],

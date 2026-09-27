@@ -4,6 +4,38 @@ Every change to the code is recorded here with its version, task and verificatio
 Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 (The task list's `_harness/CHANGELOG.md` does not exist in the current checkout; this file replaces it.)
 
+## [0.12.2] — 2026-09-27 — ORFS synthesis order, Track-A tools for T3.7/T4, HB-GP campaign report
+
+### Fixed
+- **Track-B synthesis order** (`eval/miniflow.synth_script`): `hilomap` ran before `setundef -zero`, so the
+  constants that `setundef` creates never became tie cells. bp_be_top's netlist kept wide constant buses (128'b0,
+  64'b0, 6'b0); OpenROAD links them through a GROUND-typed `zero_` net that detailed routing refuses
+  (DRT-0305 in both f2 runs, while f1 passed). Now ORFS synth.tcl's order after mapping: `opt`, `setundef -zero`,
+  `abc`, `splitnets`, `opt_clean -purge`, `hilomap`, `insbuf -buf BUF_X1 A Z` (SYNTH_INSBUF=1): no constants and no
+  port assigns remain (checked on bp_be_top and bp_fe_top). Every netlist changes, so the five Track-B baselines
+  are recomputed from synthesis (`tb4_*`); the `tb3_*` results (bp_fe_top f1/f2, bp_be_top f1) are superseded.
+
+### Added
+- `--final dreamplace` for `algorithm_r.py` (T3.7 guard and promotion test) and `run_e0.py` (T4): the spec's
+  Track-A f1, scored against the M1 baseline of the seeding campaign given by `--runs` (the archive's J scale);
+  `hbgp` stays the development default. `evaluators.track_a_final` selects the evaluator.
+- `scripts/report_trackA.py`: Track-A campaign report (per design: M1 time and P_M displacement, baseline of 3
+  seeds, program evaluations and failures by name, layouts below the baseline, local search, archive best);
+  `--node` / `--code` for runs made before the host and code-version records.
+- `scripts/merge_archives.py`: merges the archives of parallel streams (disjoint designs) by replaying each
+  input's rows in id order through `Archive.insert` (checked: the 17-design HB-GP archive replays to an identical
+  top-k on every design, 155/155 rows).
+- `reports/T2_trackA_ibm_hbgp_dev.md` — the HB-GP development campaign on 224 (17 IBM designs, 1,360 program and
+  809 local-search evaluations; baseline = the benchmark macro positions): programs beat that baseline on 8
+  designs, mostly where its placement is congested (ibm18: RUDY OF 76 %, best J 0.12 vs 0.45); 68 program
+  timeouts (the sandbox's 60 s CPU limit) on the larger designs. Development only: the spec's Track-A campaign
+  (DREAMPlace, M1 baseline) is running.
+
+### Verified
+- M1 is thread-count invariant on bp_fe_top: the 8-thread Hier-RTLMP placement is identical to the single-threaded
+  one (all 11 macros) and f1 on it is identical (GR WL 1,762,903 um, setup WNS -2.234 ns, TNS -81.1 ns); the
+  0.12.1 thread change aligns M1 with ORFS and speeds it up, and the earlier bp_fe_top results stand.
+
 ## [0.12.1] — 2026-09-27 — Track-A seeding with DREAMPlace, ORFS-faithful M1 and synthesis
 
 ### Fixed

@@ -93,6 +93,15 @@ class DreamplaceEvaluator(Evaluator):
         return rec
 
 
+TRACK_A_FINAL = {"hbgp": HBGPEvaluator, "dreamplace": DreamplaceEvaluator}
+
+
+def track_a_final(name: str, **kw) -> Evaluator:
+    """Track-A final cost evaluator by name: 'dreamplace' = the spec's f1 (T1.4), 'hbgp' = the development stand-in.
+    The J scale is set by the baseline of the seeding campaign that used the same evaluator."""
+    return TRACK_A_FINAL[name](**kw)
+
+
 def cluster_centroids(design, layout, cluster_of) -> "np.ndarray":
     """Area-weighted centroids (normalized) of each cell cluster in a placed layout."""
     import numpy as np
