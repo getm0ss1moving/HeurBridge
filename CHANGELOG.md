@@ -21,6 +21,23 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
   rtl_macro_placer, with those later upstream settings (max level 1, 10-30 macros and 8k-80k instances per
   cluster, halo 8 x 8) on the 2024-12 flow and floorplan; `run_seed_orfs.py --make-var KEY=VALUE` passes such
   overrides to every run of a design (recorded in meta.json; P_M's spacing follows the halo).
+- **ariane133's deviation narrowed to one setting, `RTLMP_MAX_LEVEL=1`.** With halo 8 x 8 its M1 converged (4:51)
+  but the 2024-12 power grid failed (`PDN-0179 Unable to repair all channels`: two VDD channels on metal4, 6 um tall,
+  between the core's bottom edge and macros placed 6 um from it); upstream's smaller halo (fa3401136d) came with a
+  utilization-based floorplan (355cd0439d) that the 2024-12 configuration does not have. The job
+  (`seedB_orfs3_ariane133`) was stopped in its second base run (same deterministic failure); logs fetched. Probe
+  (`scripts/orfs_probe.py`, 224, 8 threads, 2024-12 halo 10 x 10), both variants converge and pass the PDN:
+  max level 1 with upstream's 2026-04 clusters (10-30 macros, 8k-80k instances) in 4:48, and **max level 1 alone**
+  (the 2024-12 clusters, 4-16 macros, 5k-30k instances) in 6:03; both leave the 132 macros >= 9.3 um from the core
+  edge with gaps >= 19.9 um (the PDN-0110 via warnings also occur in unmodified bp_fe_top). The smaller deviation is
+  kept: only `RTLMP_MAX_LEVEL=1`, the level limit of upstream's MPL workaround for this design (98b961bb3c,
+  2025-12-05); clusters, halo, channel and floorplan are the 2024-12 values. Restarted as `seedB_orfs4_ariane133`.
+
+### Added
+- `scripts/orfs_probe.py`: runs ORFS up to one stage (default the floorplan, which ends with the PDN) for several
+  design-config overrides. The first variant synthesizes; the others reuse its synthesis. Output: one JSON line per
+  variant with the return code, step times, MPL/PDN/PPL/GPL messages and the macro geometry (distance to the core
+  edge, smallest facing gap).
 
 ## [0.13.1] — 2026-09-27 — OpenROAD 676f8451 from source (ORFS pin); Track-A campaign and E3 on the spec tools
 
