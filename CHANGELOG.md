@@ -4,6 +4,26 @@ Every change to the code is recorded here with its version, task and verificatio
 Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 (The task list's `_harness/CHANGELOG.md` does not exist in the current checkout; this file replaces it.)
 
+## [0.12.3] — 2026-09-27 — ORFS floorplan areas and RTLMP arguments for Track B
+
+### Fixed
+- **Track-B floorplan and M1 were not ORFS's for three designs** (`eval/miniflow.py`): ariane136, bp_be_top and
+  swerv_wrapper give `DIE_AREA`/`CORE_AREA`, which ORFS uses (floorplan.tcl); the mini-flow always used
+  `-utilization` (bp_be_top: core 498,584 um^2 instead of 529,418 um^2). And ORFS calls `rtl_macro_placer` with the
+  design's `RTLMP_*` arguments (ariane133: max level 1, 10-30 macros and 8k-80k instances per cluster) and always
+  `-target_util <placement density>` (macro_place_util.tcl); the M1 passed only the halo — for ariane133 that also
+  meant a much deeper search (M1 still running after 40 minutes). Now the floorplan method follows the design
+  (both methods given is an error, as in ORFS), and M1 passes the RTLMP arguments and `-target_util` (the density of
+  `place_density_with_lb_addon`, shared with global placement); flags the build lacks are dropped and logged.
+  All five Track-B baselines are recomputed (`tb5_*`); the `tb4_*` and `seedB_bp_fe_top` runs are superseded.
+
+### Known deviations from ORFS (kept, documented)
+- No floorplan-stage timing repair (ORFS 2026: `repair_timing_helper -setup` at floorplan unless
+  `REMOVE_ABC_BUFFERS`), `repair_tie_fanout` after global placement (ORFS: at floorplan), and swerv_wrapper's
+  `SWAP_ARITH_OPERATORS` (hierarchical arithmetic swapping) is not applied. The spec defines f1/f2 by their steps
+  (T1.4/T1.5); these ORFS-version-specific optimizations are outside them. The ORFS checkout is 2026-09 while the
+  OpenROAD build is 2024-12, so "ORFS behaviour" means the 2026 scripts' logic applied to the 2024 tools.
+
 ## [0.12.2] — 2026-09-27 — ORFS synthesis order, Track-A tools for T3.7/T4, HB-GP campaign report
 
 ### Fixed

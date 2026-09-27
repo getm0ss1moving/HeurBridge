@@ -114,6 +114,10 @@ def test_io_exclusions_and_orfs_config(tmp_path):
     c = MF.from_orfs(str(tmp_path), "nangate45/toy")
     assert c.top == "toy_top" and c.utilization == 35 and c.halo == (7.0, 9.0)
     assert c.place_density_lb_addon == 0.08 and c.cell_pad_gpl == 0
+    assert c.die_area is None and c.rtlmp_args == ()
+    m1 = MF.m1_script(MF.Nangate45(str(tmp_path)), c, Path("fp.odb"), Path("m1.odb"), Path("m1.tcl"), threads=8)
+    assert "-halo_width 7 -halo_height 9 -target_util $hb_density" in m1      # ORFS 2_3 always passes -target_util
+    assert "set_thread_count 8" in m1
     gp = MF._global_placement(c)                                # ORFS place_density_with_lb_addon
     assert "gpl::get_global_placement_uniform_density -pad_left 0 -pad_right 0" in gp
     assert "(1.0 - $hb_lb) * 0.08 + 0.01" in gp and "-density $hb_density" in gp
@@ -187,3 +191,24 @@ def test_f2_stages_and_metrics():
     assert m["total_power_w"] == pytest.approx(0.152) and m["gr_overflow_total"] == 12 and m["done"]
     m = MF.f2_metrics(F2_LOG.replace("HB_F2_DONE\n", "").replace("Number of violations = 3.", ""))
     assert not m["done"] and m["drc_violations"] == 57     # the last reported count, never a guess
+
+
+def test_orfs_floorplan_area_and_rtlmp_args(tmp_path):
+    ddir = tmp_path / "designs" / "nangate45" / "toy2"
+    ddir.mkdir(parents=True)
+    (tmp_path / "designs" / "src").mkdir(parents=True)
+    (tmp_path / "designs" / "src" / "t.v").write_text("")
+    (ddir / "config.mk").write_text(
+        "export DESIGN_NAME = t\nexport VERILOG_FILES = $(DESIGN_HOME)/src/t.v\n"
+        "export DIE_AREA = 0 0 800 700\nexport CORE_AREA = 10.07 11.2 790 690\n"
+        "export RTLMP_MAX_LEVEL = 1\nexport RTLMP_MAX_MACRO = 30\nexport PLACE_DENSITY = 0.35\n")
+    c = MF.from_orfs(str(tmp_path), "nangate45/toy2")
+    assert c.die_area == (0, 0, 800, 700) and c.core_area == (10.07, 11.2, 790, 690)
+    assert c.rtlmp_args == (("-max_num_level", "1"), ("-max_num_macro", "30"))
+    fp = MF.floorplan_script(MF.Nangate45(str(tmp_path)), c, Path("n.v"), Path("fp.odb"))
+    assert "initialize_floorplan -die_area {0 0 800 700} -core_area {10.07 11.2 790 690}" in fp
+    m1 = MF.m1_script(MF.Nangate45(str(tmp_path)), c, Path("fp.odb"), Path("m1.odb"), Path("m1.tcl"), threads=8)
+    assert "set hb_density 0.35" in m1 and "-max_num_level 1 -max_num_macro 30" in m1
+    (ddir / "config.mk").write_text((ddir / "config.mk").read_text() + "export CORE_UTILIZATION = 40\n")
+    with pytest.raises(ValueError, match="mutually exclusive"):
+        MF.from_orfs(str(tmp_path), "nangate45/toy2")

@@ -68,6 +68,10 @@ class DesignCfg:
     utilization: float = 50.0
     place_density: float = 0.30        # Nangate45 platform default (PLACE_DENSITY ?= 0.30)
     place_density_lb_addon: float | None = None   # ORFS: density = uniform lower bound + addon (util.tcl)
+    die_area: tuple | None = None      # DIE_AREA + CORE_AREA (ORFS floorplan method 3; else CORE_UTILIZATION)
+    core_area: tuple | None = None
+    rtlmp_args: tuple = ()             # (flag, value) from the design's RTLMP_* variables (macro_place_util.tcl)
+    rtlmp_override: str | None = None  # RTLMP_ARGS replaces every argument (ORFS)
     cell_pad_gpl: int = 0              # CELL_PAD_IN_SITES_GLOBAL_PLACEMENT (ORFS default 0)
     halo: tuple = (22.4, 15.12)        # Nangate45 platform default (MACRO_PLACE_HALO ?= 22.4 15.12)
     io_tcl: str | None = None
@@ -130,11 +134,18 @@ def from_orfs(flow_dir: str, platform_design: str) -> DesignCfg:
     if missing:                        # e.g. a sparse ORFS checkout without designs/nangate45/swerv/macros.v
         raise FileNotFoundError("%s: VERILOG_FILES missing: %s" % (platform_design, " ".join(missing)))
     addon = get("PLACE_DENSITY_LB_ADDON")
+    die, core = get("DIE_AREA"), get("CORE_AREA")
+    if die and core and v.get("CORE_UTILIZATION"):
+        raise ValueError("%s: DIE_AREA/CORE_AREA and CORE_UTILIZATION are mutually exclusive (ORFS)" % platform_design)
+    rtlmp = tuple((flag, get(var)) for var, flag in RTLMP_VARS if get(var))
     return DesignCfg(name=ddir.name, top=get("DESIGN_NAME"), verilog=get("VERILOG_FILES", "").split(),
                      sdc=get("SDC_FILE") or str(ddir / "constraint.sdc"),
                      macro_lefs=get("ADDITIONAL_LEFS", "").split(), macro_libs=get("ADDITIONAL_LIBS", "").split(),
                      utilization=float(get("CORE_UTILIZATION", 50)), place_density=float(get("PLACE_DENSITY", 0.30)),
                      place_density_lb_addon=float(addon) if addon else None,
+                     die_area=tuple(float(x) for x in die.split()) if die and core else None,
+                     core_area=tuple(float(x) for x in core.split()) if die and core else None,
+                     rtlmp_args=rtlmp, rtlmp_override=get("RTLMP_ARGS"),
                      cell_pad_gpl=int(get("CELL_PAD_IN_SITES_GLOBAL_PLACEMENT", 0)),
                      halo=halo, io_tcl=get("IO_CONSTRAINTS"), fastroute_tcl=path_or_none("FASTROUTE_TCL"),
                      core_margin=float(get("CORE_MARGIN", "1.0").split()[0]),
@@ -193,11 +204,14 @@ def io_exclusions(io_tcl: str | None) -> str:
 
 
 def floorplan_script(p: Nangate45, d: DesignCfg, netlist: Path, out_odb: Path) -> str:
-    """ORFS 2_1 floorplan (utilization, aspect ratio, core margin, platform tracks) + random IO placement
+    """ORFS 2_1 floorplan (DIE_AREA/CORE_AREA when the design gives them, else utilization, aspect ratio and core
+    margin; platform tracks) + random IO placement
     with the design's exclusions.  Tapcells and the power grid follow the macro placement (ORFS 2_3/2_4),
     so they are part of f1 (every candidate gets them after its macros are placed)."""
     return "\n".join([
         _reads(p, d), "read_verilog %s" % netlist, "link_design %s" % d.top, "read_sdc %s" % d.sdc,
+        ("initialize_floorplan -die_area {%s} -core_area {%s} -site %s" % (
+            " ".join("%g" % x for x in d.die_area), " ".join("%g" % x for x in d.core_area), p.site)) if d.die_area else
         "initialize_floorplan -utilization %g -aspect_ratio %g -core_space %g -site %s" % (
             d.utilization, d.aspect_ratio, d.core_margin, p.site),
         ("source %s" % d.make_tracks_tcl) if d.make_tracks_tcl else "make_tracks",
@@ -211,8 +225,7 @@ def m1_script(p: Nangate45, d: DesignCfg, fp_odb: Path, out_odb: Path, out_tcl: 
     single-threaded M1 took over an hour on ariane133 and is not ORFS's configuration)."""
     return "\n".join([
         "read_db %s" % fp_odb, "\n".join("read_liberty %s" % l for l in [p.lib] + d.macro_libs), "read_sdc %s" % d.sdc,
-        "set_thread_count %d" % (threads or tools.eda_threads(8)),
-        "rtl_macro_placer -halo_width %g -halo_height %g" % d.halo,
+        "set_thread_count %d" % (threads or tools.eda_threads(8)), _rtlmp_call(d),
         "write_macro_placement %s" % out_tcl, "write_db %s" % out_odb, 'puts "HB_M1_DONE"']) + "\n"
 
 
@@ -243,6 +256,42 @@ def _drop_supply_ports() -> str:
             "{ foreach bt [$net getBTerms] { odb::dbBTerm_destroy $bt } } }")
 
 
+RTLMP_VARS = (("RTLMP_MAX_LEVEL", "-max_num_level"), ("RTLMP_MAX_INST", "-max_num_inst"),
+              ("RTLMP_MIN_INST", "-min_num_inst"), ("RTLMP_MAX_MACRO", "-max_num_macro"),
+              ("RTLMP_MIN_MACRO", "-min_num_macro"), ("RTLMP_MIN_AR", "-min_ar"), ("RTLMP_AREA_WT", "-area_weight"),
+              ("RTLMP_WIRELENGTH_WT", "-wirelength_weight"), ("RTLMP_OUTLINE_WT", "-outline_weight"),
+              ("RTLMP_BOUNDARY_WT", "-boundary_weight"), ("RTLMP_NOTCH_WT", "-notch_weight"),
+              ("RTLMP_FENCE_LX", "-fence_lx"), ("RTLMP_FENCE_LY", "-fence_ly"), ("RTLMP_FENCE_UX", "-fence_ux"),
+              ("RTLMP_FENCE_UY", "-fence_uy"))
+
+
+def _density_tcl(d: DesignCfg) -> str:
+    """Sets hb_density as ORFS's ``place_density_with_lb_addon`` (flow/scripts/util.tcl)."""
+    if d.place_density_lb_addon is not None:
+        return ("set hb_lb [gpl::get_global_placement_uniform_density -pad_left %d -pad_right %d]\n"
+                "set hb_density [expr {$hb_lb + (1.0 - $hb_lb) * %r + 0.01}]\n"
+                "if {$hb_density > 1.0} { error \"HB_PLACE_DENSITY_ABOVE_1 $hb_density\" }\n"
+                % (d.cell_pad_gpl, d.cell_pad_gpl, d.place_density_lb_addon))
+    return "set hb_density %r\n" % d.place_density
+
+
+def _rtlmp_call(d: DesignCfg) -> str:
+    """rtl_macro_placer as ORFS 2_3 calls it (macro_place_util.tcl): the design's RTLMP_* arguments, the platform
+    halo and -target_util = the placement density (the earlier M1 passed only the halo).  RTLMP_ARGS replaces
+    all of them, as in ORFS.  Flags this build does not have are dropped and logged (HB_RTLMP_DROPPED)."""
+    if d.rtlmp_override:
+        return "rtl_macro_placer %s" % d.rtlmp_override
+    args = " ".join("%s %s" % fv for fv in d.rtlmp_args)
+    return (_density_tcl(d) +
+            "set hb_rtlmp [list %s -halo_width %g -halo_height %g -target_util $hb_density]\n" % (args, d.halo[0], d.halo[1]) +
+            "set hb_keep {}\n"
+            "foreach {f v} $hb_rtlmp { if {![info exists sta::cmd_args(rtl_macro_placer)] || "
+            "[string first $f $sta::cmd_args(rtl_macro_placer)] >= 0} { lappend hb_keep $f $v } "
+            "else { puts \"HB_RTLMP_DROPPED $f\" } }\n"
+            'puts "HB_RTLMP_ARGS $hb_keep"\n'
+            "rtl_macro_placer {*}$hb_keep")
+
+
 def _global_placement(d: DesignCfg) -> str:
     """Routability- and timing-driven global placement with *virtual* timing-driven repairs.
 
@@ -258,14 +307,7 @@ def _global_placement(d: DesignCfg) -> str:
     uniform-density lower bound of the placement area (after macros, tapcells and grid) plus the addon share
     of the remainder plus 0.01 (bp_be_top, swerv_wrapper; a fixed 0.30 is below their utilization: GPL-0302);
     otherwise PLACE_DENSITY (design, else the platform's 0.30)."""
-    if d.place_density_lb_addon is not None:
-        dens = ("set hb_lb [gpl::get_global_placement_uniform_density -pad_left %d -pad_right %d]\n"
-                "set hb_density [expr {$hb_lb + (1.0 - $hb_lb) * %r + 0.01}]\n"
-                "if {$hb_density > 1.0} { error \"HB_PLACE_DENSITY_ABOVE_1 $hb_density\" }\n"
-                % (d.cell_pad_gpl, d.cell_pad_gpl, d.place_density_lb_addon))
-    else:
-        dens = "set hb_density %r\n" % d.place_density
-    return (dens + 'puts "HB_PLACE_DENSITY $hb_density"\n'
+    return (_density_tcl(d) + 'puts "HB_PLACE_DENSITY $hb_density"\n'
             "set hb_gpl [list -routability_driven -timing_driven -density $hb_density]\n"
             "if {[info exists sta::cmd_args(global_placement)] && "
             "[string first -keep_resize_below_overflow $sta::cmd_args(global_placement)] >= 0} "

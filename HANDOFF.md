@@ -21,6 +21,11 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 - `--final dreamplace` in `algorithm_r.py` / `run_e0.py`; `scripts/report_trackA.py`.
 - Unintended write found and fixed: one `.pyc` in the HA-PR harness tree on 224 (remove after `seedA_ibm`).
 
+**Update 16:15:** Track-B flow now follows ORFS for floorplan areas, RTLMP arguments + `-target_util`, synthesis
+order and density (CHANGELOG); bp_fe_top's M1 changes with `-target_util`, so all five baselines rerun as `tb5_*` on
+224 (fetch: `python scripts/hbv.py fetch --port 224 --run tb5_<design>`); then restart the Track-B seeding
+(`seedB_*`). Superseded: `tb3_*`, `tb4_*`, `seedB_bp_fe_top`.
+
 **Running:** 225 GPU 0 `pretrain_small` (T3.4, 200k steps, ~0.048 s/step); 225 GPU 1 `seedA_dp_s1`/`_s2` (Track-A
 T1.7/T2.7 with DREAMPlace, 17 IBM designs, ~12 h); 224 `tb3_{ariane133,bp_fe_top,bp_be_top,swerv_wrapper}` (M1 ->
 f1 -> f2 x2; ariane133 through detailed routing = the T0.3 Track-B condition); 224 `seedA_ibm` (HB-GP dev
