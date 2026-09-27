@@ -135,9 +135,9 @@ go to local disks.
 | T0.6 LLM | **PASS**: DeepSeek reachable with the lab key (read by the client from the key file); models `deepseek-flash`, `deepseek-v4-pro`; the old names `deepseek-reasoner` / `deepseek-chat` are answered by `deepseek-flash` |
 
 | T0.3 OpenROAD 676f8451 (source) | the ORFS 8ae3ae36 pin, 8 commits after the package; built without root (conda-forge deps + CUDD 3.0.0; GUI and tests off; `676f8451bb-src`); every probed command present; used for all ORFS runs. ariane133's own M1 (Hier-RTLMP) does not converge at 8 threads (MPL-0040) with either build; its runs set `RTLMP_MAX_LEVEL=1` (upstream's MPL workaround for the design, 98b961bb3c), all else 2024-12: M1 in 6 min, PDN passes (`scripts/orfs_probe.py`; upstream's later 8 x 8 halo fails the 2024-12 PDN, CHANGELOG). |
-| T0.3 ORFS 2024-12 | ORFS 8ae3ae36 (2024-12-13, pins OpenROAD 676f8451 and Yosys 0.48) with the OpenROAD package above and Yosys 0.48 (conda-forge, commit aaa53474): bp_fe_top runs the full flow to 6_report in 15 min — setup WNS -0.077 ns, hold -0.05 ns, DRC 0, 0 antenna diodes. The GDS step needs KLayout (absent); the metrics do not. ariane133 is in the Track-B campaign (`seedB_orfs5_ariane133`). |
+| T0.3 ORFS 2024-12 | ORFS 8ae3ae36 (2024-12-13, pins OpenROAD 676f8451 and Yosys 0.48) with the OpenROAD package above and Yosys 0.48 (conda-forge, commit aaa53474): bp_fe_top runs the full flow to 6_report in 15 min — setup WNS -0.077 ns, hold -0.05 ns, DRC 0, 0 antenna diodes. The GDS step needs KLayout (absent); the metrics do not. **ariane133 through detailed routing (the T0.3 Track-B condition), 2026-09-28**: OpenROAD 676f8451, `RTLMP_MAX_LEVEL=1`, 8 threads, twice, bit-identical: 6_report in 1 h 56 min, routed WL 7,656,562 um, DRC 0, GR overflow 0, setup WNS -0.015 ns / TNS -0.084 ns, hold +0.01 ns (report resolution), power 0.345 W (`seedB_orfs5_ariane133`, baseline_f2.json). |
 
-**Track decision.** Track A (bookshelf, HB-GP as the f1 stand-in; DREAMPlace not built yet) proceeds on 224's CPUs.
-Track B: the 2024-12 package has every command; the remaining T0.3 condition — ariane133 (ORFS Nangate45, fakeram)
-to detailed routing — runs on 224 with the ORFS-aligned mini-flow (`scripts/server/trackb.sh`: native OpenROAD
-2024-12, Yosys 0.38+92, ORFS platform files; 8 threads per job). GPU work (T3.4 pretraining, later T3.7) runs on 225.
+**Track decision (updated 2026-09-28).** Track A runs on the spec's tools: DREAMPlace 4.3.1 on 225 (M1 = mixed-size,
+f1 = macros fixed). Track B runs the real ORFS flow 2024-12 (8ae3ae36) with OpenROAD 676f8451 built from source and
+Yosys 0.48, 8 threads per job on 224; T0.3 is complete (ariane133 to detailed routing, above). The mini-flow is a
+fallback only. GPU work (T3.4 pretraining, T3.7) runs on 225.

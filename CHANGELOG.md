@@ -18,6 +18,8 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 ### Observed (Track-B campaign, first hours)
 - The 0.13.2 timeout fix worked in production: bp_fe_top's M2.v0.s1 was stopped at 7,200 s in 5_1_grt (log tail
   ends with `do-5_1_grt] Terminated`), recorded as a timeout, and the job's session held one OpenROAD afterwards.
+- **T0.3 complete**: ariane133 through detailed routing on ORFS 2024-12 + OpenROAD 676f8451 (`RTLMP_MAX_LEVEL=1`),
+  twice, bit-identical at 8 threads: routed WL 7,656,562 um, DRC 0, setup WNS -0.015 ns, hold +0.01 ns, 0.345 W.
 - bp_be_top's first three SA layouts fail ORFS's default global route with GRT-0116 (overflow 13, 2,194 and 389,781
   after the extra iterations; the base flow routes cleanly): unroutable at f1, counted as +inf.
 
