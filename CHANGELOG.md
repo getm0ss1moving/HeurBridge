@@ -6,6 +6,17 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 
 ## [Unreleased]
 
+## [0.13.3] — 2026-09-28 — bridge inference runs on the model's device (T3.7 on the GPU)
+
+### Fixed
+- **T3.7 stopped at its first validation on the GPU** (`algR_trackA`, 225, after 4.5 h of CPU data preparation;
+  no training step was lost). `bridge.sample.refine` and `bridge_endpoints` defaulted to `device="cpu"`: the
+  training validation, and also Algorithm R's promotion test, RLCE and the evolution driver (none of which pass a
+  device), put the graph on the CPU while the model was on CUDA. Local runs were CPU-only, so this path had never
+  run on a GPU. Inference now runs on the model's device by default. New test `test_refine_follows_model_device`
+  (Mac GPU backend MPS, CUDA on the servers): fails before the fix, passes after (136 tests pass). The rerun
+  (`algR_trackA2`) restores the cached sources and pairs with `--after algR_trackA`.
+
 ## [0.13.2] — 2026-09-28 — ORFS timeouts kill the whole flow; hbv stop/resume fixes; Track-B campaign restarted
 
 ### Fixed

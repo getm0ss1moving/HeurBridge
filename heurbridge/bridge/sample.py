@@ -53,9 +53,16 @@ def _det_context():
     return Ctx()
 
 
+def model_device(model) -> torch.device:
+    """Device of the model's parameters: inference runs where the model is (cpu for a parameterless model)."""
+    p = next(iter(model.parameters()), None)
+    return p.device if p is not None else torch.device("cpu")
+
+
 @torch.no_grad()
 def bridge_endpoints(model, graph: BridgeGraph, sources: np.ndarray, K: int = 20, method: str = "euler",
-                     device: str = "cpu", gt: dict | None = None) -> np.ndarray:
+                     device=None, gt: dict | None = None) -> np.ndarray:
+    device = device or model_device(model)
     gt = gt or graph.tensors(device)
     xh = torch.as_tensor(np.asarray(sources, np.float32), device=device)
     with _det_context():
@@ -66,7 +73,7 @@ def bridge_endpoints(model, graph: BridgeGraph, sources: np.ndarray, K: int = 20
 
 
 def refine(model, graph: BridgeGraph, design: Design, layouts: list, evaluate, K: int = 20,
-           alphas=ALPHAS, halo: float = 0.0, method: str = "euler", device: str = "cpu",
+           alphas=ALPHAS, halo: float = 0.0, method: str = "euler", device=None,
            sources: np.ndarray | None = None, project=None) -> list:
     """Guarded refinement of a batch of heuristic layouts of one design."""
     project = project or (lambda d, l: legalize_macros(d, l, halo=halo))

@@ -213,3 +213,23 @@ def test_bf16_autocast_step():
     loss.backward()
     assert torch.isfinite(loss)
     assert all(p.grad is None or torch.isfinite(p.grad).all() for p in m.parameters())
+
+
+# inference follows the model's device (T3.7 on 225 failed: validation called refine() without a device, the
+# graph went to the CPU while the model was on CUDA) --------------------------------------------------------
+@pytest.mark.skipif(not (torch.cuda.is_available() or torch.backends.mps.is_available()), reason="no GPU backend")
+def test_refine_follows_model_device():
+    dev = "cuda" if torch.cuda.is_available() else "mps"
+    des, ref, g = small_case(seed=5)
+    m = randomize(BridgeNet(TINY)).eval()
+    rng = np.random.default_rng(2)
+    src = np.stack([np.clip(g.node_positions(ref) + rng.normal(0, 0.05, (g.n, 2)) * g.movable[:, None], 0, 1)
+                    for _ in range(3)])
+    e_cpu = bridge_endpoints(m, g, src, K=10)
+    e_gpu = bridge_endpoints(m.to(dev), g, src, K=10)                  # no device argument
+    assert np.allclose(e_gpu, e_cpu, atol=1e-4), np.abs(e_gpu - e_cpu).max()
+    ctx = f0.F0Context(des, ref.orient)
+    norm = f0.reference_normalizers(ctx, ref.pos)
+    res = refine(m, g, des, [ref], lambda l: float(f0.surrogate_j0(
+        ctx, torch.as_tensor(l.pos, dtype=torch.float32), norm)[0]), K=10)
+    assert len(res) == 1 and res[0].alpha in (0.0, 0.25, 0.5, 1.0)
