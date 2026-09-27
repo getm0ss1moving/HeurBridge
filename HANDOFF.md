@@ -23,7 +23,14 @@ the CPU while the model was on CUDA; no training step lost). Fixed; `algR_trackA
 and pairs (`--after algR_trackA`; preparation ~100 s per design instead of 1,000-2,000 s) and trains on GPU 0.
 
 **Running**: 224 `seedB_orfs5_*` (5 jobs); 225 GPU 0 `algR_trackA2`; 225 GPU 1 `seedA_ispd_s1`, `seedA_ispd_s2`
-(adaptec1, adaptec2, bigblue1 done: DREAMPlace's M1 is the best layout on each, next best +6.5-12% J).
+(adaptec1-4, bigblue1 done: DREAMPlace's M1 is the best layout on each, next best +6.5-17% J).
+
+**Open (for the ISPD2005 report and T5):** on bigblue2 (23,084 movable macros, MMS convention) all 80 program runs
+crash with MemoryError in the sandbox: the program view's dense macro affinity `macro_aff` (M x M float64) is
+4.3 GB, above the 4 GB sandbox address-space limit (bigblue4: 8,170 macros, 0.53 GB, fine). Recorded by name;
+bigblue2's archive holds M1 only. A sparse affinity for very large M would change the program API (T2.1/T5 template).
+Track B: SA layouts often fail ORFS's default global route (GRT-0116) or hit the 2-h timeout; failures are named
+since 0.13.4.
 
 ---
 
