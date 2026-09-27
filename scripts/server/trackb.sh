@@ -6,7 +6,7 @@
 # find in hbv's archiving does not follow the symlink, so none of it is copied into the vault).
 set -eu
 H=/data/dzy/heura_repr
-export HB_OPENROAD="$PWD/scripts/server/openroad_deb.sh"
+export HB_OPENROAD=${HB_OPENROAD:-$PWD/scripts/server/openroad_deb.sh}   # ORFS jobs: scripts/server/openroad_676.sh
 export HB_YOSYS="$H/tools/openroad_2024/bin/yosys"
 export EDA_THREADS=${EDA_THREADS:-8}                 # red line A.2
 export OMP_NUM_THREADS=$EDA_THREADS                  # OpenMP is not bounded by set_thread_count

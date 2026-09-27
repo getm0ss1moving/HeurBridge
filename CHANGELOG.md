@@ -4,7 +4,7 @@ Every change to the code is recorded here with its version, task and verificatio
 Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 (The task list's `_harness/CHANGELOG.md` does not exist in the current checkout; this file replaces it.)
 
-## [Unreleased]
+## [0.13.1] — 2026-09-27 — OpenROAD 676f8451 from source (ORFS pin); Track-A campaign and E3 on the spec tools
 
 ### Added
 - **Track-A campaign on the spec's tools** (`reports/T2_trackA_ibm_dreamplace.md`; 225 GPU 1, two streams): 17 IBM
@@ -19,6 +19,19 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
   f0 must not make macro-stage decisions; the f1 guard and fitness stand (as in the development study).
 - The HB-GP development campaign and the DREAMPlace campaign disagree on which programs help (HB-GP's baseline was
   the benchmark placement, not a placer's): the spec baseline is the stronger reference.
+
+### Changed
+- **Track B runs OpenROAD 676f8451 built from source** (`scripts/server/build_openroad.sh`, launcher
+  `scripts/server/openroad_676.sh`; version string `676f8451bb-src`): the commit ORFS 8ae3ae36 pins. The package
+  (a008522d8) is 8 commits older and lacks mpl2 PR #6335 ("cluster placement for stdcell-only levels"): ORFS's
+  own macro placement of ariane133 failed there after 15 minutes with `MPL-0040 Failed on cluster
+  (i_cache_subsystem/i_nbdcache)_glue_logic`, so the T0.3 Track-B condition (ariane133 to detailed routing) could
+  not be met with it. Built without root against conda-forge CMake 3.29 / gcc 11.4 / Boost 1.86 / SWIG 4.2.1 /
+  spdlog 1.15.3 / Tcl 8.6.13 + tclreadline 2.3.8 / OR-Tools 9.6 (the installer's 9.11 is a GitHub binary: not
+  downloaded without asking) / LEMON 1.3.1 / Eigen 3.4, CUDD 3.0.0 from source; GUI and tests off. Every required
+  command is present (probe), the Python API works. Build fixes on the way: tclreadline is needed for Main.cc,
+  readline must be linked explicitly, and a stale CMake cache hides OR-Tools' pkg-config targets (fresh configure).
+  The ORFS campaign restarted on it (`seedB_orfs2_*`); the `seedB_orfs_*` runs on the package are superseded.
 
 ### Running
 - T3.7 Algorithm R on 225 GPU 0 (`algR_trackA`): the two stream archives merged (139 entries); train 13 IBM designs,
