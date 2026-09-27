@@ -58,7 +58,7 @@ def main():
     w = ROOT / "runs" / "miniflow" / name
     p, d = MF.Nangate45(str(FLOW)), MF.from_orfs(str(FLOW), a.design)
     des, lay = load_def_design(str(w / "fp.hb.def"), [str(p.tech_lef), str(p.sc_lef)] + d.macro_lefs,
-                               family="orfs_cpu", tech="nangate45")
+                               design_id=name, family="orfs_cpu", tech="nangate45")
     m1 = lay.copy()
     idx = {n: i for i, n in enumerate(des.names)}
     m1_cmds = parse_macro_tcl((w / "m1_macros.tcl").read_text())

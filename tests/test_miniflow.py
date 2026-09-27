@@ -144,8 +144,9 @@ def test_orfs_order_tapcell_pdn_and_supply_ports():
     d.tapcell_tcl, d.pdn_tcl, d.fastroute_tcl, d.dont_use = "/p/tapcell.tcl", "/p/pdn.tcl", "/d/fastroute.tcl", ("X1",)
     s = MF.f1_script(p, d, Path("/w/fp.odb"), Path("/w/macros.tcl"), Path("/w"))
     keys = ["set_dont_use {X1}", "source /w/macros.tcl", "setPlacementStatus FIRM", "source /p/tapcell.tcl",
-            "source /p/pdn.tcl", "pdngen", "odb::dbBTerm_destroy", "source /d/fastroute.tcl", "global_placement",
-            "buffer_ports", "HB_POWER_PLACE_BEGIN", "global_route"]
+            "source /p/pdn.tcl", "pdngen", "odb::dbBTerm_destroy", "source /d/fastroute.tcl", "remove_buffers",
+            "buffer_ports", "global_placement", "repair_design", "detailed_placement", "improve_placement",
+            "optimize_mirroring", "HB_POWER_PLACE_BEGIN", "global_route"]      # ORFS 3_3 / 3_4 / 3_5 order
     i = {k: s.index(k) for k in keys}
     assert sorted(i, key=i.get) == keys
     d.pdn_tcl = None                                   # no grid: no supply ports to drop

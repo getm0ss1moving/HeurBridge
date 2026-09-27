@@ -215,17 +215,21 @@ def floorplan_script(p: Nangate45, d: DesignCfg, netlist: Path, out_odb: Path) -
         "initialize_floorplan -utilization %g -aspect_ratio %g -core_space %g -site %s" % (
             d.utilization, d.aspect_ratio, d.core_margin, p.site),
         ("source %s" % d.make_tracks_tcl) if d.make_tracks_tcl else "make_tracks",
+        # ORFS 2_1: tie cells get their own drivers here (SKIP_REPAIR_TIE_FANOUT=0, TIE_SEPARATION 0)
+        "repair_tie_fanout -separation 0 LOGIC0_X1/Z", "repair_tie_fanout -separation 0 LOGIC1_X1/Z",
         "place_pins -hor_layers %s -ver_layers %s -random %s" % (d.io_h, d.io_v, io_exclusions(d.io_tcl)),
         "write_db %s" % out_odb]) + "\n"
 
 
-def m1_script(p: Nangate45, d: DesignCfg, fp_odb: Path, out_odb: Path, out_tcl: Path, threads: int | None = None) -> str:
+def m1_script(p: Nangate45, d: DesignCfg, fp_odb: Path, out_odb: Path, out_tcl: Path, threads: int | None = None,
+              report_dir: Path | None = None) -> str:
     """Tool-native macro placement (M1).  ORFS runs every stage as ``openroad -threads $(NUM_CORES)``, and
     Hier-RTLMP's annealing runs in parallel with the thread count, so M1 uses EDA_THREADS threads (the earlier
     single-threaded M1 took over an hour on ariane133 and is not ORFS's configuration)."""
     return "\n".join([
         "read_db %s" % fp_odb, "\n".join("read_liberty %s" % l for l in [p.lib] + d.macro_libs), "read_sdc %s" % d.sdc,
-        "set_thread_count %d" % (threads or tools.eda_threads(8)), _rtlmp_call(d),
+        "set_thread_count %d" % (threads or tools.eda_threads(8)),
+        _rtlmp_call(d, report_dir or Path(out_tcl).parent / "rtlmp"),
         "write_macro_placement %s" % out_tcl, "write_db %s" % out_odb, 'puts "HB_M1_DONE"']) + "\n"
 
 
@@ -275,13 +279,21 @@ def _density_tcl(d: DesignCfg) -> str:
     return "set hb_density %r\n" % d.place_density
 
 
-def _rtlmp_call(d: DesignCfg) -> str:
+def _if_command(cmd: str) -> str:
+    """Run an optional OpenROAD command when this build has it (logged either way)."""
+    return ('if {[llength [info commands %s]]} { %s; puts "HB_RAN %s" } else { puts "HB_SKIPPED %s" }'
+            % (cmd, cmd, cmd, cmd))
+
+
+def _rtlmp_call(d: DesignCfg, report_dir: Path | None = None) -> str:
     """rtl_macro_placer as ORFS 2_3 calls it (macro_place_util.tcl): the design's RTLMP_* arguments, the platform
     halo and -target_util = the placement density (the earlier M1 passed only the halo).  RTLMP_ARGS replaces
     all of them, as in ORFS.  Flags this build does not have are dropped and logged (HB_RTLMP_DROPPED)."""
     if d.rtlmp_override:
         return "rtl_macro_placer %s" % d.rtlmp_override
     args = " ".join("%s %s" % fv for fv in d.rtlmp_args)
+    if report_dir is not None:                          # ORFS: RTLMP_RPT_DIR under the objects directory
+        args += " -report_directory %s" % report_dir
     return (_density_tcl(d) +
             "set hb_rtlmp [list %s -halo_width %g -halo_height %g -target_util $hb_density]\n" % (args, d.halo[0], d.halo[1]) +
             "set hb_keep {}\n"
@@ -324,11 +336,15 @@ def _place_steps(p: Nangate45, d: DesignCfg, fp_odb: Path, macro_tcl: Path | Non
         ("set_dont_use {%s}" % " ".join(d.dont_use)) if d.dont_use else "",
         _macro_env(d, macro_tcl), _route_setup(p, d),
         "set t0 [clock milliseconds]",
+        # ORFS 3_3 global_place.tcl: remove the synthesis buffers before timing-driven placement (GPL_TIMING_DRIVEN=1),
+        # buffer the ports (DONT_BUFFER_PORTS=0), then place
+        "remove_buffers", "buffer_ports",
         _global_placement(d),
-        # ORFS 3_4 resize: port buffering, electrical repair (buffering / resizing of long, high-fanout nets), tie cells
-        "estimate_parasitics -placement", "buffer_ports", "repair_design",
-        "repair_tie_fanout -separation 5 LOGIC0_X1/Z", "repair_tie_fanout -separation 5 LOGIC1_X1/Z",
+        # ORFS 3_4 resize: electrical repair (ENABLE_PLACE_REPAIR_TIMING=0: no timing repair here)
+        "estimate_parasitics -placement", "repair_design",
+        # ORFS 3_5 detail_place: detailed placement, DPO (ENABLE_DPO=1), mirroring
         "detailed_placement",
+        _if_command("improve_placement"), _if_command("optimize_mirroring"),
         'set cp_ok 1\nif {[catch {check_placement} msg]} { set cp_ok 0; puts "HB_CHECK_PLACEMENT_FAIL $msg" }\nputs "HB_CHECK_PLACEMENT $cp_ok"']
 
 

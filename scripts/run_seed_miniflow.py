@@ -61,7 +61,7 @@ def main():
     fp_def = w / "fp.hb.def"
     if not fp_def.exists():
         odb_to_def(w / "fp.odb", fp_def, docker_image=IMG)
-    des, lay = load_def_design(fp_def, [str(p.tech_lef), str(p.sc_lef)] + d.macro_lefs, family="orfs_cpu", tech="nangate45")
+    des, lay = load_def_design(fp_def, [str(p.tech_lef), str(p.sc_lef)] + d.macro_lefs, design_id=name, family="orfs_cpu", tech="nangate45")
     # M1 layout from ORFS-style place_macro commands
     m1 = lay.copy()
     idx = {n: i for i, n in enumerate(des.names)}

@@ -4,6 +4,31 @@ Every change to the code is recorded here with its version, task and verificatio
 Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 (The task list's `_harness/CHANGELOG.md` does not exist in the current checkout; this file replaces it.)
 
+## [0.12.4] — 2026-09-27 — Track-B placement steps as ORFS 3_3-3_5; T3.4 pretraining done
+
+### Fixed
+- **Track-B placement steps now follow ORFS 3_3-3_5** (`eval/miniflow._place_steps`): `remove_buffers` before
+  timing-driven global placement (GPL_TIMING_DRIVEN=1) and `buffer_ports` before it (DONT_BUFFER_PORTS=0; the
+  mini-flow buffered after placement), `repair_design` only at 3_4 (ENABLE_PLACE_REPAIR_TIMING=0), and after
+  detailed placement `improve_placement` (ENABLE_DPO=1) and `optimize_mirroring`, each only when the build has it
+  (logged). `repair_tie_fanout` moved to the floorplan (ORFS 2_1). ariane133's f1 had stopped with GPL-0302: its
+  cells kept the synthesis buffers (31.65 % of the free core against the platform density 0.30).
+- Track-B design ids are the ORFS design names: ariane133 and ariane136 share the top module `ariane` and would
+  have collided in run directories and merged archives. Hier-RTLMP reports go to the run's `rtlmp/` directory.
+- Baselines on the aligned flow (`tb5_*`, superseded by `tb6_*` for the placement change): bp_fe_top, bp_be_top and
+  swerv_wrapper completed f1 and two bit-identical f2 runs with DRC 0 (setup WNS -1.89 / -2.02 / -0.94 ns);
+  ariane136's M1 (no RTLMP limits in its config) exceeded the 7,200 s step limit — retried once in `tb6_*`; if it
+  times out again it cannot run within red line A.2 on this build and is excluded by name.
+
+### Added
+- **T3.4 pretraining done** (`reports/T3_pretrain_small.md`): 200k steps, batch 64, 3.47 h on 225 GPU 0 (0.048 s/step
+  on ~200-object circuits, 0.106 on ~1,000); final loss 0.089 (flow term 0.077, overlap 0.127); checkpoint sha256
+  6a5ee4b8...; `scripts/report_pretrain.py`.
+- ORFS's CI reference bounds for the five designs (upstream rules-base.json before 2026-09-22) show ORFS's timing
+  closure is far better than the mini-flow's (signoff setup WNS about -0.2 to -0.6 ns vs -0.9 to -2.0 ns here): the
+  mini-flow repairs timing only in its f2 `rt` stage, not at floorplan / placement / CTS / global routing as ORFS
+  does. Recorded as a deviation; J is relative to the same flow's baseline.
+
 ## [0.12.3] — 2026-09-27 — ORFS floorplan areas and RTLMP arguments for Track B
 
 ### Fixed
