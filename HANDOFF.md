@@ -4,6 +4,32 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
+## 2026-09-27 — Session 3 (evening): Track B moves to the real ORFS flow; T3.4 done
+
+**Track B = ORFS 2024-12-13 (8ae3ae36) + OpenROAD a008522d8 + Yosys 0.48** (0.13.0). The mini-flow could not be made
+ORFS-equivalent on this build (each alignment exposed the next gap; ORFS's kept-resize placement diverges there).
+The real flow works: bp_fe_top M1 to 6_report in 15 minutes (setup WNS -0.077 ns, DRC 0). `run_seed_orfs.py` does
+the T1.7 baselines and the T2.7 seeding; candidates reuse the base synthesis/floorplan; identical layouts are
+evaluated once. In the driver test M2.v0 beat ORFS's own M1 at f2 with every gate passed (J 0.937).
+
+**T3.4 done**: `reports/T3_pretrain_small.md` (checkpoint in the 225 vault as `pretrain_small`).
+
+**Running**
+- 224: `seedB_orfs_{bp_fe_top,bp_be_top,swerv_wrapper,ariane133,ariane136}` (hours to days; ariane136's M1 has no
+  RTLMP limits and ran > 2 h in the mini-flow — watch it).
+- 225 GPU 1: `seedA_dp_s1/_s2` (Track-A spec campaign; ibm17/ibm18 left at 20:10).
+
+**Next**
+1. When `seedA_dp_*` end: fetch; `report_trackA.py --label ibm_dreamplace ...`; E3 calibration
+   (`calibrate_dev.py`, combined runs dir); launch T3.7 on 225 GPU 0 (command: scratch `algr_cmd.txt`, i.e.
+   `--after seedA_dp_s1 seedA_dp_s2 pretrain_small --data eda_harness:eda`, merge the two archives, then
+   `algorithm_r.py ... --val ibm04,ibm06 --final dreamplace --pretrained checkpoints/pretrain_small/pretrain_small.pt`;
+   ibm08/ibm12 are held back for E0). Merge the job's new alpha-ledger lines into `stats/alpha_ledger.jsonl`.
+2. When the ORFS jobs end: fetch; merge `archive_B0_orfs_*`; Track-B report.
+3. User decisions still open: T5 LLM model, E0 protocol, a third 225 GPU (ISPD2005).
+
+---
+
 ## 2026-09-27 — Session 3 (continued): OpenROAD 2024-12, 225 GPU work, Track B on the servers, DREAMPlace
 
 **User decisions received:** 225's GPUs may be used; the prebuilt OpenROAD 2024-12 package may be downloaded.
