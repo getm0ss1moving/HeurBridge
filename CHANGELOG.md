@@ -4,6 +4,52 @@ Every change to the code is recorded here with its version, task and verificatio
 Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 (The task list's `_harness/CHANGELOG.md` does not exist in the current checkout; this file replaces it.)
 
+## [0.11.1] — 2026-09-27 — OpenROAD 2024-12 on 224, GPU env on 225, T3.4 pretraining started
+
+### Fixed
+- **bf16 autocast crash in the bridge model** (`bridge/model.py`): the attention output (bf16 under autocast) was
+  `index_add`-ed into the fp32 residual stream — every CUDA training run (T3.4 pretraining, T3.7) would have
+  stopped at the first step. Never exercised before: all earlier training ran on CPUs with autocast off. Found by
+  the GPU smoke test on 225; `test_bf16_autocast_step` runs the same mixed-dtype path under CPU autocast (fails
+  without the fix).
+- **Unintended write into the HA-PR tree on 224**: importing `eda/harness/metrics_schema.py` with Python 3.11 left
+  `eda/harness/__pycache__/metrics_schema.cpython-311.pyc` (12 KB; the only file of ours in that tree — nothing
+  else in it changed). The harness shim now imports with `sys.dont_write_bytecode`, and hbv jobs export
+  `PYTHONDONTWRITEBYTECODE=1`. The stray file is to be removed once the job that is still importing it ends.
+- **Server runs recorded `git_sha: unknown`** (workspaces are shipped without `.git`): `hbv.py push-code` adds a
+  `CODE_VERSION` stamp (commit, dirty flag, archive name) and `meta.git_sha()` falls back to it; `meta.json` also
+  records `code_archive`.
+- `run_seed_miniflow.py` assumed `runs/miniflow/<design>/` existed (true only on the Mac); `run_tool` creates the
+  script's directory. `run_f2_miniflow.py` accepts a baseline-only campaign (no `evals.jsonl`).
+
+### Added
+- **OpenROAD 2024-12 on 224 without root** (T0.3; download approved by the user): `scripts/server/install_openroad_deb.sh`
+  unpacks the Precision Innovations package `openroad_2.0-17598-ga008522d8_amd64-ubuntu-20.04.deb`
+  (sha256 `c24ca8ff…0535dfdb`, checked) and its two missing dependencies; `ldd` finds every library. Probe: every
+  required command and flag, including `rtl_macro_placer`, `place_macro`, `global_route -allow_congestion` and the
+  Python API (`reports/env/openroad_probe_224_deb_2024-12_a008522d8.txt`). `scripts/server/openroad_deb.sh` sets
+  the package's library path for the binary only.
+- `heurbridge/tools.py`: one place resolving the EDA binaries — `HB_OPENROAD` / `HB_YOSYS` select native runs (the
+  servers), otherwise the local OpenLane container; `EDA_THREADS` sets the evaluators' thread count; run metadata
+  records the actual tool versions (`tools.describe()`) instead of a hard-coded build. Native runs call the binary
+  directly (no login shell: the shared account's profile cannot choose the tool).
+- `scripts/server/trackb.sh`: Track-B jobs on 224 (native OpenROAD 2024-12, Yosys 0.38+92, ORFS platform files
+  linked read only, `EDA_THREADS=8`).
+- **225 set up for GPU work** (approved by the user): env `/tmp/.hbenv/hb` (torch 2.6.0+cu118 — Ubuntu 18.04's glibc
+  2.27 excludes later wheels —, PyG 2.8.0.post1), GPU smoke test PASS on GPU 0 (0.119 s/step, `reports/env/gpu_smoke_225.txt`).
+  `setup_env.sh` bootstraps micromamba itself (`HB_TOOLS`), `TORCH_SPEC` pins a torch version; `t0_server.sh t05`
+  takes `HB_ENV` / `SMOKE_GPU` / `HOST_TAG`, `t03deb` probes the package.
+- `pretrain_bridge.py --resume`: continues from the checkpoint (model, EMA, optimizer, step; the data streams are
+  reseeded from the step — valid, not bit-identical to an uninterrupted run); checkpoints are written atomically;
+  `meta.json` records the configuration and code version. Tested on a 4 + 2-step CPU run.
+
+### Running
+- T3.4 pretraining on 225 GPU 0 (`pretrain_small`, 200k steps, batch 64): 0.047 s/step in stage 1, loss 0.249 ->
+  0.130 over the first 4k steps.
+- Track B on 224: `ariane133` and `bp_fe_top` baselines (synthesis -> floorplan -> M1 `rtl_macro_placer` -> f1) with
+  the 2024-12 OpenROAD; f2 (detailed route) follows — the remaining T0.3 condition for Track B.
+- Track-A seeding `seedA_ibm`: 16 of 17 designs done (ibm18 running).
+
 ## [0.11.0] — 2026-09-27 — server access, encrypted workflow on the shared lab account, T0 on 224
 
 ### Added

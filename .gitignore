@@ -58,3 +58,7 @@ archive_dev*/
 # local-only lab/server notes (host, account, ports, people): never published
 LAB_*.md
 LAB_*
+
+# lab-server recovery payload: large, machine-local, never published
+_recovered_from_server/
+CODE_VERSION

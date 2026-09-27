@@ -16,6 +16,7 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+from heurbridge import tools  # noqa: E402
 from heurbridge.archive.store import Archive, Candidate  # noqa: E402
 from heurbridge.core import orient as O  # noqa: E402
 from heurbridge.core.odb import odb_to_def  # noqa: E402
@@ -44,6 +45,7 @@ def main():
     a = ap.parse_args()
     name = a.design.split("/")[-1]
     w = ROOT / "runs" / "miniflow" / name
+    w.mkdir(parents=True, exist_ok=True)
     p, d = MF.Nangate45(str(FLOW)), MF.from_orfs(str(FLOW), a.design)
     if not (w / "fp.odb").exists():
         MF.run_tool("yosys", MF.synth_script(p, d, w / "synth_hier.v"), w / "synth_hier.ys")
@@ -90,7 +92,7 @@ def main():
     if a.programs:
         progs = [q for q in progs if q["id"] in set(a.programs.split(","))]
     write_meta(rdir, "seed_miniflow_%s" % des.id, des.id, config=vars(a), baseline=baseline.to_dict(),
-               track="B-dev (local mini-flow f1, OpenLane OpenROAD b16bda7e)")
+               track="B-dev (mini-flow f1; %s)" % tools.describe(), eda_threads=ev.threads, record_host=True)
     # MACRO_PLACE_HALO is a per-side halo (rtl_macro_placer inflates each macro by it and inflated macros do
     # not overlap: M1 leaves 20 um between RAMs and >= 10 um to the core edge for halo 10).  P_M's halo is
     # the macro-to-macro spacing, so it is twice the platform value; its footprint then keeps one platform

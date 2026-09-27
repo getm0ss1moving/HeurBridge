@@ -31,9 +31,10 @@ import time
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from .. import tools
 from .f1 import parse_f1_log
 
-DOCKER_IMAGE = "efabless/openlane:master-arm64v8"
+DOCKER_IMAGE = tools.docker_image()          # None when HB_OPENROAD is set (servers: native tools)
 
 
 @dataclass
@@ -346,16 +347,14 @@ def f2_metrics(log: str) -> dict:
 def run_tool(cmd: str, script_text: str, script_path: Path, docker_image: str | None = DOCKER_IMAGE,
              timeout: int = 7200, mount: str | None = None) -> tuple:
     """Run 'openroad' or 'yosys' on a script; returns (returncode, log)."""
+    script_path.parent.mkdir(parents=True, exist_ok=True)
     script_path.write_text(script_text)
-    if cmd == "openroad":
-        inner = "openroad -no_init -no_splash -exit %s" % script_path
-    else:
-        inner = "yosys -q -s %s" % script_path
+    args = ["-no_init", "-no_splash", "-exit", str(script_path)] if cmd == "openroad" else ["-q", "-s", str(script_path)]
     if docker_image:
         m = mount or str(Path.home())
-        full = ["docker", "run", "--rm", "-v", "%s:%s" % (m, m), docker_image, "bash", "-lc", inner]
-    else:
-        full = ["bash", "-lc", inner]
+        full = ["docker", "run", "--rm", "-v", "%s:%s" % (m, m), docker_image, "bash", "-lc", " ".join([cmd] + args)]
+    else:                                  # no login shell: the shared account's profile must not pick the binary
+        full = [tools.binary(cmd)] + args
     t0 = time.time()
     try:
         pr = subprocess.run(full, capture_output=True, text=True, timeout=timeout)

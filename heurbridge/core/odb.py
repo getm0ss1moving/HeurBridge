@@ -12,18 +12,19 @@ import subprocess
 import tempfile
 from pathlib import Path
 
+from .. import tools
 from .defio import load_def_design
 
 TCL = "read_db {odb}\nwrite_def {out}\nexit\n"
 
 
-def odb_to_def(odb: str | Path, out_def: str | Path, openroad: str = "openroad", timeout: int = 1800,
+def odb_to_def(odb: str | Path, out_def: str | Path, openroad: str | None = None, timeout: int = 1800,
                docker_image: str | None = None) -> Path:
     out_def = Path(out_def)
     with tempfile.NamedTemporaryFile("w", suffix=".tcl", delete=False, dir=out_def.parent) as fh:
         fh.write(TCL.format(odb=Path(odb).resolve(), out=out_def.resolve()))
         tcl = fh.name
-    cmd = [openroad, "-no_init", "-no_splash", "-exit", tcl]
+    cmd = [openroad or tools.binary("openroad"), "-no_init", "-no_splash", "-exit", tcl]
     if docker_image:
         mounts = sorted({str(Path(odb).resolve().parent), str(out_def.resolve().parent)})
         cmd = ["docker", "run", "--rm"] + sum([["-v", "%s:%s" % (m, m)] for m in mounts], []) + \

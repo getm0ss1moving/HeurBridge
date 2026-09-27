@@ -11,6 +11,7 @@ import time
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from .. import tools
 from ..core.design import Design, Layout
 from ..eval import cost
 
@@ -120,8 +121,8 @@ class MiniflowEvaluator(Evaluator):
     flow_dir: str = ""
     platform_design: str = ""
     fp_odb: str = ""
-    threads: int = 6
-    docker_image: str | None = "efabless/openlane:master-arm64v8"
+    threads: int = field(default_factory=tools.eda_threads)
+    docker_image: str | None = field(default_factory=tools.docker_image)
     timeout_s: int = 7200
     exact: bool = False               # place_macro -exact exists only in newer OpenROAD builds
     timing_stage: str = "place"
@@ -169,8 +170,8 @@ class MiniflowF2Evaluator(Evaluator):
     flow_dir: str = ""
     platform_design: str = ""
     fp_odb: str = ""
-    threads: int = 6
-    docker_image: str | None = "efabless/openlane:master-arm64v8"
+    threads: int = field(default_factory=tools.eda_threads)
+    docker_image: str | None = field(default_factory=tools.docker_image)
     timeout_s: int = 7200
     exact: bool = False
     repair_timing: bool = True

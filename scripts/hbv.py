@@ -33,6 +33,7 @@ from __future__ import annotations
 
 import argparse
 import io
+import json
 import os
 import shlex
 import stat
@@ -115,13 +116,18 @@ def decrypt_bytes(data: bytes) -> bytes:
                           input=data, capture_output=True, check=True).stdout
 
 
-def tgz(root: Path, files: list) -> bytes:
+def tgz(root: Path, files: list, extra: dict | None = None) -> bytes:
+    """tar.gz of root/files, plus generated members ``extra`` {name: bytes}."""
     buf = io.BytesIO()
     with tarfile.open(fileobj=buf, mode="w:gz", format=tarfile.PAX_FORMAT) as t:
         for f in files:
             p = root / f
             if p.is_file():
                 t.add(str(p), arcname=str(f))
+        for name, data in (extra or {}).items():
+            ti = tarfile.TarInfo(name)
+            ti.size, ti.mtime, ti.mode = len(data), int(time.time()), 0o600
+            t.addfile(ti, io.BytesIO(data))
     return buf.getvalue()
 
 
@@ -158,7 +164,10 @@ def cmd_push_code(a):
                          text=True).stdout.strip() or "nogit"
     dirty = subprocess.run(["git", "-C", str(ROOT), "status", "--porcelain"], capture_output=True, text=True).stdout.strip()
     name = "%s%s-%s" % (sha, "-dirty" if dirty else "", time.strftime("%Y%m%d%H%M%S"))
-    blob = encrypt_bytes(tgz(ROOT, files))
+    full = subprocess.run(["git", "-C", str(ROOT), "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
+    # the workspace has no .git: heurbridge.meta reads the commit from this stamp
+    stamp = json.dumps({"code": name, "git_sha": full or "unknown", "dirty": bool(dirty)}).encode()
+    blob = encrypt_bytes(tgz(ROOT, files, {"CODE_VERSION": stamp}))
     upload(a.port, a.root, "vault/code/%s.tgz.enc" % name, blob)
     upload(a.port, a.root, "vault/code/latest", (name + "\n").encode())       # a name, not content
     print("CODE_PUSHED %s files=%d bytes=%d" % (name, len(files), len(blob)))
@@ -181,7 +190,8 @@ def cmd_run(a):
     # The account's $HOME is on a NAS whose per-user quota is exhausted (EDQUOT): tool caches go to a local disk.
     # They hold public packages only (conda/pip downloads, font and kernel caches), never our data.
     cache = a.cache_dir or ("/data/dzy/heura_repr/cache" if a.port == 224 else "/tmp/.hbcache")
-    env = ["export PYTHONUNBUFFERED=1", "mkdir -p %s" % shlex.quote(cache)]
+    # PYTHONDONTWRITEBYTECODE: no __pycache__ next to modules imported from outside the workspace
+    env = ["export PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1", "mkdir -p %s" % shlex.quote(cache)]
     for var, sub in (("XDG_CACHE_HOME", "xdg"), ("PIP_CACHE_DIR", "pip"), ("CONDA_PKGS_DIRS", "conda_pkgs"),
                      ("MPLCONFIGDIR", "mpl"), ("TORCH_HOME", "torch")):
         env.append("export %s=%s" % (var, shlex.quote("%s/%s" % (cache, sub))))

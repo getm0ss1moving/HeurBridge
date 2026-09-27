@@ -7,7 +7,7 @@ Selection from the f1 campaign (runs/seed_miniflow/<design>/evals.jsonl, rows wi
 gates): the --top best by f1 J (T2.7: top 10 to f2) and --spread more rows evenly spaced in f1-J rank (for
 the f1 -> f2 calibration).  The M1 baseline is evaluated --base-runs times at f2 (T1.7 median).  Every f2
 evaluation is appended to evals_f2.jsonl (resumable); rows that pass every f2 gate are inserted into the
-archive at fidelity 2.  Development flow (OpenLane OpenROAD b16bda7e): no claim follows from it.
+archive at fidelity 2.  Development flow (tool versions in f2_meta/meta.json): no claim follows from it.
 """
 
 import argparse
@@ -21,6 +21,7 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+from heurbridge import tools  # noqa: E402
 from heurbridge.archive.store import Archive, Candidate  # noqa: E402
 from heurbridge.core import orient as O  # noqa: E402
 from heurbridge.core.defio import load_def_design  # noqa: E402
@@ -85,7 +86,8 @@ def main():
         print(json.dumps({"error": "baseline f2 failed", "failures": [r.get("failure") for r in recs]}))
         sys.exit(1)
     baseline = cost.Baseline.from_records(des.id, ok_base)
-    rows = [json.loads(l) for l in (rdir / "evals.jsonl").read_text().splitlines()]
+    ev_path = rdir / "evals.jsonl"                      # absent when only the baseline was run (--seeds 0)
+    rows = [json.loads(l) for l in ev_path.read_text().splitlines()] if ev_path.exists() else []
     pick = select(rows, a.top, a.spread)
     ledger = Ledger(rdir / "evals_f2.jsonl")
     arch = Archive(a.archive, min_fidelity=1)
@@ -108,7 +110,8 @@ def main():
         print(json.dumps({"run_id": rid, "status": row.get("status"), "f1_J_raw": r["J_raw"], "f2_J": row.get("J"),
                           "f2_J_raw": row.get("J_raw"), "failure": (row.get("record") or {}).get("failure")}), flush=True)
     write_meta(rdir / "f2_meta", "f2_miniflow_%s" % des.id, des.id, config=vars(a), baseline_f2=baseline.to_dict(),
-               n_selected=len(pick), track="B-dev (local mini-flow f2, OpenLane OpenROAD b16bda7e)")
+               n_selected=len(pick), track="B-dev (mini-flow f2; %s)" % tools.describe(), eda_threads=ev.threads,
+               record_host=True)
     print(json.dumps({"f2_done": len(out), "ok": sum(1 for r in out if r.get("status") == "ok")}), flush=True)
 
 

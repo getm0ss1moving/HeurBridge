@@ -21,4 +21,10 @@ def harness(name: str) -> ModuleType:
     hdir = str(root / "harness")
     if hdir not in sys.path:
         sys.path.insert(0, hdir)
-    return importlib.import_module(name)
+    # the harness tree belongs to HA-PR (on the servers: another project's directory): never leave
+    # __pycache__/*.pyc in it
+    saved, sys.dont_write_bytecode = sys.dont_write_bytecode, True
+    try:
+        return importlib.import_module(name)
+    finally:
+        sys.dont_write_bytecode = saved

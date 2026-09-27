@@ -94,7 +94,7 @@ class Block(nn.Module):
             hb = h.view(B, N, W)
             a = self.n3(hb[:, attn_idx])
             out, _ = self.attn(a, a, a, need_weights=False)
-            hb = hb.index_add(1, attn_idx, out)
+            hb = hb.index_add(1, attn_idx, out.to(hb.dtype))       # autocast: attention output is bf16
             h = hb.reshape(B * N, W)
         return h
 

@@ -28,6 +28,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
+from .. import tools
 from ..core import defio, orient as O
 from ..core.design import Design, Layout
 from .f0 import F0Config, F0Context
@@ -141,14 +142,14 @@ def parse_f1_log(text: str) -> dict:
     return out
 
 
-def run_openroad_f1(job: OpenroadJob, work: str | Path, openroad: str = "openroad", timeout: int = 7200,
+def run_openroad_f1(job: OpenroadJob, work: str | Path, openroad: str | None = None, timeout: int = 7200,
                     env: dict | None = None, docker_image: str | None = None) -> dict:
     """Run the f1 script; returns the parsed metrics plus HPWL recomputed from the output DEF."""
     work = Path(work)
     work.mkdir(parents=True, exist_ok=True)
     tcl = work / "f1.tcl"
     tcl.write_text(make_f1_tcl(job, work))
-    cmd = [openroad, "-no_init", "-no_splash", "-exit", str(tcl)]
+    cmd = [openroad or tools.binary("openroad"), "-no_init", "-no_splash", "-exit", str(tcl)]
     if docker_image:
         mounts = sorted({str(Path(p).resolve().parent) for p in [tcl, *(job.lefs or []), *(job.libs or []),
                                                                job.def_path or tcl, job.db_path or tcl, job.sdc or tcl]})

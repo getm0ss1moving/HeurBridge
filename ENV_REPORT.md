@@ -117,7 +117,7 @@ go to local disks.
 |---|---|---|---|---|
 | 224 (EDA node) | 64 cores / 125 GB | 3x RTX 3090, GPU 0 "Unknown Error" | **fails** (`cuInit` error 3 on every device: the faulty GPU breaks the driver; needs an admin) | `/data` 3.6 TB, 300 GB free |
 | 227 | 64 / 125 GB | 3x RTX 3090, GPU 0 faulty | fails the same way | `/data` not writable; `/tmp` |
-| 225 | 24 / 125 GB | 4x RTX 3090, idle | works (driver 510.54) | `/data` 99 % full — **use needs approval (A.2)** |
+| 225 | 24 / 125 GB | 4x RTX 3090 | works (driver 510.54, CUDA 11.6) | `/data` 99 % full; **approved by the user (2026-09-27)**: env and vault in `/tmp` (`/tmp/.hbenv/hb`, `/tmp/.hbv`), GPU 0 used |
 | 231 | — | 5x RTX 4090, all busy | works | `/tmp` 5 GB free — **use needs approval (A.2)** |
 | 232 | — | — | host does not answer commands | — |
 | 234 | — | — | NVIDIA driver not running | `/tmp` |
@@ -128,11 +128,13 @@ go to local disks.
 | T0.2 probe | Ubuntu 20.04, Python 3.8 system, gcc 9.4, cmake; no Docker access (not in the `docker` group; Docker Hub unreachable); no conda on PATH; GitHub, PyPI, conda (TUNA mirror) and the DeepSeek API reachable |
 | T0.3 OpenROAD 2022 (HA-PR binary) | runs with its bundled libraries; `rtl_macro_placer` yes, `place_macro` no, `global_route -congestion_report_file` no |
 | T0.3 conda (litex-hub) | unpinned: 2022-03 build `f12e2f47` (no `place_macro`). Pinned `2.0-12381-g01bba3695` (2024-03, needs Anaconda `main` before conda-forge): every GP/GR/DRT/RCX command and flag, but **no `rtl_macro_placer` and no `place_macro`**. Yosys 0.38+92. |
-| T0.3 candidate | prebuilt `openroad_2.0-17598-ga008522d8_amd64-ubuntu-20.04.deb` (2024-12, Precision Innovations, 53 MB), unpackable without root — waiting for approval to download |
+| T0.3 OpenROAD 2024-12 (.deb) | **installed without root** (approved 2026-09-27): `openroad_2.0-17598-ga008522d8_amd64-ubuntu-20.04.deb` (Precision Innovations release 2024-12-14, 53,059,724 bytes, sha256 `c24ca8ffd12636a93d0c8c4ac01ff96ca1d621a1f1a77421fb10de7c0535dfdb`; downloaded on the Mac because 224 cannot fetch GitHub release assets), unpacked with `dpkg -x` by `scripts/server/install_openroad_deb.sh`; the two missing dependencies (`libqt5charts5`, `tcl-tclreadline`) unpacked the same way; `ldd`: no missing library. Probe (`reports/env/openroad_probe_224_deb_2024-12_a008522d8.txt`): **every required command and flag**, including `rtl_macro_placer`, `macro_placement`, `place_macro` (`-macro_name -location [-orientation]`; no `-exact`), `global_route -allow_congestion`, `extract_parasitics`; Python API (`openroad -python`: `openroad`, `odb`) works. Launcher `scripts/server/openroad_deb.sh` (library path for this binary only). |
 | T0.4 benchmarks | IBM bookshelf + LEF/DEF, ISPD2005 and the ORFS checkout uploaded (public data, plaintext); **all 260 files match** the sha256 manifests |
 | T0.5 env `hb` | Python 3.11, torch 2.7.1+cu118, PyG 2.8.0, pymetis, kahypar. GPU smoke test **FAIL** on 224 (CUDA cannot initialize; CPU fallback 8.1 s/step) |
+| T0.5 on 225 | env `/tmp/.hbenv/hb`: Python 3.11, torch 2.6.0+cu118 (Ubuntu 18.04 / glibc 2.27: pip skips the manylinux_2_28 wheels of later versions), PyG 2.8.0.post1, pymetis, kahypar. GPU smoke test **PASS** on GPU 0 (`reports/env/gpu_smoke_225.txt`): 1.13M params, 20k nodes / 120k edges, batch 4, median step 0.119 s, peak 4.29 GB. The first attempt found a bf16-autocast bug in the bridge model (never exercised on CPU), fixed in 0.11.1. |
 | T0.6 LLM | **PASS**: DeepSeek reachable with the lab key (read by the client from the key file); models `deepseek-flash`, `deepseek-v4-pro`; the old names `deepseek-reasoner` / `deepseek-chat` are answered by `deepseek-flash` |
 
 **Track decision.** Track A (bookshelf, HB-GP as the f1 stand-in; DREAMPlace not built yet) proceeds on 224's CPUs.
-Track B needs an OpenROAD with Hier-RTLMP (M1) and ORFS-compatible commands: the conda builds lack them; the
-prebuilt 2024-12 package is the next step (approval pending), a source build the fallback.
+Track B: the 2024-12 package has every command; the remaining T0.3 condition — ariane133 (ORFS Nangate45, fakeram)
+to detailed routing — runs on 224 with the ORFS-aligned mini-flow (`scripts/server/trackb.sh`: native OpenROAD
+2024-12, Yosys 0.38+92, ORFS platform files; 8 threads per job). GPU work (T3.4 pretraining, later T3.7) runs on 225.

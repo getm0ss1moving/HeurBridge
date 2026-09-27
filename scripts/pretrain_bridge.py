@@ -9,10 +9,15 @@ circuits of ~200 objects, stage 2 of ~1000 (the last 25% of steps).  Cells are c
 cluster) as in the macro-stage graph.  Source x0 = uniform on the canvas for movable nodes (FlowPlace's
 choice); target = the circuit's hidden layout.  One circuit per step, ``batch`` noise draws (graph shared).
 Same loss as the bridge (sigma, overlap penalty).  The model is the bridge backbone (use_source=False).
+
+--resume continues from <out>/pretrain_<model>.pt (model, EMA, optimizer, step).  The circuit streams and the
+noise generator are reseeded from the resume step, so a resumed run is valid but not bit-identical to an
+uninterrupted one.  Checkpoints are written atomically (temp file + rename).
 """
 
 import argparse
 import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -28,6 +33,7 @@ from heurbridge.bridge.graph import build_graph  # noqa: E402
 from heurbridge.bridge.model import BridgeConfig, BridgeNet  # noqa: E402
 from heurbridge.bridge.train import EMA, TrainConfig, bridge_loss, file_sha256, integrate, lr_at  # noqa: E402
 from heurbridge.core import synth  # noqa: E402
+from heurbridge.meta import write_meta  # noqa: E402
 from heurbridge.heuristics.cell.cluster import cluster_cells  # noqa: E402
 
 
@@ -46,13 +52,13 @@ def circuit(seed: int, n_obj: int):
 
 
 class Circuits(IterableDataset):
-    def __init__(self, base_seed: int, n_circuits: int, n_obj: int):
-        self.base, self.n, self.n_obj = base_seed, n_circuits, n_obj
+    def __init__(self, base_seed: int, n_circuits: int, n_obj: int, offset: int = 0):
+        self.base, self.n, self.n_obj, self.offset = base_seed, n_circuits, n_obj, offset
 
     def __iter__(self):
         info = torch.utils.data.get_worker_info()
         wid, nw = (info.id, info.num_workers) if info else (0, 1)
-        rng = np.random.default_rng(self.base + 7919 * wid)
+        rng = np.random.default_rng([self.base + 7919 * wid, self.offset])
         while True:
             seed = self.base + int(rng.integers(0, self.n))
             g, x1 = circuit(seed, self.n_obj)
@@ -73,9 +79,11 @@ def main():
     ap.add_argument("--log-every", type=int, default=500)
     ap.add_argument("--save-every", type=int, default=10000)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--resume", action="store_true", help="continue from <out>/pretrain_<model>.pt if present")
     a = ap.parse_args()
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
+    write_meta(out, "pretrain_%s" % a.model, "synthetic", seed=a.seed, config=vars(a), record_host=True)
     n1, o1 = map(int, a.stage1.split(":"))
     n2, o2 = map(int, a.stage2.split(":"))
     cfg = TrainConfig(steps=a.steps, batch=a.batch, lr=a.lr, device=a.device, warmup=min(1000, a.steps // 10),
@@ -84,15 +92,25 @@ def main():
     model = BridgeNet(BridgeConfig.small() if a.model == "small" else BridgeConfig.base()).to(a.device)
     opt = torch.optim.AdamW(model.parameters(), lr=a.lr, weight_decay=cfg.weight_decay)
     ema = EMA(model, cfg.ema)
-    gen = torch.Generator().manual_seed(a.seed)
-    rng = np.random.default_rng(a.seed)
+    ckpt = out / ("pretrain_%s.pt" % a.model)
+    start = 0
+    if a.resume and ckpt.exists():
+        st = torch.load(ckpt, map_location=a.device, weights_only=False)
+        model.load_state_dict(st["model"])
+        ema.shadow.load_state_dict(st["ema"])
+        if "opt" in st:
+            opt.load_state_dict(st["opt"])
+        start = int(st["step"])
+        print(json.dumps({"resumed_from_step": start, "had_optimizer_state": "opt" in st}), flush=True)
+    gen = torch.Generator().manual_seed(a.seed + start)
+    rng = np.random.default_rng([a.seed, start])
     switch = int(0.75 * a.steps)
-    loaders = {1: iter(DataLoader(Circuits(10_000_000, n1, o1), batch_size=None, num_workers=a.workers)),
-               2: iter(DataLoader(Circuits(20_000_000, n2, o2), batch_size=None, num_workers=a.workers))}
+    loaders = {1: iter(DataLoader(Circuits(10_000_000, n1, o1, start), batch_size=None, num_workers=a.workers)),
+               2: iter(DataLoader(Circuits(20_000_000, n2, o2, start), batch_size=None, num_workers=a.workers))}
     logf = open(out / "pretrain.log", "a")
     t0, run = time.time(), []
     use_bf16 = a.device.startswith("cuda")
-    for it in range(a.steps):
+    for it in range(start, a.steps):
         g, x1 = next(loaders[1 if it < switch else 2])
         gt = g.tensors(a.device)
         X1 = torch.as_tensor(x1, device=a.device).unsqueeze(0).repeat(a.batch, 1, 1)
@@ -119,10 +137,11 @@ def main():
             logf.write(s + "\n")
             logf.flush()
         if (it + 1) % a.save_every == 0 or it + 1 == a.steps:
-            path = out / ("pretrain_%s.pt" % a.model)
+            tmp = ckpt.with_suffix(".pt.tmp")
             torch.save({"model": model.state_dict(), "ema": ema.shadow.state_dict(), "model_config": model.export_config(),
-                        "train_config": vars(a), "step": it + 1}, path)
-    h = file_sha256(out / ("pretrain_%s.pt" % a.model))
+                        "train_config": vars(a), "step": it + 1, "opt": opt.state_dict()}, tmp)
+            os.replace(tmp, ckpt)
+    h = file_sha256(ckpt)
     (out / "pretrain_done.json").write_text(json.dumps({"sha256": h, "steps": a.steps}, indent=1))
     print(json.dumps({"done": True, "sha256": h}), flush=True)
 

@@ -195,3 +195,21 @@ def test_guard_monotonicity_100_cases():
             assert project.check_macros(des, r.layout)["ok"] and r.alpha in (0.0, 0.25, 0.5, 1.0)
             n_cases += 1
     assert n_cases == 100
+
+
+# 7 ----------------------------------------------------------------------------------------
+def test_bf16_autocast_step():
+    """Training runs under bf16 autocast on CUDA (train.py, pretrain_bridge.py); CPU autocast takes the same
+    mixed-dtype paths (the attention output is bf16, the residual stream fp32 -- index_add failed on 225)."""
+    des, ref, g = small_case(seed=5)
+    m = BridgeNet(TINY)
+    gt = g.tensors("cpu")
+    x1 = torch.as_tensor(g.node_positions(ref), dtype=torch.float32).unsqueeze(0).repeat(2, 1, 1)
+    x0 = x1.clone()
+    x0[:, torch.as_tensor(g.movable)] = torch.rand(2, int(g.movable.sum()), 2)
+    cfg = TrainConfig(steps=1, batch=2, device="cpu")
+    with torch.autocast(device_type="cpu", dtype=torch.bfloat16):
+        loss, _ = bridge_loss(m, gt, x0, x1, torch.ones(2), cfg, torch.Generator().manual_seed(0))
+    loss.backward()
+    assert torch.isfinite(loss)
+    assert all(p.grad is None or torch.isfinite(p.grad).all() for p in m.parameters())

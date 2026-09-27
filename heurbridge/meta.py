@@ -18,15 +18,28 @@ EXTENDED = ("git_sha", "config_hash", "program_hash", "bridge_ckpt_hash", "skill
             "archive_snapshot", "alpha_ledger_id")
 
 
+def code_stamp() -> dict | None:
+    """CODE_VERSION written by scripts/hbv.py push-code: server workspaces are shipped without .git."""
+    try:
+        return json.loads((REPO_ROOT / "CODE_VERSION").read_text())
+    except (OSError, ValueError):
+        return None
+
+
 def git_sha(short: bool = False) -> str:
     try:
         out = subprocess.run(["git", "-C", str(REPO_ROOT), "rev-parse", "--short" if short else "HEAD"],
                              capture_output=True, text=True, timeout=10).stdout.strip()
-        dirty = subprocess.run(["git", "-C", str(REPO_ROOT), "status", "--porcelain", "--untracked-files=no"],
-                               capture_output=True, text=True, timeout=10).stdout.strip()
-        return out + ("+dirty" if dirty else "") if out else "unknown"
+        if out:
+            dirty = subprocess.run(["git", "-C", str(REPO_ROOT), "status", "--porcelain", "--untracked-files=no"],
+                                   capture_output=True, text=True, timeout=10).stdout.strip()
+            return out + ("+dirty" if dirty else "")
     except Exception:
-        return "unknown"
+        pass
+    st = code_stamp()
+    if st and st.get("git_sha", "unknown") != "unknown":
+        return (st["git_sha"][:7] if short else st["git_sha"]) + ("+dirty" if st.get("dirty") else "")
+    return "unknown"
 
 
 # The code a process runs is the code it imported at start: record the commit at import time, and the
@@ -46,6 +59,7 @@ def write_meta(run_dir: str | Path, run_id: str, design: str, **fields) -> dict:
     meta = {"run_id": run_id, "design": design, "heurbridge_version": __version__, "git_sha": _GIT_AT_START,
             "process_started": _STARTED, "git_sha_at_write": git_sha(),
             "host": platform.node() if fields.pop("record_host", False) else None,
+            "code_archive": (code_stamp() or {}).get("code"),
             "created": time.strftime("%Y-%m-%dT%H:%M:%S")}
     for k in EXTENDED:
         meta.setdefault(k, None)

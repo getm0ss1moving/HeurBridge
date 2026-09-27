@@ -1,0 +1,1 @@
+GPU_SMOKE_PASS device=NVIDIA GeForce RTX 3090 params=1.13M nodes=20000 edges=120000 batch=4 median_step=0.119s peak_mem=4.29GB

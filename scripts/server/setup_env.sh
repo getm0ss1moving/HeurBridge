@@ -1,13 +1,21 @@
 #!/usr/bin/env bash
 # T0.5: Python env "hb" (py3.11, CUDA PyTorch matching the driver, PyG, science stack) + GPU smoke test.
-#   bash setup_env.sh [env_prefix]     (default /data/dzy/heura_repr/envs/hb)
+#   [HB_TOOLS=dir] [TORCH_SPEC=torch==x.y.z] bash setup_env.sh [env_prefix]     (default /data/dzy/heura_repr/envs/hb)
+# HB_TOOLS (default /data/dzy/heura_repr/tools) holds the micromamba binary, bootstrapped when no conda is on PATH;
+# hosts whose /data is full (225) use /tmp.
 set -eu
 ENV=${1:-/data/dzy/heura_repr/envs/hb}
-TOOLS=/data/dzy/heura_repr/tools
+TOOLS=${HB_TOOLS:-/data/dzy/heura_repr/tools}
 MM=""
 for c in mamba conda micromamba; do command -v $c >/dev/null 2>&1 && { MM=$c; break; }; done
-if [ -z "$MM" ] && [ -x "$TOOLS/micromamba/bin/micromamba" ]; then MM="$TOOLS/micromamba/bin/micromamba"; export MAMBA_ROOT_PREFIX="$TOOLS/micromamba/root"; fi
-[ -n "$MM" ] || { echo "ENV_FAIL no conda/mamba/micromamba (run install_openroad.sh first to bootstrap micromamba)"; exit 1; }
+if [ -z "$MM" ]; then
+  if [ ! -x "$TOOLS/micromamba/bin/micromamba" ]; then     # static binary, no root needed
+    mkdir -p "$TOOLS/micromamba"
+    curl -Ls https://micro.mamba.pm/api/micromamba/linux-64/latest | tar -xj -C "$TOOLS/micromamba" bin/micromamba
+  fi
+  MM="$TOOLS/micromamba/bin/micromamba"; export MAMBA_ROOT_PREFIX="$TOOLS/micromamba/root"
+fi
+echo "INSTALLER $MM; $(ldd --version 2>&1 | head -1)"
 [ -x "$ENV/bin/python" ] || "$MM" create -y -p "$ENV" -c conda-forge python=3.11 pip 2>&1 | tail -2
 PY="$ENV/bin/python"
 # CUDA wheel index from the driver's max CUDA version.  Plain `nvidia-smi` aborts when one GPU is faulty
@@ -25,7 +33,8 @@ case "$CU" in
 esac
 echo "DRIVER_CUDA=$CU TORCH_INDEX=$IDX"
 "$PY" -m pip install -q --upgrade pip
-"$PY" -m pip install -q torch --index-url "$IDX"
+# glibc < 2.28 (Ubuntu 18.04 on 225): pip skips the manylinux_2_28 torch wheels and takes the newest older one
+"$PY" -m pip install -q "${TORCH_SPEC:-torch}" --index-url "$IDX"
 "$PY" -m pip install -q torch_geometric numpy scipy scikit-learn pandas pyyaml networkx matplotlib hypothesis pytest gdown
 "$PY" -m pip install -q pymetis 2>/dev/null && echo "PYMETIS_OK" || echo "PYMETIS_UNAVAILABLE"
 "$PY" -m pip install -q kahypar 2>/dev/null && echo "KAHYPAR_OK" || echo "KAHYPAR_UNAVAILABLE"
