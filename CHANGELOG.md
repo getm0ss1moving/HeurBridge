@@ -12,6 +12,11 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
   evaluations. Against this strong M1 the programs win on two designs only -- ibm02 (J 0.164; its M1 is anomalous:
   HPWL 12.2 M, RUDY OF 5.4 %) and ibm06 (J 0.4251, 9 distinct layouts); elsewhere M1 stays the best elite. 55 M2
   timeouts on designs with >= 614 macros. `report_trackA.py --note`.
+- **E3 calibration on the spec's f1** (`reports/E3_calibration_trackA_dreamplace.md`, one row per distinct layout,
+  17 designs): f0 (the bridge guard's surrogate J0) vs DREAMPlace f1 -- mean Spearman 0.44, Kendall 0.34, top-5
+  recall 0.01, decision regret 1.53 vs 0.18 for a random pick; good on some designs (ibm01 Kendall 0.75, ibm12 0.71),
+  anti-correlated on others (ibm13 -0.34, ibm06 -0.13), with catastrophic picks on ibm06 and ibm09. **G0 not met**:
+  f0 must not make macro-stage decisions; the f1 guard and fitness stand (as in the development study).
 - The HB-GP development campaign and the DREAMPlace campaign disagree on which programs help (HB-GP's baseline was
   the benchmark placement, not a placer's): the spec baseline is the stronger reference.
 
