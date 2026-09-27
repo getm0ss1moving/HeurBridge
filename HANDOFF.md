@@ -4,6 +4,33 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
+## 2026-09-27 — Session 3 (continued): OpenROAD 2024-12, 225 GPU work, Track B on the servers, DREAMPlace
+
+**User decisions received:** 225's GPUs may be used; the prebuilt OpenROAD 2024-12 package may be downloaded.
+(c) — the faulty GPUs on 224/227 — still needs the admin.
+
+**Done (0.11.1 and Unreleased in CHANGELOG):**
+- T0.3: OpenROAD 2.0-17598-ga008522d8 unpacked without root on 224; every required command incl. Hier-RTLMP and
+  `place_macro`. Its timing-driven global placement *keeps* resizer buffers by default and then diverged on
+  bp_fe_top -> the mini-flow keeps timing-driven repairs virtual (`-keep_resize_below_overflow 0`); bp_fe_top M1
+  at f1 now matches the local dev flow closely (numbers in CHANGELOG).
+- 225: env in `/tmp/.hbenv/hb`, GPU smoke PASS; a bf16-autocast bug that would have stopped all GPU training fixed.
+- Unintended write found and fixed: one `.pyc` in the HA-PR harness tree on 224 (to be removed after `seedA_ibm`).
+- Server runs record the commit (`CODE_VERSION` stamp); tool versions come from `tools.describe()`.
+- Track-A f1 per spec (DREAMPlace, macros FIXED): `eval/dreamplace.py` with orientation baking (tested); the
+  build on 225 is `scripts/server/build_dreamplace.sh`.
+
+**Running:** `pretrain_small` (T3.4) on 225 GPU 0 (~4-5 h); Track B on 224: `tb_bp_fe_top_f2` (M1 at f2, twice),
+ariane133 M1 (the T0.3 Track-B condition needs ariane133 through detailed routing); `seedA_ibm` (ibm18 left);
+`dp_build3` (DREAMPlace on 225).
+
+**Next:** ariane133 f1 + f2 (T0.3 exit); Track-B T1.7 baselines at f2 for the five ORFS designs; DREAMPlace smoke
+test on ibm01, then Track-A M1 (DREAMPlace mixed-size) and f1 = DREAMPlace for the server campaigns (the HB-GP
+campaign stays as development data); T3.7 Algorithm R on 225 after pretraining; LLM model choice for T5
+(`deepseek-v4-pro` vs `deepseek-flash`; the old names alias to flash).
+
+---
+
 ## 2026-09-27 — Session 3: server access, encrypted workflow, T0 on 224
 
 **Access.** Key-only SSH works on ports 224, 225, 227, 231, 232, 234 (the lab note `LAB_PORTS_AND_API_KEY.md`

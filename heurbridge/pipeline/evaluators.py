@@ -59,6 +59,40 @@ class HBGPEvaluator(Evaluator):
         return rec
 
 
+@dataclass
+class DreamplaceEvaluator(Evaluator):
+    """Track-A f1 of the spec (T1.4): DREAMPlace GP + LG of the cells with the macros FIXED + f0 metrics.
+    Same record fields as HBGPEvaluator, so both score with TRACK_A_WEIGHTS; ``deterministic_flag`` is on."""
+    name: str = "dreamplace_f1"
+    fidelity: int = 1
+    weights: dict = field(default_factory=lambda: dict(TRACK_A_WEIGHTS))
+    required_gates: tuple | None = ()
+    f0cfg: object = None
+    cluster_of: object = None
+    gpu: bool = True
+    iters: int = 1000
+    seed: int = 0
+    timeout_s: int = 3600
+
+    def evaluate(self, design, layout, run_id, workdir):
+        from ..eval.dreamplace import run_dreamplace_f1
+        work = Path(workdir) / run_id
+        out, placed = run_dreamplace_f1(design, layout, work, self.f0cfg, gpu=self.gpu, iters=self.iters,
+                                        seed=self.seed, timeout=self.timeout_s)
+        rec = {"run_id": run_id, "backend": "dreamplace", "returncode": out["returncode"], "failure": out.get("failure"),
+               "runtime_s": out["wall_s"], "unchecked": out["unchecked"], "gp_overflow": out.get("gp_overflow"),
+               "macro_max_shift": out.get("macro_max_shift")}
+        if placed is not None and out.get("failure") is None:
+            r = out["rudy"]
+            rec.update({"hpwl_um": out["hpwl"], "rudy_overflow": r["rudy_overflow"],
+                        "rudy_overflow_ratio": r["rudy_overflow_ratio"], "rudy_peak": r["rudy_peak"],
+                        "density_overflow": r["density_overflow"], "rudy_of_pct": 100.0 * r["rudy_overflow_ratio"]})
+            if self.cluster_of is not None:
+                rec["cluster_pos"] = cluster_centroids(design, placed, self.cluster_of).tolist()
+        (work / "record.json").write_text(json.dumps(rec, indent=1, default=str))
+        return rec
+
+
 def cluster_centroids(design, layout, cluster_of) -> "np.ndarray":
     """Area-weighted centroids (normalized) of each cell cluster in a placed layout."""
     import numpy as np

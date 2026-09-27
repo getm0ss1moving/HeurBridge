@@ -4,6 +4,52 @@ Every change to the code is recorded here with its version, task and verificatio
 Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 (The task list's `_harness/CHANGELOG.md` does not exist in the current checkout; this file replaces it.)
 
+## [0.12.0] — 2026-09-27 — DREAMPlace Track-A f1 on 225, Track B through detailed routing on 224
+
+### Fixed
+- **Red line A.2 exceeded on 224 (OpenROAD threads).** `set_thread_count 8` does not bound OpenMP in the 2024-12
+  build: one f2 run (bp_fe_top, second determinism repeat) was seen with 73 threads and ~59 cores busy; the
+  earlier Track-B runs of today with this build (bp_fe_top f1 twice, f2 once; together about 25 minutes of run
+  time) were launched the same way and may have exceeded 8 cores in their OpenMP phases. The job was stopped
+  on sight; `openroad_deb.sh`, `trackb.sh` and native `run_tool` calls now set `OMP_NUM_THREADS=EDA_THREADS` (8),
+  and the f2 baseline pair is rerun under the cap (results depend on the thread count).
+- A truncated `m1_macros.tcl` would have produced a partial M1 baseline silently: both Track-B drivers now
+  require it to place every macro of the design.
+- **Placement density for bp_be_top / swerv_wrapper** (`eval/miniflow.py`): their ORFS configs set
+  `PLACE_DENSITY_LB_ADDON`, for which ORFS computes the density (`place_density_with_lb_addon`: uniform lower bound
+  + addon x remainder + 0.01); the mini-flow used the platform's 0.30, below bp_be_top's 31 % utilization
+  (GPL-0302). Now the ORFS rule, computed in the run and logged (`HB_PLACE_DENSITY`); ariane133 / bp_fe_top (0.30)
+  and ariane136 (0.35) are unchanged.
+- The local ORFS checkout is sparse and lacked `designs/nangate45/swerv/` (swerv_wrapper's `macros.v`): added to
+  the sparse set and to the copy on 224; `from_orfs` now fails when a `VERILOG_FILES` entry is missing.
+- `run_seed_miniflow.py` carried on after a failed f1 baseline (all metrics null): it now stops with the named
+  failure, like the f2 driver.
+- **Track-B global placement diverged on OpenROAD 2024-12** (`eval/miniflow.py`): builds with
+  `-keep_resize_below_overflow` (default 0.3) keep the resizer's buffers inside timing-driven global placement;
+  on bp_fe_top (M1) that step added 21,726 um^2 of buffers (+49 % cell area) at iteration 336, HPWL went from
+  2.4e9 to 3e10, the overflow never fell below 0.28 in 5,000 iterations and detailed placement failed (DPL-0036).
+  The flow now passes `-keep_resize_below_overflow 0` when the build has the flag (every timing-driven repair
+  virtual, the only behaviour of the local build b16bda7e; electrical repair stays in the explicit ORFS 3_4
+  step) and logs the arguments (`HB_GPL_ARGS`). bp_fe_top M1 at f1 on 224 then converges at iteration 420:
+  GR WL 1,762,903 um, overflow 0, setup WNS -2.234 ns, TNS -81.1 ns, hold +0.093 ns, power 0.158 W
+  (local b16bda7e, 6 threads: 1,832,439 / 0 / -2.336 / -113.5 / +0.096 / 0.151).
+
+### Added
+- `heurbridge/eval/dreamplace.py` — the Track-A f1 of the spec (T1.4: DREAMPlace GP + LG with the macros FIXED,
+  then f0 RUDY / HPWL). DREAMPlace's bookshelf reader ignores orientations, and our programs rotate and flip
+  macros, so each layout is written as a bookshelf copy with orientations baked in (swapped footprints,
+  transformed pin offsets, all N; macros `/FIXED`); `test_dreamplace_io` checks identical absolute pin
+  positions for all eight orientations on ibm01. A run whose macros moved is a named failure (`macros_moved`).
+- `scripts/server/build_dreamplace.sh` — DREAMPlace 4.3.1 with CUDA on 225 without root (conda CMake 3.26, gcc 11,
+  CUDA 11.8 nvcc, Boost, tclsh; torch's C++ ABI; sm_86; the driver stub found via `CMAKE_LIBRARY_PATH`). The public
+  source with submodules is copied from the Mac (225 cannot reach GitHub). Installed copy: `np.string_` ->
+  `np.bytes_` (NumPy 2; the only NumPy-1-only name, 6 uses in PlaceDB.py).
+- `DreamplaceEvaluator` (Track-A f1, same record fields as HB-GP) and `scripts/server/dp_smoke.py`: **DP_SMOKE_PASS**
+  on ibm01 (225 GPU 1): benchmark macro layout HPWL 2,568,480 (HB-GP 2,655,909: -3.3 %), GP overflow 0.071, macros
+  unmoved, 10.4 s per run, bit-identical in two runs; all-orientations layout runs as well (HPWL 2,812,144).
+  The ICCAD04 `.wts` holds node weights that DREAMPlace would read as net weights (assertion): the copy writes
+  net weights from the design instead.
+
 ## [0.11.1] — 2026-09-27 — OpenROAD 2024-12 on 224, GPU env on 225, T3.4 pretraining started
 
 ### Fixed

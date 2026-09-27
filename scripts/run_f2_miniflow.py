@@ -61,7 +61,10 @@ def main():
                                family="orfs_cpu", tech="nangate45")
     m1 = lay.copy()
     idx = {n: i for i, n in enumerate(des.names)}
-    for inst, (x, y, o) in parse_macro_tcl((w / "m1_macros.tcl").read_text()).items():
+    m1_cmds = parse_macro_tcl((w / "m1_macros.tcl").read_text())
+    if len(m1_cmds) != int(des.is_macro.sum()):            # a truncated file would give a partial baseline
+        sys.exit("m1_macros.tcl places %d macros, the design has %d" % (len(m1_cmds), int(des.is_macro.sum())))
+    for inst, (x, y, o) in m1_cmds.items():
         i = idx[inst]
         m1.orient[i] = O.from_odb(o)
         eff = O.effective_size(des.size[i:i + 1], m1.orient[i:i + 1])[0]

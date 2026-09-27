@@ -9,6 +9,7 @@ H=/data/dzy/heura_repr
 export HB_OPENROAD="$PWD/scripts/server/openroad_deb.sh"
 export HB_YOSYS="$H/tools/openroad_2024/bin/yosys"
 export EDA_THREADS=${EDA_THREADS:-8}                 # red line A.2
+export OMP_NUM_THREADS=$EDA_THREADS                  # OpenMP is not bounded by set_thread_count
 [ -e third_party ] || ln -s "$H/third_party" third_party
 PY=${HB_PYTHON:-$H/envs/hb/bin/python}
 "$HB_OPENROAD" -version 2>&1 | head -1 | sed 's/^/OPENROAD /'

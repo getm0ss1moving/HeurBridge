@@ -59,7 +59,10 @@ def main():
     # M1 layout from ORFS-style place_macro commands
     m1 = lay.copy()
     idx = {n: i for i, n in enumerate(des.names)}
-    for inst, (x, y, o) in parse_macro_tcl((w / "m1_macros.tcl").read_text()).items():
+    m1_cmds = parse_macro_tcl((w / "m1_macros.tcl").read_text())
+    if len(m1_cmds) != int(des.is_macro.sum()):            # a truncated file would give a partial baseline
+        sys.exit("m1_macros.tcl places %d macros, the design has %d" % (len(m1_cmds), int(des.is_macro.sum())))
+    for inst, (x, y, o) in m1_cmds.items():
         i = idx[inst]
         m1.orient[i] = O.from_odb(o)
         eff = O.effective_size(des.size[i:i + 1], m1.orient[i:i + 1])[0]
@@ -80,11 +83,15 @@ def main():
         bpath.write_text(json.dumps({"records": recs, "deterministic": same, "threads": ev.threads}, indent=1, default=str))
         print(json.dumps({"baseline_runs": len(recs), "deterministic": same,
                           "values": [{k: r.get(k) for k in keys} for r in recs]}), flush=True)
-    baseline = cost.Baseline.from_records(des.id, recs)
+    ok_base = [r for r in recs if r.get("returncode") == 0]
+    if not ok_base:                                     # nothing to normalize against: stop, by name
+        print(json.dumps({"error": "baseline f1 failed", "failures": [r.get("failure") for r in recs]}), flush=True)
+        sys.exit(1)
+    baseline = cost.Baseline.from_records(des.id, ok_base)
     arch = Archive(a.archive, min_fidelity=1)
-    c = ev.score(recs[0], baseline)
+    c = ev.score(ok_base[0], baseline)
     arch.insert(Candidate(design_id=des.id, stage="M", layout=m1, fidelity=1, J=c.J_inf, admissible=c.admissible,
-                          metrics=recs[0], gates=c.gates, provenance={"program": "M1_rtl_macro_placer"}))
+                          metrics=ok_base[0], gates=c.gates, provenance={"program": "M1_rtl_macro_placer"}))
     cpath = rdir / "clusters.npy"
     cl = np.load(cpath) if cpath.exists() else cluster_cells(des, seed=0)
     np.save(cpath, cl)

@@ -105,9 +105,18 @@ def test_io_exclusions_and_orfs_config(tmp_path):
         "export DESIGN_NAME = toy_top\nexport PLATFORM = nangate45\n"
         "export VERILOG_FILES = $(DESIGN_HOME)/src/toy/a.v \\\n    $(DESIGN_HOME)/src/toy/b.v\n"
         "export SDC_FILE = $(DESIGN_HOME)/$(PLATFORM)/toy/constraint.sdc\n"
-        "export CORE_UTILIZATION ?= 35\nexport MACRO_PLACE_HALO = 7 9\n")
+        "export CORE_UTILIZATION ?= 35\nexport MACRO_PLACE_HALO = 7 9\nexport PLACE_DENSITY_LB_ADDON = 0.08\n")
+    with pytest.raises(FileNotFoundError, match="b.v"):         # a missing RTL file fails at parse time
+        (tmp_path / "designs" / "src" / "toy").mkdir(parents=True)
+        (tmp_path / "designs" / "src" / "toy" / "a.v").write_text("")
+        MF.from_orfs(str(tmp_path), "nangate45/toy")
+    (tmp_path / "designs" / "src" / "toy" / "b.v").write_text("")
     c = MF.from_orfs(str(tmp_path), "nangate45/toy")
     assert c.top == "toy_top" and c.utilization == 35 and c.halo == (7.0, 9.0)
+    assert c.place_density_lb_addon == 0.08 and c.cell_pad_gpl == 0
+    gp = MF._global_placement(c)                                # ORFS place_density_with_lb_addon
+    assert "gpl::get_global_placement_uniform_density -pad_left 0 -pad_right 0" in gp
+    assert "(1.0 - $hb_lb) * 0.08 + 0.01" in gp and "-density $hb_density" in gp
     assert c.verilog == [str(tmp_path / "designs" / "src/toy/a.v"), str(tmp_path / "designs" / "src/toy/b.v")]
     assert c.sdc == str(tmp_path / "designs" / "nangate45/toy/constraint.sdc")
 

@@ -65,6 +65,8 @@ class DesignCfg:
     macro_libs: list = field(default_factory=list)
     utilization: float = 50.0
     place_density: float = 0.30        # Nangate45 platform default (PLACE_DENSITY ?= 0.30)
+    place_density_lb_addon: float | None = None   # ORFS: density = uniform lower bound + addon (util.tcl)
+    cell_pad_gpl: int = 0              # CELL_PAD_IN_SITES_GLOBAL_PLACEMENT (ORFS default 0)
     halo: tuple = (22.4, 15.12)        # Nangate45 platform default (MACRO_PLACE_HALO ?= 22.4 15.12)
     io_tcl: str | None = None
     fastroute_tcl: str | None = None
@@ -122,10 +124,16 @@ def from_orfs(flow_dir: str, platform_design: str) -> DesignCfg:
         return x if x and Path(x).exists() else None
     tracks = pdir / "make_tracks.tcl"
     halo = tuple(float(x) for x in get("MACRO_PLACE_HALO", "22.4 15.12").split()[:2])
+    missing = [f for f in get("VERILOG_FILES", "").split() if not Path(f).exists()]
+    if missing:                        # e.g. a sparse ORFS checkout without designs/nangate45/swerv/macros.v
+        raise FileNotFoundError("%s: VERILOG_FILES missing: %s" % (platform_design, " ".join(missing)))
+    addon = get("PLACE_DENSITY_LB_ADDON")
     return DesignCfg(name=ddir.name, top=get("DESIGN_NAME"), verilog=get("VERILOG_FILES", "").split(),
                      sdc=get("SDC_FILE") or str(ddir / "constraint.sdc"),
                      macro_lefs=get("ADDITIONAL_LEFS", "").split(), macro_libs=get("ADDITIONAL_LIBS", "").split(),
                      utilization=float(get("CORE_UTILIZATION", 50)), place_density=float(get("PLACE_DENSITY", 0.30)),
+                     place_density_lb_addon=float(addon) if addon else None,
+                     cell_pad_gpl=int(get("CELL_PAD_IN_SITES_GLOBAL_PLACEMENT", 0)),
                      halo=halo, io_tcl=get("IO_CONSTRAINTS"), fastroute_tcl=path_or_none("FASTROUTE_TCL"),
                      core_margin=float(get("CORE_MARGIN", "1.0").split()[0]),
                      aspect_ratio=float(get("CORE_ASPECT_RATIO", 1.0)), tapcell_tcl=path_or_none("TAPCELL_TCL"),
@@ -212,6 +220,37 @@ def _drop_supply_ports() -> str:
             "{ foreach bt [$net getBTerms] { odb::dbBTerm_destroy $bt } } }")
 
 
+def _global_placement(d: DesignCfg) -> str:
+    """Routability- and timing-driven global placement with *virtual* timing-driven repairs.
+
+    Builds that have ``-keep_resize_below_overflow`` (OpenROAD 2024-12 on 224; default 0.3) keep the resizer's
+    buffers inside global placement once the overflow falls below that value.  On bp_fe_top (M1 layout) that
+    step added 21,726 um^2 of buffers (+49 % cell area) at iteration 336, after which the placement diverged
+    (HPWL 2.4e9 -> 3e10, overflow stuck near 0.4-0.8 until iteration 5,000) and detailed placement failed
+    (DPL-0036).  0 keeps every timing-driven repair virtual -- the only behaviour of the older local build
+    (b16bda7e) -- and electrical repair stays in the explicit ORFS 3_4 step below.  The flag is used only when
+    the build has it, so one script serves both builds; the arguments are logged (HB_GPL_ARGS).
+
+    Density as ORFS's ``place_density_with_lb_addon`` (flow/scripts/util.tcl): with PLACE_DENSITY_LB_ADDON the
+    uniform-density lower bound of the placement area (after macros, tapcells and grid) plus the addon share
+    of the remainder plus 0.01 (bp_be_top, swerv_wrapper; a fixed 0.30 is below their utilization: GPL-0302);
+    otherwise PLACE_DENSITY (design, else the platform's 0.30)."""
+    if d.place_density_lb_addon is not None:
+        dens = ("set hb_lb [gpl::get_global_placement_uniform_density -pad_left %d -pad_right %d]\n"
+                "set hb_density [expr {$hb_lb + (1.0 - $hb_lb) * %r + 0.01}]\n"
+                "if {$hb_density > 1.0} { error \"HB_PLACE_DENSITY_ABOVE_1 $hb_density\" }\n"
+                % (d.cell_pad_gpl, d.cell_pad_gpl, d.place_density_lb_addon))
+    else:
+        dens = "set hb_density %r\n" % d.place_density
+    return (dens + 'puts "HB_PLACE_DENSITY $hb_density"\n'
+            "set hb_gpl [list -routability_driven -timing_driven -density $hb_density]\n"
+            "if {[info exists sta::cmd_args(global_placement)] && "
+            "[string first -keep_resize_below_overflow $sta::cmd_args(global_placement)] >= 0} "
+            "{ lappend hb_gpl -keep_resize_below_overflow 0 }\n"
+            'puts "HB_GPL_ARGS $hb_gpl"\n'
+            "global_placement {*}$hb_gpl")
+
+
 def _place_steps(p: Nangate45, d: DesignCfg, fp_odb: Path, macro_tcl: Path | None, threads: int) -> list:
     """Shared by f1 and f2: macros + tapcells + grid, global placement, ORFS 3_4 resize, detailed placement."""
     return [
@@ -220,7 +259,7 @@ def _place_steps(p: Nangate45, d: DesignCfg, fp_odb: Path, macro_tcl: Path | Non
         ("set_dont_use {%s}" % " ".join(d.dont_use)) if d.dont_use else "",
         _macro_env(d, macro_tcl), _route_setup(p, d),
         "set t0 [clock milliseconds]",
-        "global_placement -routability_driven -timing_driven -density %g" % d.place_density,
+        _global_placement(d),
         # ORFS 3_4 resize: port buffering, electrical repair (buffering / resizing of long, high-fanout nets), tie cells
         "estimate_parasitics -placement", "buffer_ports", "repair_design",
         "repair_tie_fanout -separation 5 LOGIC0_X1/Z", "repair_tie_fanout -separation 5 LOGIC1_X1/Z",
@@ -355,9 +394,13 @@ def run_tool(cmd: str, script_text: str, script_path: Path, docker_image: str | 
         full = ["docker", "run", "--rm", "-v", "%s:%s" % (m, m), docker_image, "bash", "-lc", " ".join([cmd] + args)]
     else:                                  # no login shell: the shared account's profile must not pick the binary
         full = [tools.binary(cmd)] + args
+    env = None
+    if not docker_image:                   # native runs: OpenMP is not bounded by set_thread_count
+        import os
+        env = dict(os.environ, OMP_NUM_THREADS=str(tools.eda_threads(8)))
     t0 = time.time()
     try:
-        pr = subprocess.run(full, capture_output=True, text=True, timeout=timeout)
+        pr = subprocess.run(full, capture_output=True, text=True, timeout=timeout, env=env)
         log = pr.stdout + "\n" + pr.stderr
         rc = pr.returncode
     except subprocess.TimeoutExpired as e:
