@@ -61,8 +61,10 @@ exec 0</dev/null
 P='__CIPHER__'
 encout() {
   local out="$ROOT/vault/runs/$RUN.$1.tgz.enc"
-  ( cd "$WD/repo" && find . -type f -newer "$WD/.marker" -print0 \
-      | { if [ -n "$EXCL" ]; then grep -z -v -E "$EXCL" || true; else cat; fi; } > "$WD/.list" ) || return 1
+  # this run's files: everything newer than the marker, plus what --resume restored (older mtimes, same run)
+  ( cd "$WD/repo" && { find . -type f -newer "$WD/.marker" -print0
+      if [ -s "$WD/.resumed" ]; then while IFS= read -r f; do if [ -f "$f" ]; then printf '%s\0' "$f"; fi; done < "$WD/.resumed"; fi
+    } | sort -z -u | { if [ -n "$EXCL" ]; then grep -z -v -E "$EXCL" || true; else cat; fi; } > "$WD/.list" ) || return 1
   ( cd "$WD/repo" && tar --null -T "$WD/.list" -czf - 2>/dev/null ) \
     | openssl enc $P -salt -pass fd:3 -out "$out.tmp" 3< <(printf '%s' "$K") && mv -f "$out.tmp" "$out"
 }
@@ -218,7 +220,10 @@ def cmd_run(a):
     for r in a.after:
         lines.append('dec "$ROOT/vault/runs/%s.final.tgz.enc" "$WD/repo"' % r)
     if a.resume:
-        lines.append('[ -e "$ROOT/vault/runs/$RUN.partial.tgz.enc" ] && dec "$ROOT/vault/runs/$RUN.partial.tgz.enc" "$WD/repo"')
+        # restored files keep their mtimes (make depends on them), so they predate the marker: list them for encout
+        lines.append('if [ -e "$ROOT/vault/runs/$RUN.partial.tgz.enc" ]; then dec "$ROOT/vault/runs/$RUN.partial.tgz.enc" '
+                     '"$WD/repo"; openssl enc -d $P -pass fd:3 -in "$ROOT/vault/runs/$RUN.partial.tgz.enc" '
+                     '3< <(printf "%s" "$K") | tar -tzf - > "$WD/.resumed"; fi')
     for d in a.data:
         name, _, dest = d.partition(":")
         lines += ['mkdir -p "$WD/repo/%s"' % (dest or "."), 'dec "$ROOT/vault/data/%s.tgz.enc" "$WD/repo/%s"' % (name, dest or ".")]
@@ -269,9 +274,14 @@ def cmd_fetch(a):
 
 
 def cmd_stop(a):
+    # The job is a session leader (setsid).  Tool runs inside it may have their own process groups (ORFS make:
+    # heurbridge.tools.run_group), so the whole session gets one TERM -- in a single pass: the job's final
+    # archiving starts after it and must not be hit by a second signal.
     script = ('ROOT=%s; f="$ROOT/state/%s.pid"; [ -e "$f" ] || { echo "no such run"; exit 1; }; pid=$(cat "$f"); '
               'pg=$(ps -o pgid= -p "$pid" | tr -d " "); [ "$pg" = "$pid" ] || { echo "pid $pid is not our job"; exit 1; }; '
-              'kill -TERM -- "-$pid" && echo "HBV_STOPPED %s"\n') % (shlex.quote(a.root), a.run, a.run)
+              'sid=$(ps -o sid= -p "$pid" | tr -d " "); '
+              'if [ "$sid" = "$pid" ]; then pkill -TERM -s "$pid"; else kill -TERM -- "-$pid"; fi && echo "HBV_STOPPED %s"\n'
+              ) % (shlex.quote(a.root), a.run, a.run)
     sys.stdout.write(remote_script(a.port, script).stdout.decode())
 
 

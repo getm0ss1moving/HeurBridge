@@ -157,7 +157,7 @@ def run_openroad_f1(job: OpenroadJob, work: str | Path, openroad: str | None = N
               [docker_image, "bash", "-lc", "openroad -no_init -no_splash -exit %s" % tcl]
     t0 = time.time()
     try:
-        p = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, env=env)
+        p = tools.run_group(cmd, timeout=timeout, env=env)
         log = p.stdout + "\n" + p.stderr
         rc = p.returncode
     except subprocess.TimeoutExpired as e:

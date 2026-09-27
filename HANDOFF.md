@@ -4,6 +4,24 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
+## 2026-09-28 — Session 3 (00:40): ORFS timeout fix (0.13.2); Track-B campaign restarted
+
+Some candidate layouts (e.g. SA seeds that scatter macros through the core) keep FastRoute in its overflow
+"extra run" for hours; the 7,200 s candidate timeout then fires. It would have killed only the top `make` and left
+the sub-make and OpenROAD running beside the next candidate (red line A.2). Fixed before any timeout occurred:
+`tools.run_group` kills the whole process group; `hbv.py stop` kills the job's session; `hbv.py run --resume` now
+keeps the restored files in later archives (both verified on 224). All five ORFS jobs restarted as
+`seedB_orfs5_*` (same arguments; ariane133 with `--make-var RTLMP_MAX_LEVEL=1`; new vault exclude pattern that
+keeps the base synthesis/floorplan, see SERVER_RUNBOOK).
+
+Expect a slow Track-B campaign: a normal bp_fe_top candidate takes ~10 min to f1, a route-hostile one 2 h
+(timeout, recorded as a failure). If the throughput is a problem: split a design's programs across two jobs
+(`--programs`; up to 8 parallel jobs are allowed, 5 in use).
+
+**Running**: 224 `seedB_orfs5_*` (5 jobs); 225 GPU 0 `algR_trackA`; 225 GPU 1 `seedA_ispd_s1`, `seedA_ispd_s2`.
+
+---
+
 ## 2026-09-27 — Session 3 (late night): ariane133 deviation narrowed; ISPD2005 Track-A campaign started
 
 **ariane133**: the halo-8 settings made its M1 converge but failed the 2024-12 PDN (PDN-0179, 6-um channels at the

@@ -24,6 +24,7 @@ from pathlib import Path
 
 import numpy as np
 
+from .. import tools
 from ..core import orient as O
 from ..core.bookshelf import _fmt, parse_nets, parse_nodes, parse_pl
 from ..core.design import Design, Layout
@@ -123,8 +124,7 @@ def run_placer(param: dict, work: Path, timeout: int = 3600) -> tuple:
     py = os.environ.get("HB_DREAMPLACE_PYTHON", sys.executable)
     t0 = time.time()
     try:
-        p = subprocess.run([py, str(Path(root) / "dreamplace" / "Placer.py"), str(pj)], cwd=root,
-                           capture_output=True, text=True, timeout=timeout)
+        p = tools.run_group([py, str(Path(root) / "dreamplace" / "Placer.py"), str(pj)], timeout=timeout, cwd=root)
         rc, log = p.returncode, p.stdout + "\n" + p.stderr
     except subprocess.TimeoutExpired as e:
         rc, log = "timeout", str(e.stdout or "")

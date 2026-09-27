@@ -10,8 +10,49 @@ Environment:
 from __future__ import annotations
 
 import os
+import signal
+import subprocess
 
 LOCAL_IMAGE = "efabless/openlane:master-arm64v8"
+
+
+def run_group(cmd, timeout: float | None = None, env: dict | None = None, cwd=None) -> subprocess.CompletedProcess:
+    """``subprocess.run(cmd, capture_output=True, text=True)`` with the child in its own process group; on a timeout
+    (or any exception, e.g. KeyboardInterrupt) the whole group is killed before TimeoutExpired is re-raised.
+
+    ORFS runs every step in a recursive sub-make (make -> sh -> time -> openroad | tee); killing only the top make
+    leaves the rest running, and the next evaluation then shares the job's 8 threads with it (red line A.2).  The
+    group stays in the job's session, which ``hbv.py stop`` kills as a whole."""
+    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env, cwd=cwd,
+                         process_group=0)
+    try:
+        out, err = p.communicate(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        kill_group(p)
+        out, err = p.communicate()
+        raise subprocess.TimeoutExpired(cmd, timeout, output=out, stderr=err) from None
+    except BaseException:
+        kill_group(p)
+        raise
+    return subprocess.CompletedProcess(cmd, p.returncode, out, err)
+
+
+def kill_group(p: subprocess.Popen, grace: float = 10.0) -> None:
+    """SIGTERM to the process group led by ``p``, then SIGKILL to whatever is left of it."""
+    for sig in (signal.SIGTERM, signal.SIGKILL):
+        try:
+            os.killpg(p.pid, sig)
+        except (ProcessLookupError, PermissionError):
+            break                                       # group empty
+        if sig == signal.SIGTERM:
+            try:
+                p.wait(timeout=grace)
+            except subprocess.TimeoutExpired:
+                pass
+    try:
+        p.wait(timeout=grace)
+    except subprocess.TimeoutExpired:
+        pass
 
 
 def binary(tool: str) -> str:
@@ -41,8 +82,6 @@ def describe() -> str:
         if img:
             _DESCRIBED = "container %s (OpenROAD b16bda7e, Yosys 0.38)" % img
         else:
-            import subprocess
-
             def first(cmd):
                 try:
                     out = subprocess.run(cmd, capture_output=True, text=True, timeout=60)

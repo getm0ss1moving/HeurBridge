@@ -6,7 +6,25 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 
 ## [Unreleased]
 
+## [0.13.2] — 2026-09-28 — ORFS timeouts kill the whole flow; hbv stop/resume fixes; Track-B campaign restarted
+
 ### Fixed
+- **An ORFS timeout left the flow running (red line A.2).** `orfs.run` killed only the top `make` on a timeout, but
+  ORFS runs every step in a recursive sub-make (make -> sh -> time -> openroad | tee). The step would have kept
+  running as an orphan while the driver started the next candidate on the same 8-thread budget; plain
+  `subprocess.run` returns at once and leaves the grandchild alive. Caught before any candidate timed out:
+  bp_fe_top's and bp_be_top's M2.v0.s1 (SA seed 1, macros scattered through the core) spent > 1.5 h in FastRoute's
+  "Extra Run for hard benchmark" at 5_1_grt (base: 1:46 / 4:44). New `heurbridge.tools.run_group`: the child runs
+  in its own process group, and a timeout or any exception kills the whole group (SIGTERM, 10 s, SIGKILL); the
+  output so far is kept (an ORFS timeout record now carries its log tail). Used for the ORFS runs, signoff and M1
+  extraction, the mini-flow, the dev f1 and DREAMPlace. `tests/test_tools.py` (135 tests pass).
+- **`hbv.py stop`** signals the job's whole session in a single pass, so tool process groups inside it are
+  reached too, and the job's final archiving, which starts afterwards, is not. Verified on 224: nothing left in
+  the session, final archive written, workspace wiped.
+- **`hbv.py run --resume` lost the restored files.** They keep their mtimes (make needs them), so they predated
+  the workspace marker and were never archived again; the resumed job's finish then deleted the partial that
+  held them. The restored members are now listed and archived with the job's own files. Verified on 224 with a
+  simulated crash (SIGKILL: partial kept) and a resume: the final archive holds the restored and the new files.
 - ORFS's `final_report.tcl` saves images through `gui::show` whenever the `save_image` proc exists; our OpenROAD
   build has no GUI, so 6_report failed after every metric was written (bp_fe_top on 676f8451: metrics identical to
   the package's -- routed WL 2,376,571 um, setup WNS -0.077 ns). `scripts/server/patch_orfs.py` also requires
@@ -43,7 +61,11 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 - ISPD2005 Track-A campaign (T1.7/T2.7 on the spec tools) on 225 GPU 1: `seedA_ispd_s1` (adaptec1, bigblue1,
   bigblue4) and `seedA_ispd_s2` (adaptec2-4, bigblue2, bigblue3); M1 = DREAMPlace mixed-size, f1 = DREAMPlace with the
   macros fixed, MMS convention (macros movable).
-- `seedB_orfs4_ariane133` on 224 (above).
+- ORFS Track-B campaign restarted with this code as `seedB_orfs5_{bp_fe_top,bp_be_top,swerv_wrapper,ariane133,
+  ariane136}` (`seedB_orfs3_*`, `seedB_orfs2_*`, `seedB_orfs4_ariane133` stopped: the three in their base runs lost
+  1-5 h). The vault now keeps the base variant's synthesis and pre-macro floorplan (exclude pattern in
+  `docs/SERVER_RUNBOOK.md`): a resumed job seeds candidates without re-synthesis, and later f2 / E0 jobs can start
+  from them with `--after`.
 
 ## [0.13.1] — 2026-09-27 — OpenROAD 676f8451 from source (ORFS pin); Track-A campaign and E3 on the spec tools
 

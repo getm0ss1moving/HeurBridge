@@ -492,7 +492,7 @@ def run_tool(cmd: str, script_text: str, script_path: Path, docker_image: str | 
         env = dict(os.environ, OMP_NUM_THREADS=str(tools.eda_threads(8)))
     t0 = time.time()
     try:
-        pr = subprocess.run(full, capture_output=True, text=True, timeout=timeout, env=env)
+        pr = tools.run_group(full, timeout=timeout, env=env)     # yosys runs ABC as a child process
         log = pr.stdout + "\n" + pr.stderr
         rc = pr.returncode
     except subprocess.TimeoutExpired as e:

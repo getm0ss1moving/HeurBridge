@@ -25,6 +25,7 @@ from pathlib import Path
 
 import numpy as np
 
+from .. import tools
 from ..core import orient as O
 from ..core.design import Design, Layout
 from .f1 import parse_f1_log
@@ -106,7 +107,6 @@ class OrfsRun:
     make_vars_extra: tuple = ()       # KEY=VALUE overrides of the design config (make command line wins)
 
     def make_vars(self, variant: str | None = None) -> list:
-        from .. import tools
         v = ["DESIGN_CONFIG=%s" % self.design_config, "FLOW_VARIANT=%s" % (variant or self.variant),
              "NUM_CORES=%d" % self.threads, "OPENROAD_EXE=%s" % tools.binary("openroad"),
              "YOSYS_EXE=%s" % (self.yosys or tools.binary("yosys"))]
@@ -201,11 +201,9 @@ def parse_stage_report(text: str) -> dict:
 
 def extract_macros(r: OrfsRun, d: dict, out_tcl: Path, timeout: int = 1800) -> Path:
     """ORFS's own macro placement (M1) as place_macro commands, from the 2_3 macro-stage database."""
-    from .. import tools
     script = Path(out_tcl).with_suffix(".extract.tcl")
     script.write_text("read_db %s\nwrite_macro_placement %s\n" % (d["results"] / "2_3_floorplan_macro.odb", Path(out_tcl).resolve()))
-    p = subprocess.run([tools.binary("openroad"), "-no_init", "-no_splash", "-exit", str(script)],
-                       capture_output=True, text=True, timeout=timeout)
+    p = tools.run_group([tools.binary("openroad"), "-no_init", "-no_splash", "-exit", str(script)], timeout=timeout)
     if p.returncode != 0 or not Path(out_tcl).exists():
         raise RuntimeError("M1 extraction failed: %s" % (p.stdout + p.stderr)[-600:])
     return Path(out_tcl)
@@ -220,13 +218,13 @@ def run(r: OrfsRun) -> dict:
     rec = {"variant": r.variant, "stage": r.stage, "design_config": r.design_config, "macro_tcl": r.macro_tcl}
     d = r.dirs()
     rec["seeded_from_base"] = r.seed_from_base()
-    try:
-        p = subprocess.run(r.command(d), capture_output=True, text=True, timeout=r.timeout_s, env=env)
+    try:                                                # own process group: a timeout kills the sub-makes too
+        p = tools.run_group(r.command(d), timeout=r.timeout_s, env=env)
         rec["returncode"] = p.returncode
         tail = (p.stdout + p.stderr)[-4000:]
-    except subprocess.TimeoutExpired:
+    except subprocess.TimeoutExpired as e:
         rec["returncode"] = "timeout"
-        tail = ""
+        tail = ((e.output or "") + (e.stderr or ""))[-4000:]
     rec["duration_s"] = round(time.time() - t0, 1)
     meta = stage_metrics(d["logs"], r.stage)
     rec.update(map_metrics(meta))
@@ -258,9 +256,12 @@ def run_signoff(r: OrfsRun, env: dict, d: dict) -> dict:
     Canonical DRC (METRIC_CONVENTIONS s.8): signoff DRC when available, else the detailed-route count."""
     out = {"drc_detailed_route": None, "drc_klayout": None, "lvs_errors": None, "signoff": {}}
     for target in ("drc", "lvs"):
-        p = subprocess.run(["make", "-C", r.flow_dir, "DESIGN_CONFIG=%s" % r.design_config,
-                            "FLOW_VARIANT=%s" % r.variant, target], capture_output=True, text=True, env=env, timeout=r.timeout_s)
-        out["signoff"][target] = p.returncode
+        try:
+            p = tools.run_group(["make", "-C", r.flow_dir, "DESIGN_CONFIG=%s" % r.design_config,
+                                 "FLOW_VARIANT=%s" % r.variant, target], timeout=r.timeout_s, env=env)
+            out["signoff"][target] = p.returncode
+        except subprocess.TimeoutExpired:
+            out["signoff"][target] = "timeout"
     cnt = d["reports"] / "6_drc_count.rpt"
     if cnt.exists():
         try:
