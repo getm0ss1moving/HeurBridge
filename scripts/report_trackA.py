@@ -56,6 +56,7 @@ def main():
     ap.add_argument("--archives", nargs="*", default=[])
     ap.add_argument("--node", default="")
     ap.add_argument("--code", default="", help="commit / code archive for runs made before the CODE_VERSION stamp")
+    ap.add_argument("--note", default="", help="observations appended to the report's notes")
     ap.add_argument("--out", default="")
     a = ap.parse_args()
     designs = {}
@@ -130,7 +131,8 @@ def main():
                               "Distinct layouts below the baseline, all designs: %d." % n_beat]),
         "notes": "M1 = the tool-native macro placement (DREAMPlace mixed-size for the dreamplace evaluator; the benchmark "
                  "macro positions for the HB-GP development runs); P_M disp = mean macro displacement of the legality "
-                 "check, core-normalized. Failures are counted as +inf and listed by name."},
+                 "check, core-normalized. Failures are counted as +inf and listed by name." +
+                 ((" " + a.note) if a.note else "")},
         gate_passed=None, out=out)
     print("REPORT_OK", out)
 

@@ -4,6 +4,22 @@ Every change to the code is recorded here with its version, task and verificatio
 Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 (The task list's `_harness/CHANGELOG.md` does not exist in the current checkout; this file replaces it.)
 
+## [Unreleased]
+
+### Added
+- **Track-A campaign on the spec's tools** (`reports/T2_trackA_ibm_dreamplace.md`; 225 GPU 1, two streams): 17 IBM
+  designs, M1 = DREAMPlace mixed-size, f1 = DREAMPlace with the macros fixed; 1,360 program and 809 local-search
+  evaluations. Against this strong M1 the programs win on two designs only -- ibm02 (J 0.164; its M1 is anomalous:
+  HPWL 12.2 M, RUDY OF 5.4 %) and ibm06 (J 0.4251, 9 distinct layouts); elsewhere M1 stays the best elite. 55 M2
+  timeouts on designs with >= 614 macros. `report_trackA.py --note`.
+- The HB-GP development campaign and the DREAMPlace campaign disagree on which programs help (HB-GP's baseline was
+  the benchmark placement, not a placer's): the spec baseline is the stronger reference.
+
+### Running
+- T3.7 Algorithm R on 225 GPU 0 (`algR_trackA`): the two stream archives merged (139 entries); train 13 IBM designs,
+  validate ibm04 / ibm06 (ibm08 / ibm12 held back for E0), pretrained warm start, f1 guard and promotion test with
+  DREAMPlace.
+
 ## [0.13.0] — 2026-09-27 — Track B on the real ORFS flow (2024-12), T3.4 done
 
 ### Changed — Track B runs the real ORFS flow
