@@ -4,6 +4,27 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
+## 2026-09-27 — Session 3 (night): OpenROAD built from source; Track-A campaign, E3, T3.7 running
+
+**Track A (spec tools) done**: `reports/T2_trackA_ibm_dreamplace.md` (DREAMPlace M1 is strong: programs win only on
+ibm02 -- anomalous M1 -- and ibm06) and `reports/E3_calibration_trackA_dreamplace.md` (G0 not met; f1 guard stands).
+
+**Track B tools**: OpenROAD 676f8451 (the ORFS 8ae3ae36 pin) built from source on 224
+(`scripts/server/build_openroad.sh`, launcher `openroad_676.sh`, version `676f8451bb-src`); ORFS checkout patched for a
+GUI-less build (`patch_orfs.py`). ariane133's tool-native Hier-RTLMP does not converge at 8 threads (MPL-0040 with
+both builds): its runs use upstream's later MPL settings via `--make-var` (documented deviation; user may prefer to
+exclude it or allow more threads for M1).
+
+**Running**
+- 225 GPU 0: `algR_trackA` (T3.7; data preparation, then 20k steps per round, V5 test with DREAMPlace f1).
+- 224: `seedB_orfs3_{bp_fe_top,bp_be_top,ariane133}`, `seedB_orfs2_{swerv_wrapper,ariane136}` (ORFS T1.7/T2.7).
+
+**Next**: fetch and report T3.7 (merge the job's new alpha-ledger lines into `stats/alpha_ledger.jsonl`); Track-B
+reports per design (`report_trackb_dev.py --runs runs/remote/<job>/runs/seed_orfs --label orfs`) and the f1->f2
+calibration; merge the per-design Track-B archives; then T4 (E0, protocol pending the user) and T5 (model pending).
+
+---
+
 ## 2026-09-27 — Session 3 (evening): Track B moves to the real ORFS flow; T3.4 done
 
 **Track B = ORFS 2024-12-13 (8ae3ae36) + OpenROAD a008522d8 + Yosys 0.48** (0.13.0). The mini-flow could not be made
