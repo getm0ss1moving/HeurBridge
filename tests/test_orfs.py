@@ -58,3 +58,15 @@ def test_command_and_dirs(tmp_path):
     assert (d["results"] / "2_2_floorplan_io.odb").read_text() == "2_2_floorplan_io.odb" and (d["objects"] / "lib").is_dir()
     r.stage = "grt"
     assert r.command(d)[-1] == str(d["results"] / "5_1_grt.odb")
+
+
+def test_failure_reason_names_the_tool_error():
+    grt = ("[INFO GRT-0014] Routed nets: 58762\n[ERROR GRT-0116] Global routing finished with congestion. Check the "
+           "congestion regions in the DRC Viewer.\nError: global_route.tcl, 110 GRT-0116\nmake[1]: *** "
+           "[Makefile:765: do-5_1_grt] Error 1\nmake: *** [Makefile:763: /x/5_1_grt.odb] Error 2\n")
+    assert orfs.failure_reason(grt, 2).startswith("GRT-0116 Global routing finished with congestion.")
+    killed = "[INFO GRT-0103] Extra Run for hard benchmark.\nmake[1]: *** [Makefile:765: do-5_1_grt] Terminated\n"
+    assert orfs.failure_reason(killed, "timeout") == "timeout in 5_1_grt"
+    assert orfs.failure_reason("", "timeout") == "timeout"
+    assert orfs.failure_reason("make[1]: *** [Makefile:1: do-3_3_place_gp] Error 1\n", 2) == "make returncode 2 in 3_3_place_gp"
+    assert orfs.failure_reason("anything", 0) is None

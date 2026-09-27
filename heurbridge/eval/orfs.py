@@ -209,6 +209,21 @@ def extract_macros(r: OrfsRun, d: dict, out_tcl: Path, timeout: int = 1800) -> P
     return Path(out_tcl)
 
 
+def failure_reason(tail: str, returncode) -> str | None:
+    """Name of a failed ORFS run from its log tail: the last tool error ('GRT-0116 Global routing finished with
+    congestion. ...'), or for a timeout the step it stopped ('timeout in 5_1_grt').  None for a successful run."""
+    if returncode == 0:
+        return None
+    tail = tail or ""
+    step = re.findall(r"do-(\w+)\] (?:Terminated|Error|Killed)", tail)
+    if returncode == "timeout":
+        return "timeout" + (" in %s" % step[-1] if step else "")
+    errs = re.findall(r"\[ERROR (\w+-\d+)\] ([^\n]*)", tail)
+    if errs:
+        return ("%s %s" % (errs[-1][0], errs[-1][1].strip()))[:160]
+    return "make returncode %s" % returncode + (" in %s" % step[-1] if step else "")
+
+
 def run(r: OrfsRun) -> dict:
     """Run ORFS to ``r.stage``; then ``make metadata`` for f2.  Never raises: failures are recorded."""
     env = os.environ.copy()
@@ -248,6 +263,7 @@ def run(r: OrfsRun) -> dict:
     if r.stage == "signoff" and rec["returncode"] == 0:
         rec.update(run_signoff(r, env, d))
     rec["log_tail"] = tail[-1500:]
+    rec["failure"] = failure_reason(tail, rec["returncode"])
     return rec
 
 

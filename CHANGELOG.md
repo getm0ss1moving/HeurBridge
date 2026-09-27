@@ -6,6 +6,21 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 
 ## [Unreleased]
 
+## [0.13.4] — 2026-09-28 — ORFS failures recorded by name
+
+### Fixed
+- **ORFS failures had no name in the records** (red line: every failure recorded by name): the Track-B report fell
+  back to "tool returncode 2 (no reason parsed)". `orfs.failure_reason` names the last tool error
+  (`GRT-0116 Global routing finished with congestion. ...`) or the step a timeout stopped (`timeout in 5_1_grt`);
+  `orfs.run` records it as `failure`, and `report_trackb_dev.py` derives it from the stored log tail for earlier
+  records (the running `seedB_orfs5_*` jobs). Tested on the bp_be_top snapshot.
+
+### Observed (Track-B campaign, first hours)
+- The 0.13.2 timeout fix worked in production: bp_fe_top's M2.v0.s1 was stopped at 7,200 s in 5_1_grt (log tail
+  ends with `do-5_1_grt] Terminated`), recorded as a timeout, and the job's session held one OpenROAD afterwards.
+- bp_be_top's first three SA layouts fail ORFS's default global route with GRT-0116 (overflow 13, 2,194 and 389,781
+  after the extra iterations; the base flow routes cleanly): unroutable at f1, counted as +inf.
+
 ## [0.13.3] — 2026-09-28 — bridge inference runs on the model's device (T3.7 on the GPU)
 
 ### Fixed

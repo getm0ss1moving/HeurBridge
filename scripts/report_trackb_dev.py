@@ -25,6 +25,7 @@ sys.path.insert(0, str(ROOT))
 
 from heurbridge import reporting  # noqa: E402
 from heurbridge.archive.store import Archive  # noqa: E402
+from heurbridge.eval import orfs  # noqa: E402
 from heurbridge.pipeline.seed_archive import distinct  # noqa: E402
 
 
@@ -55,6 +56,10 @@ def main():
         if r.get("status") != "ok":
             rec = r.get("record") or {}
             name = rec.get("failure") or r.get("error") or r.get("status")
+            if "design_config" in rec:                  # ORFS: the tool error or the step a timeout stopped
+                name = rec.get("failure") or orfs.failure_reason(rec.get("log_tail", ""), rec.get("returncode")) or name
+                fails[str(name).split(". ")[0]] += 1
+                continue
             fails[str(name).split(":")[0] + (": " + str(name).split("]")[0].split("[")[-1] if "[" in str(name) else "")] += 1
     # per program
     by = collections.defaultdict(list)
