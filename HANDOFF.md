@@ -18,7 +18,12 @@ Expect a slow Track-B campaign: a normal bp_fe_top candidate takes ~10 min to f1
 (timeout, recorded as a failure). If the throughput is a problem: split a design's programs across two jobs
 (`--programs`; up to 8 parallel jobs are allowed, 5 in use).
 
-**Running**: 224 `seedB_orfs5_*` (5 jobs); 225 GPU 0 `algR_trackA`; 225 GPU 1 `seedA_ispd_s1`, `seedA_ispd_s2`.
+**T3.7 rerun** (0.13.3): `algR_trackA` stopped at its first validation on the GPU (bridge inference defaulted to
+the CPU while the model was on CUDA; no training step lost). Fixed; `algR_trackA2` restores the cached sources
+and pairs (`--after algR_trackA`; preparation ~100 s per design instead of 1,000-2,000 s) and trains on GPU 0.
+
+**Running**: 224 `seedB_orfs5_*` (5 jobs); 225 GPU 0 `algR_trackA2`; 225 GPU 1 `seedA_ispd_s1`, `seedA_ispd_s2`
+(adaptec1, adaptec2, bigblue1 done: DREAMPlace's M1 is the best layout on each, next best +6.5-12% J).
 
 ---
 
