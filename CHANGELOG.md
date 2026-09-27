@@ -4,6 +4,15 @@ Every change to the code is recorded here with its version, task and verificatio
 Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 (The task list's `_harness/CHANGELOG.md` does not exist in the current checkout; this file replaces it.)
 
+## [Unreleased]
+
+### Fixed
+- ORFS's `final_report.tcl` saves images through `gui::show` whenever the `save_image` proc exists; our OpenROAD
+  build has no GUI, so 6_report failed after every metric was written (bp_fe_top on 676f8451: metrics identical to
+  the package's -- routed WL 2,376,571 um, setup WNS -0.077 ns). `scripts/server/patch_orfs.py` also requires
+  `gui::show` there (applied to the checkout on 224); the metrics are untouched. bp_fe_top / bp_be_top restarted
+  (`seedB_orfs3_*`).
+
 ## [0.13.1] — 2026-09-27 — OpenROAD 676f8451 from source (ORFS pin); Track-A campaign and E3 on the spec tools
 
 ### Added
