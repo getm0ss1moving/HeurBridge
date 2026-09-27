@@ -4,6 +4,42 @@ Every change to the code is recorded here with its version, task and verificatio
 Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 (The task list's `_harness/CHANGELOG.md` does not exist in the current checkout; this file replaces it.)
 
+## [0.12.1] — 2026-09-27 — Track-A seeding with DREAMPlace, ORFS-faithful M1 and synthesis
+
+### Fixed
+- **M1 (Hier-RTLMP) ran single-threaded** (`eval/miniflow.m1_script` had no `set_thread_count`): ORFS runs every
+  stage as `openroad -threads $(NUM_CORES)`, and Hier-RTLMP anneals in parallel with the thread count, so the M1
+  layouts of today (bp_fe_top, bp_be_top) were not ORFS's configuration, and ariane133's M1 had run for over an
+  hour. M1 now uses EDA_THREADS (8); the Track-B baselines are recomputed from M1 on (`tb3_*`). bp_fe_top's f2
+  pair on the single-threaded M1 was bit-identical across runs and across the thread cap (DRC 0, setup WNS
+  -1.905 ns, TNS -54.9 ns, hold +0.096 ns, 590 s each) — kept as a record of determinism, superseded as baseline.
+- **swerv_wrapper did not synthesize**: its RTL instantiates `OPENROAD_CLKGATE`, which ORFS resolves with the
+  platform's `CLKGATE_MAP_FILE`. The synthesis script now reads it (and the standard cells as black boxes) for RTL
+  that uses the clock gate, and maps latches with the platform's `LATCH_MAP_FILE` (as ORFS). Reading the
+  standard-cell library for every design would change other netlists (bp_fe_top: 362 lines, output ports driven
+  through assigns), so it is conditional; bp_fe_top's netlist is bit-identical with and without the latch map and
+  clock-gate file (checked on 224).
+- Synthesis, floorplan and M1 failures were noticed only at the next step: each step must now produce its file,
+  or `run_seed_miniflow.py` stops with the step's first errors.
+- DREAMPlace's parameter file was passed as a relative path while Placer.py runs in its install directory.
+
+### Added
+- Track A per spec: `run_seed_archive.py --evaluator dreamplace` — M1 = DREAMPlace mixed-size placement (macro
+  placement and macro legalization switch on for movable macros; cached per design as `m1.npz`; P_M checks
+  legality and its displacement is recorded), baseline = f1 on M1 with DREAMPlace seeds 0-2 (median), every
+  program evaluated with DREAMPlace (macros FIXED). A design whose M1 or baseline fails is reported by name and
+  the campaign continues; the job still exits non-zero. On 225 (ibm01, 2 programs, 88 s): M1 26.5 s, P_M mean
+  displacement 0.0107 of the core; baseline HPWL 2,484,943 / 2,490,825 / 2,481,027 (-3 % vs the benchmark
+  macro positions); M2.v0 J 0.525, M5.v0 J 0.533 against the baseline's 0.45 — the programs start far behind
+  DREAMPlace's own macro placement.
+- The HA-PR harness (`metrics_schema.py` sha256 4356a854..., identical on 224 and the Mac) reaches 225 as an
+  encrypted data bundle (`--data eda_harness:eda`, `HB_EDA_DIR`): the NAS copy there predates `metrics_schema.py`.
+- DREAMPlace evaluations delete their bookshelf copy and output after reading (workspaces are in RAM).
+
+### Running
+- Track A (spec f1) on 225 GPU 1: `seedA_dp_s1` / `seedA_dp_s2` — 17 IBM designs (ibm05 has no macros).
+- Track B on 224: `tb3_{ariane133,bp_fe_top,bp_be_top,swerv_wrapper}` — M1 (8 threads) -> f1 -> f2 x 2.
+
 ## [0.12.0] — 2026-09-27 — DREAMPlace Track-A f1 on 225, Track B through detailed routing on 224
 
 ### Fixed

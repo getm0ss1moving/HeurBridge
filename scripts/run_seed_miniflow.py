@@ -47,11 +47,17 @@ def main():
     w = ROOT / "runs" / "miniflow" / name
     w.mkdir(parents=True, exist_ok=True)
     p, d = MF.Nangate45(str(FLOW)), MF.from_orfs(str(FLOW), a.design)
+    def step(tool, script, path, product):         # each step must produce its file, or the run stops by name
+        rc, log, _ = MF.run_tool(tool, script, path)
+        if rc != 0 or not product.exists():
+            err = [l for l in log.splitlines() if "ERROR" in l or l.startswith("Error")][:3]
+            sys.exit("%s failed (rc=%s): %s" % (path.name, rc, " | ".join(err)))
     if not (w / "fp.odb").exists():
-        MF.run_tool("yosys", MF.synth_script(p, d, w / "synth_hier.v"), w / "synth_hier.ys")
-        MF.run_tool("openroad", MF.floorplan_script(p, d, w / "synth_hier.v", w / "fp.odb"), w / "floorplan.tcl")
+        step("yosys", MF.synth_script(p, d, w / "synth_hier.v"), w / "synth_hier.ys", w / "synth_hier.v")
+        step("openroad", MF.floorplan_script(p, d, w / "synth_hier.v", w / "fp.odb"), w / "floorplan.tcl", w / "fp.odb")
     if not (w / "m1_macros.tcl").exists():
-        MF.run_tool("openroad", MF.m1_script(p, d, w / "fp.odb", w / "m1.odb", w / "m1_macros.tcl"), w / "m1.tcl")
+        step("openroad", MF.m1_script(p, d, w / "fp.odb", w / "m1.odb", w / "m1_macros.tcl"), w / "m1.tcl",
+             w / "m1_macros.tcl")
     fp_def = w / "fp.hb.def"
     if not fp_def.exists():
         odb_to_def(w / "fp.odb", fp_def, docker_image=IMG)

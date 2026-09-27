@@ -118,7 +118,7 @@ def run_placer(param: dict, work: Path, timeout: int = 3600) -> tuple:
     root = os.environ.get("HB_DREAMPLACE")
     if not root:
         raise RuntimeError("HB_DREAMPLACE (DREAMPlace install prefix) is not set")
-    pj = work / "dreamplace.json"
+    pj = (work / "dreamplace.json").resolve()             # Placer.py runs in the install directory
     pj.write_text(json.dumps(param, indent=1))
     py = os.environ.get("HB_DREAMPLACE_PYTHON", sys.executable)
     t0 = time.time()
@@ -133,9 +133,21 @@ def run_placer(param: dict, work: Path, timeout: int = 3600) -> tuple:
 
 
 def run_dreamplace_f1(design: Design, layout: Layout, work: str | Path, f0cfg=None, gpu: bool = True,
-                      iters: int = 1000, seed: int = 0, timeout: int = 3600) -> tuple:
+                      iters: int = 1000, seed: int = 0, timeout: int = 3600, keep_files: bool = False) -> tuple:
     """Track-A f1: cells placed by DREAMPlace (GP + LG) around the FIXED macros of ``layout``; f0 metrics.
-    Returns (record, placed layout or None)."""
+    Returns (record, placed layout or None).  Without ``keep_files`` the bookshelf copy and DREAMPlace's output
+    are deleted once read (tens of MB per evaluation on the larger designs; the workspaces are in RAM); the
+    parameters and the log stay."""
+    try:
+        return _run_f1(design, layout, Path(work), f0cfg, gpu, iters, seed, timeout)
+    finally:
+        if not keep_files:
+            import shutil
+            for sub in ("in", "out"):
+                shutil.rmtree(Path(work) / sub, ignore_errors=True)
+
+
+def _run_f1(design, layout, work, f0cfg, gpu, iters, seed, timeout):
     from .f1 import KEYS, trackA_metrics
     work = Path(work)
     work.mkdir(parents=True, exist_ok=True)
@@ -161,3 +173,36 @@ def run_dreamplace_f1(design: Design, layout: Layout, work: str | Path, f0cfg=No
         out["failure"] = "macros_moved"          # FIXED not honoured: never score such a run
         out["returncode"] = "macros_moved"
     return out, placed
+
+
+def run_dreamplace_m1(design: Design, layout: Layout, work: str | Path, gpu: bool = True, iters: int = 1000,
+                      seed: int = 0, timeout: int = 3600) -> tuple:
+    """Track-A M1 (tool-native macro placement, spec T2.1): DREAMPlace's mixed-size placement of the design with
+    the macros movable (its macro placement and macro legalization switch on by themselves), started from
+    ``layout`` (the benchmark placement).  Returns (record, macro-stage layout or None): macros at DREAMPlace's
+    positions (orientations kept), IOs and fixed objects unchanged, standard cells unplaced (NaN)."""
+    work = Path(work)
+    work.mkdir(parents=True, exist_ok=True)
+    aux = write_oriented_bookshelf(design, layout, work / "in", name=design.id, fix_macros=False)
+    rc, log, wall = run_placer(params(str(aux.resolve()), str((work / "out").resolve()), gpu=gpu, iters=iters,
+                                      seed=seed), work, timeout)
+    rec = {"backend": "dreamplace_m1", "returncode": rc, "wall_s": wall, "seed": seed,
+           "macro_place_enabled": "automatically enabling macro_place_flag" in log}
+    pl = work / "out" / design.id / ("%s.gp.pl" % design.id)
+    if rc != 0 or not pl.exists():
+        rec["failure"] = "dreamplace_rc_%s" % rc if rc != 0 else "dreamplace_no_output"
+        return rec, None
+    placed = read_placed(design, layout, pl)
+    import shutil
+    for sub in ("in", "out"):                            # the caller stores the M1 layout itself
+        shutil.rmtree(work / sub, ignore_errors=True)
+    m1 = layout.copy()
+    mac = design.is_macro & ~design.is_fixed
+    m1.pos[mac] = placed.pos[mac]
+    cells = ~design.is_macro & ~design.is_io & ~design.is_fixed
+    m1.pos[cells] = np.nan
+    fixed = design.is_fixed | design.is_io
+    rec["fixed_max_shift"] = float(np.nanmax(np.abs(design.to_abs(placed.pos[fixed]) - design.to_abs(layout.pos[fixed])))) \
+        if fixed.any() else 0.0
+    rec["failure"] = None
+    return rec, m1

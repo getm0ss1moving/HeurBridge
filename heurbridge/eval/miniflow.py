@@ -49,6 +49,8 @@ class Nangate45:
     sc_lef = property(lambda s: s.pdir / "lef" / "NangateOpenCellLibrary.macro.mod.lef")
     lib = property(lambda s: s.pdir / "lib" / "NangateOpenCellLibrary_typical.lib")
     set_rc = property(lambda s: s.pdir / "setRC.tcl")
+    clkgate_map = property(lambda s: s.pdir / "cells_clkgate.v")    # CLKGATE_MAP_FILE (OPENROAD_CLKGATE)
+    latch_map = property(lambda s: s.pdir / "cells_latch.v")        # LATCH_MAP_FILE
     tapcell = property(lambda s: s.pdir / "tapcell.tcl")
     site = "FreePDK45_38x28_10R_NP_162NW_34O"
     min_layer, max_layer = "metal2", "metal10"
@@ -148,11 +150,21 @@ def from_orfs(flow_dir: str, platform_design: str) -> DesignCfg:
 def synth_script(p: Nangate45, d: DesignCfg, out_v: Path, flatten: bool = False) -> str:
     """Hierarchical by default (ORFS SYNTH_HIERARCHICAL=1): Hier-RTLMP clusters by the logical hierarchy and
     this OpenROAD build crashes in TritonPart when it has to split one large flat cluster."""
-    lines = ["read_liberty -lib %s" % l for l in d.macro_libs]
+    # ORFS synth_preamble.tcl reads the platform's OPENROAD_CLKGATE definition (-> CLKGATE_X1) and the standard
+    # cells as black boxes.  Only swerv_wrapper's RTL instantiates OPENROAD_CLKGATE; for the others the extra
+    # standard-cell library changes the netlist (bp_fe_top: output ports driven through assigns, 362 diff lines)
+    # without being needed, so both are read only when the RTL uses the clock gate: every other netlist stays
+    # bit-identical to the one the earlier Track-B results were made with (checked on bp_fe_top).
+    clkgate = p.clkgate_map.exists() and any("OPENROAD_CLKGATE" in Path(v).read_text(errors="ignore") for v in d.verilog)
+    lines = ["read_liberty -lib %s" % l for l in ([p.lib] if clkgate else []) + d.macro_libs]
     lines += ["read_verilog -defer -sv %s" % v for v in d.verilog]
+    if clkgate:
+        lines.append("read_verilog -defer %s" % p.clkgate_map)
     du = "".join(" -dont_use %s" % c for c in d.dont_use)
-    lines += ["hierarchy -top %s" % d.top, "synth -top %s%s" % (d.top, " -flatten" if flatten else ""),
-              "dfflibmap -liberty %s" % p.lib, "abc -liberty %s%s" % (p.lib, du),   # (no dont-use flip-flops)
+    lines += ["hierarchy -top %s" % d.top, "synth -top %s%s" % (d.top, " -flatten" if flatten else "")]
+    if p.latch_map.exists():                               # ORFS: latches to the platform's latch cells
+        lines.append("techmap -map %s" % p.latch_map)
+    lines += ["dfflibmap -liberty %s" % p.lib, "abc -liberty %s%s" % (p.lib, du),   # (no dont-use flip-flops)
               "hilomap -singleton -hicell LOGIC1_X1 Z -locell LOGIC0_X1 Z", "setundef -zero", "splitnets",
               "opt_clean -purge", "write_verilog -noattr -noexpr -nohex -nodec %s" % out_v]
     return "\n".join(lines) + "\n"
@@ -186,9 +198,13 @@ def floorplan_script(p: Nangate45, d: DesignCfg, netlist: Path, out_odb: Path) -
         "write_db %s" % out_odb]) + "\n"
 
 
-def m1_script(p: Nangate45, d: DesignCfg, fp_odb: Path, out_odb: Path, out_tcl: Path) -> str:
+def m1_script(p: Nangate45, d: DesignCfg, fp_odb: Path, out_odb: Path, out_tcl: Path, threads: int | None = None) -> str:
+    """Tool-native macro placement (M1).  ORFS runs every stage as ``openroad -threads $(NUM_CORES)``, and
+    Hier-RTLMP's annealing runs in parallel with the thread count, so M1 uses EDA_THREADS threads (the earlier
+    single-threaded M1 took over an hour on ariane133 and is not ORFS's configuration)."""
     return "\n".join([
         "read_db %s" % fp_odb, "\n".join("read_liberty %s" % l for l in [p.lib] + d.macro_libs), "read_sdc %s" % d.sdc,
+        "set_thread_count %d" % (threads or tools.eda_threads(8)),
         "rtl_macro_placer -halo_width %g -halo_height %g" % d.halo,
         "write_macro_placement %s" % out_tcl, "write_db %s" % out_odb, 'puts "HB_M1_DONE"']) + "\n"
 

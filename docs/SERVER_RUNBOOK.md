@@ -72,6 +72,9 @@ python scripts/hbv.py run --port 225 --run t05_225 -- "export PIP_NO_CACHE_DIR=1
   `bash scripts/server/trackb.sh python scripts/run_seed_miniflow.py --design nangate45/ariane133 --seeds 0 --top 0 --ls 0 --base-runs 1 --archive archive_B0_trackB_dev`
   with `--exclude '/work(_f2)?/.*\.(odb|def)$'` (per-evaluation databases stay out of the vault; `fp.odb` is kept for
   the f2 job, which runs with `--after <f1 run>`).
+- Track A per spec on 225 (DREAMPlace in `/tmp/.hbtools/dreamplace`, built by `scripts/server/build_dreamplace.sh`;
+  the HA-PR harness comes as the encrypted bundle `eda_harness`):
+  `--gpu 1 --data eda_harness:eda -- "ln -s /tmp/.hbdata/benchmarks benchmarks; export HB_EDA_DIR=\$PWD/eda HB_DREAMPLACE=/tmp/.hbtools/dreamplace OMP_NUM_THREADS=4; /tmp/.hbenv/hb/bin/python scripts/run_seed_archive.py --suite ibm --designs ibm01,... --evaluator dreamplace --out runs/seed_trackA_dp --archive archive_A0_trackA_s1"`
 - T3.4 pretraining on 225 GPU 0 (`--gpu 0 --snapshot 1800`; restart with `--resume` or `--after`):
   `/tmp/.hbenv/hb/bin/python scripts/pretrain_bridge.py --steps 200000 --batch 64 --device cuda --workers 8 --out checkpoints/pretrain_small --resume`
 - T3.7 Algorithm R: `scripts/algorithm_r.py ... --guard f1 --device cuda`; T4 E0: `scripts/run_e0.py ... --guard-fidelity f1 --equal-guard --random-control`.
