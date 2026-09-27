@@ -117,7 +117,7 @@ go to local disks.
 |---|---|---|---|---|
 | 224 (EDA node) | 64 cores / 125 GB | 3x RTX 3090, GPU 0 "Unknown Error" | **fails** (`cuInit` error 3 on every device: the faulty GPU breaks the driver; needs an admin) | `/data` 3.6 TB, 300 GB free |
 | 227 | 64 / 125 GB | 3x RTX 3090, GPU 0 faulty | fails the same way | `/data` not writable; `/tmp` |
-| 225 | 24 / 125 GB | 4x RTX 3090 | works (driver 510.54, CUDA 11.6) | `/data` 99 % full; **approved by the user (2026-09-27)**: env and vault in `/tmp` (`/tmp/.hbenv/hb`, `/tmp/.hbv`), GPU 0 used |
+| 225 | 24 / 125 GB | 4x RTX 3090 | works (driver 510.54, CUDA 11.6); `nvidia-smi` utilization always reads 0 % (also under a 4096^2 matmul burn that runs at 10.9 TFLOPS, 2026-09-28): judge GPU use by memory and throughput | `/data` 99 % full; **approved by the user (2026-09-27)**: env and vault in `/tmp` (`/tmp/.hbenv/hb`, `/tmp/.hbv`), GPUs 0 and 1 used |
 | 231 | — | 5x RTX 4090, all busy | works | `/tmp` 5 GB free — **use needs approval (A.2)** |
 | 232 | — | — | host does not answer commands | — |
 | 234 | — | — | NVIDIA driver not running | `/tmp` |
