@@ -4,6 +4,44 @@ Every change to the code is recorded here with its version, task and verificatio
 Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 (The task list's `_harness/CHANGELOG.md` does not exist in the current checkout; this file replaces it.)
 
+## [0.13.0] — 2026-09-27 — Track B on the real ORFS flow (2024-12), T3.4 done
+
+### Changed — Track B runs the real ORFS flow
+- The mini-flow could not reproduce ORFS's result on this OpenROAD build: every alignment step fixed one gap and
+  exposed the next (floorplan areas, RTLMP arguments, synthesis order, buffer removal, density), and ORFS's
+  timing-driven placement with kept resizer changes diverged in the mini-flow even after `remove_buffers`
+  (bp_fe_top: +19,505 um^2 of buffers, HPWL 2.4e9 -> 3e10, detailed placement failed). Its baselines were also far
+  from ORFS's (bp_fe_top setup WNS -1.9 ns vs ORFS's CI bound -0.22 ns).
+- **ORFS at 2024-12-13 (8ae3ae36)** pins OpenROAD 676f8451 (our package a008522d8 is from 2024-12-11) and
+  **Yosys 0.48** (installed from conda-forge on 224, the same commit aaa53474); a sparse checkout
+  (`third_party/ORFS-2024-12`: scripts, util, platforms/nangate45 + common, the five designs) is on 224. The full
+  flow on bp_fe_top (M1 = ORFS's own rtl_macro_placer) runs to 6_report in 15 minutes: setup WNS -0.077 ns, TNS
+  -0.34 ns, hold WNS -0.05 ns (462 hold-violating endpoints), power 0.165 W, 2,376,571 um routed, 326,997 vias,
+  DRC 0, 0 antenna diodes, instance area 235,187 um^2 (within ORFS's CI bounds for WNS, area and antennas).
+- `eval/orfs.py`: ORFS reports its own directories (`make print-%`; directories follow DESIGN_NICKNAME, e.g.
+  bp_fe_top -> bp_fe); `WORK_HOME` keeps every output in the job's encrypted workspace; OPENROAD_EXE / YOSYS_EXE;
+  f2 stops at `6_report.log` (the GDS needs KLayout, which the servers lack and the metrics do not need); a
+  candidate variant starts from the base variant's synthesis chain and pre-macro floorplan (timestamps kept, so
+  make begins at 2_3); metrics are merged only up to the requested stage (an f1 record never reads finish keys);
+  hold WNS comes from the stage report (`report_checks -path_delay min`, 0.01 ns resolution: ORFS 2024-12 has no
+  hold-slack metric); global-route power (`globalroute__power__total`); M1 extracted from 2_3_floorplan_macro.odb.
+  `place_macro -exact` is no longer written by default (this build has no such flag).
+- `scripts/run_seed_orfs.py`: T1.7 baselines (the unmodified flow, repeated), T2.7 seeding at f1 (5_1_grt) and f2
+  verification (6_report) with `OrfsEvaluator`; variant databases are deleted after each evaluation (logs and
+  reports, which hold every metric, stay).
+- The mini-flow (`eval/miniflow.py`, `run_seed_miniflow.py`) remains for local development and as the fallback.
+- **Driver test on bp_fe_top** (`orfs_drv_test`): base flow 825 s; two programs at f1 as seeded variants (each
+  starts at 2_3: no synthesis or floorplan rerun; 6-7 minutes); M5.v0 fails the f1 setup gate (WNS -0.071 ns vs
+  M1's -0.005 ns), M2.v0 passes (J 0.916) and at f2 beats ORFS's own M1 with every gate passed: J 0.937 (setup WNS
+  -0.040 vs -0.077 ns, TNS -0.23 vs -0.34 ns, hold +0.01 vs -0.05 ns, routed WL 2,097,257 vs 2,376,571 um, DRC 0).
+- **Layout reuse in seeding** (`pipeline/seed_archive._eval`): a layout the same evaluator already evaluated
+  successfully is not evaluated again (seed-independent programs repeat their layout for every seed; all
+  evaluators are deterministic) -- the row is copied with `reused_from`; failures are always repeated.
+
+### Running
+- ORFS Track-B campaign on 224: `seedB_orfs_{bp_fe_top,bp_be_top,swerv_wrapper,ariane133,ariane136}` (base x2, 16
+  programs x 5 seeds + local search at f1, top 10 + spread 10 at f2).
+
 ## [0.12.4] — 2026-09-27 — Track-B placement steps as ORFS 3_3-3_5; T3.4 pretraining done
 
 ### Fixed

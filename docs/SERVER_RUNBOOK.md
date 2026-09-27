@@ -67,7 +67,10 @@ python scripts/hbv.py run --port 225 --run t05_225 -- "export PIP_NO_CACHE_DIR=1
 ## Later tasks (commands run inside `hbv.py run`)
 
 - T1.7 / T2.7 Track A: `python scripts/run_seed_archive.py --suite ibm ...` with the DREAMPlace / HB-GP f1.
-- Track B on 224 with the mini-flow and native tools (`scripts/server/trackb.sh` sets `HB_OPENROAD`, `HB_YOSYS`,
+- **Track B on 224 with ORFS 2024-12** (`third_party/ORFS-2024-12`, Yosys 0.48 in `tools/yosys_048`): one job per design,
+  outputs under the workspace (`WORK_HOME`), variant databases deleted after each evaluation:
+  `--exclude '(/(objects|results)/|\.png$)' -- "bash scripts/server/trackb.sh python scripts/run_seed_orfs.py --flow /data/dzy/heura_repr/third_party/ORFS-2024-12/flow --design nangate45/<design> --seeds 5 --top 10 --spread 10 --ls 8 --base-runs 2 --yosys /data/dzy/heura_repr/tools/yosys_048/bin/yosys --archive archive_B0_orfs_<design>"`
+- (fallback) Track B on 224 with the mini-flow and native tools (`scripts/server/trackb.sh` sets `HB_OPENROAD`, `HB_YOSYS`,
   `EDA_THREADS=8` and links the ORFS checkout read only):
   `bash scripts/server/trackb.sh python scripts/run_seed_miniflow.py --design nangate45/ariane133 --seeds 0 --top 0 --ls 0 --base-runs 1 --archive archive_B0_trackB_dev`
   with `--exclude '/work(_f2)?/.*\.(odb|def)$'` (per-evaluation databases stay out of the vault; `fp.odb` is kept for

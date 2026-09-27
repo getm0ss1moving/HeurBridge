@@ -1,6 +1,9 @@
 """T1.4/T1.5 Track B glue: macro placement Tcl round trip and ORFS metric mapping."""
 
+from pathlib import Path
+
 import numpy as np
+import pytest
 
 from heurbridge.core import orient as O, synth
 from heurbridge.eval import orfs
@@ -19,7 +22,8 @@ def test_macro_tcl_roundtrip():
         x, y, o = got[des.names[i]]
         assert abs(x - ll[i, 0]) < 1e-3 and abs(y - ll[i, 1]) < 1e-3
         assert O.from_odb(o) == lay.orient[i]
-    assert "-exact" in txt
+    assert "-exact" not in txt                       # OpenROAD 2024-12's place_macro has no -exact (probe)
+    assert "-exact" in orfs.macro_placement_tcl(des, lay, exact=True)
 
 
 def test_metric_mapping_first_candidate_wins():
@@ -32,9 +36,25 @@ def test_metric_mapping_first_candidate_wins():
     assert "vias" not in m                                   # missing -> absent -> 'unchecked' downstream
 
 
-def test_command_and_dirs():
-    r = orfs.OrfsRun(flow_dir="/f/flow", design_config="/f/flow/designs/nangate45/ariane133/config.mk", variant="hb_x",
-                     macro_tcl="/tmp/m.tcl", stage="grt")
-    c = r.command()
-    assert "MACRO_PLACEMENT_TCL=/tmp/m.tcl" in c and c[-1] == "globalroute" and "FLOW_VARIANT=hb_x" in c
-    assert str(r.dirs()["logs"]).endswith("logs/nangate45/ariane133/hb_x")
+ORFS_FLOW = Path(__file__).resolve().parents[1] / "third_party" / "ORFS-2024-12" / "flow"
+
+
+@pytest.mark.skipif(not (ORFS_FLOW / "Makefile").exists(), reason="needs the ORFS 2024-12 checkout")
+def test_command_and_dirs(tmp_path):
+    r = orfs.OrfsRun(flow_dir=str(ORFS_FLOW), design_config="./designs/nangate45/bp_fe_top/config.mk", variant="hb_x",
+                     macro_tcl="/tmp/m.tcl", stage="finish", work_home=str(tmp_path), base_variant="base")
+    d = r.dirs()                                    # ORFS names its directories by DESIGN_NICKNAME (bp_fe)
+    assert d["logs"] == tmp_path / "logs" / "nangate45" / "bp_fe" / "hb_x"
+    c = r.command(d)
+    assert "MACRO_PLACEMENT_TCL=/tmp/m.tcl" in c and "FLOW_VARIANT=hb_x" in c and "WORK_HOME=%s" % tmp_path in c
+    assert c[-1] == str(d["logs"] / "6_report.log")            # f2 stops at the report: no GDS / KLayout
+    assert "MACRO_PLACEMENT_TCL=/tmp/m.tcl" not in r.make_vars("base")    # the base variant is M1 (rtl_macro_placer)
+    base = r.dirs("base")                           # a candidate starts from the base synthesis and floorplan
+    base["results"].mkdir(parents=True)
+    for f in orfs.OrfsRun.SEED_FILES:
+        (base["results"] / f).write_text(f)
+    (base["objects"] / "lib").mkdir(parents=True)
+    assert r.seed_from_base() == list(orfs.OrfsRun.SEED_FILES)
+    assert (d["results"] / "2_2_floorplan_io.odb").read_text() == "2_2_floorplan_io.odb" and (d["objects"] / "lib").is_dir()
+    r.stage = "grt"
+    assert r.command(d)[-1] == str(d["results"] / "5_1_grt.odb")

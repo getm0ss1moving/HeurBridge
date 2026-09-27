@@ -29,15 +29,12 @@ from ..core import orient as O
 from ..core.design import Design, Layout
 from .f1 import parse_f1_log
 
-STAGE_TARGET = {"floorplan": "floorplan", "place": "place", "cts": "cts", "grt": "globalroute",
-                "route": "route", "finish": "finish", "signoff": "finish"}
-
 CANDIDATES = {
     "setup_wns_ns": ["finish__timing__setup__ws", "detailedroute__timing__setup__ws", "globalroute__timing__setup__ws"],
     "hold_wns_ns": ["finish__timing__hold__ws", "detailedroute__timing__hold__ws", "globalroute__timing__hold__ws"],
     "setup_tns_ns": ["finish__timing__setup__tns", "detailedroute__timing__setup__tns", "globalroute__timing__setup__tns"],
     "hold_tns_ns": ["finish__timing__hold__tns", "detailedroute__timing__hold__tns"],
-    "total_power_w": ["finish__power__total", "detailedroute__power__total"],
+    "total_power_w": ["finish__power__total", "detailedroute__power__total", "globalroute__power__total"],
     "detailed_wirelength_um": ["detailedroute__route__wirelength", "finish__route__wirelength"],
     "vias": ["detailedroute__route__vias", "detailedroute__route__via__count", "detailedroute__route__vias__total"],
     "drc_violations": ["detailedroute__route__drc_errors", "finish__route__drc_errors"],
@@ -69,7 +66,7 @@ def map_metrics(meta: dict) -> dict:
     return out
 
 
-def macro_placement_tcl(design: Design, layout: Layout, exact: bool = True) -> str:
+def macro_placement_tcl(design: Design, layout: Layout, exact: bool = False) -> str:
     """``place_macro`` commands (lower-left location in microns, ODB orientation) for movable macros."""
     lines = ["# HeurBridge macro placement (%s)" % design.id]
     mm = np.flatnonzero(design.is_macro & ~design.is_fixed)
@@ -96,60 +93,152 @@ def parse_macro_tcl(text: str) -> dict:
 @dataclass
 class OrfsRun:
     flow_dir: str                     # .../OpenROAD-flow-scripts/flow
-    design_config: str                # designs/nangate45/ariane133/config.mk
+    design_config: str                # ./designs/nangate45/ariane133/config.mk (relative to flow_dir) or absolute
     variant: str                      # FLOW_VARIANT (one directory per evaluated candidate)
     macro_tcl: str | None = None
     stage: str = "finish"
     threads: int = 8
     timeout_s: int = 7200
     env: dict = field(default_factory=dict)
+    work_home: str | None = None      # ORFS WORK_HOME: results/logs/reports/objects go here (the encrypted workspace)
+    base_variant: str | None = None   # reuse this variant's synthesis and pre-macro floorplan (stages 1 - 2_2)
+    yosys: str | None = None          # YOSYS_EXE (default: tools.binary('yosys'))
 
-    def dirs(self) -> dict:
-        cfg = Path(self.design_config)
-        platform, name = cfg.parent.parent.name, cfg.parent.name
-        base = Path(self.flow_dir)
-        return {k: base / k / platform / name / self.variant for k in ("results", "logs", "reports", "objects")}
+    def make_vars(self, variant: str | None = None) -> list:
+        from .. import tools
+        v = ["DESIGN_CONFIG=%s" % self.design_config, "FLOW_VARIANT=%s" % (variant or self.variant),
+             "NUM_CORES=%d" % self.threads, "OPENROAD_EXE=%s" % tools.binary("openroad"),
+             "YOSYS_EXE=%s" % (self.yosys or tools.binary("yosys"))]
+        if self.work_home:
+            v.append("WORK_HOME=%s" % self.work_home)
+        if self.macro_tcl and variant in (None, self.variant):
+            v.append("MACRO_PLACEMENT_TCL=%s" % self.macro_tcl)
+        return v
 
-    def command(self) -> list:
-        args = ["make", "-C", self.flow_dir, "DESIGN_CONFIG=%s" % self.design_config, "FLOW_VARIANT=%s" % self.variant,
-                "NUM_CORES=%d" % self.threads]
-        if self.macro_tcl:
-            args.append("MACRO_PLACEMENT_TCL=%s" % self.macro_tcl)
-        args.append(STAGE_TARGET[self.stage])
-        return args
+    def dirs(self, variant: str | None = None) -> dict:
+        """ORFS's own output directories for this design and variant (``make print-%``: the design's
+        DESIGN_NICKNAME, not its directory name, names them -- bp_fe_top -> bp_fe)."""
+        p = subprocess.run(["make", "-s", "-C", self.flow_dir] + self.make_vars(variant) +
+                           ["print-%s" % k for k in ("LOG_DIR", "RESULTS_DIR", "REPORTS_DIR", "OBJECTS_DIR")],
+                           capture_output=True, text=True, timeout=120)
+        got = dict(re.findall(r"^(\w+) = (.*)$", p.stdout, re.M))
+        if len(got) < 4:
+            raise RuntimeError("ORFS did not report its directories: %s" % (p.stdout + p.stderr)[-400:])
+        return {"logs": Path(got["LOG_DIR"]), "results": Path(got["RESULTS_DIR"]),
+                "reports": Path(got["REPORTS_DIR"]), "objects": Path(got["OBJECTS_DIR"])}
+
+    def target(self, d: dict) -> str:
+        """File target of the stage.  f2 stops at 6_report (metrics, RCX, STA): ``finish`` also streams the GDS
+        through KLayout, which the servers do not have and the metrics do not need."""
+        res, logs = d["results"], d["logs"]
+        return str({"floorplan": res / "2_floorplan.odb", "place": res / "3_place.odb", "cts": res / "4_cts.odb",
+                    "grt": res / "5_1_grt.odb", "route": res / "5_route.odb", "finish": logs / "6_report.log",
+                    "signoff": logs / "6_report.log"}[self.stage])
+
+    # the synthesis chain make checks (1_synth.rtlil -> 1_1_yosys.v -> 1_synth.v; timestamps kept, so nothing is
+    # rebuilt) and the pre-macro floorplan (2_1, 2_2): a candidate variant starts at 2_3 macro placement
+    SEED_FILES = ("1_synth.rtlil", "1_1_yosys.v", "1_synth.v", "1_synth.sdc", "clock_period.txt", "synth_stats.txt",
+                  "mem.json", "mem_hierarchical.json", "2_1_floorplan.odb", "2_1_floorplan.sdc", "2_2_floorplan_io.odb")
+
+    def seed_from_base(self) -> list:
+        """Copy the base variant's synthesis and pre-macro floorplan (and its objects: merged libraries) into this
+        variant, timestamps kept, so make starts at the macro placement (2_3).  Returns the copied files."""
+        import shutil
+        if not self.base_variant or self.base_variant == self.variant:
+            return []
+        src, dst = self.dirs(self.base_variant), self.dirs()
+        copied = []
+        for f in self.SEED_FILES:
+            if (src["results"] / f).exists() and not (dst["results"] / f).exists():
+                dst["results"].mkdir(parents=True, exist_ok=True)
+                shutil.copy2(src["results"] / f, dst["results"] / f)
+                copied.append(f)
+        if src["objects"].exists() and not dst["objects"].exists():
+            shutil.copytree(src["objects"], dst["objects"], symlinks=True)
+        return copied
+
+    def command(self, d: dict | None = None) -> list:
+        return ["make", "-C", self.flow_dir] + self.make_vars() + [self.target(d or self.dirs())]
+
+
+STAGE_ORDER = ("1_", "2_", "3_", "4_", "5_1", "5_2", "5_3", "6_")
+STAGE_LAST = {"floorplan": "2_", "place": "3_", "cts": "4_", "grt": "5_1", "route": "5_3", "finish": "6_",
+              "signoff": "6_"}
+STAGE_REPORT = {"grt": "5_global_route.rpt", "route": "5_global_route.rpt", "finish": "6_finish.rpt",
+                "signoff": "6_finish.rpt"}
+
+
+def stage_metrics(log_dir: Path, stage: str) -> dict:
+    """Merged per-step JSON metrics of the steps up to ``stage`` only: a variant that continued to finish still
+    gives its f1 (grt) record from the grt-stage metrics (the finish keys come first in CANDIDATES)."""
+    last = STAGE_ORDER.index(STAGE_LAST[stage])
+    meta = {}
+    for js in sorted(Path(log_dir).glob("*.json")):
+        if not any(js.name.startswith(pfx) for pfx in STAGE_ORDER[:last + 1]):
+            continue
+        try:
+            meta.update(json.loads(js.read_text()))
+        except (OSError, ValueError):
+            pass
+    return meta
+
+
+def parse_stage_report(text: str) -> dict:
+    """ORFS stage report (5_global_route.rpt / 6_finish.rpt): worst hold slack = the first path of
+    ``report_checks -path_delay min``, worst setup slack = the first of ``-path_delay max`` (2 decimals)."""
+    out = {}
+    for key, title in (("hold_wns_ns", "report_checks -path_delay min"), ("setup_wns_report_ns", "report_checks -path_delay max")):
+        i = text.find(title)
+        if i < 0:
+            continue
+        m = re.search(r"^\s*(-?[0-9.]+)\s+slack \((?:MET|VIOLATED)\)", text[i:], re.M)
+        if m:
+            out[key] = float(m.group(1))
+    return out
+
+
+def extract_macros(r: OrfsRun, d: dict, out_tcl: Path, timeout: int = 1800) -> Path:
+    """ORFS's own macro placement (M1) as place_macro commands, from the 2_3 macro-stage database."""
+    from .. import tools
+    script = Path(out_tcl).with_suffix(".extract.tcl")
+    script.write_text("read_db %s\nwrite_macro_placement %s\n" % (d["results"] / "2_3_floorplan_macro.odb", Path(out_tcl).resolve()))
+    p = subprocess.run([tools.binary("openroad"), "-no_init", "-no_splash", "-exit", str(script)],
+                       capture_output=True, text=True, timeout=timeout)
+    if p.returncode != 0 or not Path(out_tcl).exists():
+        raise RuntimeError("M1 extraction failed: %s" % (p.stdout + p.stderr)[-600:])
+    return Path(out_tcl)
 
 
 def run(r: OrfsRun) -> dict:
     """Run ORFS to ``r.stage``; then ``make metadata`` for f2.  Never raises: failures are recorded."""
     env = os.environ.copy()
     env.update({k: str(v) for k, v in r.env.items()})
-    env.setdefault("OPENROAD_THREADS", str(r.threads))
+    env.setdefault("OMP_NUM_THREADS", str(r.threads))      # OpenMP is not bounded by -threads (red line A.2)
     t0 = time.time()
     rec = {"variant": r.variant, "stage": r.stage, "design_config": r.design_config, "macro_tcl": r.macro_tcl}
+    d = r.dirs()
+    rec["seeded_from_base"] = r.seed_from_base()
     try:
-        p = subprocess.run(r.command(), capture_output=True, text=True, timeout=r.timeout_s, env=env)
+        p = subprocess.run(r.command(d), capture_output=True, text=True, timeout=r.timeout_s, env=env)
         rec["returncode"] = p.returncode
         tail = (p.stdout + p.stderr)[-4000:]
     except subprocess.TimeoutExpired:
         rec["returncode"] = "timeout"
         tail = ""
     rec["duration_s"] = round(time.time() - t0, 1)
-    d = r.dirs()
-    if r.stage in ("route", "finish", "signoff") and rec["returncode"] == 0:
-        subprocess.run(["make", "-C", r.flow_dir, "DESIGN_CONFIG=%s" % r.design_config, "FLOW_VARIANT=%s" % r.variant,
-                        "metadata"], capture_output=True, text=True, env=env, timeout=1800)
-    meta = {}
-    for cand in (d["reports"] / "metadata.json", d["logs"] / "metadata.json"):
-        if cand.exists():
-            meta = json.loads(cand.read_text())
-            break
-    if not meta:                                         # per-stage JSON logs
-        for js in sorted(d["logs"].glob("*.json")):
-            try:
-                meta.update(json.loads(js.read_text()))
-            except Exception:
-                pass
+    meta = stage_metrics(d["logs"], r.stage)
     rec.update(map_metrics(meta))
+    rpt = d["reports"] / STAGE_REPORT.get(r.stage, "")
+    if STAGE_REPORT.get(r.stage) and rpt.exists():     # hold WNS: not an ORFS 2024-12 metric (report only)
+        h = parse_stage_report(rpt.read_text(errors="replace"))
+        rec["hold_wns_ns"] = h.get("hold_wns_ns")
+        rec["hold_wns_resolution_ns"] = 0.01
+        rec["metric_sources"]["hold_wns_ns"] = "%s: report_checks -path_delay min" % rpt.name
+        if r.stage == "grt":
+            rec["grt_hold_wns_ns"] = rec["hold_wns_ns"]
+    for k in ("finish__timing__drv__hold_violation_count", "globalroute__timing__drv__hold_violation_count"):
+        if k in meta:
+            rec.setdefault("hold_violation_count", meta[k])
     grt_log = d["logs"] / "5_1_grt.log"
     if grt_log.exists():
         g = parse_f1_log(grt_log.read_text(errors="replace"))

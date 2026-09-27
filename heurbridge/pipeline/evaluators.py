@@ -119,31 +119,50 @@ def cluster_centroids(design, layout, cluster_of) -> "np.ndarray":
 
 @dataclass
 class OrfsEvaluator(Evaluator):
-    """Track B: ORFS flow with our macro placement (stage 'grt' = f1, 'finish' = f2)."""
+    """Track B: the ORFS flow with our macro placement (MACRO_PLACEMENT_TCL replaces rtl_macro_placer at 2_3);
+    stage 'grt' (5_1) = f1, 'finish' (6_report) = f2.  ``base_variant`` names the M1 run whose synthesis and
+    pre-macro floorplan every candidate reuses; ``work_home`` keeps ORFS's outputs in the job's workspace."""
     name: str = "orfs"
     fidelity: int = 2
     flow_dir: str = ""
     design_config: str = ""
-    threads: int = 8
+    threads: int = field(default_factory=tools.eda_threads)
     timeout_s: int = 7200
+    work_home: str | None = None
+    base_variant: str | None = "base"
+    yosys: str | None = None
+    keep_results: bool = False          # False: delete the variant's results/objects after reading (RAM workspace)
+
+    def __post_init__(self):
+        if self.fidelity < 2 and self.weights == cost.WEIGHTS:
+            self.weights = dict(F1_B_WEIGHTS)          # no vias before detailed routing
 
     def evaluate(self, design, layout, run_id, workdir):
         from ..eval import orfs
         workdir = Path(workdir)
         workdir.mkdir(parents=True, exist_ok=True)
-        tcl = workdir / "macros.tcl"
+        tcl = workdir / ("%s.macros.tcl" % run_id)
         tcl.write_text(orfs.macro_placement_tcl(design, layout))
         stage = "finish" if self.fidelity >= 2 else "grt"
-        rec = orfs.run(orfs.OrfsRun(flow_dir=self.flow_dir, design_config=self.design_config, variant=run_id,
-                                    macro_tcl=str(tcl), stage=stage, threads=self.threads, timeout_s=self.timeout_s,
-                                    env={"EDA_THREADS": self.threads}))
+        run = orfs.OrfsRun(flow_dir=self.flow_dir, design_config=self.design_config, variant=run_id,
+                           macro_tcl=str(tcl.resolve()), stage=stage, threads=self.threads, timeout_s=self.timeout_s,
+                           work_home=self.work_home, base_variant=self.base_variant, yosys=self.yosys,
+                           env={"EDA_THREADS": self.threads})
+        rec = orfs.run(run)
+        if not self.keep_results:           # logs and reports (every metric) stay; databases go
+            import shutil
+            d = run.dirs()
+            for k in ("results", "objects"):
+                shutil.rmtree(d[k], ignore_errors=True)
+            for png in d["reports"].glob("*.png"):
+                png.unlink()
         if self.fidelity == 1:                      # f1 timing comes from the GRT-stage estimate
             for a, b in (("grt_setup_wns_ns", "setup_wns_ns"), ("grt_setup_tns_ns", "setup_tns_ns"),
                          ("grt_hold_wns_ns", "hold_wns_ns")):
                 if a in rec:
                     rec[b] = rec[a]
         rec["run_id"] = run_id
-        (workdir / "record.json").write_text(json.dumps(rec, indent=1, default=str))
+        (workdir / ("%s.record.json" % run_id)).write_text(json.dumps(rec, indent=1, default=str))
         return rec
 
 

@@ -304,6 +304,19 @@ def _rtlmp_call(d: DesignCfg, report_dir: Path | None = None) -> str:
             "rtl_macro_placer {*}$hb_keep")
 
 
+def _keep_resize_tcl() -> str:
+    """-keep_resize_below_overflow: 0 (every timing-driven repair virtual; the default of this flow) unless
+    HB_GPL_KEEP_RESIZE says otherwise ('build' = the build's own default, or a number) -- a diagnostic switch; the
+    value used is in the log (HB_GPL_ARGS)."""
+    import os
+    v = os.environ.get("HB_GPL_KEEP_RESIZE", "0")
+    if v == "build":
+        return ""
+    return ("if {[info exists sta::cmd_args(global_placement)] && "
+            "[string first -keep_resize_below_overflow $sta::cmd_args(global_placement)] >= 0} "
+            "{ lappend hb_gpl -keep_resize_below_overflow %s }\n" % float(v))
+
+
 def _global_placement(d: DesignCfg) -> str:
     """Routability- and timing-driven global placement with *virtual* timing-driven repairs.
 
@@ -321,9 +334,7 @@ def _global_placement(d: DesignCfg) -> str:
     otherwise PLACE_DENSITY (design, else the platform's 0.30)."""
     return (_density_tcl(d) + 'puts "HB_PLACE_DENSITY $hb_density"\n'
             "set hb_gpl [list -routability_driven -timing_driven -density $hb_density]\n"
-            "if {[info exists sta::cmd_args(global_placement)] && "
-            "[string first -keep_resize_below_overflow $sta::cmd_args(global_placement)] >= 0} "
-            "{ lappend hb_gpl -keep_resize_below_overflow 0 }\n"
+            + _keep_resize_tcl() +
             'puts "HB_GPL_ARGS $hb_gpl"\n'
             "global_placement {*}$hb_gpl")
 

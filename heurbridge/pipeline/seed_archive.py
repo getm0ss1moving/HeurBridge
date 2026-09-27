@@ -44,24 +44,47 @@ class Ledger:
         self.path = path
         path.parent.mkdir(parents=True, exist_ok=True)
         self.rows = {}
+        self.by_layout = {}                     # (evaluator, fidelity, layout key) -> run_id of a successful row
         if path.exists():
             for line in path.read_text().splitlines():
                 if line.strip():
-                    r = json.loads(line)
-                    self.rows[r["run_id"]] = r
+                    self._index(json.loads(line))
+
+    def _index(self, r: dict):
+        self.rows[r["run_id"]] = r
+        if r.get("status") == "ok" and "pos_macros" in r and not r.get("reused_from"):
+            self.by_layout.setdefault((r.get("evaluator"), r.get("fidelity"), layout_key(r)), r["run_id"])
 
     def get(self, run_id):
         return self.rows.get(run_id)
 
     def add(self, row: dict):
-        self.rows[row["run_id"]] = row
+        self._index(row)
         with open(self.path, "a") as fh:
             fh.write(json.dumps(row, default=str) + "\n")
 
 
+REUSE_KEYS = ("status", "fidelity", "evaluator", "J", "J_raw", "admissible", "partial", "terms", "gates", "unchecked",
+              "record")
+
+
 def _eval(ev: Evaluator, design, layout, base, run_id, work, ledger: Ledger, extra: dict) -> dict:
+    """Evaluate one layout (resumable by run_id).  A layout this evaluator already evaluated successfully -- a
+    seed-independent program repeats its layout for every seed -- is not evaluated again: every evaluator is
+    deterministic (ORFS and the mini-flow at a fixed thread count, DREAMPlace with deterministic_flag, HB-GP on
+    one thread), so the row is copied with ``reused_from``.  Failed evaluations are always repeated."""
     row = ledger.get(run_id)
     if row is not None:
+        return row
+    mm = design.is_macro & ~design.is_fixed
+    probe = {"pos_macros": layout.pos[mm].tolist(), "orient_macros": layout.orient[mm].tolist()}
+    prev = ledger.by_layout.get((ev.name, ev.fidelity, layout_key(probe)))
+    if prev is not None:
+        src = ledger.get(prev)
+        row = {k: src[k] for k in REUSE_KEYS if k in src}
+        row.update({"run_id": run_id, "reused_from": prev, "wall_s": 0.0, **probe})
+        row.update(extra)
+        ledger.add(row)
         return row
     t0 = time.time()
     rec = None
