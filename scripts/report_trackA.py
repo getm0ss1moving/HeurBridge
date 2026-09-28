@@ -38,6 +38,9 @@ def failure_name(r):
     if rec.get("failure"):
         return str(rec["failure"]).split(":")[0]
     err = str(r.get("error") or "").strip()
+    if "Traceback" in err:                       # a crash: its exception line, not the whole traceback
+        lines = [l.strip() for l in err.splitlines() if l.strip()]
+        err = "%s %s" % (err.split()[0], lines[-1]) if err.startswith("rc=") else lines[-1]
     return "%s%s" % (r.get("status"), " (%s)" % err if err else "")
 
 
@@ -106,11 +109,11 @@ def main():
                           "hbgp_f1": "HB-GP (heurbridge.eval.gp, 1 thread) + f0 RUDY/HPWL"}.get(e, e) for e in evs) or "-"
     shas = [a.code] if a.code else sorted({(m.get("git_sha") or "unknown") + (
         " (%s)" % m["code_archive"] if m.get("code_archive") else "") for m in metas})
-    cmds = collections.defaultdict(list)                  # one command per configuration, designs joined
+    cmds = collections.defaultdict(set)                   # one command per configuration, designs joined
     for m in metas:
         cfg = dict(m.get("config") or {})
-        des = cfg.pop("designs", "")
-        cmds[json.dumps(cfg, sort_keys=True)].append(des)
+        des = cfg.pop("designs", "")                      # a stream's whole list (in every design's meta)
+        cmds[json.dumps(cfg, sort_keys=True)].update(d for d in des.split(",") if d)
     out = a.out or str(ROOT / "reports" / ("T2_trackA_%s.md" % a.label))
     reporting.render({
         "title": "Track-A seeding campaign (T1.7 / T2.7): %s" % a.label,

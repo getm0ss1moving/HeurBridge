@@ -51,8 +51,8 @@ Distinct layouts below the baseline, all designs: 46.
 ## Exact commands
 
 ```bash
-python scripts/run_seed_archive.py --designs ibm01,ibm02,ibm04,ibm07,ibm09,ibm11,ibm13,ibm16,ibm18,ibm01,ibm02,ibm04,ibm07,ibm09,ibm11,ibm13,ibm16,ibm18,ibm01,ibm02,ibm04,ibm07,ibm09,ibm11,ibm13,ibm16,ibm18,ibm01,ibm02,ibm04,ibm07,ibm09,ibm11,ibm13,ibm16,ibm18,ibm01,ibm02,ibm04,ibm07,ibm09,ibm11,ibm13,ibm16,ibm18,ibm01,ibm02,ibm04,ibm07,ibm09,ibm11,ibm13,ibm16,ibm18,ibm01,ibm02,ibm04,ibm07,ibm09,ibm11,ibm13,ibm16,ibm18,ibm01,ibm02,ibm04,ibm07,ibm09,ibm11,ibm13,ibm16,ibm18,ibm01,ibm02,ibm04,ibm07,ibm09,ibm11,ibm13,ibm16,ibm18 --archive archive_A0_trackA_s1 --evaluator dreamplace --ls 8 --min-fidelity 1 --out runs/seed_trackA_dp --seeds 5 --suite ibm --top 10
-python scripts/run_seed_archive.py --designs ibm03,ibm06,ibm08,ibm10,ibm12,ibm14,ibm15,ibm17,ibm03,ibm06,ibm08,ibm10,ibm12,ibm14,ibm15,ibm17,ibm03,ibm06,ibm08,ibm10,ibm12,ibm14,ibm15,ibm17,ibm03,ibm06,ibm08,ibm10,ibm12,ibm14,ibm15,ibm17,ibm03,ibm06,ibm08,ibm10,ibm12,ibm14,ibm15,ibm17,ibm03,ibm06,ibm08,ibm10,ibm12,ibm14,ibm15,ibm17,ibm03,ibm06,ibm08,ibm10,ibm12,ibm14,ibm15,ibm17,ibm03,ibm06,ibm08,ibm10,ibm12,ibm14,ibm15,ibm17 --archive archive_A0_trackA_s2 --evaluator dreamplace --ls 8 --min-fidelity 1 --out runs/seed_trackA_dp --seeds 5 --suite ibm --top 10
+python scripts/run_seed_archive.py --designs ibm01,ibm02,ibm04,ibm07,ibm09,ibm11,ibm13,ibm16,ibm18 --archive archive_A0_trackA_s1 --evaluator dreamplace --ls 8 --min-fidelity 1 --out runs/seed_trackA_dp --seeds 5 --suite ibm --top 10
+python scripts/run_seed_archive.py --designs ibm03,ibm06,ibm08,ibm10,ibm12,ibm14,ibm15,ibm17 --archive archive_A0_trackA_s2 --evaluator dreamplace --ls 8 --min-fidelity 1 --out runs/seed_trackA_dp --seeds 5 --suite ibm --top 10
 ```
 
 ## Notes

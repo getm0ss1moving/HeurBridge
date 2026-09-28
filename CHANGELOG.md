@@ -6,6 +6,12 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 
 ## [Unreleased]
 
+### Fixed
+- `report_trackA.py` repeated every stream's design list once per design in "Exact commands" (each design's
+  meta.json holds its stream's whole list); now the designs are joined once. Crashes are named by their exception
+  line (`program_crash (rc=1 MemoryError)`) instead of the whole traceback. The committed
+  `reports/T2_trackA_ibm_dreamplace.md` had the repeated list; its command lines are corrected (nothing else changes).
+
 ## [0.13.4] — 2026-09-28 — ORFS failures recorded by name
 
 ### Fixed
