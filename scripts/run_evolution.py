@@ -179,7 +179,7 @@ def main():
     ap.add_argument("--children", type=int, default=4)
     ap.add_argument("--islands", type=int, default=4)
     ap.add_argument("--llm", default="deepseek", choices=["deepseek", "mock"])
-    ap.add_argument("--model", default="deepseek-reasoner")
+    ap.add_argument("--model", default="deepseek-flash")
     ap.add_argument("--budget", type=int, default=2000, help="LLM calls per stage per family split (B.3)")
     ap.add_argument("--split", default="dev")
     ap.add_argument("--K", type=int, default=20)

@@ -12,6 +12,9 @@ def test_cost_weights_frozen_and_consistent():
     assert cfg["weights"] == cost.WEIGHTS
     assert abs(sum(cost.WEIGHTS.values()) - 1.0) < 1e-12
     assert cfg["gates"]["setup_wns_guard_ns"] == cost.GUARD_NS
+    enf = cfg["gate_enforcement"]
+    assert [tuple(enf["f%d" % f]) for f in (0, 1)] == [cost.ENFORCED_GATES[f] for f in (0, 1)]
+    assert enf["f2"] == enf["f3"] == "all" and 2 not in cost.ENFORCED_GATES and 3 not in cost.ENFORCED_GATES
 
 
 def test_families_have_disjoint_designs():

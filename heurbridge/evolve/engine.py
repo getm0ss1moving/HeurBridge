@@ -46,7 +46,7 @@ class EngineConfig:
     parents: int = 8
     children: int = 4
     generations: int = 10
-    model: str = "deepseek-reasoner"
+    model: str = "deepseek-flash"           # the user's choice (2026-09-28)
     budget_scope: str = "M/dev"
     max_tokens: int = 8192
     skill: str = "v0"

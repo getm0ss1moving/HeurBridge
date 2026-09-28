@@ -30,7 +30,8 @@ from pathlib import Path
 from ..paths import logs_dir
 
 DEFAULT_BASE = "https://api.deepseek.com"
-MODELS = {"reasoning": "deepseek-reasoner", "chat": "deepseek-chat"}
+DEFAULT_MODEL = "deepseek-flash"          # the user's choice for every LLM call (2026-09-28); thinks by default
+MODELS = {"reasoning": DEFAULT_MODEL}      # the self-test checks this model (old names map to it at DeepSeek)
 KEY_VARS = ("DEEPSEEK_LAB_API_KEY", "DEEPSEEK_API_KEY") + tuple("DEEPSEEK_API_KEY_%d" % i for i in range(2, 6))
 
 
@@ -139,7 +140,7 @@ class LLMClient:
         with urllib.request.urlopen(req, timeout=60) as r:
             return json.loads(r.read().decode())
 
-    def chat(self, messages: list, model: str = MODELS["reasoning"], max_tokens: int = 8192,
+    def chat(self, messages: list, model: str = DEFAULT_MODEL, max_tokens: int = 8192,
              temperature: float | None = None, purpose: str = "", program_id: str = "",
              budget_scope: str | None = None, retries: int = 4) -> Reply:
         if not self.keys:

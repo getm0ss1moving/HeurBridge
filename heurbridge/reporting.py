@@ -16,7 +16,7 @@ from .meta import git_sha
 TEMPLATE = Path(__file__).resolve().parent.parent / "reports" / "templates" / "experiment_report.md"
 MANDATORY = ("title", "report_id", "node", "track", "tools", "metric_conventions", "gate", "samples", "failures",
              "commands")
-METRIC_CONVENTIONS = "timing setup_hold_v1_2026-09-22; metrics_v2_2026-09-22; HPWL centre (pin_offset_v2); cost cost_v1_2026-09-25"
+METRIC_CONVENTIONS = "timing setup_hold_v1_2026-09-22; metrics_v2_2026-09-22; HPWL centre (pin_offset_v2); cost cost_v2_2026-09-28"
 
 
 def public_paths(text: str) -> str:

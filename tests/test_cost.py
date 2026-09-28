@@ -63,6 +63,19 @@ def test_gates():
     assert math.isinf(cost.evaluate(bad, base(), fidelity=3).J_inf)
 
 
+
+def test_f1_gates_reported_not_enforced():
+    """cost_v2 (2026-09-28): at f0/f1 timing and DRC gates are reported, only a failed flow is enforced."""
+    bad = {"gr_wl": 1000.0, "gr_overflow_total": 2, "setup_tns_ns": -10.0, "total_power_w": 0.010,
+           "setup_wns_ns": -0.53, "hold_wns_ns": -0.01}                   # setup and hold both fail the guard
+    r1 = cost.evaluate(bad, base(), fidelity=1)
+    assert r1.gates["setup"]["status"] == "fail" and r1.gates["setup"]["enforced"] is False
+    assert r1.gates["hold"]["status"] == "fail" and math.isfinite(r1.J_inf) and r1.J_inf == r1.J
+    r2 = cost.evaluate(dict(bad, detailed_wirelength_um=1000.0, vias=500, drc_violations=0), base(), fidelity=2)
+    assert r2.gates["setup"]["enforced"] is True and math.isinf(r2.J_inf) and not r2.admissible
+    flow = cost.evaluate(dict(bad, returncode=2), base(), fidelity=1)
+    assert flow.gates["flow"]["enforced"] is True and math.isinf(flow.J_inf)
+
 def test_missing_fields_are_unchecked_not_passed():
     rec = {"detailed_wirelength_um": 1000.0, "vias": 500, "setup_tns_ns": -10.0, "total_power_w": 0.010,
            "setup_wns_ns": -0.5}

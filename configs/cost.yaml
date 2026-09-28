@@ -1,6 +1,6 @@
 # Final cost J (task spec B.3; proposal v1.2 s.3.1).  FROZEN before any experiment (L1).
 # heurbridge/eval/cost.py holds the same values; tests/test_configs.py keeps them identical.
-version: cost_v1_2026-09-25
+version: cost_v2_2026-09-28   # v2: gate enforcement by fidelity (user decision 2026-09-28); weights unchanged
 weights:          # J = sum_k w_k * y_k / y_k^base
   rwl: 0.30       # routed wirelength (detailed route; GR wirelength at f1)
   via: 0.05       # via count
@@ -13,4 +13,9 @@ gates:
   hold_wns_guard_ns: 0.02
   drc: 0
   lvs: clean when checked (required at f3)
+gate_enforcement:              # a failing *enforced* gate sets J_inf = +inf; the others are reported only
+  f0: [flow]                   # f0/f1: timing and DRC reported, not enforced (f1 timing predicts f2 badly)
+  f1: [flow]
+  f2: all
+  f3: all
 failures: J_inf = +inf; every failure recorded by name

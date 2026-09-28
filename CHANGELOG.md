@@ -6,6 +6,31 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 
 ## [Unreleased]
 
+## [0.14.0] — 2026-09-28 — T4 starts: E0 demo on 225; cost_v2 gate rule; LLM = deepseek-flash
+
+### Changed
+- **Gate enforcement by fidelity (cost_v2, the user's decision 2026-09-28).** At f0/f1 only a failed flow sets
+  J_inf = +inf; the timing and DRC gates are computed and reported (`"enforced": false`) but do not remove a layout,
+  because f1 timing predicts f2 badly (10 of 12 f1-passing bp_fe_top layouts failed at f2, and the best gated f2
+  layout was gated out at f1). At f2/f3 every gate is enforced. `cost.ENFORCED_GATES`, `configs/cost.yaml`
+  (`gate_enforcement`, version cost_v2_2026-09-28; weights unchanged), reports show "cost cost_v2_2026-09-28".
+  Stored ledger rows are re-scored under the current rule when a campaign resumes (`seed_archive.rescore`; the
+  ledger keeps the values as written). Tests: f1 reports/f2 enforces, a failed flow is always enforced, a cost_v1
+  row is re-scored (140 tests pass).
+- **LLM for T5 and any later LLM use: `deepseek-flash`** (the user's decision 2026-09-28): `llm.DEFAULT_MODEL`,
+  the self-test, `EngineConfig.model` and `run_evolution.py --model` default to it.
+- Experiment workflow (the user's decision 2026-09-28): each experiment first runs as a demo on 225 (direction check,
+  results reported), then at full capacity if the effect is good.
+
+### Running
+- **E0 demo** (T4 direction check; exploratory, not the pre-registered G0′ test) on 225 GPUs 1-3:
+  `e0demo_{spec,eq}_{ibm04,ibm06}`: ibm04 and ibm06 (T3.7's validation designs, kept out of the confirmatory set so
+  that the go/no-go decision does not use the held-out designs; the bridge was selected on them, so the demo is
+  optimistic for it), 16 programs x 2 seeds, partners none / memetic / repertoire / frozen generator / co-trained
+  bridge (T3.7 round-1 checkpoint, sha256 f95bdde8...) / random-direction control; final cost DREAMPlace f1.
+  `spec` = the task list's protocol (only the bridge is guarded at f1), `eq` = every partner guarded at f1
+  (`--equal-guard`). Ledger campaigns `E0_demo_spec` / `E0_demo_eq` (exploratory).
+
 ### Added
 - **Same-path control for Track B** (`run_seed_orfs.py`, red line "pairing"): M1's own layout is evaluated through
   the candidates' path at f1 and f2 (rows `<design>.M1replay.f1/.f2`, program `M1_replay`), and

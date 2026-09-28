@@ -95,3 +95,31 @@ def test_deterministic_failures_are_reused(tmp_path):
             assert r2["record"]["failure"] == r1["record"]["failure"]
         # a resumed ledger indexes the failure the same way
         assert (SA.Ledger(tmp_path / mode / "evals.jsonl").by_layout != {}) == reused
+
+
+
+@dataclass
+class TimingEval(Evaluator):
+    """Track-B-like f1 record whose setup WNS fails the 0.02 ns guard against the baseline."""
+    name: str = "timing_fake"
+    fidelity: int = 1
+    weights: dict = field(default_factory=lambda: {"rwl": 0.3, "of": 0.15})
+    required_gates: tuple = ("setup", "hold")
+
+    def evaluate(self, design, layout, run_id, workdir):
+        return {"returncode": 0, "gr_wl": 110.0, "gr_overflow_total": 0, "setup_wns_ns": -0.60, "hold_wns_ns": 0.1}
+
+
+def test_stored_rows_rescored_under_current_gate_rule(tmp_path):
+    des, ref = synth.make_design(seed=2, n_macros=4, n_cells=40, n_io=6)
+    base = cost.Baseline.from_records(des.id, [{"gr_wl": 100.0, "gr_overflow_total": 0, "setup_wns_ns": -0.5,
+                                                "hold_wns_ns": 0.1}])
+    ledger = SA.Ledger(tmp_path / "evals.jsonl")
+    ev = TimingEval()
+    r = SA._eval(ev, des, ref, base, "x", tmp_path, ledger, {})
+    assert r["gates"]["setup"]["status"] == "fail" and r["J"] == r["J_raw"] < float("inf")   # f1: reported only
+    old = dict(r, J=float("inf"))                   # the same row as written under cost_v1 (gate enforced at f1)
+    (tmp_path / "old").mkdir()
+    SA.Ledger(tmp_path / "old" / "evals.jsonl").add(old)
+    r2 = SA._eval(ev, des, ref, base, "x", tmp_path, SA.Ledger(tmp_path / "old" / "evals.jsonl"), {})
+    assert r2["J"] == r["J"] and r2["gates"]["setup"]["enforced"] is False

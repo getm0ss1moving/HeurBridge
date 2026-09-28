@@ -7,9 +7,11 @@ with y_base the per-design median over the baseline flow's seeds.  Gates:
                         (eda/docs/METRIC_CONVENTIONS.md s.2, via metrics_schema.guard_status)
   DRC                   == 0
   LVS                   clean, when checked (required at f3)
-J_inf = +inf if any gate fails.  Missing inputs are *unchecked*, never passed:
-a missing J term makes J partial; a missing required gate makes the result
-inadmissible for the elite archive.
+J_inf = +inf if an *enforced* gate fails (cost_v2, user decision 2026-09-28): at f0/f1 only a failed flow is
+enforced -- the timing and DRC gates are computed and reported ('enforced': False) but do not set J_inf, because
+f1 timing predicts f2 badly (reports/E3_calibration_dev_bp_fe_top_f1f2.md); at f2/f3 every gate is enforced.
+Missing inputs are *unchecked*, never passed: a missing J term makes J partial; a missing required gate makes the
+result inadmissible for the elite archive.
 """
 
 from __future__ import annotations
@@ -21,6 +23,7 @@ from statistics import median
 WEIGHTS = {"rwl": 0.30, "via": 0.05, "of": 0.15, "tns": 0.30, "power": 0.20}
 GUARD_NS = 0.02
 REQUIRED_GATES = {0: (), 1: ("setup", "hold"), 2: ("setup", "hold", "drc"), 3: ("setup", "hold", "drc", "lvs")}
+ENFORCED_GATES = {0: ("flow",), 1: ("flow",)}      # other fidelities: every gate (configs/cost.yaml, cost_v2)
 
 # canonical record field for each J term (first present wins)
 FIELDS = {
@@ -148,7 +151,10 @@ def evaluate(record: dict, base: Baseline, fidelity: int = 2, weights: dict | No
     gates["lvs"] = {"status": "unchecked"} if lvs is None else {"status": "pass" if lvs == 0 else "fail", "value": lvs}
     if r.get("returncode") not in (None, 0):
         gates["flow"] = {"status": "fail", "returncode": r.get("returncode")}
-    failed = any(g["status"] == "fail" for g in gates.values())
+    enforce = ENFORCED_GATES.get(fidelity)
+    for k, g in gates.items():
+        g["enforced"] = enforce is None or k in enforce
+    failed = any(g["status"] == "fail" and g["enforced"] for g in gates.values())
     required = REQUIRED_GATES.get(fidelity, ()) if required_gates is None else tuple(required_gates)
     missing_req = [g for g in required if gates[g]["status"] == "unchecked"]
     unchecked += ["gate:" + g for g in missing_req]

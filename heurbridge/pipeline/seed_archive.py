@@ -93,7 +93,7 @@ def _eval(ev: Evaluator, design, layout, base, run_id, work, ledger: Ledger, ext
     timeout, see deterministic_failure); crashes and unnamed failures are evaluated again."""
     row = ledger.get(run_id)
     if row is not None:
-        return row
+        return rescore(row, ev, base)
     mm = design.is_macro & ~design.is_fixed
     probe = {"pos_macros": layout.pos[mm].tolist(), "orient_macros": layout.orient[mm].tolist()}
     prev = ledger.by_layout.get((ev.name, ev.fidelity, layout_key(probe)))
@@ -130,6 +130,16 @@ def _eval(ev: Evaluator, design, layout, base, run_id, work, ledger: Ledger, ext
     row["orient_macros"] = layout.orient[design.is_macro & ~design.is_fixed].tolist()
     ledger.add(row)
     return row
+
+
+def rescore(row: dict, ev: Evaluator, base) -> dict:
+    """A stored row scored under the current cost rule (cost_v2, 2026-09-28: at f1 only a failed flow is enforced;
+    timing and DRC gates are reported).  The ledger keeps the values the row was written with."""
+    if row.get("status") != "ok" or not isinstance(row.get("record"), dict) or base is None:
+        return row
+    c = ev.score(row["record"], base)
+    return {**row, "J": c.J_inf, "J_raw": c.J, "admissible": c.admissible, "partial": c.partial, "terms": c.terms,
+            "gates": c.gates, "unchecked": c.unchecked}
 
 
 def layout_key(row: dict) -> str:
