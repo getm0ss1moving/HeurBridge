@@ -43,6 +43,14 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
   flow stays the evaluation (the M1 baseline uses it); a run of base and candidates with timing-driven placement
   off would be a robustness check.
 
+### T3.7 done (2026-09-28; `reports/T3_algorithmR_trackA.md`)
+- Algorithm R on Track A (13 IBM training designs, validation ibm04/ibm06, DREAMPlace f1 guard and final cost):
+  round 0 promoted (T3 exit gate; J 0.4815 vs raw 0.8870, p = 2.6e-9, `algR_trackA#1`), round 1 promoted (0.4756 vs
+  0.4815, p = 1.2e-4, `#2`), round 2 not promoted (0.4864 vs 0.4756, p ~ 1, `#3`) -> stop. **Final checkpoint:
+  round 1** (sha256 f95bdde8...; the one the E0 demo used). Every round's best validation checkpoint was at step
+  4,000 of 20,000 (training overfits early). The job's six ledger lines are merged into `stats/alpha_ledger.jsonl`.
+  `report_algr.py`: `--node`, `--track`, per-round training table.
+
 ### E0 demo results (exploratory, 2026-09-28; `reports/E0_demo_spec.md`, `reports/E0_demo_eq.md`)
 - ibm04 + ibm06 (T3.7's validation designs: optimistic for the bridge), 16 programs x 2 seeds = 64 paired cases,
   T3.7 round-1 bridge, final cost DREAMPlace f1. **The co-trained bridge has the lowest final J under both

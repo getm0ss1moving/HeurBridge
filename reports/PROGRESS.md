@@ -17,7 +17,7 @@ Status as of **2026-09-28 14:00 CST**, code `9546dd4` (v0.14.0 + unreleased). Me
 
 | Server | Job | Task | State | Expected |
 |---|---|---|---|---|
-| 225 GPU 0 | `algR_trackA2` | T3.7 Algorithm R (Track A, 13 IBM training + 2 validation designs) | round 0 **promoted** (= T3 exit gate), round 1 **promoted**, round 2 training | round 2 result ~16:30; round 3 (if promoted by ≥ 0.5 %) ~20:30 |
+| 225 GPU 0 | — | T3.7 finished 16:04 (final checkpoint: round 1) | — | full E0 |
 | 224 (5 jobs × 8 threads) | `seedB_orfs7_{bp_fe_top, bp_be_top, swerv_wrapper, ariane136, ariane133}` (continuing earlier runs) | T1.7 / T2.7 Track-B seeding on the real ORFS 2024-12 flow | base runs done (deterministic); candidates so far: 40 / 47 / 4 / 24 / 13; now the same-path M1 control and the noise band (M1 shifted by one site/row), then the remaining candidates | several days (see §3, T2.7) |
 | 231 GPU 4 | — | set up for the full E0 (env pinned to 225's; DREAMPlace for the RTX 4090, bit-identical to the 3090 on ibm01) | ready | full E0 after T3.7 ends |
 | 225 GPUs 1–3 | — | E0 demo finished 15:13 (positive, see T4); free until the full E0 | — | full E0 after T3.7 ends |
@@ -69,14 +69,14 @@ Legend: ✅ done · 🔄 running · ⚠️ done with a limitation · ⏸ waiting
 | T2.7 seeding, Track A | ✅ | IBM 17 designs `reports/T2_trackA_ibm_dreamplace.md`; ISPD2005 8 designs `reports/T2_trackA_ispd_dreamplace.md` |
 | T2.7 seeding, Track B | 🔄 | 5 ORFS designs running (§2). Many heuristic layouts fail ORFS (GRT-0116 congestion, DPL-0036, 2-h timeouts; identical failing layouts are no longer re-run). **Findings:** (1) the failures come from ORFS 2024-12's timing-driven global placement diverging on scattered layouts (the same layout places fine with it off); (2) M1's own layout imported like a candidate scores worse than base M1 (bp_fe_top f2: J 1.32 vs 1.00, nearly all TNS) because Hier-RTLMP pre-places the standard cells — so candidates are paired with this same-path replay, and a per-design noise band (M1 shifted by one site/row) decides what counts as an improvement. Estimate: several more days |
 
-### T3 — The bridge 🔄
+### T3 — The bridge ✅ (T3.9 after G0′)
 
 | Sub-task | Status | Evidence / note |
 |---|---|---|
 | T3.1–T3.3 data, model | ✅ | `heurbridge/bridge/` |
 | T3.4 pretraining (warm start) | ✅ | `reports/T3_pretrain_small.md` |
 | T3.5–T3.6 loss, training, validation | ✅ | `heurbridge/bridge/train.py` |
-| T3.7 Algorithm R | 🔄 | round 0 promoted: bridge J 0.4815 vs raw heuristics 0.8870, p = 2.6e-9 (ledger `algR_trackA#1`); round 1 promoted: 0.4756 vs 0.4815, p = 1.2e-4 (`algR_trackA#2`); round 2 running. Report `reports/T3_*` when it ends |
+| T3.7 Algorithm R | ✅ | round 0 promoted (T3 exit gate: J 0.4815 vs raw 0.8870, p = 2.6e-9), round 1 promoted (0.4756, p = 1.2e-4), round 2 not promoted → final checkpoint round 1 (`reports/T3_algorithmR_trackA.md`) |
 | T3.8 guarded inference | ✅ | `heurbridge/bridge/sample.py` |
 | T3.9 cell / route bridges | ⬜ | only after G0′ passes (task list) |
 | T3.10 unit tests 1–6 | ✅ | `tests/test_bridge.py` (138 tests pass in total) |
