@@ -16,15 +16,15 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
   Checked with a scratch ledger: registration, refusal of a second registration, of a protocol mismatch and of a
   closed entry, and a matching record.
 
-### Fixed
-- **E0 Holm family** (task list T4: "Holm over 4 comparisons"): Holm now runs over none / memetic / repertoire /
-  frozen only; controls (the random-direction partner) are tested on their own (`controls`), and the G0' gate uses
-  the Holm-adjusted p of memetic and repertoire (it used the unadjusted ones).
-
 - `scripts/e0_combine.py`: one analysis over several `run_e0.py` runs (e.g. one per design) for `report_e0.py`;
   statistics from the new side-effect-free `run_e0.summarize` (the alpha-ledger record stays in `run_e0.analyse`);
   the runs must share the protocol. Checked: a two-design run split by design and recombined gives identical
   p-values and mean J. `report_e0.py --demo` labels an exploratory demo.
+
+### Fixed
+- **E0 Holm family** (task list T4: "Holm over 4 comparisons"): Holm now runs over none / memetic / repertoire /
+  frozen only; controls (the random-direction partner) are tested on their own (`controls`), and the G0' gate uses
+  the Holm-adjusted p of memetic and repertoire (it used the unadjusted ones).
 
 ## [0.14.0] — 2026-09-28 — T4 starts: E0 demo on 225; cost_v2 gate rule; LLM = deepseek-flash
 
