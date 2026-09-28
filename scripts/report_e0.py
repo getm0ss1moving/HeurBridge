@@ -20,6 +20,7 @@ def main():
     ap.add_argument("--run", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--dev", action="store_true")
+    ap.add_argument("--demo", action="store_true", help="exploratory demo (direction check), not the pre-registered test")
     ap.add_argument("--node", default="local (macOS, CPU)")
     ap.add_argument("--track", default="A-dev (HB-GP stand-in final cost; f0 guard)")
     ap.add_argument("--caveat", default="", help="text placed before the results (e.g. a known defect of the run)")
@@ -61,7 +62,8 @@ def main():
         "\n\nGuard: the co-trained bridge's guard scores its alpha candidates at **%s**; equal guard for the other "
         "partners: **%s**." % (guard["fidelity"], guard["equal_guard"])) + \
         "\n\n**G0' decision (%s):** co-trained vs memetic p = %.3g, vs repertoire p = %.3g -> %s." % (
-        "development, not the pre-registered test" if a.dev else "pre-registered", g["p_memetic"], g["p_repertoire"],
+        "demo: exploratory, not the pre-registered test" if a.demo else "development, not the pre-registered test"
+        if a.dev else "pre-registered", g["p_memetic"], g["p_repertoire"],
         "PASS" if g["pass"] else "FAIL")
     rc = s["vs_cotrained"].get("random_guard")
     if rc:
@@ -73,7 +75,7 @@ def main():
                     "here cannot be attributed to the learned transport."))
     cfg = meta.get("config", {})
     text = reporting.render({
-        "title": "E0 partner-type ablation%s" % (" (development)" if a.dev else ""),
+        "title": "E0 partner-type ablation%s" % (" (demo)" if a.demo else " (development)" if a.dev else ""),
         "report_id": run.name, "node": a.node, "track": a.track, "tools": "HeurBridge %s" % meta.get("heurbridge_version"),
         "gate": "G0' (co-trained beats memetic AND repertoire at p < 0.01 on the held-out family)",
         "test": "paired one-sided Wilcoxon, co-trained < each partner, Holm over the comparisons",
@@ -84,7 +86,7 @@ def main():
         "results": res, "alpha_ledger_id": meta.get("alpha_ledger_id") or "-",
         "notes": "raw rows: %s. Wins / losses count paired cases where the partner's final J is below / above the "
                  "raw layout's; the geometric-mean ratio < 1 means lower J on average in log terms." % (run / "e0_rows.jsonl")},
-        gate_passed=None if a.dev else g["pass"], out=a.out)
+        gate_passed=None if (a.dev or a.demo) else g["pass"], out=a.out)
     print("REPORT_OK", a.out)
 
 

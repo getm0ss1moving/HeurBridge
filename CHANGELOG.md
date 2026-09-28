@@ -6,6 +6,12 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 
 ## [Unreleased]
 
+### Added
+- `scripts/e0_combine.py`: one analysis over several `run_e0.py` runs (e.g. one per design) for `report_e0.py`;
+  statistics from the new side-effect-free `run_e0.summarize` (the alpha-ledger record stays in `run_e0.analyse`);
+  the runs must share the protocol. Checked: a two-design run split by design and recombined gives identical
+  p-values and mean J. `report_e0.py --demo` labels an exploratory demo.
+
 ## [0.14.0] — 2026-09-28 — T4 starts: E0 demo on 225; cost_v2 gate rule; LLM = deepseek-flash
 
 ### Changed

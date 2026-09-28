@@ -145,6 +145,19 @@ def main():
 
 
 def analyse(rows, entry, ledger, out, a):
+    """The pre-registered analysis: statistics (summarize), the ledger record and the run's summary files."""
+    res = summarize(rows, a)
+    g = res["gate_G0prime"]
+    ledger.record(entry, p_value=max(g["p_memetic"], g["p_repertoire"]), n=res["n_cases"],
+                  extra={"gate": "G0prime", **g})
+    (out / "e0_summary.json").write_text(json.dumps(res, indent=1, default=str))
+    write_meta(out, "e0", a.designs, config=vars(a), alpha_ledger_id=entry["ledger_id"], summary=res)
+    print(json.dumps(res, indent=1, default=str))
+
+
+def summarize(rows, a) -> dict:
+    """Paired statistics of E0 rows (no side effects): mean / portfolio J per partner, one-sided Wilcoxon of the
+    co-trained bridge against every other partner with Holm, Kendall tau of each partner's program ranking vs raw."""
     import collections
     by = collections.defaultdict(dict)
     for r in rows:
@@ -182,10 +195,7 @@ def analyse(rows, entry, ledger, out, a):
                            "note": "development run (Track-A stand-in final cost); not the pre-registered f2 test"
                            if a.final == "hbgp" else "Track-A final cost = DREAMPlace f1 (spec T1.4); the E0 protocol "
                            "is pre-registered only after the user's decision (HANDOFF open issue 8)"}
-    ledger.record(entry, p_value=max(pm, pr), n=len(keys), extra={"gate": "G0prime", **res["gate_G0prime"]})
-    (out / "e0_summary.json").write_text(json.dumps(res, indent=1, default=str))
-    write_meta(out, "e0", a.designs, config=vars(a), alpha_ledger_id=entry["ledger_id"], summary=res)
-    print(json.dumps(res, indent=1, default=str))
+    return res
 
 
 if __name__ == "__main__":
