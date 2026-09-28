@@ -7,6 +7,14 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 ## [Unreleased]
 
 ### Added
+- **Deterministic failures are reused for identical layouts** (`seed_archive.deterministic_failure`): a named tool
+  error of the deterministic ORFS flow (`GRT-0116`, `DPL-0036`, ...) or a timeout is copied with `reused_from`, like a
+  successful evaluation already was; crashes and unnamed failures are still evaluated again. Found on ariane133:
+  two SA program versions give byte-identical layouts for the same seed (M2.v0.s0 = M2.v1.s0), and the second
+  evaluation repeated the same ~1 h DPL-0036 failure. Test with a failing fake evaluator (138 tests pass).
+- **`hbv.py run --resume-from RUN`**: continue a stopped run under a new name. Its final archive (else its partial)
+  is restored and those files stay in the new run's archives (`hbv stop` writes the final and deletes the partial,
+  so `--resume` cannot continue a stopped run, and `--after` inputs are not re-archived). Verified on 224.
 - **ISPD2005 Track-A campaign on the spec's tools** (`reports/T2_trackA_ispd_dreamplace.md`; 225 GPU 1, two
   streams, 11.9 h): 8 designs (MMS convention: macros movable), M1 = DREAMPlace mixed-size, f1 = DREAMPlace with the
   macros fixed; 640 program and 336 local-search evaluations. As on IBM, DREAMPlace's M1 is the best layout on every

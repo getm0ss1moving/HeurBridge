@@ -21,7 +21,7 @@ The lab login is shared by several people, so nothing of ours stays readable on 
   hbv.py keygen
   hbv.py push-code --port 224
   hbv.py push-data --port 224 --name NAME --src LOCAL_DIR
-  hbv.py run       --port 224 --run RUN [--code latest] [--after RUN0 ...] [--resume] [--data NAME:DEST ...]
+  hbv.py run       --port 224 --run RUN [--code latest] [--after RUN0 ...] [--resume | --resume-from RUN0] [--data NAME:DEST ...]
                    [--gpu 1] [--workroot /dev/shm] [--snapshot 1800] [--exclude REGEX] -- COMMAND ...
   hbv.py status    --port 224 [--run RUN] [--tail 30]
   hbv.py fetch     --port 224 --run RUN [--partial]        # decrypted on the Mac into runs/remote/RUN/
@@ -61,7 +61,7 @@ exec 0</dev/null
 P='__CIPHER__'
 encout() {
   local out="$ROOT/vault/runs/$RUN.$1.tgz.enc"
-  # this run's files: everything newer than the marker, plus what --resume restored (older mtimes, same run)
+  # this run's files: everything newer than the marker, plus what --resume / --resume-from restored
   ( cd "$WD/repo" && { find . -type f -newer "$WD/.marker" -print0
       if [ -s "$WD/.resumed" ]; then while IFS= read -r f; do if [ -f "$f" ]; then printf '%s\0' "$f"; fi; done < "$WD/.resumed"; fi
     } | sort -z -u | { if [ -n "$EXCL" ]; then grep -z -v -E "$EXCL" || true; else cat; fi; } > "$WD/.list" ) || return 1
@@ -219,11 +219,15 @@ def cmd_run(a):
     ]
     for r in a.after:
         lines.append('dec "$ROOT/vault/runs/%s.final.tgz.enc" "$WD/repo"' % r)
-    if a.resume:
-        # restored files keep their mtimes (make depends on them), so they predate the marker: list them for encout
-        lines.append('if [ -e "$ROOT/vault/runs/$RUN.partial.tgz.enc" ]; then dec "$ROOT/vault/runs/$RUN.partial.tgz.enc" '
-                     '"$WD/repo"; openssl enc -d $P -pass fd:3 -in "$ROOT/vault/runs/$RUN.partial.tgz.enc" '
-                     '3< <(printf "%s" "$K") | tar -tzf - > "$WD/.resumed"; fi')
+    # restored files keep their mtimes (make depends on them), so they predate the marker: list them for encout
+    restore = ('dec "$F" "$WD/repo"; openssl enc -d $P -pass fd:3 -in "$F" 3< <(printf "%s" "$K") '
+               '| tar -tzf - > "$WD/.resumed"')
+    if a.resume_from:       # continue a stopped run under a new name: its final archive (else its partial)
+        lines.append('F=""; for k in final partial; do f="$ROOT/vault/runs/%s.$k.tgz.enc"; '
+                     '[ -e "$f" ] && { F="$f"; break; }; done; [ -n "$F" ] || { echo "HBV_ERROR nothing to resume"; '
+                     'exit 4; }; %s' % (a.resume_from, restore))
+    elif a.resume:          # the same run after a crash: its partial snapshot
+        lines.append('F="$ROOT/vault/runs/$RUN.partial.tgz.enc"; if [ -e "$F" ]; then %s; fi' % restore)
     for d in a.data:
         name, _, dest = d.partition(":")
         lines += ['mkdir -p "$WD/repo/%s"' % (dest or "."), 'dec "$ROOT/vault/data/%s.tgz.enc" "$WD/repo/%s"' % (name, dest or ".")]
@@ -311,6 +315,8 @@ def main():
     p.add_argument("--code", default="latest")
     p.add_argument("--after", nargs="*", default=[])
     p.add_argument("--resume", action="store_true")
+    p.add_argument("--resume-from", default="", help="continue a stopped run: restore its final archive (else its "
+                                                     "partial) and keep those files in this run's archives")
     p.add_argument("--data", nargs="*", default=[])
     p.add_argument("--gpu", default=None)
     p.add_argument("--workroot", default="/dev/shm")

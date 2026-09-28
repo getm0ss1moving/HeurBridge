@@ -59,3 +59,39 @@ def test_distinct_rows_by_layout():
     d = dict(a, pos_macros=[[0.1, 0.2], [0.3, 0.4 + 1e-6]])
     assert layout_key(a) == layout_key(b) != layout_key(c) != layout_key(d)
     assert distinct([a, b, c, d, b]) == [a, c, d]
+
+
+@dataclass
+class FailingEval(Evaluator):
+    """Fails every layout: with a named ORFS-style tool error, a timeout or an unnamed crash."""
+    name: str = "fail_fake"
+    fidelity: int = 1
+    weights: dict = field(default_factory=lambda: dict(TRACK_A_WEIGHTS))
+    required_gates: tuple = ()
+    mode: str = "tool"
+    calls: int = 0
+
+    def evaluate(self, design, layout, run_id, workdir):
+        self.calls += 1
+        if self.mode == "tool":
+            return {"returncode": 2, "design_config": "x", "failure": "DPL-0036 Detailed placement failed."}
+        if self.mode == "timeout":
+            return {"returncode": "timeout", "design_config": "x", "failure": "timeout in 3_5_place_dp"}
+        return {"returncode": -11, "failure": None}
+
+
+def test_deterministic_failures_are_reused(tmp_path):
+    des, ref = synth.make_design(seed=1, n_macros=4, n_cells=40, n_io=6)
+    base = cost.Baseline.from_records(des.id, [{"hpwl_um": 1.0, "rudy_of_pct": 1.0}])
+    for mode, reused in (("tool", True), ("timeout", True), ("crash", False)):
+        ev = FailingEval(mode=mode)
+        ledger = SA.Ledger(tmp_path / mode / "evals.jsonl")
+        r1 = SA._eval(ev, des, ref, base, "a", tmp_path / mode, ledger, {})
+        r2 = SA._eval(ev, des, ref.copy(), base, "b", tmp_path / mode, ledger, {})
+        assert r1["status"] == r2["status"] == "eval_failed" and r2["J"] == float("inf")
+        assert ev.calls == (1 if reused else 2), mode
+        assert (r2.get("reused_from") == "a") == reused
+        if reused:
+            assert r2["record"]["failure"] == r1["record"]["failure"]
+        # a resumed ledger indexes the failure the same way
+        assert (SA.Ledger(tmp_path / mode / "evals.jsonl").by_layout != {}) == reused

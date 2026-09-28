@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import math
+import re
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -44,7 +45,7 @@ class Ledger:
         self.path = path
         path.parent.mkdir(parents=True, exist_ok=True)
         self.rows = {}
-        self.by_layout = {}                     # (evaluator, fidelity, layout key) -> run_id of a successful row
+        self.by_layout = {}                     # (evaluator, fidelity, layout key) -> run_id of a reusable row
         if path.exists():
             for line in path.read_text().splitlines():
                 if line.strip():
@@ -52,7 +53,7 @@ class Ledger:
 
     def _index(self, r: dict):
         self.rows[r["run_id"]] = r
-        if r.get("status") == "ok" and "pos_macros" in r and not r.get("reused_from"):
+        if "pos_macros" in r and not r.get("reused_from") and (r.get("status") == "ok" or deterministic_failure(r)):
             self.by_layout.setdefault((r.get("evaluator"), r.get("fidelity"), layout_key(r)), r["run_id"])
 
     def get(self, run_id):
@@ -68,11 +69,28 @@ REUSE_KEYS = ("status", "fidelity", "evaluator", "J", "J_raw", "admissible", "pa
               "record")
 
 
+def deterministic_failure(row: dict) -> str | None:
+    """Name of a failure an identical layout would repeat: a named error of a deterministic tool flow (ORFS
+    'GRT-0116 ...', 'DPL-0036 ...') or a timeout of the same computation.  Crashes, sandbox errors and unnamed
+    failures give None: they are evaluated again."""
+    if row.get("status") != "eval_failed":
+        return None
+    rec = row.get("record") or {}
+    name = rec.get("failure")
+    if not name and "design_config" in rec:             # ORFS records written before failure naming (0.13.4)
+        from ..eval import orfs
+        name = orfs.failure_reason(rec.get("log_tail", ""), rec.get("returncode"))
+    if name and (re.match(r"[A-Z]{3}-\d{4}\b", str(name)) or str(name).startswith("timeout")):
+        return str(name)
+    return None
+
+
 def _eval(ev: Evaluator, design, layout, base, run_id, work, ledger: Ledger, extra: dict) -> dict:
     """Evaluate one layout (resumable by run_id).  A layout this evaluator already evaluated successfully -- a
     seed-independent program repeats its layout for every seed -- is not evaluated again: every evaluator is
     deterministic (ORFS and the mini-flow at a fixed thread count, DREAMPlace with deterministic_flag, HB-GP on
-    one thread), so the row is copied with ``reused_from``.  Failed evaluations are always repeated."""
+    one thread), so the row is copied with ``reused_from``.  So is a deterministic failure (a named tool error or a
+    timeout, see deterministic_failure); crashes and unnamed failures are evaluated again."""
     row = ledger.get(run_id)
     if row is not None:
         return row
@@ -81,7 +99,11 @@ def _eval(ev: Evaluator, design, layout, base, run_id, work, ledger: Ledger, ext
     prev = ledger.by_layout.get((ev.name, ev.fidelity, layout_key(probe)))
     if prev is not None:
         src = ledger.get(prev)
-        row = {k: src[k] for k in REUSE_KEYS if k in src}
+        if src.get("status") == "ok":
+            row = {k: src[k] for k in REUSE_KEYS if k in src}
+        else:                                   # the failure's name, not the tool record (logs stay with the source)
+            row = {k: src[k] for k in ("status", "fidelity", "evaluator", "J", "error") if k in src}
+            row["record"] = {"failure": deterministic_failure(src), "returncode": (src.get("record") or {}).get("returncode")}
         row.update({"run_id": run_id, "reused_from": prev, "wall_s": 0.0, **probe})
         row.update(extra)
         ledger.add(row)
