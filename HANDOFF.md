@@ -4,6 +4,22 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
+## 2026-09-28 — Session 3 (16:10): T3.7 done; E0 demo positive; full E0 pre-registered and running
+
+- **T3.7** finished: rounds 0 and 1 promoted, round 2 not -> final checkpoint round 1 (`reports/T3_algorithmR_trackA.md`).
+- **E0 demo** (ibm04/ibm06, exploratory): the co-trained bridge has the lowest J under both protocols (spec and equal
+  guard), p <= 5e-9 vs memetic/repertoire; the random-direction control is close (0.508 vs 0.482) but beaten
+  (p = 2.3e-9) -> much of the gain is the f1 guard, the learned direction adds on top. Reports
+  `reports/E0_demo_{spec,eq}.md`.
+- **Full E0 pre-registered** (commit d186667, 16:06, `reports/E0_preregistration.md`; ledger E0#1 primary ISPD2005
+  task-list protocol, E0#2 equal guard, E0#3 IBM held-out) and **running since 16:08**: 225 GPUs 0-3 (8 slots: the
+  five smaller ISPD designs x both protocols, ibm08/ibm12) and 231 GPU 4 (bigblue4 x2, bigblue3 x2); inputs from the
+  encrypted bundles `e0_inputs`, `bridge_final`, `eda_harness`; vault excludes the source caches.
+- **When the runs end**: fetch all 11 jobs; `e0_combine.py --runs <the 7 ISPD spec runs> --ledger-entry E0#1`, the eq
+  runs into E0#2, ibm08/ibm12 into E0#3; `report_e0.py` for each; commit ledger + reports. Then T5 if G0' passes.
+
+---
+
 ## 2026-09-28 — Session 3 (13:40): user decisions; T4 E0 demo started (0.14.0)
 
 **User decisions:** LLM = deepseek-flash (code default now); f1 timing gates reported, enforced at f2/f3 (cost_v2);
