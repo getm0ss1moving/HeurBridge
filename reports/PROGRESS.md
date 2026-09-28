@@ -147,7 +147,10 @@ planned path at T4 ("stop and report", with a repositioning decision for you).
    memetic and repertoire partners decide on f0 — the bridge can win through the guard alone. Proposal: keep the
    spec's comparison as the primary G0′ test and pre-register `--equal-guard` (every partner guarded at the same
    fidelity) and `--random-control` (the bridge's guard along a random direction) as secondary analyses. Also the
-   design set: held-out ibm08 / ibm12, and whether ISPD2005 (the held-out family) is included — about 10× the cost.
+   design set: held-out ibm08 / ibm12 (≈ 0.5–1 GPU-day on one 225 GPU), and whether ISPD2005 (the held-out family,
+   7 usable designs) is included (≈ 4–5 more GPU-days, mostly bigblue3/4; ~2–3 days on two GPUs). "Cost" here is
+   compute time only: E0 makes no LLM calls and the servers are the lab's (the only paid resource is the DeepSeek
+   API in T5).
 2. **T5 LLM model:** `deepseek-v4-pro` (about 4× the price) or `deepseek-flash` (what the old `deepseek-reasoner`
    name maps to now).
 3. **Timing gates at f1:** proposal — report them at f1, enforce them only at f2 / f3 (they predict f2 badly).
