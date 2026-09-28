@@ -146,3 +146,17 @@ def test_surrogate_j0_differentiable():
     j.sum().backward()
     assert torch.isfinite(p.grad).all()
     assert float(j[0]) == pytest.approx(float(f0.surrogate_j0(ctx, p.detach(), ref)[0]), rel=1e-6)
+
+
+def test_rudy_bmm_equals_einsum(monkeypatch):
+    """HB_RUDY_IMPL=bmm (no nets x GCells x GCells temporary) gives the reference einsum's maps to float rounding."""
+    des, lay = synth.make_design(seed=11, n_macros=8, n_cells=400, n_io=12)
+    ctx = f0.F0Context(des, lay.orient)
+    p = torch.as_tensor(lay.pos, dtype=torch.float32)
+    monkeypatch.setenv("HB_RUDY_IMPL", "einsum")
+    a = ctx.rudy(p)
+    monkeypatch.setenv("HB_RUDY_IMPL", "bmm")
+    b = ctx.rudy(p)
+    for k in ("dem_h", "dem_v"):
+        assert torch.allclose(a[k], b[k], rtol=1e-5, atol=1e-6 * float(a[k].abs().max()))
+    assert float(b["overflow"][0]) == pytest.approx(float(a["overflow"][0]), rel=1e-4, abs=1e-6)

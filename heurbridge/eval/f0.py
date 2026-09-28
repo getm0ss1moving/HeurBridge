@@ -21,6 +21,7 @@ Orientation is fixed per call (orientation is never transported).
 from __future__ import annotations
 
 import math
+import os
 from dataclasses import dataclass
 
 import numpy as np
@@ -269,8 +270,8 @@ class F0Context:
         ox = torch.clamp(torch.minimum(cx.unsqueeze(-1) + bw.unsqueeze(-1) / 2, ex[1:]) - torch.maximum(cx.unsqueeze(-1) - bw.unsqueeze(-1) / 2, ex[:-1]), min=0)
         oy = torch.clamp(torch.minimum(cy.unsqueeze(-1) + bh.unsqueeze(-1) / 2, ey[1:]) - torch.maximum(cy.unsqueeze(-1) - bh.unsqueeze(-1) / 2, ey[:-1]), min=0)
         w = self.net_w.view(1, -1)
-        dem_h = torch.einsum("bki,bkj,bk->bij", ox, oy, w / bh)    # horizontal wire length per GCell
-        dem_v = torch.einsum("bki,bkj,bk->bij", ox, oy, w / bw)
+        dem_h = _gcell_sum(ox, oy, w / bh)                            # horizontal wire length per GCell
+        dem_v = _gcell_sum(ox, oy, w / bw)
         cover = self._raster(pa, self.is_macro, g, nx, ny) / (g * g)
         cover = cover.clamp(max=1.0)
         cell_area = self._gcell_area(nx, ny, g, pa)
@@ -325,6 +326,19 @@ class F0Context:
                 "rudy_overflow_ratio": r["overflow_ratio"], "rudy_peak": r["peak"],
                 "channel_shortage": self.channel_shortage(pos, r),
             }
+
+
+def _gcell_sum(ox: torch.Tensor, oy: torch.Tensor, wk: torch.Tensor) -> torch.Tensor:
+    """sum_k ox[b,k,i] oy[b,k,j] wk[b,k] -> (b, i, j): each net's RUDY demand spread over the GCells.
+
+    HB_RUDY_IMPL=einsum (default: the reference implementation every stored result was computed with) lets torch
+    contract the three operands left to right; without opt_einsum that materializes a (b, nets, ngx, ngy)
+    temporary -- 4 bytes x nets x ngx x ngy, 18 GB on bigblue3 at 64 x 64 GCells.  HB_RUDY_IMPL=bmm computes the
+    same sum as one batched matrix product without the temporary; it agrees to ~1e-6 relative (a different float
+    summation order), so a run must use one implementation throughout."""
+    if os.environ.get("HB_RUDY_IMPL", "einsum") == "bmm":
+        return torch.bmm((ox * wk.unsqueeze(-1)).transpose(1, 2), oy)
+    return torch.einsum("bki,bkj,bk->bij", ox, oy, wk)
 
 
 # ---------------------------------------------------------------------- surrogate J0

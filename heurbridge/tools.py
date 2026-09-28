@@ -12,6 +12,9 @@ from __future__ import annotations
 import os
 import signal
 import subprocess
+import tempfile
+import time
+from contextlib import contextmanager
 
 LOCAL_IMAGE = "efabless/openlane:master-arm64v8"
 
@@ -53,6 +56,35 @@ def kill_group(p: subprocess.Popen, grace: float = 10.0) -> None:
         p.wait(timeout=grace)
     except subprocess.TimeoutExpired:
         pass
+
+
+@contextmanager
+def slot(name: str, n: int | None, poll_s: float = 1.0):
+    """At most ``n`` concurrent holders of ``name`` on this host, across processes and jobs (flock on n files in
+    HB_SLOTS_DIR, default /dev/shm/.hb_slots); ``n`` falsy = no limit.  Used to keep memory-heavy steps of
+    parallel jobs from coinciding.  Waiting changes only the timing, never a result."""
+    if not n:
+        yield
+        return
+    import fcntl
+    root = os.environ.get("HB_SLOTS_DIR") or ("/dev/shm/.hb_slots" if os.path.isdir("/dev/shm") else
+                                              os.path.join(tempfile.gettempdir(), ".hb_slots"))
+    os.makedirs(root, mode=0o700, exist_ok=True)
+    while True:
+        for i in range(int(n)):
+            fd = os.open(os.path.join(root, "%s.%d" % (name, i)), os.O_CREAT | os.O_RDWR, 0o600)
+            try:
+                fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError:
+                os.close(fd)
+                continue
+            try:
+                yield
+            finally:
+                fcntl.flock(fd, fcntl.LOCK_UN)
+                os.close(fd)
+            return
+        time.sleep(poll_s)
 
 
 def binary(tool: str) -> str:

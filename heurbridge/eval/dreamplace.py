@@ -180,7 +180,8 @@ def _run_f1(design, layout, work, f0cfg, gpu, iters, seed, timeout):
     placed = read_placed(design, layout, pl)
     mac = design.is_macro & layout.placed
     moved = float(np.abs(design.to_abs(placed.pos[mac]) - design.to_abs(layout.pos[mac])).max()) if mac.any() else 0.0
-    m = trackA_metrics(design, placed, f0cfg)
+    with tools.slot("metrics", int(os.environ.get("HB_METRIC_SLOTS") or 0)):     # RUDY's peak memory (f0._gcell_sum)
+        m = trackA_metrics(design, placed, f0cfg)
     out.update({"hpwl": m["hpwl"], "gr_overflow_total": m["rudy_overflow"], "rudy": m,
                 "macro_max_shift": moved, "runtime_s": wall})
     if moved > 1e-6 * max(design.core[2] - design.core[0], 1.0):

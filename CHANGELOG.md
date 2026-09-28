@@ -7,6 +7,17 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 ## [Unreleased]
 
 ### Added
+- **RUDY without the 18 GB temporary, and a host-wide cap on memory-heavy steps.** On 231 the kernel's OOM killer
+  ended one E0 slice (bigblue3 spec 2/4) at 22:46 on 28 Sep: 21 GB resident. Cause: `F0Context.rudy` sums each
+  net's demand over the GCells with a three-operand `torch.einsum`, and without `opt_einsum` (not installed on the
+  servers) torch materializes a nets x ngx x ngy float32 temporary -- 18 GB on bigblue3, 36 GB on bigblue4, 9 GB
+  on adaptec4 (measured on 225: 1.60 GB above baseline for 100k nets x 64 x 64, as predicted). Now
+  `f0._gcell_sum`: `HB_RUDY_IMPL=einsum` (default, the reference implementation every stored result used) or
+  `bmm` (one batched matrix product, no temporary, equal to ~1e-6 relative -- a run must use one implementation
+  throughout). `tools.slot(name, n)` caps concurrent holders per host (flock files in HB_SLOTS_DIR, default
+  /dev/shm/.hb_slots); DREAMPlace f1 takes a "metrics" slot around its RUDY/HPWL step when `HB_METRIC_SLOTS` is
+  set (timing only; results unchanged). Tests: `test_f0.py::test_rudy_bmm_equals_einsum`, `test_tools_slot.py`.
+
 - **DREAMPlace GPU out-of-memory is rerun, not scored** (`eval/dreamplace.run_placer`). With several E0 slices
   sharing a GPU, a placer run can die because the GPU is momentarily full; that says nothing about the layout, and
   recording it as a failed case (J = +inf) would add noise to the paired tests. Such a run is rerun after 30, 90,
