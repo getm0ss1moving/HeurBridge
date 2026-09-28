@@ -22,6 +22,7 @@ Resumable; everything lands in runs/seed_orfs/<design>/:
 import argparse
 import json
 import math
+import os
 import sys
 from pathlib import Path
 
@@ -153,7 +154,8 @@ def main():
     out = ROOT / "runs" / "seed_orfs"
     rdir = out / name
     rdir.mkdir(parents=True, exist_ok=True)
-    track = "B (ORFS 2024-12-13 8ae3ae36; %s)" % tools.describe()
+    # the Yosys ORFS runs (--yosys / HB_YOSYS), not the one on PATH (runs before 2026-09-29 recorded the PATH one)
+    track = "B (ORFS 2024-12-13 8ae3ae36; %s)" % tools.describe(yosys=a.yosys or os.environ.get("HB_YOSYS"))
 
     # 1. baselines
     bpath, b2path = rdir / "baseline.json", rdir / "baseline_f2.json"

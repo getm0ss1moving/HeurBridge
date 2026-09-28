@@ -106,9 +106,17 @@ def eda_threads(default: int = 6) -> int:
 _DESCRIBED: str | None = None
 
 
-def describe() -> str:
-    """Tool versions for run metadata and reports (queried once per process)."""
+def describe(yosys: str | None = None) -> str:
+    """Tool versions for run metadata and reports (queried once per process).  ``yosys``: the Yosys binary the
+    flow actually runs (e.g. ORFS's YOSYS_EXE, run_seed_orfs.py --yosys) when it is not the one on PATH."""
     global _DESCRIBED
+    if yosys:
+        try:
+            out = subprocess.run([yosys, "-V"], capture_output=True, text=True, timeout=60)
+            yv = ((out.stdout or out.stderr).strip().splitlines() or ["?"])[0][:60].split(" (")[0]
+        except (OSError, subprocess.SubprocessError):
+            yv = "Yosys unavailable (%s)" % yosys
+        return "%s, %s (%s)" % (describe().split(", ")[0], yv, yosys)
     if _DESCRIBED is None:
         img = docker_image()
         if img:

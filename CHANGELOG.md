@@ -7,6 +7,15 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 ## [Unreleased]
 
 ### Added
+- **Track-B ORFS report** (`report_trackb_dev.py --label orfs`, first: `reports/T2_trackB_orfs_bp_fe_top.md`).
+  Every stored row is re-scored from its record under the current cost rule (the campaign resumed rows written
+  under cost_v1, which enforced the timing gates at f1); 'timing gates passed' counts setup/hold within the B.3
+  guard; a signoff (f2) section: completed/admitted layouts, failing gates, J before the gates, Kendall tau of
+  f1 vs f2, admitted layouts below the f2 noise band and below the same-path replay; the run's real command line;
+  f2-admitted archive top-k. `tools.describe(yosys=...)` and `run_seed_orfs.py` now record the Yosys the flow runs
+  (`--yosys`/HB_YOSYS); earlier runs recorded the one on PATH (0.38+92) although ORFS ran Yosys 0.48 -- the report
+  names the configured binary.
+
 - **RUDY without the 18 GB temporary, and a host-wide cap on memory-heavy steps.** On 231 the kernel's OOM killer
   ended one E0 slice (bigblue3 spec 2/4) at 22:46 on 28 Sep: 21 GB resident. Cause: `F0Context.rudy` sums each
   net's demand over the GCells with a three-operand `torch.einsum`, and without `opt_einsum` (not installed on the
@@ -60,6 +69,13 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
   `--resume-from`, sources reused from encrypted saves, budgets carried over with `--budget-s`). Checked on the
   restarted components: the recomputed random-control scale equals the original probe's exactly. bigblue4 moves
   whole to 225 (no rows had been computed on 231).
+
+### Observed (Track B, bp_fe_top campaign complete, 2026-09-29)
+- Signoff (f2) on 20 layouts: 15 pass every gate, 14 of them below the unmodified flow (J 1.00); best 0.881 (local
+  search around the best heuristic layouts). The tool's own macro layout through the same path scores 1.323 and
+  fails the setup gate; its one-site shifts span 1.03-1.40. f1 and f2 agree only moderately (Kendall tau 0.51 over
+  20 layouts). Descriptive: each candidate is one run, and a candidate's own one-site shifts could move it as much
+  as M1's do, so no improvement is claimed before candidates get their own noise band.
 
 ### Observed (T3.7 training data, 2026-09-28)
 - Algorithm R's rounds 1-2 trained on exactly round 0's pairs (checked on the fetched shards: x0, x1, weights and
