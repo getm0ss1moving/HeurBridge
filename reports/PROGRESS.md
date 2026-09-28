@@ -1,6 +1,6 @@
 # HeurBridge-PR — progress against the task list (T0–T7)
 
-Status as of **2026-09-28 13:00 CST**, code `4163646` (v0.13.4 + unreleased fixes). Measured against
+Status as of **2026-09-28 13:25 CST**, code `369689d` (v0.13.4 + unreleased fixes). Measured against
 `HEURBRIDGE_TASKS.md` (Part C tasks, Part D gates). Session history: `HANDOFF.md`; every code change: `CHANGELOG.md`.
 
 ## 1. Summary
@@ -18,15 +18,17 @@ Status as of **2026-09-28 13:00 CST**, code `4163646` (v0.13.4 + unreleased fixe
 | Server | Job | Task | State | Expected |
 |---|---|---|---|---|
 | 225 GPU 0 | `algR_trackA2` | T3.7 Algorithm R (Track A, 13 IBM training + 2 validation designs) | round 0 **promoted** (= T3 exit gate), round 1 **promoted**, round 2 training | round 2 result ~16:30; round 3 (if promoted by ≥ 0.5 %) ~20:30 |
-| 224 (5 jobs × 8 threads) | `seedB_orfs5_{bp_fe_top, bp_be_top, swerv_wrapper, ariane136, ariane133}` | T1.7 / T2.7 Track-B seeding on the real ORFS 2024-12 flow | base runs done on all five (deterministic); candidates evaluated: 30 / 46 / 4 / 24 / 12 (ok: 20 / 31 / 0 / 15 / 0) | several days (see §3, T2.7) |
-| 224 (1 job) | `probe_ariane133_place` | validity control for Track B: ORFS's own macro placement (M1) replayed through our import path | running (M1 replay first) | ~1.5 h |
+| 224 (5 jobs × 8 threads) | `seedB_orfs6_{bp_fe_top, bp_be_top, swerv_wrapper, ariane136, ariane133}` (continuing `seedB_orfs5_*`) | T1.7 / T2.7 Track-B seeding on the real ORFS 2024-12 flow | base runs done on all five (deterministic); candidates so far: 40 / 47 / 4 / 24 / 13; now evaluating the same-path M1 control, then the remaining candidates | several days (see §3, T2.7) |
+| 224 (1 job) | `probe_ariane133_place` | validity control for Track B | control **passed** (import is sound); remaining diagnostic variants running | ~1 h |
 | 225 GPU 1 | — | free (ISPD2005 campaign finished) | — | reserved for E0 |
 
-**What I am doing at this moment:** checking why candidate layouts on ariane133 / swerv_wrapper fail ORFS's global
-placement (they never converge; detailed placement then fails or hangs). The M1-replay probe tells whether this is a
-property of the heuristic layouts or a problem in our import. If the control passes, the five ORFS jobs are continued
-(`hbv.py run --resume-from`) with the new reuse of deterministic failures (identical layouts no longer re-run a
-1–2 h failure). Everything else is monitored automatically (completions, failures, thread cap).
+**What I just did:** the Track-B validity control passed — ORFS's own macro placement replayed through our import
+converges like the base run, so candidates that fail global placement (ariane133, swerv_wrapper) fail because of
+their layouts. The probe also found that Hier-RTLMP pre-places every standard cell (a warm start that imported
+layouts do not get); M1 is therefore now also evaluated through the candidates' path, and candidate deltas are paired
+with that same-path control. The five ORFS jobs were continued (`hbv.py run --resume-from`) with this control and
+with reuse of deterministic failures (identical layouts no longer re-run a 1–2 h failure). Everything is monitored
+automatically (completions, failures, thread cap, orphaned processes).
 
 ## 3. Status per task
 

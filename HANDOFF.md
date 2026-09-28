@@ -16,7 +16,9 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 - **T0.3 complete**: ariane133 through detailed routing on ORFS 2024-12 (ENV_REPORT).
 - Track B: failures now named (GRT-0116 congestion on several bp_be_top SA layouts; 2-h timeouts in 5_1_grt).
 
-**Running**: 224 `seedB_orfs5_*` (5 jobs); 225 GPU 0 `algR_trackA2` (round 1 of 0-3); 225 GPU 1 free.
+**Running**: 224 `seedB_orfs6_*` (5 jobs, continuing `seedB_orfs5_*` with `--resume-from`: deterministic-failure
+reuse and the same-path M1 control, CHANGELOG); 225 GPU 0 `algR_trackA2` (round 2 of 0-3); 225 GPU 1 free.
+Progress against the task list: `reports/PROGRESS.md`.
 
 **Next**: T3.7 report (`report_algr.py`) and the job's new alpha-ledger lines into `stats/alpha_ledger.jsonl`; then
 T4 E0 — needs the user's protocol decision (open issue 8: the co-trained bridge's f1 guard vs f0-only partners;
