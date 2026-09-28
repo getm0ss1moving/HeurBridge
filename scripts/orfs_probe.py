@@ -61,15 +61,22 @@ def geometry(odb: Path) -> dict:
             "gap_min_um": round(gap, 3)}
 
 
-def step_report(log_dir: Path, prefix: str) -> dict:
-    steps, msgs = {}, []
-    for log in sorted(log_dir.glob(prefix + "*.log")):
+def step_report(log_dir: Path) -> dict:
+    steps, msgs, gpl = {}, [], {}
+    for log in sorted(log_dir.glob("*.log")):
         text = log.read_text(errors="replace")
         m = re.search(r"Elapsed time: (\S+)\[h:\]min:sec", text)
         steps[log.stem] = m.group(1) if m else None
         msgs += ["%s: %s" % (log.stem, l.strip()) for l in text.splitlines()
-                 if re.search(r"(ERROR|WARNING) (MPL|PDN|PPL|GPL)-", l)][:8]
-    return {"steps": steps, "messages": msgs}
+                 if re.search(r"(ERROR|WARNING) (MPL|PDN|PPL|GPL|DPL|GRT)-", l)][:8]
+        if log.stem.startswith("3_3_place_gp"):         # global placement convergence
+            it = re.findall(r"\[NesterovSolve\] Iter:\s*(\d+) overflow: ([0-9.]+)", text)
+            fin = re.search(r"Finished with Overflow: ([0-9.]+)", text)
+            gpl = {"iterations": int(it[-1][0]) if it else None, "last_overflow": float(it[-1][1]) if it else None,
+                   "finished_overflow": float(fin.group(1)) if fin else None,
+                   "dummies": int(re.search(r"NumDummyInstances:\s+(\d+)", text).group(1))
+                   if re.search(r"NumDummyInstances:\s+(\d+)", text) else None}
+    return {"steps": steps, "messages": msgs, "gpl": gpl}
 
 
 def main():
@@ -92,7 +99,7 @@ def main():
         d = r.dirs()
         out = {"variant": name, "make_vars": kv, "stage": a.stage, "returncode": rec.get("returncode"),
                "duration_s": rec.get("duration_s"), "seeded_from_base": bool(rec.get("seeded_from_base"))}
-        out.update(step_report(d["logs"], "2_"))
+        out.update(step_report(d["logs"]))
         odb = d["results"] / "2_3_floorplan_macro.odb"
         if odb.exists():
             try:
