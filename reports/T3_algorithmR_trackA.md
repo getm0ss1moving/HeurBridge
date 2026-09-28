@@ -51,3 +51,10 @@ python scripts/algorithm_r.py --suite ibm --train ibm01,ibm02,ibm03,ibm07,ibm09,
 ## Notes
 
 Per-round pairs and checkpoints under runs/remote/algR_trackA2/checkpoints/algR_trackA (not in the repository).
+
+Training data (added 2026-09-28 20:30, checked on the fetched pair shards): round 0 = 1,608 pairs on the 13 training
+designs (16 seed programs x 8 seeds, 104-128 legal sources per design; each paired with the nearest of the design's
+top-5 archive elites). Rounds 1 and 2 added no new information: the seed programs are fixed until T5 and the archive
+is not updated with bridge outputs, so their pairs are identical to round 0's (x0, x1, weights, struct_err equal on
+ibm01, ibm09, ibm18) and the DAgger aggregation holds 2 and 3 copies of them. Round 1's gain is further fine-tuning
+on the same data.

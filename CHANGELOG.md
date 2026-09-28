@@ -50,6 +50,13 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
   restarted components: the recomputed random-control scale equals the original probe's exactly. bigblue4 moves
   whole to 225 (no rows had been computed on 231).
 
+### Observed (T3.7 training data, 2026-09-28)
+- Algorithm R's rounds 1-2 trained on exactly round 0's pairs (checked on the fetched shards: x0, x1, weights and
+  struct_err identical): the seed programs do not change before T5 and the archive is not updated with the
+  bridge's outputs, so the DAgger aggregation duplicated the 1,608 round-0 pairs (2x, 3x). The on-policy part of
+  Algorithm R only adds information once the population changes (T5) or refined layouts enter the archive.
+  Recorded in `reports/T3_algorithmR_trackA.md`.
+
 ### Observed (Track B, 2026-09-28)
 - **The same-path replay of M1 scores worse than base M1**: f1 J 0.959 (bp_fe_top), 1.024 (bp_be_top), 0.958
   (ariane136) vs 0.95 by construction; at f2 bp_fe_top's replay has J 1.323 before the gates vs 1.00 and fails the
