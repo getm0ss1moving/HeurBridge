@@ -15,6 +15,11 @@ confirmatory set (held-out ibm08/ibm12 + ISPD2005), so the go/no-go does not pee
 ~18:00-18:30: fetch the four runs, `report_e0.py` per variant, compare spec vs equal guard and the random control.
 Then, with the final T3.7 checkpoint: pre-register and launch the full E0 (5 seeds) if the demo points the right way.
 
+**231 approved (user, 2026-09-28) for the full E0.** Only GPU 4 is free; root disk full, so everything lives in RAM
+(`/dev/shm`: vault `.hbv`, env `.hbenv/hb` pinned to 225's versions, DREAMPlace for sm_89 in `.hbtools`, benchmarks
+`.hbdata`). `setup_231` job builds and smoke-tests it (`scripts/server/setup_231.sh`). A reboot of 231 wipes all of
+it: fetch results promptly. Designs are assigned whole to one server (3090 vs 4090 results are not bit-identical).
+
 **Track B**: `seedB_orfs6_*` run code 369689d (cost_v1); continue them with `--resume-from` on 0.14.0 before their
 f1 phase ends (stored rows are re-scored under cost_v2 on load) -- e.g. after their M1 replays finish.
 
