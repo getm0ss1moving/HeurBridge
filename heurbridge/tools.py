@@ -115,8 +115,8 @@ def describe(yosys: str | None = None) -> str:
             out = subprocess.run([yosys, "-V"], capture_output=True, text=True, timeout=60)
             yv = ((out.stdout or out.stderr).strip().splitlines() or ["?"])[0][:60].split(" (")[0]
         except (OSError, subprocess.SubprocessError):
-            yv = "Yosys unavailable (%s)" % yosys
-        return "%s, %s (%s)" % (describe().split(", ")[0], yv, yosys)
+            yv = "Yosys unavailable"
+        return "%s; flow Yosys: %s (%s)" % (describe().split(", Yosys")[0], yv, yosys)
     if _DESCRIBED is None:
         img = docker_image()
         if img:
