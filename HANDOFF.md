@@ -31,6 +31,8 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
   -> proposal (open, user): reference the f2 gates to the same-path replay.
 - **Meeting brief** (private artifact, refreshed 19:00): https://claude.ai/artifact/WEwo1A2vGXnV5a55BrYJAr
 
+---
+
 ## 2026-09-28 — Session 3 (16:10): T3.7 done; E0 demo positive; full E0 pre-registered and running
 
 - **T3.7** finished: rounds 0 and 1 promoted, round 2 not -> final checkpoint round 1 (`reports/T3_algorithmR_trackA.md`).
