@@ -48,6 +48,9 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from train_bridge import load_bundle  # noqa: E402
 
 
+SPEC_PARTNERS = ("none", "memetic", "repertoire", "frozen")      # T4 partners besides the co-trained bridge
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--suite", default="ibm")
@@ -65,6 +68,9 @@ def main():
     ap.add_argument("--programs", default="")
     ap.add_argument("--guard-fidelity", default="f1", choices=["f0", "f1"])
     ap.add_argument("--equal-guard", action="store_true")
+    ap.add_argument("--component", default="", help="pre-registration id: this run is one part (e.g. one design) of "
+                                                  "a pooled pre-registered test; no ledger entry of its own "
+                                                  "(e0_combine.py --ledger-entry records the pooled result)")
     ap.add_argument("--random-control", action="store_true",
                     help="add the random-direction control partner (the bridge's guard along a random displacement)")
     a = ap.parse_args()
@@ -72,9 +78,11 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     ledger = AlphaLedger(ROOT / "stats" / "alpha_ledger.jsonl", campaign=a.campaign)
     ck = hashlib.sha256(Path(a.bridge).read_bytes()).hexdigest()[:16]
-    entry = ledger.reserve("partner_ablation", "%s@%s" % (Path(a.bridge).name, ck), "wilcoxon_less_holm4",
-                           meta={"designs": a.designs, "final": a.final, "bridge": str(a.bridge), "bridge_sha256_16": ck,
-                                 "guard_fidelity": a.guard_fidelity, "equal_guard": a.equal_guard})
+    a.bridge_sha256_16 = ck                             # in meta.json: the checkpoint identity, not its path
+    entry = None if a.component else ledger.reserve(
+        "partner_ablation", "%s@%s" % (Path(a.bridge).name, ck), "wilcoxon_less_holm4",
+        meta={"designs": a.designs, "final": a.final, "bridge": str(a.bridge), "bridge_sha256_16": ck,
+              "guard_fidelity": a.guard_fidelity, "equal_guard": a.equal_guard})
     progs = all_programs()
     if a.programs:
         progs = [p for p in progs if p["id"] in set(a.programs.split(","))]
@@ -148,10 +156,12 @@ def analyse(rows, entry, ledger, out, a):
     """The pre-registered analysis: statistics (summarize), the ledger record and the run's summary files."""
     res = summarize(rows, a)
     g = res["gate_G0prime"]
-    ledger.record(entry, p_value=max(g["p_memetic"], g["p_repertoire"]), n=res["n_cases"],
-                  extra={"gate": "G0prime", **g})
+    if entry is not None:
+        ledger.record(entry, p_value=max(g["p_memetic"], g["p_repertoire"]), n=res["n_cases"],
+                      extra={"gate": "G0prime", **g})
     (out / "e0_summary.json").write_text(json.dumps(res, indent=1, default=str))
-    write_meta(out, "e0", a.designs, config=vars(a), alpha_ledger_id=entry["ledger_id"], summary=res)
+    write_meta(out, "e0", a.designs, config=vars(a), alpha_ledger_id=entry["ledger_id"] if entry else
+               "component of %s" % a.component, summary=res)
     print(json.dumps(res, indent=1, default=str))
 
 
@@ -176,7 +186,11 @@ def summarize(rows, a) -> dict:
         t = ST.wilcoxon_less([by[k]["cotrained"] for k in ks], [by[k][p] for k in ks])
         res["vs_cotrained"][p] = t
         pvals[p] = t["p"]
-    res["holm"] = ST.holm(pvals, alpha=0.05) if pvals else {}
+    # Holm over the task list's comparisons (T4: none, memetic, repertoire, frozen); controls such as the random-
+    # direction partner are tested on their own (they check where a win comes from, they are not partners)
+    spec = {k: v for k, v in pvals.items() if k in SPEC_PARTNERS}
+    res["holm"] = ST.holm(spec, alpha=0.05) if spec else {}
+    res["controls"] = {k: v for k, v in pvals.items() if k not in SPEC_PARTNERS}
     designs = sorted({k[0] for k in keys})
     for p in partners:
         res["portfolio"][p] = float(np.mean([min(by[k][p] for k in keys if k[0] == d and p in by[k]) for d in designs]))
@@ -188,8 +202,8 @@ def summarize(rows, a) -> dict:
             if len(progs) > 2:
                 taus.append(ST.kendall_tau(raw, pv))
         res["kendall_vs_raw"][p] = float(np.nanmean(taus)) if taus else None
-    pm = res["vs_cotrained"].get("memetic", {}).get("p", 1.0)
-    pr = res["vs_cotrained"].get("repertoire", {}).get("p", 1.0)
+    pm = res["holm"].get("memetic", {}).get("p_adj", 1.0)          # Holm-adjusted (pre-registered, T4)
+    pr = res["holm"].get("repertoire", {}).get("p_adj", 1.0)
     res["guard"] = {"fidelity": a.guard_fidelity, "equal_guard": a.equal_guard, "random_control": a.random_control}
     res["gate_G0prime"] = {"pass": bool(pm < 0.01 and pr < 0.01), "p_memetic": pm, "p_repertoire": pr,
                            "note": "development run (Track-A stand-in final cost); not the pre-registered f2 test"
