@@ -227,12 +227,23 @@ class CotrainedPartner(Partner):
         self.K, self.halo, self.device = K, halo, device
 
     def __call__(self, design, layout, rng, budget_s=None):
-        from .bridge.sample import refine, source_nodes
+        from .bridge.sample import refine
         t0 = time.time()
         r = refine(self.model, self.graph, design, [layout], self.evaluate, K=self.K, halo=self.halo, device=self.device)[0]
+        return PartnerResult(r.layout, time.time() - t0, len(r.scores),
+                             {"alpha": r.alpha, "scores": r.scores, "disp": self.displacement(layout, r.x_bridge)})
+
+    def displacement(self, layout, x_bridge=None) -> float:
+        """Mean distance the bridge moves the movable nodes of ``layout`` (its unguarded endpoint; the call's own
+        endpoint when given, else the same batch-of-one integration refine() runs, without the guard)."""
+        from .bridge.sample import bridge_endpoints, source_nodes
         mv = self.graph.movable
-        disp = float(np.linalg.norm(r.x_bridge[mv] - source_nodes(self.graph, layout)[mv], axis=1).mean()) if mv.any() else 0.0
-        return PartnerResult(r.layout, time.time() - t0, len(r.scores), {"alpha": r.alpha, "scores": r.scores, "disp": disp})
+        if not mv.any():
+            return 0.0
+        src = source_nodes(self.graph, layout)
+        if x_bridge is None:
+            x_bridge = bridge_endpoints(self.model, self.graph, src[None], K=self.K, device=self.device)[0]
+        return float(np.linalg.norm(x_bridge[mv] - src[mv], axis=1).mean())
 
 
 class RandomGuardPartner(Partner):

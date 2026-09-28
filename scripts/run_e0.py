@@ -23,6 +23,7 @@ import argparse
 import hashlib
 import json
 import math
+import os
 import sys
 import time
 from pathlib import Path
@@ -73,13 +74,27 @@ def main():
                                                   "(e0_combine.py --ledger-entry records the pooled result)")
     ap.add_argument("--random-control", action="store_true",
                     help="add the random-direction control partner (the bridge's guard along a random displacement)")
+    ap.add_argument("--slice", default="", help="K/N: only the K-th of N contiguous parts of each design's source "
+                                               "list (one component split over processes; rows go to --out)")
+    ap.add_argument("--budget-s", type=float, default=0.0,
+                    help="the component's partner budget as first measured (a slice or a restarted run); the "
+                         "random-direction scale is then recomputed from the bridge's endpoints on the budget "
+                         "sources, the quantity the timed probe measures.  One design per call.")
+    ap.add_argument("--sources-cache", default="", help="source cache shared by a component's slices (default <out>/cache)")
+    ap.add_argument("--prepare-only", action="store_true",
+                    help="build and cache the sources, fix the budget (measure it unless --budget-s), write "
+                         "<cache>/budget_<design>.json and exit: the slices then read the same budget")
     a = ap.parse_args()
+    if a.budget_s and "," in a.designs:
+        sys.exit("--budget-s is one design's measured budget: run one design per call")
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
+    cache_dir = Path(a.sources_cache) if a.sources_cache else out / "cache"
     ledger = AlphaLedger(ROOT / "stats" / "alpha_ledger.jsonl", campaign=a.campaign)
     ck = hashlib.sha256(Path(a.bridge).read_bytes()).hexdigest()[:16]
     a.bridge_sha256_16 = ck                             # in meta.json: the checkpoint identity, not its path
-    entry = None if a.component else ledger.reserve(
+    a.budget_used = {}                                  # design -> {budget_s, scale, from}: in meta.json
+    entry = None if (a.component or a.prepare_only) else ledger.reserve(
         "partner_ablation", "%s@%s" % (Path(a.bridge).name, ck), "wilcoxon_less_holm4",
         meta={"designs": a.designs, "final": a.final, "bridge": str(a.bridge), "bridge_sha256_16": ck,
               "guard_fidelity": a.guard_fidelity, "equal_guard": a.equal_guard})
@@ -94,7 +109,7 @@ def main():
     fh = open(rows_path, "a")
     for name in a.designs.split(","):
         b = load_bundle(a.suite, name, a.runs)
-        srcs = BD.run_sources(b, progs, a.seeds, cache=out / "cache")
+        srcs = BD.run_sources(b, progs, a.seeds, cache=cache_dir)
         final = track_a_final(a.final, cluster_of=b.cluster_of)
         if a.final == "dreamplace":             # the campaign's M1 baseline: the archive's J scale
             base_recs = json.loads((Path(a.runs) / b.design.id / "baseline.json").read_text())["records"]
@@ -115,11 +130,14 @@ def main():
             return _cache[h]
         guard = b.scorer if a.guard_fidelity == "f0" else (lambda lay: final_J(lay, "guard")[0])
         cot = P.CotrainedPartner(bridge, b.graph, guard, K=a.K)
-        # measure the co-trained partner's median time per call (includes its guard)
-        rng = np.random.default_rng(0)
-        probe = [cot(b.design, l, rng) for _, _, l in srcs[:5]]
-        budget = float(np.median([r.wall_s for r in probe]))
-        scale = float(np.median([r.info["disp"] for r in probe]))   # the bridge's typical displacement
+        budget, scale, how = component_budget(a, b, cot, srcs, cache_dir)
+        a.budget_used[b.design.id] = {"budget_s": budget, "scale": scale, "from": how}
+        lo, hi = slice_bounds(len(srcs), a.slice)
+        print(json.dumps({"design": b.design.id, "n_sources": len(srcs), "slice": [lo, hi], "budget_s": budget,
+                          "scale": scale, "budget_from": how}), flush=True)
+        if a.prepare_only:
+            continue
+        srcs = srcs[lo:hi]
         partners = [P.NonePartner(), P.MemeticPartner(b.scorer), P.RepertoirePartner(b.scorer, b.view.macro_aff, b.view.macro_order), cot]
         if frozen is not None:
             partners.append(P.FrozenGenPartner(frozen, b.graph, b.scorer, K=a.K))
@@ -144,12 +162,52 @@ def main():
                 else:
                     J, terms = math.inf, {}
                 row = {"design": b.design.id, "program": pid, "seed": s, "partner": part.name, "J": J, "terms": terms,
-                       "wall_s": round(res.wall_s, 3), "budget_s": round(budget, 3), "info": {k: v for k, v in res.info.items() if k != "scores"}}
+                       "wall_s": round(res.wall_s, 3), "budget_s": round(budget, 3),
+                       "load1": round(os.getloadavg()[0], 2),      # host load: wall-clock budgets depend on it
+                       "info": {k: v for k, v in res.info.items() if k != "scores"}}
                 fh.write(json.dumps(row, default=str) + "\n")
                 fh.flush()
                 rows.append(row)
     fh.close()
-    analyse(rows, entry, ledger, out, a)
+    if not a.prepare_only:
+        analyse(rows, entry, ledger, out, a)
+
+
+def slice_bounds(n: int, spec: str) -> tuple:
+    """[lo, hi) of the K-th of N contiguous parts of n sources ("K/N"; "" = everything)."""
+    if not spec:
+        return 0, n
+    k, m = (int(x) for x in spec.split("/"))
+    if not 0 <= k < m:
+        raise ValueError("--slice K/N needs 0 <= K < N, got %r" % spec)
+    return round(n * k / m), round(n * (k + 1) / m)
+
+
+def component_budget(a, b, cot, srcs, cache_dir) -> tuple:
+    """(budget_s, scale, how) of one design's component, identical in all its slices and restarts.
+
+    Measured once (the protocol: the co-trained partner's median wall-clock per call over the first five sources,
+    guard included; scale = its median displacement) and kept in <cache>/budget_<design>.json.  With --budget-s the
+    budget is the value first measured and the scale is recomputed without the guard (deterministic: the same
+    batch-of-one integration the probe runs)."""
+    path = cache_dir / ("budget_%s.json" % b.design.id)
+    if a.budget_s:
+        disp = [cot.displacement(l) for _, _, l in srcs[:5]]
+        got = {"budget_s": a.budget_s, "scale": float(np.median(disp)), "disp": disp, "from": "given"}
+    elif path.exists():
+        got = json.loads(path.read_text())
+        return got["budget_s"], got["scale"], "cache:" + got["from"]
+    else:
+        rng = np.random.default_rng(0)
+        probe = [cot(b.design, l, rng) for _, _, l in srcs[:5]]
+        disp = [r.info["disp"] for r in probe]
+        got = {"budget_s": float(np.median([r.wall_s for r in probe])), "scale": float(np.median(disp)),
+               "disp": disp, "wall_s": [r.wall_s for r in probe], "from": "measured"}
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(".tmp%d" % os.getpid())             # slices may start together: atomic replace
+    tmp.write_text(json.dumps(got))
+    os.replace(tmp, path)
+    return got["budget_s"], got["scale"], got["from"]
 
 
 def analyse(rows, entry, ledger, out, a):

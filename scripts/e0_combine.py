@@ -5,8 +5,9 @@
       runs/remote/e0demo_spec_ibm06/runs/e0_demo/spec_ibm06 --out runs/e0_demo_spec
 
 The statistics are recomputed over all rows (run_e0.summarize).  The runs must share the protocol (guard fidelity,
-equal guard, final cost, bridge checkpoint).  Without --ledger-entry nothing is written to the alpha ledger (a demo,
-or runs that recorded their own entries).  With --ledger-entry E0#1 the runs are components (run_e0.py --component)
+equal guard, final cost, bridge checkpoint).  Slices of one component (run_e0.py --slice) are listed together: no
+case may appear twice, and a design's rows must share one partner budget.  Without --ledger-entry nothing is
+written to the alpha ledger (a demo, or runs that recorded their own entries).  With --ledger-entry E0#1 the runs are components (run_e0.py --component)
 of a test pre-registered by e0_preregister.py: the entry must be reserved and still open, the combined designs and
 protocol must equal the ones registered in it, and the pooled result is recorded into it.
 """
@@ -38,6 +39,7 @@ def main():
     for r in a.runs:
         rows += [json.loads(l) for l in (Path(r) / "e0_rows.jsonl").read_text().splitlines() if l.strip()]
         metas.append(json.loads((Path(r) / "meta.json").read_text()))
+    check_rows(rows)
     cfgs = [m.get("config", {}) for m in metas]
     for k in PROTOCOL:
         vals = {json.dumps(c.get(k)) for c in cfgs}
@@ -59,6 +61,23 @@ def main():
     (out / "meta.json").write_text(json.dumps(meta, indent=1, default=str))
     print(json.dumps({"combined": len(a.runs), "rows": len(rows), "n_cases": res["n_cases"],
                       "gate_G0prime": res["gate_G0prime"]}, default=str))
+
+
+def check_rows(rows):
+    """A component split over slices or restarted must not repeat a case, and all of a design's rows must share
+    the component's partner budget (run_e0.py --budget-s carries the first measurement)."""
+    seen, dup, budgets = set(), [], {}
+    for r in rows:
+        k = (r["design"], r["program"], r["seed"], r["partner"])
+        if k in seen:
+            dup.append(k)
+        seen.add(k)
+        budgets.setdefault(r["design"], set()).add(r.get("budget_s"))
+    if dup:
+        sys.exit("duplicate cases across runs (overlapping slices or restarts): %s" % dup[:5])
+    mixed = {d: sorted(v, key=str) for d, v in budgets.items() if len(v) > 1}
+    if mixed:
+        sys.exit("rows of one design carry different partner budgets: %s" % mixed)
 
 
 def record(ledger_id: str, cfg: dict, res: dict, ledger_path) -> dict:

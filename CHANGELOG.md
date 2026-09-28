@@ -7,6 +7,16 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 ## [Unreleased]
 
 ### Added
+- **E0 components split over processes** (`run_e0.py --slice K/N --sources-cache DIR --budget-s S --prepare-only`).
+  The full E0 is CPU-bound (memetic and repertoire each spend the bridge's whole budget per case; measured 10-27 min
+  per case on ISPD2005, adaptec4 ~27 h per component), so one component can now run as N contiguous slices of its
+  source list. The protocol is unchanged: every slice uses the component's one budget and random-control scale
+  (`<cache>/budget_<design>.json`, written once by `--prepare-only`, which measures it with the timed probe as
+  before, or takes `--budget-s`, the value the component's first run measured, and recomputes the scale from the
+  bridge's unguarded endpoints -- `CotrainedPartner.displacement`, the same batch-of-one integration, equal to the
+  call's `disp` by test); every row records the host load (`load1`). `e0_combine.py` now refuses duplicate cases
+  and a design whose rows carry different budgets. Tests: `tests/test_e0_slices.py`, partner displacement.
+
 - **Track-B noise band** (`run_seed_orfs.py --noise-replays 3`, default): besides the same-path replay of M1, the
   whole M1 layout shifted by exactly one site (+x, -x) or one row (+y) goes through the candidates' path at f1 and
   f2 (rows `<design>.M1replay.p1-3`). ORFS is deterministic, so this is the task list's "3 seeds" of the baseline:

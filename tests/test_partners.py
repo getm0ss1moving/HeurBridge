@@ -68,3 +68,14 @@ def test_random_guard_control(case):
     assert r1.info["alpha"] in (0.0, 0.25, 0.5, 1.0) and r1.info["scores"][0] == pytest.approx(scorer(h))
     r2 = part(des, h, np.random.default_rng(3))
     assert np.array_equal(r1.layout.pos, r2.layout.pos, equal_nan=True)   # deterministic (cells are NaN)
+
+
+def test_cotrained_displacement_matches_call(case):
+    """E0 slices recompute the random-control scale without the guard: same value as the timed call's disp."""
+    des, h, scorer, view, g = case
+    import torch
+    m = BridgeNet(TINY).eval()
+    torch.nn.init.normal_(m.dec[-1].weight, std=0.1)
+    part = P.CotrainedPartner(m, g, scorer)
+    res = part(des, h, np.random.default_rng(4))
+    assert part.displacement(h) == pytest.approx(res.info["disp"], rel=1e-9, abs=1e-12)
