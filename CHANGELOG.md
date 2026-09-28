@@ -14,6 +14,20 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
   `report_trackb_dev.py` prints the band. (A shift is checked at zero halo -- M1 itself does not meet P_M's 20 um
   spacing rule, smallest gap 19.88 um -- and never re-legalized: P_M would move macros by hundreds of um.)
 
+- **Pre-registered, pooled E0** (T4). `scripts/e0_preregister.py` reserves campaign E0's ledger entries before any
+  data exist -- E0#1 primary (task-list protocol, held-out family ISPD2005), E0#2 equal guard, E0#3 the training
+  family's held-out designs -- with the protocol in each entry's meta, and writes `reports/E0_preregistration.md`.
+  Per-design runs are `run_e0.py --component <id>` (no ledger entry of their own, so they do not spend alpha);
+  `e0_combine.py --ledger-entry E0#1` records the pooled result after checking that the entry is open and that
+  designs, guard, equal guard, final cost, seeds and the bridge checkpoint (sha256, now in every run's meta) match.
+  Checked with a scratch ledger: registration, refusal of a second registration, of a protocol mismatch and of a
+  closed entry, and a matching record.
+
+- `scripts/e0_combine.py`: one analysis over several `run_e0.py` runs (e.g. one per design) for `report_e0.py`;
+  statistics from the new side-effect-free `run_e0.summarize` (the alpha-ledger record stays in `run_e0.analyse`);
+  the runs must share the protocol. Checked: a two-design run split by design and recombined gives identical
+  p-values and mean J. `report_e0.py --demo` labels an exploratory demo.
+
 ### Observed (Track B, 2026-09-28)
 - **The same-path replay of M1 scores worse than base M1**: f1 J 0.959 (bp_fe_top), 1.024 (bp_be_top), 0.958
   (ariane136) vs 0.95 by construction; at f2 bp_fe_top's replay has J 1.323 before the gates vs 1.00 and fails the
@@ -28,20 +42,6 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
   way. So the failures come from the 2024-12 timing-driven placement diverging on scattered layouts. The default
   flow stays the evaluation (the M1 baseline uses it); a run of base and candidates with timing-driven placement
   off would be a robustness check.
-
-- **Pre-registered, pooled E0** (T4). `scripts/e0_preregister.py` reserves campaign E0's ledger entries before any
-  data exist -- E0#1 primary (task-list protocol, held-out family ISPD2005), E0#2 equal guard, E0#3 the training
-  family's held-out designs -- with the protocol in each entry's meta, and writes `reports/E0_preregistration.md`.
-  Per-design runs are `run_e0.py --component <id>` (no ledger entry of their own, so they do not spend alpha);
-  `e0_combine.py --ledger-entry E0#1` records the pooled result after checking that the entry is open and that
-  designs, guard, equal guard, final cost, seeds and the bridge checkpoint (sha256, now in every run's meta) match.
-  Checked with a scratch ledger: registration, refusal of a second registration, of a protocol mismatch and of a
-  closed entry, and a matching record.
-
-- `scripts/e0_combine.py`: one analysis over several `run_e0.py` runs (e.g. one per design) for `report_e0.py`;
-  statistics from the new side-effect-free `run_e0.summarize` (the alpha-ledger record stays in `run_e0.analyse`);
-  the runs must share the protocol. Checked: a two-design run split by design and recombined gives identical
-  p-values and mean J. `report_e0.py --demo` labels an exploratory demo.
 
 ### Fixed
 - **E0 Holm family** (task list T4: "Holm over 4 comparisons"): Holm now runs over none / memetic / repertoire /
