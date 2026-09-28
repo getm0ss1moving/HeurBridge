@@ -97,6 +97,23 @@ def load_design(a, name, rdir, base_run_dirs):
     return des, lay, m1, d
 
 
+def shifted_m1(des, m1, dx_sites: int, dy_rows: int):
+    """M1's macro layout shifted as a whole by whole sites / rows: every relative gap is kept and the macros stay
+    on the placement grid, so only the core boundary and fixed objects can be violated.  Checked at zero halo (M1
+    itself need not meet P_M's spacing rule); if the shift fails, the opposite direction is used; None if both fail.
+    Never re-legalized: P_M would move macros far more than the one-site perturbation."""
+    from heurbridge.core import project
+    mm = des.is_macro & ~des.is_fixed
+    w, h = des.core_wh
+    sw, sh = des.site if des.site else (w / 1000.0, h / 1000.0)
+    for sign in (1, -1):
+        lay = m1.copy()
+        lay.pos[mm] = lay.pos[mm] + sign * np.array([dx_sites * sw / w, dy_rows * sh / h])
+        if project.check_macros(des, lay, 0.0)["ok"]:
+            return lay
+    return None
+
+
 def select(rows, top, spread):
     """--top best distinct f1 layouts (by J before the gates) and --spread more evenly across the rest."""
     fin = distinct(sorted([r for r in rows if r.get("status") == "ok" and r.get("J_raw") is not None
@@ -125,6 +142,7 @@ def main():
     ap.add_argument("--phase", default="all", choices=["base", "f1", "f2", "all"])
     ap.add_argument("--base-timeout", type=int, default=4 * 7200, help="whole unmodified flow (each step < 7,200 s)")
     ap.add_argument("--timeout", type=int, default=7200, help="one candidate evaluation")
+    ap.add_argument("--noise-replays", type=int, default=3, help="shifted M1 replays for the noise band (0-3)")
     ap.add_argument("--make-var", action="append", default=[],
                     help="KEY=VALUE override of the design config for every run (recorded in meta.json)")
     a = ap.parse_args()
@@ -178,11 +196,20 @@ def main():
     # 2b. same-path control (red line: pairing).  Hier-RTLMP leaves every standard cell PLACED at its cluster
     # position, a warm start for global placement that no imported macro layout gets (a candidate's cells start
     # unplaced).  M1's own layout through the candidates' path is the control their deltas are paired with.
-    for ev, base, led, work in ((ev1, base1, "evals.jsonl", "work"), (ev2, base2, "evals_f2.jsonl", "work_f2")):
-        row = _eval(ev, des, m1, base, "%s.M1replay.f%d" % (name, ev.fidelity), rdir / work, Ledger(rdir / led),
-                    {"program": "M1_replay", "seed": 0, "stage": "M"})
-        print(json.dumps({"m1_replay": row["run_id"], "status": row.get("status"), "J": row.get("J"),
-                          "J_raw": row.get("J_raw"), "wall_s": row.get("wall_s")}), flush=True)
+    # 2c. noise band (the task list's "3 seeds" of the baseline; ORFS itself is deterministic): the whole M1 layout
+    # shifted by one site (+x, -x) or one row (+y), through the same path.  Global placement reacts chaotically to
+    # its start, so J's spread over base, replay and shifts is the band a candidate's improvement must exceed.
+    replays = [("M1replay", m1)] + [("M1replay.p%d" % k, shifted_m1(des, m1, dx, dy))
+                                    for k, (dx, dy) in enumerate(((1, 0), (-1, 0), (0, 1))[:a.noise_replays], 1)]
+    for tag, lay_m in replays:
+        if lay_m is None:
+            print(json.dumps({"m1_replay": tag, "skipped": "the shift leaves the core in both directions"}), flush=True)
+            continue
+        for ev, base, led, work in ((ev1, base1, "evals.jsonl", "work"), (ev2, base2, "evals_f2.jsonl", "work_f2")):
+            row = _eval(ev, des, lay_m, base, "%s.%s.f%d" % (name, tag, ev.fidelity), rdir / work, Ledger(rdir / led),
+                        {"program": "M1_replay", "seed": 0 if tag == "M1replay" else int(tag[-1]), "stage": "M"})
+            print(json.dumps({"m1_replay": row["run_id"], "status": row.get("status"), "J": row.get("J"),
+                              "J_raw": row.get("J_raw"), "wall_s": row.get("wall_s")}), flush=True)
 
     progs = all_programs()
     if a.programs:

@@ -7,6 +7,28 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 ## [Unreleased]
 
 ### Added
+- **Track-B noise band** (`run_seed_orfs.py --noise-replays 3`, default): besides the same-path replay of M1, the
+  whole M1 layout shifted by exactly one site (+x, -x) or one row (+y) goes through the candidates' path at f1 and
+  f2 (rows `<design>.M1replay.p1-3`). ORFS is deterministic, so this is the task list's "3 seeds" of the baseline:
+  the spread of J over base, replay and shifts is the band a candidate's improvement must exceed.
+  `report_trackb_dev.py` prints the band. (A shift is checked at zero halo -- M1 itself does not meet P_M's 20 um
+  spacing rule, smallest gap 19.88 um -- and never re-legalized: P_M would move macros by hundreds of um.)
+
+### Observed (Track B, 2026-09-28)
+- **The same-path replay of M1 scores worse than base M1**: f1 J 0.959 (bp_fe_top), 1.024 (bp_be_top), 0.958
+  (ariane136) vs 0.95 by construction; at f2 bp_fe_top's replay has J 1.323 before the gates vs 1.00 and fails the
+  setup gate. Almost all of it is timing: setup TNS -1.756 ns vs -0.336 ns (the (1 - TNS) term doubles because the
+  base TNS is close to 0), WNS -0.122 vs -0.077 ns; wirelength +0.7 %, vias +2.3 %, power +0.5 %. The only
+  difference between the two runs is global placement's starting point (Hier-RTLMP leaves the standard cells
+  placed). Candidate comparisons must be paired with the replay, and the noise band above decides what counts as
+  an improvement.
+- **Why candidate layouts fail placement** (`probe_ariane133_place`): the SA layout M2.v0.s0 fails with ORFS's
+  default timing-driven global placement (5,000 iterations, overflow 0.30, then DPL-0036) but converges with
+  `GPL_TIMING_DRIVEN=0` (730 iterations, overflow 0.0999; detailed placement passes); M1's replay converges either
+  way. So the failures come from the 2024-12 timing-driven placement diverging on scattered layouts. The default
+  flow stays the evaluation (the M1 baseline uses it); a run of base and candidates with timing-driven placement
+  off would be a robustness check.
+
 - **Pre-registered, pooled E0** (T4). `scripts/e0_preregister.py` reserves campaign E0's ledger entries before any
   data exist -- E0#1 primary (task-list protocol, held-out family ISPD2005), E0#2 equal guard, E0#3 the training
   family's held-out designs -- with the protocol in each entry's meta, and writes `reports/E0_preregistration.md`.

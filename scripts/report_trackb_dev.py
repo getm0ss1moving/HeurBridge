@@ -97,15 +97,23 @@ def main():
            "completed layouts: %d distinct of %d (seed-independent programs repeat their layout)." % (
                J_base, len(beat), len(distinct(beat)), len(raw_beat), len(distinct(raw_beat)), len(distinct(ok_all)), len(ok_all)),
            "", "\n".join(lines)]
-    if replay[1] or replay[2]:                  # same-path control: M1's layout imported like every candidate
+    if replay[1] or replay[2]:                  # same-path control and noise band (M1 imported like a candidate)
         txt = []
         for fid, jb in ((1, J_base), (2, 1.0)):
-            for r in replay[fid][:1]:
-                txt.append("f%d J %s before the gates, %s gated (the baseline is %.2f by construction)%s" % (
-                    fid, fmt(r.get("J_raw")), fmt(r.get("J")), jb, "" if r.get("status") == "ok" else "; " + str(
-                        r.get("status"))))
-        res += ["", "**Same-path control (M1 replayed through the candidates' path, standard cells not pre-placed "
-                "by Hier-RTLMP):** " + "; ".join(txt) + ". Candidate deltas are paired with this control."]
+            rr = sorted(replay[fid], key=lambda r: r.get("seed") or 0)
+            if not rr:
+                continue
+            vals = [r.get("J_raw") for r in rr if r.get("status") == "ok" and r.get("J_raw") is not None]
+            band = [jb] + vals                    # base (by construction) + replay + shifted replays
+            txt.append("f%d: replay J %s%s; shifted by one site/row: %s; band over base and replays %s-%s (width %s)" % (
+                fid, fmt(rr[0].get("J_raw")), "" if rr[0].get("status") == "ok" else " (" + str(rr[0].get("status")) + ")",
+                ", ".join(fmt(r.get("J_raw")) if r.get("status") == "ok" else str(r.get("status")) for r in rr[1:]) or "-",
+                fmt(min(band)), fmt(max(band)), fmt(max(band) - min(band))))
+        res += ["", "**Same-path control and noise band** (M1's layout imported like every candidate -- standard "
+                "cells not pre-placed by Hier-RTLMP -- and the same layout shifted as a whole by one site or row; J "
+                "before the gates, the baseline is %.2f at f1 and 1.00 at f2 by construction): " % J_base
+                + "; ".join(txt) + ". Candidate deltas are paired with the replay; differences inside the band are "
+                "not distinguishable from the flow's sensitivity to its starting point."]
     if ls_rows:
         traj = []
         best = None
