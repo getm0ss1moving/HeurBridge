@@ -7,6 +7,17 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 ## [Unreleased]
 
 ### Added
+- **Same-path control for Track B** (`run_seed_orfs.py`, red line "pairing"): M1's own layout is evaluated through
+  the candidates' path at f1 and f2 (rows `<design>.M1replay.f1/.f2`, program `M1_replay`), and
+  `report_trackb_dev.py` shows it as the control candidate deltas are paired with. Why: the validity probe on
+  ariane133 (`probe_ariane133_place`) replayed ORFS's own macro placement through our import. It converges like
+  the base run (global placement 700 iterations, final overflow 0.099; detailed placement succeeds), so the
+  import is sound and the non-converging candidates are a property of their layouts. After macro placement the
+  macro records of both databases are identical (132 LOCKED macros, same locations and orientations, no halos),
+  and synthesis, SDC, floorplan and IO placement are byte-identical. **But Hier-RTLMP leaves all 167,923 standard
+  cells PLACED at their cluster positions, while an imported layout leaves them unplaced**: global placement
+  starts warm for M1 only (610 vs 700 iterations here). The base run stays the spec's M1 baseline; deltas are
+  also reported against the same-path replay.
 - **Deterministic failures are reused for identical layouts** (`seed_archive.deterministic_failure`): a named tool
   error of the deterministic ORFS flow (`GRT-0116`, `DPL-0036`, ...) or a timeout is copied with `reused_from`, like a
   successful evaluation already was; crashes and unnamed failures are still evaluated again. Found on ariane133:

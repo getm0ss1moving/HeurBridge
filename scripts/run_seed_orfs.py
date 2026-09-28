@@ -100,7 +100,8 @@ def load_design(a, name, rdir, base_run_dirs):
 def select(rows, top, spread):
     """--top best distinct f1 layouts (by J before the gates) and --spread more evenly across the rest."""
     fin = distinct(sorted([r for r in rows if r.get("status") == "ok" and r.get("J_raw") is not None
-                           and math.isfinite(r["J_raw"]) and r["run_id"].endswith(".f1")], key=lambda r: r["J_raw"]))
+                           and math.isfinite(r["J_raw"]) and r["run_id"].endswith(".f1")
+                           and r.get("program") != "M1_replay"], key=lambda r: r["J_raw"]))
     pick, rest = fin[:top], fin[top:]
     if spread and rest:
         idx = np.unique(np.linspace(0, len(rest) - 1, min(spread, len(rest))).round().astype(int))
@@ -173,6 +174,15 @@ def main():
                record_host=True)
     if a.phase == "base":
         return
+
+    # 2b. same-path control (red line: pairing).  Hier-RTLMP leaves every standard cell PLACED at its cluster
+    # position, a warm start for global placement that no imported macro layout gets (a candidate's cells start
+    # unplaced).  M1's own layout through the candidates' path is the control their deltas are paired with.
+    for ev, base, led, work in ((ev1, base1, "evals.jsonl", "work"), (ev2, base2, "evals_f2.jsonl", "work_f2")):
+        row = _eval(ev, des, m1, base, "%s.M1replay.f%d" % (name, ev.fidelity), rdir / work, Ledger(rdir / led),
+                    {"program": "M1_replay", "seed": 0, "stage": "M"})
+        print(json.dumps({"m1_replay": row["run_id"], "status": row.get("status"), "J": row.get("J"),
+                          "J_raw": row.get("J_raw"), "wall_s": row.get("wall_s")}), flush=True)
 
     progs = all_programs()
     if a.programs:

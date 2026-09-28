@@ -46,7 +46,10 @@ def main():
     dev = a.label == "dev"
     base = json.loads((rdir / "baseline.json").read_text())
     rows = [json.loads(l) for l in (rdir / "evals.jsonl").read_text().splitlines()]
-    prog_rows = [r for r in rows if r.get("program") not in (None, "LS")]
+    prog_rows = [r for r in rows if r.get("program") not in (None, "LS", "M1_replay")]
+    replay = {1: [r for r in rows if r.get("program") == "M1_replay"]}
+    f2_path = rdir / "evals_f2.jsonl"
+    replay[2] = [json.loads(l) for l in f2_path.read_text().splitlines() if '"M1_replay"' in l] if f2_path.exists() else []
     ls_rows = [r for r in rows if r.get("program") == "LS"]
     b0 = base["records"][0]
     J_base = 0.95                   # every term of the M1 baseline is 1 by construction (no via term at f1)
@@ -94,6 +97,15 @@ def main():
            "completed layouts: %d distinct of %d (seed-independent programs repeat their layout)." % (
                J_base, len(beat), len(distinct(beat)), len(raw_beat), len(distinct(raw_beat)), len(distinct(ok_all)), len(ok_all)),
            "", "\n".join(lines)]
+    if replay[1] or replay[2]:                  # same-path control: M1's layout imported like every candidate
+        txt = []
+        for fid, jb in ((1, J_base), (2, 1.0)):
+            for r in replay[fid][:1]:
+                txt.append("f%d J %s before the gates, %s gated (the baseline is %.2f by construction)%s" % (
+                    fid, fmt(r.get("J_raw")), fmt(r.get("J")), jb, "" if r.get("status") == "ok" else "; " + str(
+                        r.get("status"))))
+        res += ["", "**Same-path control (M1 replayed through the candidates' path, standard cells not pre-placed "
+                "by Hier-RTLMP):** " + "; ".join(txt) + ". Candidate deltas are paired with this control."]
     if ls_rows:
         traj = []
         best = None
