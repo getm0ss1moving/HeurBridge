@@ -1,0 +1,6 @@
+{"run": "dp_r0", "returncode": 0, "failure": null, "hpwl_um": 2568479.75, "rudy_of_pct": 0.0, "gp_overflow": 0.07055011, "macro_max_shift": 0.0, "runtime_s": 10.7}
+{"run": "dp_r1", "returncode": 0, "failure": null, "hpwl_um": 2568479.75, "rudy_of_pct": 0.0, "gp_overflow": 0.07055011, "macro_max_shift": 0.0, "runtime_s": 10.5}
+{"run": "dp_rot", "returncode": 0, "failure": null, "hpwl_um": 2812143.75, "rudy_of_pct": 0.0, "gp_overflow": 0.07538491, "macro_max_shift": 0.0, "runtime_s": 9.5}
+{"run": "hbgp", "returncode": 0, "failure": null, "hpwl_um": 2648943.0, "rudy_of_pct": 0.0, "gp_overflow": 0.06990919262170792, "macro_max_shift": null, "runtime_s": 7.05}
+{"deterministic": true, "pm_ok": true, "pm_rot_ok": true, "hpwl_ratio_dp_over_hbgp": 0.9696243935788728}
+DP_SMOKE_PASS
