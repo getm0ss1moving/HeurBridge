@@ -6,6 +6,18 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 
 ## [Unreleased]
 
+### Added
+- **ISPD2005 Track-A campaign on the spec's tools** (`reports/T2_trackA_ispd_dreamplace.md`; 225 GPU 1, two
+  streams, 11.9 h): 8 designs (MMS convention: macros movable), M1 = DREAMPlace mixed-size, f1 = DREAMPlace with the
+  macros fixed; 640 program and 336 local-search evaluations. As on IBM, DREAMPlace's M1 is the best layout on every
+  design (the best program, M6 on all seven designs with program results, is 6.8-33% worse in J). The program API
+  hits memory limits: bigblue2's dense 23,084 x 23,084 macro affinity (4.3 GB) exceeds the 4 GB sandbox, so all 80
+  runs crash (M1-only archive); on bigblue4 (8,170 macros) 40 runs fail allocating further M x M arrays.
+- **E3 calibration on ISPD2005** (`reports/E3_calibration_trackA_ispd.{md,json}`, 7 designs): Kendall 0.54,
+  Spearman 0.72, top-5 recall 0.09, regret 0.026 vs random 0.049 (54 %): **G0 not met** (regret must be <= 25 % of
+  random); f0 ranks better than on IBM (Kendall 0.34) but still picks badly on adaptec1 and bigblue1. The f1 guard
+  stands.
+
 ### Fixed
 - `report_trackA.py` repeated every stream's design list once per design in "Exact commands" (each design's
   meta.json holds its stream's whole list); now the designs are joined once. Crashes are named by their exception

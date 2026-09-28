@@ -4,6 +4,27 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
+## 2026-09-28 — Session 3 (11:30): ISPD2005 campaign and E3 done; T3 exit gate passed; T0.3 complete
+
+- **ISPD2005 Track A done** (`reports/T2_trackA_ispd_dreamplace.md`): DREAMPlace's M1 best on all 8 designs;
+  bigblue2's programs cannot run (dense macro affinity > 4 GB sandbox; see CHANGELOG). **E3 on ISPD2005**
+  (`reports/E3_calibration_trackA_ispd.md`): Kendall 0.54, regret 54 % of random, G0 not met.
+- **T3.7 round 0 promoted** (T3 exit gate): on ibm04/ibm06 the f1-guarded bridge's final J 0.4815 vs the raw
+  heuristics' 0.8870, paired one-sided Wilcoxon p = 2.6e-9 at alpha_j 0.025 (ledger `algR_trackA#1`). Caveat for the
+  report and E0: the guard picks alpha with the same f1 that scores the final cost (alpha = 0 is the raw layout).
+  Rounds 1-3 continue (round 1 regenerated the heuristic sources, ~4 h; rounds 2-3 reuse round 0's cache, CHANGELOG).
+- **T0.3 complete**: ariane133 through detailed routing on ORFS 2024-12 (ENV_REPORT).
+- Track B: failures now named (GRT-0116 congestion on several bp_be_top SA layouts; 2-h timeouts in 5_1_grt).
+
+**Running**: 224 `seedB_orfs5_*` (5 jobs); 225 GPU 0 `algR_trackA2` (round 1 of 0-3); 225 GPU 1 free.
+
+**Next**: T3.7 report (`report_algr.py`) and the job's new alpha-ledger lines into `stats/alpha_ledger.jsonl`; then
+T4 E0 — needs the user's protocol decision (open issue 8: the co-trained bridge's f1 guard vs f0-only partners;
+proposal `--equal-guard` + `--random-control` as pre-registered secondary analyses) and the design set (held-out
+ibm08/ibm12; ISPD2005 as the held-out family is ~10x the evaluation cost).
+
+---
+
 ## 2026-09-28 — Session 3 (00:40): ORFS timeout fix (0.13.2); Track-B campaign restarted
 
 Some candidate layouts (e.g. SA seeds that scatter macros through the core) keep FastRoute in its overflow

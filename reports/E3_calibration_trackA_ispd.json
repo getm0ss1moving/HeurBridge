@@ -1,0 +1,8039 @@
+{
+ "track": "A",
+ "rows": [
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.M2.v0.s0.f1",
+   "program": "M2.v0",
+   "seed": 0,
+   "J_proxy": 2.100797414779663,
+   "J_signoff": 0.5221838418686694,
+   "J_gated": 0.5221838418686694,
+   "terms": {
+    "rwl": 1.237157501113152,
+    "of": 1.0069106102314922
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.M2.v1.s4.f1",
+   "program": "M2.v1",
+   "seed": 4,
+   "J_proxy": 2.1011016368865967,
+   "J_signoff": 0.5230270660603635,
+   "J_gated": 0.5230270660603635,
+   "terms": {
+    "rwl": 1.239561994377041,
+    "of": 1.0077231183150082
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.M3.v0.s0.f1",
+   "program": "M3.v0",
+   "seed": 0,
+   "J_proxy": 2.1102614402770996,
+   "J_signoff": 0.5594119065848538,
+   "J_gated": 0.5594119065848538,
+   "terms": {
+    "rwl": 1.3096616485876047,
+    "of": 1.1100894133904833
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.M3.v0.s1.f1",
+   "program": "M3.v0",
+   "seed": 1,
+   "J_proxy": 2.1818594932556152,
+   "J_signoff": 0.5829728315721157,
+   "J_gated": 0.5829728315721157,
+   "terms": {
+    "rwl": 1.3852651853275728,
+    "of": 1.1159551731589594
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.M3.v0.s2.f1",
+   "program": "M3.v0",
+   "seed": 2,
+   "J_proxy": 2.1446144580841064,
+   "J_signoff": 0.5946380248781619,
+   "J_gated": 0.5946380248781619,
+   "terms": {
+    "rwl": 1.4183478060806376,
+    "of": 1.1275578870264704
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.M3.v0.s3.f1",
+   "program": "M3.v0",
+   "seed": 3,
+   "J_proxy": 2.1392650604248047,
+   "J_signoff": 0.5697264778962284,
+   "J_gated": 0.5697264778962284,
+   "terms": {
+    "rwl": 1.3518445788968505,
+    "of": 1.0944873615144886
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.M3.v0.s4.f1",
+   "program": "M3.v0",
+   "seed": 4,
+   "J_proxy": 2.1722631454467773,
+   "J_signoff": 0.5685907943322596,
+   "J_gated": 0.5685907943322596,
+   "terms": {
+    "rwl": 1.3446790486303872,
+    "of": 1.1012471982876226
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.M3.v1.s0.f1",
+   "program": "M3.v1",
+   "seed": 0,
+   "J_proxy": 2.122838020324707,
+   "J_signoff": 0.5274462217495399,
+   "J_gated": 0.5274462217495399,
+   "terms": {
+    "rwl": 1.2389609773793064,
+    "of": 1.0383861902383198
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.M3.v1.s1.f1",
+   "program": "M3.v1",
+   "seed": 1,
+   "J_proxy": 2.1312742233276367,
+   "J_signoff": 0.5429311393597898,
+   "J_gated": 0.5429311393597898,
+   "terms": {
+    "rwl": 1.2754156936775947,
+    "of": 1.0687095417100763
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.M3.v1.s2.f1",
+   "program": "M3.v1",
+   "seed": 2,
+   "J_proxy": 2.1566038131713867,
+   "J_signoff": 0.5434704313887813,
+   "J_gated": 0.5434704313887813,
+   "terms": {
+    "rwl": 1.2797287056264888,
+    "of": 1.063678798005564
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.M3.v1.s3.f1",
+   "program": "M3.v1",
+   "seed": 3,
+   "J_proxy": 2.110258102416992,
+   "J_signoff": 0.5591515867675669,
+   "J_gated": 0.5591515867675669,
+   "terms": {
+    "rwl": 1.317763736209993,
+    "of": 1.0921497726971272
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.M3.v1.s4.f1",
+   "program": "M3.v1",
+   "seed": 4,
+   "J_proxy": 2.149658679962158,
+   "J_signoff": 0.5583546401446782,
+   "J_gated": 0.5583546401446782,
+   "terms": {
+    "rwl": 1.3212166336158706,
+    "of": 1.0799310003994465
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.M3.v2.s0.f1",
+   "program": "M3.v2",
+   "seed": 0,
+   "J_proxy": 2.1349117755889893,
+   "J_signoff": 0.5177769293519218,
+   "J_gated": 0.5177769293519218,
+   "terms": {
+    "rwl": 1.211536506918553,
+    "of": 1.0287731818423727
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.M3.v2.s1.f1",
+   "program": "M3.v2",
+   "seed": 1,
+   "J_proxy": 2.1179425716400146,
+   "J_signoff": 0.5127895002666081,
+   "J_gated": 0.5127895002666081,
+   "terms": {
+    "rwl": 1.1977891335106154,
+    "of": 1.0230184014228232
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.M3.v2.s2.f1",
+   "program": "M3.v2",
+   "seed": 2,
+   "J_proxy": 2.1193385124206543,
+   "J_signoff": 0.5022278590827451,
+   "J_gated": 0.5022278590827451,
+   "terms": {
+    "rwl": 1.1582066409773453,
+    "of": 1.0317724452636106
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.M3.v2.s3.f1",
+   "program": "M3.v2",
+   "seed": 3,
+   "J_proxy": 2.1068036556243896,
+   "J_signoff": 0.5099743913756312,
+   "J_gated": 0.5099743913756312,
+   "terms": {
+    "rwl": 1.1848421237961055,
+    "of": 1.0301450282453306
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.M3.v2.s4.f1",
+   "program": "M3.v2",
+   "seed": 4,
+   "J_proxy": 2.1280593872070312,
+   "J_signoff": 0.5161199122419344,
+   "J_gated": 0.5161199122419344,
+   "terms": {
+    "rwl": 1.1947767125635411,
+    "of": 1.051245989819147
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.M4.v0.s0.f1",
+   "program": "M4.v0",
+   "seed": 0,
+   "J_proxy": 2.1808547973632812,
+   "J_signoff": 0.5228857482098082,
+   "J_gated": 0.5228857482098082,
+   "terms": {
+    "rwl": 1.2169870176926305,
+    "of": 1.051930952680127
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.M4.v1.s0.f1",
+   "program": "M4.v1",
+   "seed": 0,
+   "J_proxy": 2.0929670333862305,
+   "J_signoff": 0.5303835364412081,
+   "J_gated": 0.5303835364412081,
+   "terms": {
+    "rwl": 1.2412800970983202,
+    "of": 1.053330048744747
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.M4.v2.s0.f1",
+   "program": "M4.v2",
+   "seed": 0,
+   "J_proxy": 2.109537124633789,
+   "J_signoff": 0.5147704034138898,
+   "J_gated": 0.5147704034138898,
+   "terms": {
+    "rwl": 1.1872563983378632,
+    "of": 1.0572898927502055
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.M5.v0.s0.f1",
+   "program": "M5.v0",
+   "seed": 0,
+   "J_proxy": 2.1299588680267334,
+   "J_signoff": 0.5349896902092532,
+   "J_gated": 0.5349896902092532,
+   "terms": {
+    "rwl": 1.2687444368982121,
+    "of": 1.0291090609319313
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.M5.v1.s0.f1",
+   "program": "M5.v1",
+   "seed": 0,
+   "J_proxy": 2.129955768585205,
+   "J_signoff": 0.535793445477758,
+   "J_gated": 0.535793445477758,
+   "terms": {
+    "rwl": 1.270247564142856,
+    "of": 1.0314611748993412
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.M6.v0.s0.f1",
+   "program": "M6.v0",
+   "seed": 0,
+   "J_proxy": 2.0337133407592773,
+   "J_signoff": 0.48909406406899936,
+   "J_gated": 0.48909406406899936,
+   "terms": {
+    "rwl": 1.1275883706559964,
+    "of": 1.005450352481336
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.M6.v1.s0.f1",
+   "program": "M6.v1",
+   "seed": 0,
+   "J_proxy": 2.096245527267456,
+   "J_signoff": 0.4966631908328049,
+   "J_gated": 0.4966631908328049,
+   "terms": {
+    "rwl": 1.1611962035033134,
+    "of": 0.9886955318787394
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.M6.v2.s0.f1",
+   "program": "M6.v2",
+   "seed": 0,
+   "J_proxy": 2.057978868484497,
+   "J_signoff": 0.508272111691593,
+   "J_gated": 0.508272111691593,
+   "terms": {
+    "rwl": 1.1752473281163682,
+    "of": 1.0379860883778842
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.M7.v0.s0.f1",
+   "program": "M7.v0",
+   "seed": 0,
+   "J_proxy": 2.0232129096984863,
+   "J_signoff": 0.5854095477156421,
+   "J_gated": 0.5854095477156421,
+   "terms": {
+    "rwl": 1.4192574649224239,
+    "of": 1.0642153882594336
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.M7.v0.s1.f1",
+   "program": "M7.v0",
+   "seed": 1,
+   "J_proxy": 2.1680877208709717,
+   "J_signoff": 0.6173098926756998,
+   "J_gated": 0.6173098926756998,
+   "terms": {
+    "rwl": 1.5089742161262651,
+    "of": 1.0974508522521351
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.M7.v0.s2.f1",
+   "program": "M7.v0",
+   "seed": 2,
+   "J_proxy": 2.1664106845855713,
+   "J_signoff": 0.6192656166017568,
+   "J_gated": 0.6192656166017568,
+   "terms": {
+    "rwl": 1.5127019461766047,
+    "of": 1.1030335516585028
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.M7.v0.s3.f1",
+   "program": "M7.v0",
+   "seed": 3,
+   "J_proxy": 2.108711004257202,
+   "J_signoff": 0.6145553364990186,
+   "J_gated": 0.6145553364990186,
+   "terms": {
+    "rwl": 1.4959517204629862,
+    "of": 1.1051321357341517
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.M7.v0.s4.f1",
+   "program": "M7.v0",
+   "seed": 4,
+   "J_proxy": 2.029364824295044,
+   "J_signoff": 0.6283369655366291,
+   "J_gated": 0.6283369655366291,
+   "terms": {
+    "rwl": 1.5446929975831738,
+    "of": 1.09952710841118
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.M7.v1.s0.f1",
+   "program": "M7.v1",
+   "seed": 0,
+   "J_proxy": 2.1377692222595215,
+   "J_signoff": 0.604988109469544,
+   "J_gated": 0.604988109469544,
+   "terms": {
+    "rwl": 1.4722947430734732,
+    "of": 1.088664576983347
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.M7.v1.s1.f1",
+   "program": "M7.v1",
+   "seed": 1,
+   "J_proxy": 2.24271559715271,
+   "J_signoff": 0.6042159236548323,
+   "J_gated": 0.6042159236548323,
+   "terms": {
+    "rwl": 1.4663068999260451,
+    "of": 1.095492357846792
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.M7.v1.s2.f1",
+   "program": "M7.v1",
+   "seed": 2,
+   "J_proxy": 2.0859508514404297,
+   "J_signoff": 0.5997137389827834,
+   "J_gated": 0.5997137389827834,
+   "terms": {
+    "rwl": 1.459966930775345,
+    "of": 1.0781577316678663
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.M7.v1.s3.f1",
+   "program": "M7.v1",
+   "seed": 3,
+   "J_proxy": 2.1653528213500977,
+   "J_signoff": 0.5980096760770757,
+   "J_gated": 0.5980096760770757,
+   "terms": {
+    "rwl": 1.4522799095529488,
+    "of": 1.0821713547412741
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.M7.v1.s4.f1",
+   "program": "M7.v1",
+   "seed": 4,
+   "J_proxy": 2.1479148864746094,
+   "J_signoff": 0.617490861650031,
+   "J_gated": 0.617490861650031,
+   "terms": {
+    "rwl": 1.5092084352039248,
+    "of": 1.0981888739256902
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls0.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0338082313537598,
+   "J_signoff": 0.48901755588557305,
+   "J_gated": 0.48901755588557305,
+   "terms": {
+    "rwl": 1.1272947196834608,
+    "of": 1.005527599870232
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls0.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.03364896774292,
+   "J_signoff": 0.4887811442225356,
+   "J_gated": 0.4887811442225356,
+   "terms": {
+    "rwl": 1.1275010833828423,
+    "of": 1.0035387947178862
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls0.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.03371524810791,
+   "J_signoff": 0.48884207405749425,
+   "J_gated": 0.48884207405749425,
+   "terms": {
+    "rwl": 1.1268960262920749,
+    "of": 1.0051551077991454
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls0.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0337276458740234,
+   "J_signoff": 0.488960560236647,
+   "J_gated": 0.488960560236647,
+   "terms": {
+    "rwl": 1.1272446437935029,
+    "of": 1.0052477806573081
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls0.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0337135791778564,
+   "J_signoff": 0.48883746124795746,
+   "J_gated": 0.48883746124795746,
+   "terms": {
+    "rwl": 1.1269549265957624,
+    "of": 1.0050065551281915
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls0.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.033726215362549,
+   "J_signoff": 0.4890004736506744,
+   "J_gated": 0.4890004736506744,
+   "terms": {
+    "rwl": 1.12768862875415,
+    "of": 1.0046259001628626
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls1.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.033597469329834,
+   "J_signoff": 0.48862491468198216,
+   "J_gated": 0.48862491468198216,
+   "terms": {
+    "rwl": 1.1271295011420706,
+    "of": 1.0032404289290735
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls1.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0336484909057617,
+   "J_signoff": 0.4886101057865666,
+   "J_gated": 0.4886101057865666,
+   "terms": {
+    "rwl": 1.1270190364930972,
+    "of": 1.0033626322575833
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls1.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0336480140686035,
+   "J_signoff": 0.48872923106366783,
+   "J_gated": 0.48872923106366783,
+   "terms": {
+    "rwl": 1.1276054878922666,
+    "of": 1.0029838979732526
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls1.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0333197116851807,
+   "J_signoff": 0.4889880610988789,
+   "J_gated": 0.4889880610988789,
+   "terms": {
+    "rwl": 1.1280219364293487,
+    "of": 1.0038765344671619
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls1.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.033670425415039,
+   "J_signoff": 0.48879274265724293,
+   "J_gated": 0.48879274265724293,
+   "terms": {
+    "rwl": 1.127253893480183,
+    "of": 1.004110497421254
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls2.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.033661365509033,
+   "J_signoff": 0.48870337448440615,
+   "J_gated": 0.48870337448440615,
+   "terms": {
+    "rwl": 1.1271423656488326,
+    "of": 1.0037377652650425
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls2.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.03360652923584,
+   "J_signoff": 0.48863342872550675,
+   "J_gated": 0.48863342872550675,
+   "terms": {
+    "rwl": 1.1270514635555966,
+    "of": 1.0034532643921854
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls2.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0336544513702393,
+   "J_signoff": 0.48882990350100736,
+   "J_gated": 0.48882990350100736,
+   "terms": {
+    "rwl": 1.1276387655006674,
+    "of": 1.0035884923387144
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls2.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0336270332336426,
+   "J_signoff": 0.48861676320855,
+   "J_gated": 0.48861676320855,
+   "terms": {
+    "rwl": 1.1270226513131791,
+    "of": 1.003399785430642
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls2.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0335822105407715,
+   "J_signoff": 0.48856263421777524,
+   "J_gated": 0.48856263421777524,
+   "terms": {
+    "rwl": 1.1267406953467909,
+    "of": 1.0036028374249197
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls2.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.03365421295166,
+   "J_signoff": 0.48864266005604595,
+   "J_gated": 0.48864266005604595,
+   "terms": {
+    "rwl": 1.1269476969555985,
+    "of": 1.003722339795776
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls3.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0335841178894043,
+   "J_signoff": 0.4884850419818595,
+   "J_gated": 0.4884850419818595,
+   "terms": {
+    "rwl": 1.1265045625408527,
+    "of": 1.0035578214640246
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls3.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0336709022521973,
+   "J_signoff": 0.48853506291687027,
+   "J_gated": 0.48853506291687027,
+   "terms": {
+    "rwl": 1.1270174417195316,
+    "of": 1.002865536006739
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls3.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0329172611236572,
+   "J_signoff": 0.48991277989621923,
+   "J_gated": 0.48991277989621923,
+   "terms": {
+    "rwl": 1.1305304089297112,
+    "of": 1.0050243814487059
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls3.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.033756971359253,
+   "J_signoff": 0.48872483039228265,
+   "J_gated": 0.48872483039228265,
+   "terms": {
+    "rwl": 1.1277579482451325,
+    "of": 1.002649639458286
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls3.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.033634662628174,
+   "J_signoff": 0.4886934855779141,
+   "J_gated": 0.4886934855779141,
+   "terms": {
+    "rwl": 1.1267939607838802,
+    "of": 1.0043686489516672
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls3.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0335896015167236,
+   "J_signoff": 0.48862478824111755,
+   "J_gated": 0.48862478824111755,
+   "terms": {
+    "rwl": 1.127050931964408,
+    "of": 1.0033967243453012
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls4.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0335898399353027,
+   "J_signoff": 0.48884247131583336,
+   "J_gated": 0.48884247131583336,
+   "terms": {
+    "rwl": 1.1277531639244358,
+    "of": 1.003443480923351
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls4.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.033587694168091,
+   "J_signoff": 0.48845296482723133,
+   "J_gated": 0.48845296482723133,
+   "terms": {
+    "rwl": 1.126579623216671,
+    "of": 1.0031938524148674
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls4.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0336365699768066,
+   "J_signoff": 0.48853316738856256,
+   "J_gated": 0.48853316738856256,
+   "terms": {
+    "rwl": 1.1268392523531416,
+    "of": 1.003209277884134
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls4.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0336127281188965,
+   "J_signoff": 0.4887442696256372,
+   "J_gated": 0.4887442696256372,
+   "terms": {
+    "rwl": 1.1271904214922743,
+    "of": 1.0039142878530325
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls4.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0336055755615234,
+   "J_signoff": 0.4885017826530775,
+   "J_gated": 0.4885017826530775,
+   "terms": {
+    "rwl": 1.1265305041908522,
+    "of": 1.003617542638812
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls4.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0335893630981445,
+   "J_signoff": 0.48852968799002766,
+   "J_gated": 0.48852968799002766,
+   "terms": {
+    "rwl": 1.1268779521916654,
+    "of": 1.0031086822168538
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls5.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.03358793258667,
+   "J_signoff": 0.4883533785244741,
+   "J_gated": 0.4883533785244741,
+   "terms": {
+    "rwl": 1.1260995963734424,
+    "of": 1.0034899974162759
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls5.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0335769653320312,
+   "J_signoff": 0.4883958948416979,
+   "J_gated": 0.4883958948416979,
+   "terms": {
+    "rwl": 1.1264940370353203,
+    "of": 1.0029845582073456
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls5.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0335774421691895,
+   "J_signoff": 0.48832666222876486,
+   "J_gated": 0.48832666222876486,
+   "terms": {
+    "rwl": 1.1262205865279482,
+    "of": 1.0030699084692027
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls5.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0335772037506104,
+   "J_signoff": 0.48854557419411515,
+   "J_gated": 0.48854557419411515,
+   "terms": {
+    "rwl": 1.126987566294737,
+    "of": 1.0029953620379604
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls5.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0339889526367188,
+   "J_signoff": 0.4885336121294894,
+   "J_gated": 0.4885336121294894,
+   "terms": {
+    "rwl": 1.126946102182033,
+    "of": 1.0029985431658637
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls5.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.035377264022827,
+   "J_signoff": 0.4885884670290467,
+   "J_gated": 0.4885884670290467,
+   "terms": {
+    "rwl": 1.1268584959541659,
+    "of": 1.0035394549519794
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls6.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0335280895233154,
+   "J_signoff": 0.48861232038508895,
+   "J_gated": 0.48861232038508895,
+   "terms": {
+    "rwl": 1.1268732741892065,
+    "of": 1.0036689208555136
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls6.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0335590839385986,
+   "J_signoff": 0.48829646791554543,
+   "J_gated": 0.48829646791554543,
+   "terms": {
+    "rwl": 1.126074292632869,
+    "of": 1.003161200837898
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls6.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.033599615097046,
+   "J_signoff": 0.4883858921812404,
+   "J_gated": 0.4883858921812404,
+   "terms": {
+    "rwl": 1.126466606929993,
+    "of": 1.0029727340149506
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls6.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0336029529571533,
+   "J_signoff": 0.48845255924363085,
+   "J_gated": 0.48845255924363085,
+   "terms": {
+    "rwl": 1.1265745199412613,
+    "of": 1.0032013550750165
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls6.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.033601760864258,
+   "J_signoff": 0.4890398260693467,
+   "J_gated": 0.4890398260693467,
+   "terms": {
+    "rwl": 1.1281480298592643,
+    "of": 1.0039694474104495
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls6.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.033555269241333,
+   "J_signoff": 0.4885828689051571,
+   "J_gated": 0.4885828689051571,
+   "terms": {
+    "rwl": 1.1271890393551842,
+    "of": 1.0028410473240121
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls7.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.033586025238037,
+   "J_signoff": 0.48848260785727304,
+   "J_gated": 0.48848260785727304,
+   "terms": {
+    "rwl": 1.1267103946490455,
+    "of": 1.0031299297503962
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls7.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.033597707748413,
+   "J_signoff": 0.4882990014593091,
+   "J_gated": 0.4882990014593091,
+   "terms": {
+    "rwl": 1.1262297298963908,
+    "of": 1.0028672166026125
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls7.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0335617065429688,
+   "J_signoff": 0.4885360559952818,
+   "J_gated": 0.4885360559952818,
+   "terms": {
+    "rwl": 1.1269011295674847,
+    "of": 1.0031047808335762
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls7.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0335726737976074,
+   "J_signoff": 0.48851693959332054,
+   "J_gated": 0.48851693959332054,
+   "terms": {
+    "rwl": 1.1266052459119575,
+    "of": 1.003569105464889
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls7.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0335614681243896,
+   "J_signoff": 0.48831489516261656,
+   "J_gated": 0.48831489516261656,
+   "terms": {
+    "rwl": 1.1261957080603258,
+    "of": 1.0030412182967923
+   }
+  },
+  {
+   "design": "adaptec1",
+   "run_id": "adaptec1.ls7.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0336170196533203,
+   "J_signoff": 0.4883466677696561,
+   "J_gated": 0.4883466677696561,
+   "terms": {
+    "rwl": 1.1262779983763078,
+    "of": 1.0030884550450916
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.M2.v0.s0.f1",
+   "program": "M2.v0",
+   "seed": 0,
+   "J_proxy": 2.217144727706909,
+   "J_signoff": 0.6113998791359276,
+   "J_gated": 0.6113998791359276,
+   "terms": {
+    "rwl": 1.5120121911390976,
+    "of": 1.0519748119613224
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.M2.v0.s1.f1",
+   "program": "M2.v0",
+   "seed": 1,
+   "J_proxy": 2.114640235900879,
+   "J_signoff": 0.5894591614941421,
+   "J_gated": 0.5894591614941421,
+   "terms": {
+    "rwl": 1.427691050701602,
+    "of": 1.074345641891077
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.M2.v0.s2.f1",
+   "program": "M2.v0",
+   "seed": 2,
+   "J_proxy": 2.2609152793884277,
+   "J_signoff": 0.6113395116233419,
+   "J_gated": 0.6113395116233419,
+   "terms": {
+    "rwl": 1.5108505066678677,
+    "of": 1.0538957308198778
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.M2.v0.s3.f1",
+   "program": "M2.v0",
+   "seed": 3,
+   "J_proxy": 2.217815399169922,
+   "J_signoff": 0.59362137566911,
+   "J_gated": 0.59362137566911,
+   "terms": {
+    "rwl": 1.4463738244412727,
+    "of": 1.0647281889115214
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.M2.v0.s4.f1",
+   "program": "M2.v0",
+   "seed": 4,
+   "J_proxy": 2.132450819015503,
+   "J_signoff": 0.5460845190383429,
+   "J_gated": 0.5460845190383429,
+   "terms": {
+    "rwl": 1.293852670492847,
+    "of": 1.0528581192699251
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.M2.v1.s0.f1",
+   "program": "M2.v1",
+   "seed": 0,
+   "J_proxy": 2.2451303005218506,
+   "J_signoff": 0.5896285511807389,
+   "J_gated": 0.5896285511807389,
+   "terms": {
+    "rwl": 1.436596606265143,
+    "of": 1.0576637953413064
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.M2.v1.s1.f1",
+   "program": "M2.v1",
+   "seed": 1,
+   "J_proxy": 2.24678897857666,
+   "J_signoff": 0.5915792478548781,
+   "J_gated": 0.5915792478548781,
+   "terms": {
+    "rwl": 1.4382215910733316,
+    "of": 1.0674184702191913
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.M2.v1.s2.f1",
+   "program": "M2.v1",
+   "seed": 2,
+   "J_proxy": 2.247687339782715,
+   "J_signoff": 0.5981897162719669,
+   "J_gated": 0.5981897162719669,
+   "terms": {
+    "rwl": 1.4630879310821185,
+    "of": 1.061755579648876
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.M2.v1.s3.f1",
+   "program": "M2.v1",
+   "seed": 3,
+   "J_proxy": 2.2750775814056396,
+   "J_signoff": 0.6085392864331329,
+   "J_gated": 0.6085392864331329,
+   "terms": {
+    "rwl": 1.4934146991574195,
+    "of": 1.0700991779060474
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.M2.v1.s4.f1",
+   "program": "M2.v1",
+   "seed": 4,
+   "J_proxy": 2.202638626098633,
+   "J_signoff": 0.5647858244512471,
+   "J_gated": 0.5647858244512471,
+   "terms": {
+    "rwl": 1.3519943873743392,
+    "of": 1.0612500549263029
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.M3.v0.s0.f1",
+   "program": "M3.v0",
+   "seed": 0,
+   "J_proxy": 2.4128239154815674,
+   "J_signoff": 0.6241779809150164,
+   "J_gated": 0.6241779809150164,
+   "terms": {
+    "rwl": 1.523281680376428,
+    "of": 1.1146231786805871
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.M3.v0.s1.f1",
+   "program": "M3.v0",
+   "seed": 1,
+   "J_proxy": 2.388558864593506,
+   "J_signoff": 0.6178415941236093,
+   "J_gated": 0.6178415941236093,
+   "terms": {
+    "rwl": 1.5031850500758832,
+    "of": 1.1125738606722955
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.M3.v0.s2.f1",
+   "program": "M3.v0",
+   "seed": 2,
+   "J_proxy": 2.359849691390991,
+   "J_signoff": 0.6189921588421055,
+   "J_gated": 0.6189921588421055,
+   "terms": {
+    "rwl": 1.5110760082451808,
+    "of": 1.1044623757903418
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.M3.v0.s3.f1",
+   "program": "M3.v0",
+   "seed": 3,
+   "J_proxy": 2.3728983402252197,
+   "J_signoff": 0.6290611155886382,
+   "J_gated": 0.6290611155886382,
+   "terms": {
+    "rwl": 1.5381839489191016,
+    "of": 1.1173728727527183
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.M3.v0.s4.f1",
+   "program": "M3.v0",
+   "seed": 4,
+   "J_proxy": 2.381136655807495,
+   "J_signoff": 0.6154256608759892,
+   "J_gated": 0.6154256608759892,
+   "terms": {
+    "rwl": 1.4928028744104738,
+    "of": 1.1172319903523131
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.M3.v1.s0.f1",
+   "program": "M3.v1",
+   "seed": 0,
+   "J_proxy": 2.3520774841308594,
+   "J_signoff": 0.6020375007465014,
+   "J_gated": 0.6020375007465014,
+   "terms": {
+    "rwl": 1.4543332954835644,
+    "of": 1.104916747342881
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.M3.v1.s1.f1",
+   "program": "M3.v1",
+   "seed": 1,
+   "J_proxy": 2.370347023010254,
+   "J_signoff": 0.608311832843495,
+   "J_gated": 0.608311832843495,
+   "terms": {
+    "rwl": 1.4772092486948618,
+    "of": 1.1009937215669094
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.M3.v1.s2.f1",
+   "program": "M3.v1",
+   "seed": 2,
+   "J_proxy": 2.300992727279663,
+   "J_signoff": 0.584375768838058,
+   "J_gated": 0.584375768838058,
+   "terms": {
+    "rwl": 1.3978103349672615,
+    "of": 1.100217788985864
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.M3.v1.s3.f1",
+   "program": "M3.v1",
+   "seed": 3,
+   "J_proxy": 2.3528707027435303,
+   "J_signoff": 0.5802333498682618,
+   "J_gated": 0.5802333498682618,
+   "terms": {
+    "rwl": 1.3954864869138017,
+    "of": 1.0772493586274752
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.M3.v1.s4.f1",
+   "program": "M3.v1",
+   "seed": 4,
+   "J_proxy": 2.3713812828063965,
+   "J_signoff": 0.6129074977264308,
+   "J_gated": 0.6129074977264308,
+   "terms": {
+    "rwl": 1.49142383324893,
+    "of": 1.1032023183450128
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.M3.v2.s0.f1",
+   "program": "M3.v2",
+   "seed": 0,
+   "J_proxy": 2.2516095638275146,
+   "J_signoff": 0.5526617540986509,
+   "J_gated": 0.5526617540986509,
+   "terms": {
+    "rwl": 1.3163806294145088,
+    "of": 1.0516504351619884
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.M3.v2.s1.f1",
+   "program": "M3.v2",
+   "seed": 1,
+   "J_proxy": 2.222386598587036,
+   "J_signoff": 0.5516982416006382,
+   "J_gated": 0.5516982416006382,
+   "terms": {
+    "rwl": 1.2988905226573988,
+    "of": 1.08020723202279
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.M3.v2.s2.f1",
+   "program": "M3.v2",
+   "seed": 2,
+   "J_proxy": 2.284113645553589,
+   "J_signoff": 0.5550081702018803,
+   "J_gated": 0.5550081702018803,
+   "terms": {
+    "rwl": 1.319049437387938,
+    "of": 1.0619555932366596
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.M3.v2.s3.f1",
+   "program": "M3.v2",
+   "seed": 3,
+   "J_proxy": 2.174630641937256,
+   "J_signoff": 0.5352231322683569,
+   "J_gated": 0.5352231322683569,
+   "terms": {
+    "rwl": 1.2565618643294993,
+    "of": 1.0550304864633808
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.M3.v2.s4.f1",
+   "program": "M3.v2",
+   "seed": 4,
+   "J_proxy": 2.2380266189575195,
+   "J_signoff": 0.5704487400998003,
+   "J_gated": 0.5704487400998003,
+   "terms": {
+    "rwl": 1.366775281130357,
+    "of": 1.0694410384046211
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.M4.v0.s0.f1",
+   "program": "M4.v0",
+   "seed": 0,
+   "J_proxy": 2.3629868030548096,
+   "J_signoff": 0.544811698709939,
+   "J_gated": 0.544811698709939,
+   "terms": {
+    "rwl": 1.2762541249460801,
+    "of": 1.0795697415074323
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.M4.v1.s0.f1",
+   "program": "M4.v1",
+   "seed": 0,
+   "J_proxy": 2.529006004333496,
+   "J_signoff": 0.58871979103931,
+   "J_gated": 0.58871979103931,
+   "terms": {
+    "rwl": 1.4252865522964828,
+    "of": 1.0742255023357683
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.M4.v2.s0.f1",
+   "program": "M4.v2",
+   "seed": 0,
+   "J_proxy": 2.2247817516326904,
+   "J_signoff": 0.5272758135121587,
+   "J_gated": 0.5272758135121587,
+   "terms": {
+    "rwl": 1.229290786360093,
+    "of": 1.0565905173608716
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.M5.v0.s0.f1",
+   "program": "M5.v0",
+   "seed": 0,
+   "J_proxy": 2.1927378177642822,
+   "J_signoff": 0.5491485210417384,
+   "J_gated": 0.5491485210417384,
+   "terms": {
+    "rwl": 1.3205693371834692,
+    "of": 1.0198514659113171
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.M6.v0.s0.f1",
+   "program": "M6.v0",
+   "seed": 0,
+   "J_proxy": 2.0708823204040527,
+   "J_signoff": 0.5064638360110647,
+   "J_gated": 0.5064638360110647,
+   "terms": {
+    "rwl": 1.1421576636120145,
+    "of": 1.0921102461830687
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.M6.v1.s0.f1",
+   "program": "M6.v1",
+   "seed": 0,
+   "J_proxy": 2.1333870887756348,
+   "J_signoff": 0.544219991957537,
+   "J_gated": 0.544219991957537,
+   "terms": {
+    "rwl": 1.3036277326694772,
+    "of": 1.0208778143779595
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.M6.v2.s0.f1",
+   "program": "M6.v2",
+   "seed": 0,
+   "J_proxy": 2.0775303840637207,
+   "J_signoff": 0.5151495893757326,
+   "J_gated": 0.5151495893757326,
+   "terms": {
+    "rwl": 1.16696611104164,
+    "of": 1.1003983737549374
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.M7.v0.s0.f1",
+   "program": "M7.v0",
+   "seed": 0,
+   "J_proxy": 2.4322781562805176,
+   "J_signoff": 0.6624393427469908,
+   "J_gated": 0.6624393427469908,
+   "terms": {
+    "rwl": 1.670502589035992,
+    "of": 1.0752571069079553
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.M7.v0.s1.f1",
+   "program": "M7.v0",
+   "seed": 1,
+   "J_proxy": 2.4360287189483643,
+   "J_signoff": 0.7240464989590755,
+   "J_gated": 0.7240464989590755,
+   "terms": {
+    "rwl": 1.8641680389204225,
+    "of": 1.098640581886325
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.M7.v0.s2.f1",
+   "program": "M7.v0",
+   "seed": 2,
+   "J_proxy": 2.4918315410614014,
+   "J_signoff": 0.6841403576356433,
+   "J_gated": 0.6841403576356433,
+   "terms": {
+    "rwl": 1.7317760948205385,
+    "of": 1.0973835279298787
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.M7.v0.s3.f1",
+   "program": "M7.v0",
+   "seed": 3,
+   "J_proxy": 2.3879635334014893,
+   "J_signoff": 0.6440665077162504,
+   "J_gated": 0.6440665077162504,
+   "terms": {
+    "rwl": 1.60093774798985,
+    "of": 1.0919012221286368
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.M7.v0.s4.f1",
+   "program": "M7.v0",
+   "seed": 4,
+   "J_proxy": 2.5302135944366455,
+   "J_signoff": 0.6787670140062358,
+   "J_gated": 0.6787670140062358,
+   "terms": {
+    "rwl": 1.7164130811995726,
+    "of": 1.0922872643090942
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.M7.v1.s0.f1",
+   "program": "M7.v1",
+   "seed": 0,
+   "J_proxy": 2.461107015609741,
+   "J_signoff": 0.6697654288918632,
+   "J_gated": 0.6697654288918632,
+   "terms": {
+    "rwl": 1.6797360162271702,
+    "of": 1.105630826824748
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.M7.v1.s1.f1",
+   "program": "M7.v1",
+   "seed": 1,
+   "J_proxy": 2.4589691162109375,
+   "J_signoff": 0.6867395769879514,
+   "J_gated": 0.6867395769879514,
+   "terms": {
+    "rwl": 1.7318112296272021,
+    "of": 1.1146413873319387
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.M7.v1.s2.f1",
+   "program": "M7.v1",
+   "seed": 2,
+   "J_proxy": 2.5265440940856934,
+   "J_signoff": 0.7259469404671948,
+   "J_gated": 0.7259469404671948,
+   "terms": {
+    "rwl": 1.8619572610629525,
+    "of": 1.115731747655394
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.M7.v1.s3.f1",
+   "program": "M7.v1",
+   "seed": 3,
+   "J_proxy": 2.4389994144439697,
+   "J_signoff": 0.6540648533576473,
+   "J_gated": 0.6540648533576473,
+   "terms": {
+    "rwl": 1.630022340945928,
+    "of": 1.1003876738257927
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.M7.v1.s4.f1",
+   "program": "M7.v1",
+   "seed": 4,
+   "J_proxy": 2.47684645652771,
+   "J_signoff": 0.6846372623472428,
+   "J_gated": 0.6846372623472428,
+   "terms": {
+    "rwl": 1.7362002057941448,
+    "of": 1.091848004059996
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls0.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0707650184631348,
+   "J_signoff": 0.5055934291230793,
+   "J_gated": 0.5055934291230793,
+   "terms": {
+    "rwl": 1.13921336681361,
+    "of": 1.092196127193309
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls0.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.070906162261963,
+   "J_signoff": 0.5058839456748904,
+   "J_gated": 0.5058839456748904,
+   "terms": {
+    "rwl": 1.1401524243735264,
+    "of": 1.0922547890855496
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls0.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0708818435668945,
+   "J_signoff": 0.5059324997824264,
+   "J_gated": 0.5059324997824264,
+   "terms": {
+    "rwl": 1.1403472628468425,
+    "of": 1.0921888061891574
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls0.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.071129322052002,
+   "J_signoff": 0.5059393607639201,
+   "J_gated": 0.5059393607639201,
+   "terms": {
+    "rwl": 1.1403747318775066,
+    "of": 1.0921796080044541
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls0.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0772993564605713,
+   "J_signoff": 0.5055998957961036,
+   "J_gated": 0.5055998957961036,
+   "terms": {
+    "rwl": 1.1393973454375936,
+    "of": 1.0918712810988371
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls0.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.071070909500122,
+   "J_signoff": 0.5055769755422317,
+   "J_gated": 0.5055769755422317,
+   "terms": {
+    "rwl": 1.1392095339256103,
+    "of": 1.0920941024303241
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls1.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.071916341781616,
+   "J_signoff": 0.5063078997068904,
+   "J_gated": 0.5063078997068904,
+   "terms": {
+    "rwl": 1.141643976768227,
+    "of": 1.0920980445094826
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls1.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0710721015930176,
+   "J_signoff": 0.5058818779686791,
+   "J_gated": 0.5058818779686791,
+   "terms": {
+    "rwl": 1.1400130030725388,
+    "of": 1.0925198469794497
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls1.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.071143627166748,
+   "J_signoff": 0.5054845029495598,
+   "J_gated": 0.5054845029495598,
+   "terms": {
+    "rwl": 1.1389067357736373,
+    "of": 1.0920832147831243
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls1.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0714528560638428,
+   "J_signoff": 0.5054957820465409,
+   "J_gated": 0.5054957820465409,
+   "terms": {
+    "rwl": 1.1389139224386367,
+    "of": 1.0921440354329994
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls1.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0710792541503906,
+   "J_signoff": 0.5056777956828532,
+   "J_gated": 0.5056777956828532,
+   "terms": {
+    "rwl": 1.1395548931047463,
+    "of": 1.0920755183428623
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls2.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.07116436958313,
+   "J_signoff": 0.5096914374153285,
+   "J_gated": 0.5096914374153285,
+   "terms": {
+    "rwl": 1.152564832901255,
+    "of": 1.0928132502996806
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls2.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.070248603820801,
+   "J_signoff": 0.5052482472125981,
+   "J_gated": 0.5052482472125981,
+   "terms": {
+    "rwl": 1.1376677547277476,
+    "of": 1.0929861386284923
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls2.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0711426734924316,
+   "J_signoff": 0.5053297767586727,
+   "J_gated": 0.5053297767586727,
+   "terms": {
+    "rwl": 1.1385945151053318,
+    "of": 1.091676148180488
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls2.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.070477247238159,
+   "J_signoff": 0.5057944729963886,
+   "J_gated": 0.5057944729963886,
+   "terms": {
+    "rwl": 1.139618455164074,
+    "of": 1.0927262429811093
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls2.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0742595195770264,
+   "J_signoff": 0.5057582927863643,
+   "J_gated": 0.5057582927863643,
+   "terms": {
+    "rwl": 1.140228922429853,
+    "of": 1.0912641070493896
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls2.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0712149143218994,
+   "J_signoff": 0.5051422216464199,
+   "J_gated": 0.5051422216464199,
+   "terms": {
+    "rwl": 1.137801746104069,
+    "of": 1.092011318767994
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls3.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0712738037109375,
+   "J_signoff": 0.5059849049460533,
+   "J_gated": 0.5059849049460533,
+   "terms": {
+    "rwl": 1.14067465536348,
+    "of": 1.0918833889133956
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls3.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.071680784225464,
+   "J_signoff": 0.5105172560758391,
+   "J_gated": 0.5105172560758391,
+   "terms": {
+    "rwl": 1.1552196668038521,
+    "of": 1.093009040231223
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls3.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.06750750541687,
+   "J_signoff": 0.5057119678581949,
+   "J_gated": 0.5057119678581949,
+   "terms": {
+    "rwl": 1.1391155483177853,
+    "of": 1.0931820224190623
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls3.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0712668895721436,
+   "J_signoff": 0.5054463805228233,
+   "J_gated": 0.5054463805228233,
+   "terms": {
+    "rwl": 1.1387614054369837,
+    "of": 1.0921197259448547
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls3.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0715434551239014,
+   "J_signoff": 0.5054342245528262,
+   "J_gated": 0.5054342245528262,
+   "terms": {
+    "rwl": 1.1385825373303329,
+    "of": 1.0923964223581755
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls3.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0713562965393066,
+   "J_signoff": 0.5056689233832643,
+   "J_gated": 0.5056689233832643,
+   "terms": {
+    "rwl": 1.1393307490085995,
+    "of": 1.0924646578712298
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls4.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.07120418548584,
+   "J_signoff": 0.5073438044191668,
+   "J_gated": 0.5073438044191668,
+   "terms": {
+    "rwl": 1.144873983426273,
+    "of": 1.0925440626085667
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls4.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.071197509765625,
+   "J_signoff": 1.0104106239160013,
+   "J_gated": 1.0104106239160013,
+   "terms": {
+    "rwl": 2.7476428138061264,
+    "of": 1.2407851984944231
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls4.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0706570148468018,
+   "J_signoff": 0.505416136122053,
+   "J_gated": 0.505416136122053,
+   "terms": {
+    "rwl": 1.1387135741888212,
+    "of": 1.0920137591027113
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls4.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.071244716644287,
+   "J_signoff": 0.5043942599819092,
+   "J_gated": 0.5043942599819092,
+   "terms": {
+    "rwl": 1.1350928525103101,
+    "of": 1.0924426948587749
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls4.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0712342262268066,
+   "J_signoff": 0.5057510555996453,
+   "J_gated": 0.5057510555996453,
+   "terms": {
+    "rwl": 1.1397401493580632,
+    "of": 1.092193405281509
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls4.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.071575164794922,
+   "J_signoff": 0.5050755628995709,
+   "J_gated": 0.5050755628995709,
+   "terms": {
+    "rwl": 1.1376986573872447,
+    "of": 1.0917731045559833
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls5.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0714237689971924,
+   "J_signoff": 0.5059122980651347,
+   "J_gated": 0.5059122980651347,
+   "terms": {
+    "rwl": 1.1400649866160342,
+    "of": 1.092618680535497
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls5.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0712504386901855,
+   "J_signoff": 0.5047802124955291,
+   "J_gated": 0.5047802124955291,
+   "terms": {
+    "rwl": 1.136244954761541,
+    "of": 1.0927115071137785
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls5.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.071199417114258,
+   "J_signoff": 0.5042666177666623,
+   "J_gated": 0.5042666177666623,
+   "terms": {
+    "rwl": 1.1347876588033372,
+    "of": 1.0922021341710744
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls5.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.071254253387451,
+   "J_signoff": 0.5054722835295966,
+   "J_gated": 0.5054722835295966,
+   "terms": {
+    "rwl": 1.1387641203993166,
+    "of": 1.0922869827320114
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls5.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.077479839324951,
+   "J_signoff": 0.506206140595111,
+   "J_gated": 0.506206140595111,
+   "terms": {
+    "rwl": 1.1406243487084844,
+    "of": 1.093458906550438
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls5.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0713613033294678,
+   "J_signoff": 0.505546804288741,
+   "J_gated": 0.505546804288741,
+   "terms": {
+    "rwl": 1.1389575215396328,
+    "of": 1.092396985512341
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls6.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0712332725524902,
+   "J_signoff": 0.5049318597400734,
+   "J_gated": 0.5049318597400734,
+   "terms": {
+    "rwl": 1.1370961753047983,
+    "of": 1.0920200476575594
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls6.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.071221351623535,
+   "J_signoff": 0.5043387144527197,
+   "J_gated": 0.5043387144527197,
+   "terms": {
+    "rwl": 1.1350867837709773,
+    "of": 1.0920845288095105
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls6.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0708181858062744,
+   "J_signoff": 0.5045165557665733,
+   "J_gated": 0.5045165557665733,
+   "terms": {
+    "rwl": 1.1355994325409315,
+    "of": 1.0922448400286255
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls6.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0712549686431885,
+   "J_signoff": 0.5055125377728269,
+   "J_gated": 0.5055125377728269,
+   "terms": {
+    "rwl": 1.139605998278075,
+    "of": 1.090871588596029
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls6.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0712006092071533,
+   "J_signoff": 0.5045775741374913,
+   "J_gated": 0.5045775741374913,
+   "terms": {
+    "rwl": 1.1357010839247559,
+    "of": 1.09244832640043
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls6.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.071197986602783,
+   "J_signoff": 0.5049950012355984,
+   "J_gated": 0.5049950012355984,
+   "terms": {
+    "rwl": 1.1372240979417871,
+    "of": 1.0921851456870815
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls7.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0712029933929443,
+   "J_signoff": 0.5045514825486217,
+   "J_gated": 0.5045514825486217,
+   "terms": {
+    "rwl": 1.135682957558591,
+    "of": 1.0923106352069627
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls7.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0711312294006348,
+   "J_signoff": 0.5044796664064752,
+   "J_gated": 0.5044796664064752,
+   "terms": {
+    "rwl": 1.135594401875432,
+    "of": 1.0920089722923045
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls7.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0711050033569336,
+   "J_signoff": 0.5043031503051906,
+   "J_gated": 0.5043031503051906,
+   "terms": {
+    "rwl": 1.1349629335774882,
+    "of": 1.0920951348796275
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls7.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.071199417114258,
+   "J_signoff": 0.5045042164435718,
+   "J_gated": 0.5045042164435718,
+   "terms": {
+    "rwl": 1.1355396235177704,
+    "of": 1.0922821959216045
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls7.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.072293281555176,
+   "J_signoff": 0.5048923783552033,
+   "J_gated": 0.5048923783552033,
+   "terms": {
+    "rwl": 1.136599177494176,
+    "of": 1.0927508340463365
+   }
+  },
+  {
+   "design": "adaptec2",
+   "run_id": "adaptec2.ls7.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.070932149887085,
+   "J_signoff": 0.5043809063426,
+   "J_gated": 0.5043809063426,
+   "terms": {
+    "rwl": 1.1354124195472817,
+    "of": 1.0917145365227703
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.M3.v0.s0.f1",
+   "program": "M3.v0",
+   "seed": 0,
+   "J_proxy": 2.424595355987549,
+   "J_signoff": 0.5913268065398956,
+   "J_gated": 0.5913268065398956,
+   "terms": {
+    "rwl": 1.4873223733397383,
+    "of": 0.9675339635864938
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.M3.v0.s1.f1",
+   "program": "M3.v0",
+   "seed": 1,
+   "J_proxy": 2.4993045330047607,
+   "J_signoff": 0.6044056328144879,
+   "J_gated": 0.6044056328144879,
+   "terms": {
+    "rwl": 1.535765676462124,
+    "of": 0.9578395325056717
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.M3.v0.s2.f1",
+   "program": "M3.v0",
+   "seed": 2,
+   "J_proxy": 2.409038782119751,
+   "J_signoff": 0.5830133296391597,
+   "J_gated": 0.5830133296391597,
+   "terms": {
+    "rwl": 1.4610861243217723,
+    "of": 0.9645832822841875
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.M3.v0.s3.f1",
+   "program": "M3.v0",
+   "seed": 3,
+   "J_proxy": 2.437377691268921,
+   "J_signoff": 0.5958557254842912,
+   "J_gated": 0.5958557254842912,
+   "terms": {
+    "rwl": 1.504035245598087,
+    "of": 0.9643010120324341
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.M3.v0.s4.f1",
+   "program": "M3.v0",
+   "seed": 4,
+   "J_proxy": 2.3999886512756348,
+   "J_signoff": 0.5824549707786624,
+   "J_gated": 0.5824549707786624,
+   "terms": {
+    "rwl": 1.4584162898212178,
+    "of": 0.9662005588819803
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.M3.v1.s0.f1",
+   "program": "M3.v1",
+   "seed": 0,
+   "J_proxy": 2.4186835289001465,
+   "J_signoff": 0.5592397849755275,
+   "J_gated": 0.5592397849755275,
+   "terms": {
+    "rwl": 1.387173526500035,
+    "of": 0.9539181801701135
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.M3.v1.s1.f1",
+   "program": "M3.v1",
+   "seed": 1,
+   "J_proxy": 2.4413628578186035,
+   "J_signoff": 0.5699975829169134,
+   "J_gated": 0.5699975829169134,
+   "terms": {
+    "rwl": 1.4260828741825464,
+    "of": 0.9478181377476632
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.M3.v1.s2.f1",
+   "program": "M3.v1",
+   "seed": 2,
+   "J_proxy": 2.4579925537109375,
+   "J_signoff": 0.5705672048694873,
+   "J_gated": 0.5705672048694873,
+   "terms": {
+    "rwl": 1.424552652055105,
+    "of": 0.9546760616863722
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.M3.v1.s3.f1",
+   "program": "M3.v1",
+   "seed": 3,
+   "J_proxy": 2.4275243282318115,
+   "J_signoff": 0.5627982671849587,
+   "J_gated": 0.5627982671849587,
+   "terms": {
+    "rwl": 1.3995579554199988,
+    "of": 0.9528725370597274
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.M3.v1.s4.f1",
+   "program": "M3.v1",
+   "seed": 4,
+   "J_proxy": 2.412020683288574,
+   "J_signoff": 0.564900038283404,
+   "J_gated": 0.564900038283404,
+   "terms": {
+    "rwl": 1.4021639972729445,
+    "of": 0.9616722606768048
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.M3.v2.s0.f1",
+   "program": "M3.v2",
+   "seed": 0,
+   "J_proxy": 2.434725046157837,
+   "J_signoff": 0.5503701441843228,
+   "J_gated": 0.5503701441843228,
+   "terms": {
+    "rwl": 1.3608414282276216,
+    "of": 0.9474514381069092
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.M3.v2.s1.f1",
+   "program": "M3.v2",
+   "seed": 1,
+   "J_proxy": 2.4370789527893066,
+   "J_signoff": 0.5451784693513957,
+   "J_gated": 0.5451784693513957,
+   "terms": {
+    "rwl": 1.3521233134317905,
+    "of": 0.9302765021457238
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.M3.v2.s2.f1",
+   "program": "M3.v2",
+   "seed": 2,
+   "J_proxy": 2.4826810359954834,
+   "J_signoff": 0.5581890180956232,
+   "J_gated": 0.5581890180956232,
+   "terms": {
+    "rwl": 1.3917149859908622,
+    "of": 0.9378301486557633
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.M3.v2.s3.f1",
+   "program": "M3.v2",
+   "seed": 3,
+   "J_proxy": 2.4084815979003906,
+   "J_signoff": 0.5448503359058365,
+   "J_gated": 0.5448503359058365,
+   "terms": {
+    "rwl": 1.3451591758791344,
+    "of": 0.9420172209473088
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.M3.v2.s4.f1",
+   "program": "M3.v2",
+   "seed": 4,
+   "J_proxy": 2.460359811782837,
+   "J_signoff": 0.5552300372527923,
+   "J_gated": 0.5552300372527923,
+   "terms": {
+    "rwl": 1.3793823284909426,
+    "of": 0.9427689247033967
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.M4.v0.s0.f1",
+   "program": "M4.v0",
+   "seed": 0,
+   "J_proxy": 2.332561731338501,
+   "J_signoff": 0.538189895050511,
+   "J_gated": 0.538189895050511,
+   "terms": {
+    "rwl": 1.3249441994651836,
+    "of": 0.938044234739706
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.M4.v1.s0.f1",
+   "program": "M4.v1",
+   "seed": 0,
+   "J_proxy": 2.430039644241333,
+   "J_signoff": 0.5564266084250713,
+   "J_gated": 0.5564266084250713,
+   "terms": {
+    "rwl": 1.3434520814234607,
+    "of": 1.0226065599868872
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.M4.v2.s0.f1",
+   "program": "M4.v2",
+   "seed": 0,
+   "J_proxy": 2.402463436126709,
+   "J_signoff": 0.549904847022948,
+   "J_gated": 0.549904847022948,
+   "terms": {
+    "rwl": 1.3600303960746043,
+    "of": 0.9459715213371112
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.M5.v0.s0.f1",
+   "program": "M5.v0",
+   "seed": 0,
+   "J_proxy": 2.240621328353882,
+   "J_signoff": 0.49819084364035604,
+   "J_gated": 0.49819084364035604,
+   "terms": {
+    "rwl": 1.1531760043154604,
+    "of": 1.0149202823047863
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.M6.v0.s0.f1",
+   "program": "M6.v0",
+   "seed": 0,
+   "J_proxy": 2.2493603229522705,
+   "J_signoff": 0.4804647345153741,
+   "J_gated": 0.4804647345153741,
+   "terms": {
+    "rwl": 1.1021164012259408,
+    "of": 0.9988654276506124
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.M6.v1.s0.f1",
+   "program": "M6.v1",
+   "seed": 0,
+   "J_proxy": 2.245342493057251,
+   "J_signoff": 0.504542050957846,
+   "J_gated": 0.504542050957846,
+   "terms": {
+    "rwl": 1.1713959378028098,
+    "of": 1.0208217974466869
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.M6.v2.s0.f1",
+   "program": "M6.v2",
+   "seed": 0,
+   "J_proxy": 2.2861342430114746,
+   "J_signoff": 0.49613605862427596,
+   "J_gated": 0.49613605862427596,
+   "terms": {
+    "rwl": 1.1565736039327685,
+    "of": 0.9944265162963029
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.M7.v0.s0.f1",
+   "program": "M7.v0",
+   "seed": 0,
+   "J_proxy": 2.396054983139038,
+   "J_signoff": 0.6122873915157018,
+   "J_gated": 0.6122873915157018,
+   "terms": {
+    "rwl": 1.5292184350814042,
+    "of": 1.0234790732752035
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.M7.v0.s1.f1",
+   "program": "M7.v0",
+   "seed": 1,
+   "J_proxy": 2.4311888217926025,
+   "J_signoff": 0.6382416863763444,
+   "J_gated": 0.6382416863763444,
+   "terms": {
+    "rwl": 1.614137668861182,
+    "of": 1.0266692381199323
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.M7.v0.s2.f1",
+   "program": "M7.v0",
+   "seed": 2,
+   "J_proxy": 2.385173797607422,
+   "J_signoff": 0.6126594220672269,
+   "J_gated": 0.6126594220672269,
+   "terms": {
+    "rwl": 1.5282780545197931,
+    "of": 1.0278400380752597
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.M7.v0.s3.f1",
+   "program": "M7.v0",
+   "seed": 3,
+   "J_proxy": 2.3933398723602295,
+   "J_signoff": 0.6443921427783014,
+   "J_gated": 0.6443921427783014,
+   "terms": {
+    "rwl": 1.632830517440918,
+    "of": 1.0302865836401733
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.M7.v0.s4.f1",
+   "program": "M7.v0",
+   "seed": 4,
+   "J_proxy": 2.3971974849700928,
+   "J_signoff": 0.6067129096590016,
+   "J_gated": 0.6067129096590016,
+   "terms": {
+    "rwl": 1.5079815741829552,
+    "of": 1.0287895826941005
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.M7.v1.s0.f1",
+   "program": "M7.v1",
+   "seed": 0,
+   "J_proxy": 2.454099178314209,
+   "J_signoff": 0.64621806002673,
+   "J_gated": 0.64621806002673,
+   "terms": {
+    "rwl": 1.6378595579217605,
+    "of": 1.0324012843346793
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.M7.v1.s1.f1",
+   "program": "M7.v1",
+   "seed": 1,
+   "J_proxy": 2.373800754547119,
+   "J_signoff": 0.6117346111707012,
+   "J_gated": 0.6117346111707012,
+   "terms": {
+    "rwl": 1.5230122759974474,
+    "of": 1.0322061891431134
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.M7.v1.s2.f1",
+   "program": "M7.v1",
+   "seed": 2,
+   "J_proxy": 2.437495708465576,
+   "J_signoff": 0.6384186502238727,
+   "J_gated": 0.6384186502238727,
+   "terms": {
+    "rwl": 1.615837791004868,
+    "of": 1.0244487528160824
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.M7.v1.s3.f1",
+   "program": "M7.v1",
+   "seed": 3,
+   "J_proxy": 2.4401514530181885,
+   "J_signoff": 0.6520762889262351,
+   "J_gated": 0.6520762889262351,
+   "terms": {
+    "rwl": 1.659796695396599,
+    "of": 1.0275818687150367
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.M7.v1.s4.f1",
+   "program": "M7.v1",
+   "seed": 4,
+   "J_proxy": 2.4217333793640137,
+   "J_signoff": 0.6206128543518128,
+   "J_gated": 0.6206128543518128,
+   "terms": {
+    "rwl": 1.563593375726593,
+    "of": 1.0102322775588997
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls0.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.2493655681610107,
+   "J_signoff": 0.4800042587923051,
+   "J_gated": 0.4800042587923051,
+   "terms": {
+    "rwl": 1.1005158148464884,
+    "of": 0.9989967622557243
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls0.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.2492852210998535,
+   "J_signoff": 0.4793332908596228,
+   "J_gated": 0.4793332908596228,
+   "terms": {
+    "rwl": 1.098339812374283,
+    "of": 0.9988756476489196
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls0.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.2493603229522705,
+   "J_signoff": 0.4804647345153741,
+   "J_gated": 0.4804647345153741,
+   "terms": {
+    "rwl": 1.1021164012259408,
+    "of": 0.9988654276506124
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls0.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.2493691444396973,
+   "J_signoff": 0.4791711884209006,
+   "J_gated": 0.4791711884209006,
+   "terms": {
+    "rwl": 1.0976032316906486,
+    "of": 0.9992681260913738
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls0.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.2493605613708496,
+   "J_signoff": 0.4792218223387082,
+   "J_gated": 0.4792218223387082,
+   "terms": {
+    "rwl": 1.0978257045421087,
+    "of": 0.9991607398405041
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls0.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.248568296432495,
+   "J_signoff": 0.48442132138027455,
+   "J_gated": 0.48442132138027455,
+   "terms": {
+    "rwl": 1.1154394475941396,
+    "of": 0.9985965806802177
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls1.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.2499492168426514,
+   "J_signoff": 0.47972930708025857,
+   "J_gated": 0.47972930708025857,
+   "terms": {
+    "rwl": 1.0996922806168044,
+    "of": 0.9988108193014485
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls1.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.2493700981140137,
+   "J_signoff": 0.48384401671107047,
+   "J_gated": 0.48384401671107047,
+   "terms": {
+    "rwl": 1.113362980886168,
+    "of": 0.9989008163014672
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls1.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.2504403591156006,
+   "J_signoff": 0.48496108996642284,
+   "J_gated": 0.48496108996642284,
+   "terms": {
+    "rwl": 1.1170613516171397,
+    "of": 0.9989512298752065
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls1.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.249471426010132,
+   "J_signoff": 0.48497823109166466,
+   "J_gated": 0.48497823109166466,
+   "terms": {
+    "rwl": 1.1170876380347472,
+    "of": 0.9990129312082701
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls1.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.249366044998169,
+   "J_signoff": 0.47900982980319967,
+   "J_gated": 0.47900982980319967,
+   "terms": {
+    "rwl": 1.0971554810346302,
+    "of": 0.9990879032854042
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls1.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.2494962215423584,
+   "J_signoff": 0.48280077565341306,
+   "J_gated": 0.48280077565341306,
+   "terms": {
+    "rwl": 1.109813513093962,
+    "of": 0.999044811501497
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls2.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.249387502670288,
+   "J_signoff": 0.4790761613485955,
+   "J_gated": 0.4790761613485955,
+   "terms": {
+    "rwl": 1.097338604401196,
+    "of": 0.9991638668549115
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls2.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.2494118213653564,
+   "J_signoff": 0.4789628129751361,
+   "J_gated": 0.4789628129751361,
+   "terms": {
+    "rwl": 1.096952081864239,
+    "of": 0.9991812561057626
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls2.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.2493650913238525,
+   "J_signoff": 0.4847449207612403,
+   "J_gated": 0.4847449207612403,
+   "terms": {
+    "rwl": 1.1163508169265617,
+    "of": 0.9989311712218124
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls2.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.2499611377716064,
+   "J_signoff": 0.47844742995979783,
+   "J_gated": 0.47844742995979783,
+   "terms": {
+    "rwl": 1.095085986638646,
+    "of": 0.9994775597880273
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls2.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.2511332035064697,
+   "J_signoff": 0.4858333819100953,
+   "J_gated": 0.4858333819100953,
+   "terms": {
+    "rwl": 1.1200752336505895,
+    "of": 0.9987387454327895
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls2.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.2493748664855957,
+   "J_signoff": 0.4790567526566345,
+   "J_gated": 0.4790567526566345,
+   "terms": {
+    "rwl": 1.0972655954791208,
+    "of": 0.9991804934193217
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls3.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.250092029571533,
+   "J_signoff": 0.48402958623727965,
+   "J_gated": 0.48402958623727965,
+   "terms": {
+    "rwl": 1.113933267921827,
+    "of": 0.998997372404877
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls3.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.2499148845672607,
+   "J_signoff": 0.4839824064140338,
+   "J_gated": 0.4839824064140338,
+   "terms": {
+    "rwl": 1.1136760136519472,
+    "of": 0.9991973487896643
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls3.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.2454187870025635,
+   "J_signoff": 0.4822690326423398,
+   "J_gated": 0.4822690326423398,
+   "terms": {
+    "rwl": 1.1069791480588083,
+    "of": 1.0011685881646488
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls3.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.249868154525757,
+   "J_signoff": 0.4838101270192492,
+   "J_gated": 0.4838101270192492,
+   "terms": {
+    "rwl": 1.1132854038976185,
+    "of": 0.9988300389997576
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls3.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.249957799911499,
+   "J_signoff": 0.4826183039455397,
+   "J_gated": 0.4826183039455397,
+   "terms": {
+    "rwl": 1.1092422643600977,
+    "of": 0.9989708309167359
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls3.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.249859094619751,
+   "J_signoff": 0.4838091657108825,
+   "J_gated": 0.4838091657108825,
+   "terms": {
+    "rwl": 1.1132222523821464,
+    "of": 0.998949933308257
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls4.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.2499632835388184,
+   "J_signoff": 0.47846374842595685,
+   "J_gated": 0.47846374842595685,
+   "terms": {
+    "rwl": 1.0951683721182213,
+    "of": 0.99942157860327
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls4.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.249967575073242,
+   "J_signoff": 0.4783811366805144,
+   "J_gated": 0.4783811366805144,
+   "terms": {
+    "rwl": 1.0948794619490883,
+    "of": 0.9994486539719196
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls4.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.2499446868896484,
+   "J_signoff": 0.47846966229622534,
+   "J_gated": 0.47846966229622534,
+   "terms": {
+    "rwl": 1.0952574894852325,
+    "of": 0.9992827696710378
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls4.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.2502894401550293,
+   "J_signoff": 0.47860401513171713,
+   "J_gated": 0.47860401513171713,
+   "terms": {
+    "rwl": 1.0955003984235523,
+    "of": 0.9996926373643431
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls4.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.249972343444824,
+   "J_signoff": 0.47841548179454074,
+   "J_gated": 0.47841548179454074,
+   "terms": {
+    "rwl": 1.0950397449832814,
+    "of": 0.9993570553303752
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls5.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.249967575073242,
+   "J_signoff": 0.4836907338949725,
+   "J_gated": 0.4836907338949725,
+   "terms": {
+    "rwl": 1.1128693892823704,
+    "of": 0.9988661140684092
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls5.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.2499544620513916,
+   "J_signoff": 0.4839088952468691,
+   "J_gated": 0.4839088952468691,
+   "terms": {
+    "rwl": 1.1135508326022423,
+    "of": 0.9989576364413094
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls5.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.249919891357422,
+   "J_signoff": 0.48400894686331275,
+   "J_gated": 0.48400894686331275,
+   "terms": {
+    "rwl": 1.1137793160674847,
+    "of": 0.9991676802871157
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls5.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.249967575073242,
+   "J_signoff": 0.48400256597776026,
+   "J_gated": 0.48400256597776026,
+   "terms": {
+    "rwl": 1.1137250602604103,
+    "of": 0.999233652664248
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls5.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.2491064071655273,
+   "J_signoff": 0.48500346672447747,
+   "J_gated": 0.48500346672447747,
+   "terms": {
+    "rwl": 1.1168539453708937,
+    "of": 0.9996485540880627
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls5.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.2499258518218994,
+   "J_signoff": 0.4840269601072156,
+   "J_gated": 0.4840269601072156,
+   "terms": {
+    "rwl": 1.1140180576469152,
+    "of": 0.99881028542094
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls6.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.249967336654663,
+   "J_signoff": 0.4837877770423905,
+   "J_gated": 0.4837877770423905,
+   "terms": {
+    "rwl": 1.1131507661488964,
+    "of": 0.9989503146514774
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls6.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.249952793121338,
+   "J_signoff": 0.48429099600966635,
+   "J_gated": 0.48429099600966635,
+   "terms": {
+    "rwl": 1.1148028033823247,
+    "of": 0.9990010332997931
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls6.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.2501258850097656,
+   "J_signoff": 0.4842331450423883,
+   "J_gated": 0.4842331450423883,
+   "terms": {
+    "rwl": 1.1145986027967627,
+    "of": 0.9990237613557299
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls6.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.2499701976776123,
+   "J_signoff": 0.48401443379870646,
+   "J_gated": 0.48401443379870646,
+   "terms": {
+    "rwl": 1.1139960187297138,
+    "of": 0.9987708545319487
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls6.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.249976873397827,
+   "J_signoff": 0.4841187653398723,
+   "J_gated": 0.4841187653398723,
+   "terms": {
+    "rwl": 1.1142198539869643,
+    "of": 0.9990187276252204
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls6.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.249986171722412,
+   "J_signoff": 0.4840964913947544,
+   "J_gated": 0.4840964913947544,
+   "terms": {
+    "rwl": 1.114303521730813,
+    "of": 0.9987028991700703
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls7.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.2499663829803467,
+   "J_signoff": 0.48378608654991717,
+   "J_gated": 0.48378608654991717,
+   "terms": {
+    "rwl": 1.1130033858989559,
+    "of": 0.9992338052015362
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls7.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.250927686691284,
+   "J_signoff": 0.47936431935498613,
+   "J_gated": 0.47936431935498613,
+   "terms": {
+    "rwl": 1.097846781761105,
+    "of": 1.000068565511031
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls7.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.249725341796875,
+   "J_signoff": 0.48416949808574,
+   "J_gated": 0.48416949808574,
+   "terms": {
+    "rwl": 1.1144854429746223,
+    "of": 0.9988257679556889
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls7.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.249979257583618,
+   "J_signoff": 0.47843608641011015,
+   "J_gated": 0.47843608641011015,
+   "terms": {
+    "rwl": 1.0951763061284139,
+    "of": 0.9992212971439065
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls7.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.2496538162231445,
+   "J_signoff": 0.4785047048018862,
+   "J_gated": 0.4785047048018862,
+   "terms": {
+    "rwl": 1.0951226113119592,
+    "of": 0.9997861427219896
+   }
+  },
+  {
+   "design": "adaptec3",
+   "run_id": "adaptec3.ls7.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.250025749206543,
+   "J_signoff": 0.4783612441833001,
+   "J_gated": 0.4783612441833001,
+   "terms": {
+    "rwl": 1.0948172721318212,
+    "of": 0.9994404169583586
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.M3.v0.s0.f1",
+   "program": "M3.v0",
+   "seed": 0,
+   "J_proxy": 2.896136522293091,
+   "J_signoff": 0.7214968122112421,
+   "J_gated": 0.7214968122112421,
+   "terms": {
+    "rwl": 1.929374324985174,
+    "of": 0.9512300981045991
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.M3.v0.s1.f1",
+   "program": "M3.v0",
+   "seed": 1,
+   "J_proxy": 2.888467788696289,
+   "J_signoff": 0.7344748837957777,
+   "J_gated": 0.7344748837957777,
+   "terms": {
+    "rwl": 1.9677178784952423,
+    "of": 0.9610634683147008
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.M3.v0.s2.f1",
+   "program": "M3.v0",
+   "seed": 2,
+   "J_proxy": 2.9112470149993896,
+   "J_signoff": 0.724034344513077,
+   "J_gated": 0.724034344513077,
+   "terms": {
+    "rwl": 1.9369335131565273,
+    "of": 0.9530286037741253
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.M3.v0.s3.f1",
+   "program": "M3.v0",
+   "seed": 3,
+   "J_proxy": 2.8734753131866455,
+   "J_signoff": 0.7147671668102609,
+   "J_gated": 0.7147671668102609,
+   "terms": {
+    "rwl": 1.9026220245008658,
+    "of": 0.9598703964000076
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.M3.v0.s4.f1",
+   "program": "M3.v0",
+   "seed": 4,
+   "J_proxy": 2.8751535415649414,
+   "J_signoff": 0.7215358208789387,
+   "J_gated": 0.7215358208789387,
+   "terms": {
+    "rwl": 1.9278401205743496,
+    "of": 0.9545585647108921
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.M3.v1.s0.f1",
+   "program": "M3.v1",
+   "seed": 0,
+   "J_proxy": 2.774127244949341,
+   "J_signoff": 0.6546239580932656,
+   "J_gated": 0.6546239580932656,
+   "terms": {
+    "rwl": 1.7118184856074328,
+    "of": 0.9405227494069051
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.M3.v1.s1.f1",
+   "program": "M3.v1",
+   "seed": 1,
+   "J_proxy": 2.803480625152588,
+   "J_signoff": 0.6696016630823736,
+   "J_gated": 0.6696016630823736,
+   "terms": {
+    "rwl": 1.7566409368727958,
+    "of": 0.950729213470232
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.M3.v1.s2.f1",
+   "program": "M3.v1",
+   "seed": 2,
+   "J_proxy": 2.817103624343872,
+   "J_signoff": 0.662123751634698,
+   "J_gated": 0.662123751634698,
+   "terms": {
+    "rwl": 1.7309842172877226,
+    "of": 0.9521899096558757
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.M3.v1.s3.f1",
+   "program": "M3.v1",
+   "seed": 3,
+   "J_proxy": 2.7936675548553467,
+   "J_signoff": 0.6571703332192484,
+   "J_gated": 0.6571703332192484,
+   "terms": {
+    "rwl": 1.7167004168523528,
+    "of": 0.9477347210902843
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.M3.v1.s4.f1",
+   "program": "M3.v1",
+   "seed": 4,
+   "J_proxy": 2.801237106323242,
+   "J_signoff": 0.6669637917876343,
+   "J_gated": 0.6669637917876343,
+   "terms": {
+    "rwl": 1.742082796721827,
+    "of": 0.9622596851405745
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.M3.v2.s0.f1",
+   "program": "M3.v2",
+   "seed": 0,
+   "J_proxy": 2.5815937519073486,
+   "J_signoff": 0.6103565981398777,
+   "J_gated": 0.6103565981398777,
+   "terms": {
+    "rwl": 1.5742270727427847,
+    "of": 0.9205898421136155
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.M3.v2.s1.f1",
+   "program": "M3.v2",
+   "seed": 1,
+   "J_proxy": 2.638749837875366,
+   "J_signoff": 0.6302213404362053,
+   "J_gated": 0.6302213404362053,
+   "terms": {
+    "rwl": 1.6400677155049144,
+    "of": 0.9213401718982065
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.M3.v2.s2.f1",
+   "program": "M3.v2",
+   "seed": 2,
+   "J_proxy": 2.678494930267334,
+   "J_signoff": 0.6308852057439814,
+   "J_gated": 0.6308852057439814,
+   "terms": {
+    "rwl": 1.6455073937931484,
+    "of": 0.9148865840402465
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.M3.v2.s3.f1",
+   "program": "M3.v2",
+   "seed": 3,
+   "J_proxy": 2.599691867828369,
+   "J_signoff": 0.6190130963800419,
+   "J_gated": 0.6190130963800419,
+   "terms": {
+    "rwl": 1.6063292643757434,
+    "of": 0.914095447115459
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.M3.v2.s4.f1",
+   "program": "M3.v2",
+   "seed": 4,
+   "J_proxy": 2.645711898803711,
+   "J_signoff": 0.6340611662133822,
+   "J_gated": 0.6340611662133822,
+   "terms": {
+    "rwl": 1.6488855237972813,
+    "of": 0.9293033938279857
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.M4.v0.s0.f1",
+   "program": "M4.v0",
+   "seed": 0,
+   "J_proxy": 2.771838426589966,
+   "J_signoff": 0.6697949511408859,
+   "J_gated": 0.6697949511408859,
+   "terms": {
+    "rwl": 1.7667995071841713,
+    "of": 0.9317006599042301
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.M4.v1.s0.f1",
+   "program": "M4.v1",
+   "seed": 0,
+   "J_proxy": 2.527491331100464,
+   "J_signoff": 0.6060914073739965,
+   "J_gated": 0.6060914073739965,
+   "terms": {
+    "rwl": 1.5347587797376563,
+    "of": 0.971091823017997
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.M4.v2.s0.f1",
+   "program": "M4.v2",
+   "seed": 0,
+   "J_proxy": 2.718369960784912,
+   "J_signoff": 0.6639120525440457,
+   "J_gated": 0.6639120525440457,
+   "terms": {
+    "rwl": 1.7515918770908292,
+    "of": 0.9228965961119804
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.M5.v0.s0.f1",
+   "program": "M5.v0",
+   "seed": 0,
+   "J_proxy": 2.3051276206970215,
+   "J_signoff": 0.5391637824830451,
+   "J_gated": 0.5391637824830451,
+   "terms": {
+    "rwl": 1.2866577110662294,
+    "of": 1.0211097944211756
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.M5.v1.s0.f1",
+   "program": "M5.v1",
+   "seed": 0,
+   "J_proxy": 2.3051276206970215,
+   "J_signoff": 0.5392647933813671,
+   "J_gated": 0.5392647933813671,
+   "terms": {
+    "rwl": 1.2869759664718818,
+    "of": 1.021146689598684
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.M6.v0.s0.f1",
+   "program": "M6.v0",
+   "seed": 0,
+   "J_proxy": 2.390829086303711,
+   "J_signoff": 0.5283019453948332,
+   "J_gated": 0.5283019453948332,
+   "terms": {
+    "rwl": 1.2672090165490144,
+    "of": 0.987594936200859
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.M6.v1.s0.f1",
+   "program": "M6.v1",
+   "seed": 0,
+   "J_proxy": 2.3308522701263428,
+   "J_signoff": 0.5531827185761315,
+   "J_gated": 0.5531827185761315,
+   "terms": {
+    "rwl": 1.3307633764836102,
+    "of": 1.026358037540323
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.M6.v2.s0.f1",
+   "program": "M6.v2",
+   "seed": 0,
+   "J_proxy": 2.6264588832855225,
+   "J_signoff": 0.5824765354837508,
+   "J_gated": 0.5824765354837508,
+   "terms": {
+    "rwl": 1.4659919652066833,
+    "of": 0.9511929728116384
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.M7.v0.s0.f1",
+   "program": "M7.v0",
+   "seed": 0,
+   "J_proxy": 2.4609286785125732,
+   "J_signoff": 0.654444438359145,
+   "J_gated": 0.654444438359145,
+   "terms": {
+    "rwl": 1.6659130769812711,
+    "of": 1.0311367684317583
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.M7.v0.s1.f1",
+   "program": "M7.v0",
+   "seed": 1,
+   "J_proxy": 2.5537140369415283,
+   "J_signoff": 0.6757772861365725,
+   "J_gated": 0.6757772861365725,
+   "terms": {
+    "rwl": 1.7407815054849718,
+    "of": 1.0236188966072066
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.M7.v0.s2.f1",
+   "program": "M7.v0",
+   "seed": 2,
+   "J_proxy": 2.5520167350769043,
+   "J_signoff": 0.6668600355472142,
+   "J_gated": 0.6668600355472142,
+   "terms": {
+    "rwl": 1.7044120244715293,
+    "of": 1.0369095213717026
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.M7.v0.s3.f1",
+   "program": "M7.v0",
+   "seed": 3,
+   "J_proxy": 2.55981183052063,
+   "J_signoff": 0.6567898579177491,
+   "J_gated": 0.6567898579177491,
+   "terms": {
+    "rwl": 1.6756796064158512,
+    "of": 1.0272398399532916
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.M7.v0.s4.f1",
+   "program": "M7.v0",
+   "seed": 4,
+   "J_proxy": 2.5034661293029785,
+   "J_signoff": 0.669187472962648,
+   "J_gated": 0.669187472962648,
+   "terms": {
+    "rwl": 1.7148141757358346,
+    "of": 1.031621468279318
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.M7.v1.s0.f1",
+   "program": "M7.v1",
+   "seed": 0,
+   "J_proxy": 2.5529019832611084,
+   "J_signoff": 0.6655371564048586,
+   "J_gated": 0.6655371564048586,
+   "terms": {
+    "rwl": 1.7072336520065603,
+    "of": 1.02244707201927
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.M7.v1.s1.f1",
+   "program": "M7.v1",
+   "seed": 1,
+   "J_proxy": 2.590839147567749,
+   "J_signoff": 0.6679078671715595,
+   "J_gated": 0.6679078671715595,
+   "terms": {
+    "rwl": 1.7198138081419512,
+    "of": 1.0130914981931611
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.M7.v1.s2.f1",
+   "program": "M7.v1",
+   "seed": 2,
+   "J_proxy": 2.5539052486419678,
+   "J_signoff": 0.6651066015860734,
+   "J_gated": 0.6651066015860734,
+   "terms": {
+    "rwl": 1.708291540086802,
+    "of": 1.0174609304002191
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.M7.v1.s3.f1",
+   "program": "M7.v1",
+   "seed": 3,
+   "J_proxy": 2.5283665657043457,
+   "J_signoff": 0.6719401253541747,
+   "J_gated": 0.6719401253541747,
+   "terms": {
+    "rwl": 1.7278500238291512,
+    "of": 1.0239007880361957
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.M7.v1.s4.f1",
+   "program": "M7.v1",
+   "seed": 4,
+   "J_proxy": 2.5520875453948975,
+   "J_signoff": 0.6702391348787324,
+   "J_gated": 0.6702391348787324,
+   "terms": {
+    "rwl": 1.7277597033006198,
+    "of": 1.01274149259031
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls0.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.39113187789917,
+   "J_signoff": 0.5288246029822057,
+   "J_gated": 0.5288246029822057,
+   "terms": {
+    "rwl": 1.2689756007448598,
+    "of": 0.987546151724985
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls0.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.3925845623016357,
+   "J_signoff": 0.5301314921657054,
+   "J_gated": 0.5301314921657054,
+   "terms": {
+    "rwl": 1.2733018296041,
+    "of": 0.9876062885631693
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls0.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.3908305168151855,
+   "J_signoff": 0.5282071476158062,
+   "J_gated": 0.5282071476158062,
+   "terms": {
+    "rwl": 1.2668138642366888,
+    "of": 0.9877532556319975
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls0.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.390829086303711,
+   "J_signoff": 0.5281699615598531,
+   "J_gated": 0.5281699615598531,
+   "terms": {
+    "rwl": 1.266719365494731,
+    "of": 0.987694346076225
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls0.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.3912599086761475,
+   "J_signoff": 0.5285095694390239,
+   "J_gated": 0.5285095694390239,
+   "terms": {
+    "rwl": 1.2678306813679328,
+    "of": 0.9877357668576275
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls0.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.3908233642578125,
+   "J_signoff": 0.5291270950398137,
+   "J_gated": 0.5291270950398137,
+   "terms": {
+    "rwl": 1.269895696680196,
+    "of": 0.9877225735716993
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls1.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.390829086303711,
+   "J_signoff": 0.5281223807384801,
+   "J_gated": 0.5281223807384801,
+   "terms": {
+    "rwl": 1.2665581931342709,
+    "of": 0.987699485321325
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls1.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.390829563140869,
+   "J_signoff": 0.5279997675856783,
+   "J_gated": 0.5279997675856783,
+   "terms": {
+    "rwl": 1.2662448271273086,
+    "of": 0.9875087963165721
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls1.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.390552282333374,
+   "J_signoff": 0.5285629701137974,
+   "J_gated": 0.5285629701137974,
+   "terms": {
+    "rwl": 1.2682062760854975,
+    "of": 0.9873405819209875
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls1.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.3908276557922363,
+   "J_signoff": 0.5280708154586435,
+   "J_gated": 0.5280708154586435,
+   "terms": {
+    "rwl": 1.2664987202665665,
+    "of": 0.9874746625244903
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls1.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.3915183544158936,
+   "J_signoff": 0.5268948300983871,
+   "J_gated": 0.5268948300983871,
+   "terms": {
+    "rwl": 1.2626171599936598,
+    "of": 0.9873978806685942
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls1.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.3908960819244385,
+   "J_signoff": 0.529539509047312,
+   "J_gated": 0.529539509047312,
+   "terms": {
+    "rwl": 1.2712465930892172,
+    "of": 0.9877702074703122
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls2.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.391526937484741,
+   "J_signoff": 0.5280719345745268,
+   "J_gated": 0.5280719345745268,
+   "terms": {
+    "rwl": 1.2666240666693513,
+    "of": 0.9872314304914769
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls2.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.392364740371704,
+   "J_signoff": 0.530379037110363,
+   "J_gated": 0.530379037110363,
+   "terms": {
+    "rwl": 1.2741831659425467,
+    "of": 0.9874939155173275
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls2.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.39029598236084,
+   "J_signoff": 0.5287143419086264,
+   "J_gated": 0.5287143419086264,
+   "terms": {
+    "rwl": 1.2686436550228748,
+    "of": 0.9874749693450934
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls2.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.3915462493896484,
+   "J_signoff": 0.527526942027384,
+   "J_gated": 0.527526942027384,
+   "terms": {
+    "rwl": 1.2646317700503351,
+    "of": 0.9875827400818905
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls2.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.3914499282836914,
+   "J_signoff": 0.5284809266496946,
+   "J_gated": 0.5284809266496946,
+   "terms": {
+    "rwl": 1.2678216137558165,
+    "of": 0.9875629501529982
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls2.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.3915183544158936,
+   "J_signoff": 0.5282045814249821,
+   "J_gated": 0.5282045814249821,
+   "terms": {
+    "rwl": 1.2669793926068913,
+    "of": 0.9874050909527643
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls3.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.3914270401000977,
+   "J_signoff": 0.5280553743103513,
+   "J_gated": 0.5280553743103513,
+   "terms": {
+    "rwl": 1.2665873517300958,
+    "of": 0.9871944586088176
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls3.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.3915183544158936,
+   "J_signoff": 0.528665106450822,
+   "J_gated": 0.528665106450822,
+   "terms": {
+    "rwl": 1.2684794601250424,
+    "of": 0.9874751227553948
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls3.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.3915576934814453,
+   "J_signoff": 0.5287572881650221,
+   "J_gated": 0.5287572881650221,
+   "terms": {
+    "rwl": 1.268799849086487,
+    "of": 0.9874488895938399
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls3.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.3915538787841797,
+   "J_signoff": 0.528012024088518,
+   "J_gated": 0.528012024088518,
+   "terms": {
+    "rwl": 1.2664221789525254,
+    "of": 0.9872358026850693
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls3.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.391472578048706,
+   "J_signoff": 0.5279765836539637,
+   "J_gated": 0.5279765836539637,
+   "terms": {
+    "rwl": 1.2662235804675457,
+    "of": 0.9873967300913331
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls3.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.391528606414795,
+   "J_signoff": 0.5278999008764889,
+   "J_gated": 0.5278999008764889,
+   "terms": {
+    "rwl": 1.2660528071060209,
+    "of": 0.9872270582978844
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls4.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.3907113075256348,
+   "J_signoff": 0.5283960164464949,
+   "J_gated": 0.5283960164464949,
+   "terms": {
+    "rwl": 1.26765893012667,
+    "of": 0.9873222493899594
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls4.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.3915302753448486,
+   "J_signoff": 0.5279768957038395,
+   "J_gated": 0.5279768957038395,
+   "terms": {
+    "rwl": 1.2663209239505595,
+    "of": 0.9872041234578115
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls4.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.3915324211120605,
+   "J_signoff": 0.5293169018255993,
+   "J_gated": 0.5293169018255993,
+   "terms": {
+    "rwl": 1.2706723998866727,
+    "of": 0.9874345457306505
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls4.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.3914990425109863,
+   "J_signoff": 0.5295164489484526,
+   "J_gated": 0.5295164489484526,
+   "terms": {
+    "rwl": 1.2713670500933119,
+    "of": 0.9873755594697273
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls4.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.3915412425994873,
+   "J_signoff": 0.5289895759260491,
+   "J_gated": 0.5289895759260491,
+   "terms": {
+    "rwl": 1.2695737964500655,
+    "of": 0.9874495799401967
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls4.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.3915250301361084,
+   "J_signoff": 0.5284981942181133,
+   "J_gated": 0.5284981942181133,
+   "terms": {
+    "rwl": 1.2679132677567182,
+    "of": 0.9874947592739857
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls5.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.3915183544158936,
+   "J_signoff": 0.5278170607859344,
+   "J_gated": 0.5278170607859344,
+   "terms": {
+    "rwl": 1.2657175721521898,
+    "of": 0.9873452609351829
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls5.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.3915183544158936,
+   "J_signoff": 0.5277359931800698,
+   "J_gated": 0.5277359931800698,
+   "terms": {
+    "rwl": 1.2654877704137506,
+    "of": 0.9872644137062974
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls5.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.391526222229004,
+   "J_signoff": 0.5271736849742936,
+   "J_gated": 0.5271736849742936,
+   "terms": {
+    "rwl": 1.2636028627696025,
+    "of": 0.9872855076227524
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls5.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.39151930809021,
+   "J_signoff": 0.5281502114660208,
+   "J_gated": 0.5281502114660208,
+   "terms": {
+    "rwl": 1.2668243542193334,
+    "of": 0.9873527013348052
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls5.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.3914926052093506,
+   "J_signoff": 0.527851512790261,
+   "J_gated": 0.527851512790261,
+   "terms": {
+    "rwl": 1.2658387403415485,
+    "of": 0.9873326045853099
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls5.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.391519784927368,
+   "J_signoff": 0.5278660841498881,
+   "J_gated": 0.5278660841498881,
+   "terms": {
+    "rwl": 1.265951552104055,
+    "of": 0.9872041234578115
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls6.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.3915209770202637,
+   "J_signoff": 0.5293854995697094,
+   "J_gated": 0.5293854995697094,
+   "terms": {
+    "rwl": 1.2708471736653075,
+    "of": 0.9875423164674477
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls6.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.3915183544158936,
+   "J_signoff": 0.528165785558018,
+   "J_gated": 0.528165785558018,
+   "terms": {
+    "rwl": 1.2669016956167962,
+    "of": 0.987301845819861
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls6.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.391902208328247,
+   "J_signoff": 0.5290745046795808,
+   "J_gated": 0.5290745046795808,
+   "terms": {
+    "rwl": 1.2699290334894473,
+    "of": 0.9873052975516446
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls6.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.3915114402770996,
+   "J_signoff": 0.527655823294463,
+   "J_gated": 0.527655823294463,
+   "terms": {
+    "rwl": 1.2651117312053959,
+    "of": 0.9874820262189619
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls6.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.391519069671631,
+   "J_signoff": 0.5279835371970517,
+   "J_gated": 0.5279835371970517,
+   "terms": {
+    "rwl": 1.2662426935715163,
+    "of": 0.987404860837312
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls6.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.391512393951416,
+   "J_signoff": 0.527607444913542,
+   "J_gated": 0.527607444913542,
+   "terms": {
+    "rwl": 1.2650735049974544,
+    "of": 0.9872359560953708
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls7.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.3915183544158936,
+   "J_signoff": 0.5272076095085425,
+   "J_gated": 0.5272076095085425,
+   "terms": {
+    "rwl": 1.2637327429784457,
+    "of": 0.9872519107667258
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls7.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.392188310623169,
+   "J_signoff": 0.527489204616601,
+   "J_gated": 0.527489204616601,
+   "terms": {
+    "rwl": 1.2648636164464082,
+    "of": 0.9868674645511901
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls7.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.39152193069458,
+   "J_signoff": 0.528290887013227,
+   "J_gated": 0.528290887013227,
+   "terms": {
+    "rwl": 1.2673557874078782,
+    "of": 0.9872276719390903
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls7.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.3915183544158936,
+   "J_signoff": 0.5274781818272855,
+   "J_gated": 0.5274781818272855,
+   "terms": {
+    "rwl": 1.264609990001624,
+    "of": 0.9873012321786551
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls7.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.3914663791656494,
+   "J_signoff": 0.5281313645466448,
+   "J_gated": 0.5281313645466448,
+   "terms": {
+    "rwl": 1.2667611476289928,
+    "of": 0.9873534683863127
+   }
+  },
+  {
+   "design": "adaptec4",
+   "run_id": "adaptec4.ls7.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.3915414810180664,
+   "J_signoff": 0.5288865386152303,
+   "J_gated": 0.5288865386152303,
+   "terms": {
+    "rwl": 1.2692504738494066,
+    "of": 0.9874093097360553
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.M2.v0.s0.f1",
+   "program": "M2.v0",
+   "seed": 0,
+   "J_proxy": 1.8417025804519653,
+   "J_signoff": 0.500395972368024,
+   "J_gated": 0.500395972368024,
+   "terms": {
+    "rwl": 1.1502289841571167,
+    "of": 1.0355151808059266
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.M3.v0.s0.f1",
+   "program": "M3.v0",
+   "seed": 0,
+   "J_proxy": 1.9689743518829346,
+   "J_signoff": 0.5187987070641573,
+   "J_gated": 0.5187987070641573,
+   "terms": {
+    "rwl": 1.2043615077683603,
+    "of": 1.0499350315576617
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.M3.v0.s1.f1",
+   "program": "M3.v0",
+   "seed": 1,
+   "J_proxy": 1.9599906206130981,
+   "J_signoff": 0.5159431565232722,
+   "J_gated": 0.5159431565232722,
+   "terms": {
+    "rwl": 1.1951518039290185,
+    "of": 1.0493174356304436
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.M3.v0.s2.f1",
+   "program": "M3.v0",
+   "seed": 2,
+   "J_proxy": 1.9312043190002441,
+   "J_signoff": 0.5155928165757422,
+   "J_gated": 0.5155928165757422,
+   "terms": {
+    "rwl": 1.1938508712017126,
+    "of": 1.049583701434856
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.M3.v0.s3.f1",
+   "program": "M3.v0",
+   "seed": 3,
+   "J_proxy": 1.972641110420227,
+   "J_signoff": 0.5165550000860409,
+   "J_gated": 0.5165550000860409,
+   "terms": {
+    "rwl": 1.2002603761732356,
+    "of": 1.0431792482271354
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.M3.v0.s4.f1",
+   "program": "M3.v0",
+   "seed": 4,
+   "J_proxy": 1.9412429332733154,
+   "J_signoff": 0.5162176130719187,
+   "J_gated": 0.5162176130719187,
+   "terms": {
+    "rwl": 1.1970670444511637,
+    "of": 1.0473166649104644
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.M3.v1.s0.f1",
+   "program": "M3.v1",
+   "seed": 0,
+   "J_proxy": 1.9384537935256958,
+   "J_signoff": 0.4967304547127772,
+   "J_gated": 0.4967304547127772,
+   "terms": {
+    "rwl": 1.1427154145659644,
+    "of": 1.0261055356199196
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.M3.v1.s1.f1",
+   "program": "M3.v1",
+   "seed": 1,
+   "J_proxy": 1.9434120655059814,
+   "J_signoff": 0.5070761660449359,
+   "J_gated": 0.5070761660449359,
+   "terms": {
+    "rwl": 1.1654736781134036,
+    "of": 1.0495604174060984
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.M3.v1.s2.f1",
+   "program": "M3.v1",
+   "seed": 2,
+   "J_proxy": 1.927013874053955,
+   "J_signoff": 0.5108926338947436,
+   "J_gated": 0.5108926338947436,
+   "terms": {
+    "rwl": 1.170847212075221,
+    "of": 1.0642564684811822
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.M3.v1.s3.f1",
+   "program": "M3.v1",
+   "seed": 3,
+   "J_proxy": 1.9442331790924072,
+   "J_signoff": 0.5224075991989905,
+   "J_gated": 0.5224075991989905,
+   "terms": {
+    "rwl": 1.2091511605736964,
+    "of": 1.064415006845877
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.M3.v1.s4.f1",
+   "program": "M3.v1",
+   "seed": 4,
+   "J_proxy": 1.8772727251052856,
+   "J_signoff": 0.5137864226045636,
+   "J_gated": 0.5137864226045636,
+   "terms": {
+    "rwl": 1.181549803666298,
+    "of": 1.0621432100311619
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.M3.v2.s0.f1",
+   "program": "M3.v2",
+   "seed": 0,
+   "J_proxy": 1.9405014514923096,
+   "J_signoff": 0.5013488449478148,
+   "J_gated": 0.5013488449478148,
+   "terms": {
+    "rwl": 1.1556804378953525,
+    "of": 1.0309647571947276
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.M3.v2.s1.f1",
+   "program": "M3.v2",
+   "seed": 1,
+   "J_proxy": 1.9018670320510864,
+   "J_signoff": 0.502542665043997,
+   "J_gated": 0.502542665043997,
+   "terms": {
+    "rwl": 1.1473503483462217,
+    "of": 1.0555837369342034
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.M3.v2.s2.f1",
+   "program": "M3.v2",
+   "seed": 2,
+   "J_proxy": 1.8621143102645874,
+   "J_signoff": 0.4943754356257621,
+   "J_gated": 0.4943754356257621,
+   "terms": {
+    "rwl": 1.1288936184737446,
+    "of": 1.0380490005575915
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.M3.v2.s3.f1",
+   "program": "M3.v2",
+   "seed": 3,
+   "J_proxy": 1.8708114624023438,
+   "J_signoff": 0.49949197443169474,
+   "J_gated": 0.49949197443169474,
+   "terms": {
+    "rwl": 1.1408509425707114,
+    "of": 1.0482446110698755
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.M3.v2.s4.f1",
+   "program": "M3.v2",
+   "seed": 4,
+   "J_proxy": 1.864328384399414,
+   "J_signoff": 0.506855878107506,
+   "J_gated": 0.506855878107506,
+   "terms": {
+    "rwl": 1.1583387607100906,
+    "of": 1.0623616659631923
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.M4.v0.s0.f1",
+   "program": "M4.v0",
+   "seed": 0,
+   "J_proxy": 1.9555912017822266,
+   "J_signoff": 0.5018929826005425,
+   "J_gated": 0.5018929826005425,
+   "terms": {
+    "rwl": 1.1505609189568817,
+    "of": 1.0448313794231872
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.M4.v1.s0.f1",
+   "program": "M4.v1",
+   "seed": 0,
+   "J_proxy": 1.8855061531066895,
+   "J_signoff": 0.5057221005228644,
+   "J_gated": 0.5057221005228644,
+   "terms": {
+    "rwl": 1.1569850769837047,
+    "of": 1.0575105161850202
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.M4.v2.s0.f1",
+   "program": "M4.v2",
+   "seed": 0,
+   "J_proxy": 1.9683425426483154,
+   "J_signoff": 0.4969591486655072,
+   "J_gated": 0.4969591486655072,
+   "terms": {
+    "rwl": 1.1368784130844543,
+    "of": 1.039304164934473
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.M5.v0.s0.f1",
+   "program": "M5.v0",
+   "seed": 0,
+   "J_proxy": 1.8284634351730347,
+   "J_signoff": 0.5210471626226428,
+   "J_gated": 0.5210471626226428,
+   "terms": {
+    "rwl": 1.2028317287950465,
+    "of": 1.0679842932275259
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.M6.v0.s0.f1",
+   "program": "M6.v0",
+   "seed": 0,
+   "J_proxy": 1.8718441724777222,
+   "J_signoff": 0.4866714686787196,
+   "J_gated": 0.4866714686787196,
+   "terms": {
+    "rwl": 1.1000736445320487,
+    "of": 1.0443291687940335
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.M6.v1.s0.f1",
+   "program": "M6.v1",
+   "seed": 0,
+   "J_proxy": 1.818899393081665,
+   "J_signoff": 0.48858707396205436,
+   "J_gated": 0.48858707396205436,
+   "terms": {
+    "rwl": 1.105105934694263,
+    "of": 1.047035290358503
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.M6.v2.s0.f1",
+   "program": "M6.v2",
+   "seed": 0,
+   "J_proxy": 1.807868242263794,
+   "J_signoff": 0.48339225032795824,
+   "J_gated": 0.48339225032795824,
+   "terms": {
+    "rwl": 1.089589038687169,
+    "of": 1.0434369248120505
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.M7.v0.s0.f1",
+   "program": "M7.v0",
+   "seed": 0,
+   "J_proxy": 1.8181146383285522,
+   "J_signoff": 0.544820411630457,
+   "J_gated": 0.544820411630457,
+   "terms": {
+    "rwl": 1.278610349056464,
+    "of": 1.0749153794234523
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.M7.v0.s1.f1",
+   "program": "M7.v0",
+   "seed": 1,
+   "J_proxy": 1.8165273666381836,
+   "J_signoff": 0.5461327459535977,
+   "J_gated": 0.5461327459535977,
+   "terms": {
+    "rwl": 1.2807696060465747,
+    "of": 1.0793457609308352
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.M7.v0.s2.f1",
+   "program": "M7.v0",
+   "seed": 2,
+   "J_proxy": 1.7984261512756348,
+   "J_signoff": 0.5322701453085761,
+   "J_gated": 0.5322701453085761,
+   "terms": {
+    "rwl": 1.236650549455096,
+    "of": 1.0751665364803151
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.M7.v0.s3.f1",
+   "program": "M7.v0",
+   "seed": 3,
+   "J_proxy": 1.807803750038147,
+   "J_signoff": 0.5446533533078163,
+   "J_gated": 0.5446533533078163,
+   "terms": {
+    "rwl": 1.27577687913367,
+    "of": 1.079468597118102
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.M7.v0.s4.f1",
+   "program": "M7.v0",
+   "seed": 4,
+   "J_proxy": 1.8087286949157715,
+   "J_signoff": 0.5269089044966758,
+   "J_gated": 0.5269089044966758,
+   "terms": {
+    "rwl": 1.223595194349506,
+    "of": 1.0655356412788268
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.M7.v1.s0.f1",
+   "program": "M7.v1",
+   "seed": 0,
+   "J_proxy": 1.8211292028427124,
+   "J_signoff": 0.5360319077827932,
+   "J_gated": 0.5360319077827932,
+   "terms": {
+    "rwl": 1.2522480372663398,
+    "of": 1.0690499773526083
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.M7.v1.s1.f1",
+   "program": "M7.v1",
+   "seed": 1,
+   "J_proxy": 1.8002511262893677,
+   "J_signoff": 0.5343705649961397,
+   "J_gated": 0.5343705649961397,
+   "terms": {
+    "rwl": 1.2416740477841306,
+    "of": 1.0791223377393366
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.M7.v1.s2.f1",
+   "program": "M7.v1",
+   "seed": 2,
+   "J_proxy": 1.8713033199310303,
+   "J_signoff": 0.5327559233078183,
+   "J_gated": 0.5327559233078183,
+   "terms": {
+    "rwl": 1.2439569076054184,
+    "of": 1.0637923401746183
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.M7.v1.s3.f1",
+   "program": "M7.v1",
+   "seed": 3,
+   "J_proxy": 1.8654844760894775,
+   "J_signoff": 0.5356327645247776,
+   "J_gated": 0.5356327645247776,
+   "terms": {
+    "rwl": 1.2468039962501969,
+    "of": 1.0772771043314568
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.M7.v1.s4.f1",
+   "program": "M7.v1",
+   "seed": 4,
+   "J_proxy": 1.875684380531311,
+   "J_signoff": 0.5361784207575374,
+   "J_gated": 0.5361784207575374,
+   "terms": {
+    "rwl": 1.2525298069003135,
+    "of": 1.0694631912496226
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls0.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.8078413009643555,
+   "J_signoff": 0.4844710790125612,
+   "J_gated": 0.4844710790125612,
+   "terms": {
+    "rwl": 1.0913858480447136,
+    "of": 1.0470354973276474
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls0.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.8078761100769043,
+   "J_signoff": 0.4836052505521203,
+   "J_gated": 0.4836052505521203,
+   "terms": {
+    "rwl": 1.089463711967133,
+    "of": 1.045107579746536
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls0.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.8078722953796387,
+   "J_signoff": 0.48397739085075275,
+   "J_gated": 0.48397739085075275,
+   "terms": {
+    "rwl": 1.0905468313371276,
+    "of": 1.0454222763307637
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls0.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.807887077331543,
+   "J_signoff": 0.4841451350935304,
+   "J_gated": 0.4841451350935304,
+   "terms": {
+    "rwl": 1.0908539421373258,
+    "of": 1.045926349682218
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls0.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.8078603744506836,
+   "J_signoff": 0.48335155060298873,
+   "J_gated": 0.48335155060298873,
+   "terms": {
+    "rwl": 1.088713561730219,
+    "of": 1.0449165472261532
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls0.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.8078925609588623,
+   "J_signoff": 0.4829995418233137,
+   "J_gated": 0.4829995418233137,
+   "terms": {
+    "rwl": 1.0870828490642215,
+    "of": 1.0458312473603155
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls1.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.8079394102096558,
+   "J_signoff": 0.4878201638957599,
+   "J_gated": 0.4878201638957599,
+   "terms": {
+    "rwl": 1.1006591633829457,
+    "of": 1.050816099205841
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls1.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.8079001903533936,
+   "J_signoff": 0.48319720192547577,
+   "J_gated": 0.48319720192547577,
+   "terms": {
+    "rwl": 1.0888276831726726,
+    "of": 1.0436593131578267
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls1.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.8078911304473877,
+   "J_signoff": 0.4832737339271985,
+   "J_gated": 0.4832737339271985,
+   "terms": {
+    "rwl": 1.0884448074571296,
+    "of": 1.0449352779337313
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls1.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.8078908920288086,
+   "J_signoff": 0.4837619021919538,
+   "J_gated": 0.4837619021919538,
+   "terms": {
+    "rwl": 1.0907393035282145,
+    "of": 1.0436007408899302
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls1.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.8079009056091309,
+   "J_signoff": 0.4836370414035308,
+   "J_gated": 0.4836370414035308,
+   "terms": {
+    "rwl": 1.0892521908041561,
+    "of": 1.045742561081893
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls1.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.8079017400741577,
+   "J_signoff": 0.4837338704368195,
+   "J_gated": 0.4837338704368195,
+   "terms": {
+    "rwl": 1.0899236455146653,
+    "of": 1.045045178549466
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls2.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.8078844547271729,
+   "J_signoff": 0.48406075615166844,
+   "J_gated": 0.48406075615166844,
+   "terms": {
+    "rwl": 1.090977200190731,
+    "of": 1.045117307296328
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls2.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.8079031705856323,
+   "J_signoff": 0.48419272983559736,
+   "J_gated": 0.48419272983559736,
+   "terms": {
+    "rwl": 1.0909436705524271,
+    "of": 1.0460641911324617
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls2.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.8079005479812622,
+   "J_signoff": 0.4835172411231939,
+   "J_gated": 0.4835172411231939,
+   "terms": {
+    "rwl": 1.0890873008348103,
+    "of": 1.0452736724850054
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls2.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.8078819513320923,
+   "J_signoff": 0.4835999662662275,
+   "J_gated": 0.4835999662662275,
+   "terms": {
+    "rwl": 1.0895427522713097,
+    "of": 1.0449142705655636
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls2.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.8078839778900146,
+   "J_signoff": 0.4835492144865301,
+   "J_gated": 0.4835492144865301,
+   "terms": {
+    "rwl": 1.0899455389031723,
+    "of": 1.0437703521038562
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls2.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.8078937530517578,
+   "J_signoff": 0.4839456210755514,
+   "J_gated": 0.4839456210755514,
+   "terms": {
+    "rwl": 1.090094310511688,
+    "of": 1.0461155194803002
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls3.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.807892084121704,
+   "J_signoff": 0.48153155398619285,
+   "J_gated": 0.48153155398619285,
+   "terms": {
+    "rwl": 1.0828506157213837,
+    "of": 1.044509128465185
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls3.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.8079140186309814,
+   "J_signoff": 0.48389861657768235,
+   "J_gated": 0.48389861657768235,
+   "terms": {
+    "rwl": 1.0900716413731948,
+    "of": 1.0458474944381595
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls3.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.8078359365463257,
+   "J_signoff": 0.4829875540136841,
+   "J_gated": 0.4829875540136841,
+   "terms": {
+    "rwl": 1.0880865833522675,
+    "of": 1.043743860053359
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls3.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.8076852560043335,
+   "J_signoff": 0.4800649025122218,
+   "J_gated": 0.4800649025122218,
+   "terms": {
+    "rwl": 1.0789222177899125,
+    "of": 1.0425882478349868
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls3.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.8079540729522705,
+   "J_signoff": 0.48410176426595264,
+   "J_gated": 0.48410176426595264,
+   "terms": {
+    "rwl": 1.0915184150979564,
+    "of": 1.044308264910438
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls3.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.8078947067260742,
+   "J_signoff": 0.4841700014337949,
+   "J_gated": 0.4841700014337949,
+   "terms": {
+    "rwl": 1.0909651329687193,
+    "of": 1.0458697436211943
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls4.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.8077178001403809,
+   "J_signoff": 0.4796343737520662,
+   "J_gated": 0.4796343737520662,
+   "terms": {
+    "rwl": 1.077646798617717,
+    "of": 1.0422688944450078
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls4.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.807655930519104,
+   "J_signoff": 0.47995783396016295,
+   "J_gated": 0.47995783396016295,
+   "terms": {
+    "rwl": 1.0783185119115548,
+    "of": 1.0430818692446435
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls4.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.8076767921447754,
+   "J_signoff": 0.4793356344230729,
+   "J_gated": 0.4793356344230729,
+   "terms": {
+    "rwl": 1.0768813057699596,
+    "of": 1.0418082846139005
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls4.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.8076890707015991,
+   "J_signoff": 0.4798006322868784,
+   "J_gated": 0.4798006322868784,
+   "terms": {
+    "rwl": 1.0775408656473426,
+    "of": 1.0435891506178376
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls4.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.8077409267425537,
+   "J_signoff": 0.48015802689508796,
+   "J_gated": 0.48015802689508796,
+   "terms": {
+    "rwl": 1.0793493112546841,
+    "of": 1.0423548901245516
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls4.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.8076896667480469,
+   "J_signoff": 0.4800943607674883,
+   "J_gated": 0.4800943607674883,
+   "terms": {
+    "rwl": 1.0788781724295697,
+    "of": 1.042872726924116
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls5.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.8076764345169067,
+   "J_signoff": 0.4795897151770623,
+   "J_gated": 0.4795897151770623,
+   "terms": {
+    "rwl": 1.0776455057010728,
+    "of": 1.0419737564449363
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls5.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.8076764345169067,
+   "J_signoff": 0.48010398021561906,
+   "J_gated": 0.48010398021561906,
+   "terms": {
+    "rwl": 1.0790833152037689,
+    "of": 1.0425265710299227
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls5.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.8076815605163574,
+   "J_signoff": 0.47981110273789085,
+   "J_gated": 0.47981110273789085,
+   "terms": {
+    "rwl": 1.0782867061621098,
+    "of": 1.0421672725950533
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls5.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.8076871633529663,
+   "J_signoff": 0.47993693290611994,
+   "J_gated": 0.47993693290611994,
+   "terms": {
+    "rwl": 1.0791698544244814,
+    "of": 1.0412398438585035
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls5.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.8076735734939575,
+   "J_signoff": 0.4798090755302249,
+   "J_gated": 0.4798090755302249,
+   "terms": {
+    "rwl": 1.0782445570795116,
+    "of": 1.0422380560424758
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls5.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.8076812028884888,
+   "J_signoff": 0.47983056542327174,
+   "J_gated": 0.47983056542327174,
+   "terms": {
+    "rwl": 1.0781660339419925,
+    "of": 1.04253836827116
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls6.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.80768620967865,
+   "J_signoff": 0.4851084051413179,
+   "J_gated": 0.4851084051413179,
+   "terms": {
+    "rwl": 1.0914844544874378,
+    "of": 1.0510871253005771
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls6.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.80767023563385,
+   "J_signoff": 0.4799924764157871,
+   "J_gated": 0.4799924764157871,
+   "terms": {
+    "rwl": 1.0780332944998636,
+    "of": 1.0438832537721865
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls6.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.8075960874557495,
+   "J_signoff": 0.47979138560511336,
+   "J_gated": 0.47979138560511336,
+   "terms": {
+    "rwl": 1.0776127518127554,
+    "of": 1.0433837337419114
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls6.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.8076838254928589,
+   "J_signoff": 0.4802692164561043,
+   "J_gated": 0.4802692164561043,
+   "terms": {
+    "rwl": 1.0797981257190772,
+    "of": 1.0421985249358743
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls6.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.807666540145874,
+   "J_signoff": 0.4798206208587771,
+   "J_gated": 0.4798206208587771,
+   "terms": {
+    "rwl": 1.0787210399600886,
+    "of": 1.0413620591383368
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls6.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.8081084489822388,
+   "J_signoff": 0.48042545085628896,
+   "J_gated": 0.48042545085628896,
+   "terms": {
+    "rwl": 1.0801559188517245,
+    "of": 1.0425245013384776
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls7.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.8076770305633545,
+   "J_signoff": 0.4799740969608562,
+   "J_gated": 0.4799740969608562,
+   "terms": {
+    "rwl": 1.0786291566839137,
+    "of": 1.0425689997045473
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls7.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.8076581954956055,
+   "J_signoff": 0.4798328634757797,
+   "J_gated": 0.4798328634757797,
+   "terms": {
+    "rwl": 1.0780569117772294,
+    "of": 1.0427719329507397
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls7.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.8076833486557007,
+   "J_signoff": 0.480199637824697,
+   "J_gated": 0.480199637824697,
+   "terms": {
+    "rwl": 1.0797337384702004,
+    "of": 1.0418634418909125
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls7.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.8082081079483032,
+   "J_signoff": 0.48052858964109246,
+   "J_gated": 0.48052858964109246,
+   "terms": {
+    "rwl": 1.0804981107901996,
+    "of": 1.0425277093602177
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls7.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.8075882196426392,
+   "J_signoff": 0.4796792349841943,
+   "J_gated": 0.4796792349841943,
+   "terms": {
+    "rwl": 1.0783385952167601,
+    "of": 1.0411843761277748
+   }
+  },
+  {
+   "design": "bigblue1",
+   "run_id": "bigblue1.ls7.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 1.8076802492141724,
+   "J_signoff": 0.48003995370496677,
+   "J_gated": 0.48003995370496677,
+   "terms": {
+    "rwl": 1.077973303167577,
+    "of": 1.0443197516979583
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.M3.v0.s0.f1",
+   "program": "M3.v0",
+   "seed": 0,
+   "J_proxy": 2.2440812587738037,
+   "J_signoff": 0.6150461821582428,
+   "J_gated": 0.6150461821582428,
+   "terms": {
+    "rwl": 1.556966763382063,
+    "of": 0.9863743542908262
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.M3.v0.s1.f1",
+   "program": "M3.v0",
+   "seed": 1,
+   "J_proxy": 2.227909803390503,
+   "J_signoff": 0.6153730879742882,
+   "J_gated": 0.6153730879742882,
+   "terms": {
+    "rwl": 1.5542187441877766,
+    "of": 0.9940497647863683
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.M3.v0.s2.f1",
+   "program": "M3.v0",
+   "seed": 2,
+   "J_proxy": 2.1826415061950684,
+   "J_signoff": 0.6012115378466296,
+   "J_gated": 0.6012115378466296,
+   "terms": {
+    "rwl": 1.5085164017621333,
+    "of": 0.9910441154532645
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.M3.v0.s3.f1",
+   "program": "M3.v0",
+   "seed": 3,
+   "J_proxy": 2.2127134799957275,
+   "J_signoff": 0.6090929135072118,
+   "J_gated": 0.6090929135072118,
+   "terms": {
+    "rwl": 1.536780081410982,
+    "of": 0.9870592605594486
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.M3.v0.s4.f1",
+   "program": "M3.v0",
+   "seed": 4,
+   "J_proxy": 2.235881805419922,
+   "J_signoff": 0.6062827320259758,
+   "J_gated": 0.6062827320259758,
+   "terms": {
+    "rwl": 1.5275902920592408,
+    "of": 0.9867042960546911
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.M3.v1.s0.f1",
+   "program": "M3.v1",
+   "seed": 0,
+   "J_proxy": 2.141484498977661,
+   "J_signoff": 0.5832072529944001,
+   "J_gated": 0.5832072529944001,
+   "terms": {
+    "rwl": 1.449236705618527,
+    "of": 0.9895749420589475
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.M3.v1.s1.f1",
+   "program": "M3.v1",
+   "seed": 1,
+   "J_proxy": 2.1594595909118652,
+   "J_signoff": 0.5858359414754468,
+   "J_gated": 0.5858359414754468,
+   "terms": {
+    "rwl": 1.4568812738799348,
+    "of": 0.9918103954097763
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.M3.v1.s2.f1",
+   "program": "M3.v1",
+   "seed": 2,
+   "J_proxy": 2.2703537940979004,
+   "J_signoff": 0.6147289223820777,
+   "J_gated": 0.6147289223820777,
+   "terms": {
+    "rwl": 1.5582280158464457,
+    "of": 0.9817367841876264
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.M3.v1.s3.f1",
+   "program": "M3.v1",
+   "seed": 3,
+   "J_proxy": 2.171875476837158,
+   "J_signoff": 0.5825034095433542,
+   "J_gated": 0.5825034095433542,
+   "terms": {
+    "rwl": 1.447356866527439,
+    "of": 0.9886423305674837
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.M3.v1.s4.f1",
+   "program": "M3.v1",
+   "seed": 4,
+   "J_proxy": 2.1307833194732666,
+   "J_signoff": 0.5845003048134451,
+   "J_gated": 0.5845003048134451,
+   "terms": {
+    "rwl": 1.4537084641913902,
+    "of": 0.9892517703735203
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.M4.v0.s0.f1",
+   "program": "M4.v0",
+   "seed": 0,
+   "J_proxy": 2.644298553466797,
+   "J_signoff": 0.7503646680236746,
+   "J_gated": 0.7503646680236746,
+   "terms": {
+    "rwl": 2.005923485899214,
+    "of": 0.9905841483594033
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.M4.v1.s0.f1",
+   "program": "M4.v1",
+   "seed": 0,
+   "J_proxy": 2.3241682052612305,
+   "J_signoff": 0.6035379211631401,
+   "J_gated": 0.6035379211631401,
+   "terms": {
+    "rwl": 1.5141243669658466,
+    "of": 0.9953374071559076
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.M4.v2.s0.f1",
+   "program": "M4.v2",
+   "seed": 0,
+   "J_proxy": 2.718081474304199,
+   "J_signoff": 0.7740262359010409,
+   "J_gated": 0.7740262359010409,
+   "terms": {
+    "rwl": 2.0839773276792024,
+    "of": 0.9922202506485344
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.M6.v0.s0.f1",
+   "program": "M6.v0",
+   "seed": 0,
+   "J_proxy": 2.19075345993042,
+   "J_signoff": 0.5541804979829527,
+   "J_gated": 0.5541804979829527,
+   "terms": {
+    "rwl": 1.3513797886077765,
+    "of": 0.9917770760041316
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.M6.v1.s0.f1",
+   "program": "M6.v1",
+   "seed": 0,
+   "J_proxy": 2.455087184906006,
+   "J_signoff": 0.658721481858064,
+   "J_gated": 0.658721481858064,
+   "terms": {
+    "rwl": 1.7001321201396529,
+    "of": 0.9912123054411208
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.M6.v2.s0.f1",
+   "program": "M6.v2",
+   "seed": 0,
+   "J_proxy": 2.0798046588897705,
+   "J_signoff": 0.5334689925308576,
+   "J_gated": 0.5334689925308576,
+   "terms": {
+    "rwl": 1.282744986874339,
+    "of": 0.990969976457039
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.M7.v0.s0.f1",
+   "program": "M7.v0",
+   "seed": 0,
+   "J_proxy": 2.7184038162231445,
+   "J_signoff": 0.8523486712725044,
+   "J_gated": 0.8523486712725044,
+   "terms": {
+    "rwl": 2.3353292508276606,
+    "of": 1.0116659734947075
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.M7.v0.s1.f1",
+   "program": "M7.v0",
+   "seed": 1,
+   "J_proxy": 2.623560905456543,
+   "J_signoff": 0.8640906965670594,
+   "J_gated": 0.8640906965670594,
+   "terms": {
+    "rwl": 2.3746907897184095,
+    "of": 1.011223064343577
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.M7.v0.s2.f1",
+   "program": "M7.v0",
+   "seed": 2,
+   "J_proxy": 2.7126166820526123,
+   "J_signoff": 0.8983800827223414,
+   "J_gated": 0.8983800827223414,
+   "terms": {
+    "rwl": 2.487783536860788,
+    "of": 1.0136334777607
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.M7.v0.s3.f1",
+   "program": "M7.v0",
+   "seed": 3,
+   "J_proxy": 2.694732904434204,
+   "J_signoff": 0.8992521398325644,
+   "J_gated": 0.8992521398325644,
+   "terms": {
+    "rwl": 2.4907514241607815,
+    "of": 1.0135114172288657
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.M7.v0.s4.f1",
+   "program": "M7.v0",
+   "seed": 4,
+   "J_proxy": 2.6580796241760254,
+   "J_signoff": 0.8590501104651848,
+   "J_gated": 0.8590501104651848,
+   "terms": {
+    "rwl": 2.3590588980821656,
+    "of": 1.0088829402702344
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.M7.v1.s0.f1",
+   "program": "M7.v1",
+   "seed": 0,
+   "J_proxy": 2.7533788681030273,
+   "J_signoff": 0.8701660740713573,
+   "J_gated": 0.8701660740713573,
+   "terms": {
+    "rwl": 2.3950405460700073,
+    "of": 1.0110260683357009
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.M7.v1.s1.f1",
+   "program": "M7.v1",
+   "seed": 1,
+   "J_proxy": 2.8144102096557617,
+   "J_signoff": 0.869158315866012,
+   "J_gated": 0.869158315866012,
+   "terms": {
+    "rwl": 2.3931693422821647,
+    "of": 1.0080500878757508
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.M7.v1.s2.f1",
+   "program": "M7.v1",
+   "seed": 2,
+   "J_proxy": 2.824204921722412,
+   "J_signoff": 0.8643226468241436,
+   "J_gated": 0.8643226468241436,
+   "terms": {
+    "rwl": 2.377929858753009,
+    "of": 1.0062912613216055
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.M7.v1.s3.f1",
+   "program": "M7.v1",
+   "seed": 3,
+   "J_proxy": 2.7298309803009033,
+   "J_signoff": 0.8285640442748466,
+   "J_gated": 0.8285640442748466,
+   "terms": {
+    "rwl": 2.2586592163927284,
+    "of": 1.0064418623801872
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.M7.v1.s4.f1",
+   "program": "M7.v1",
+   "seed": 4,
+   "J_proxy": 2.66390323638916,
+   "J_signoff": 0.8355285824599634,
+   "J_gated": 0.8355285824599634,
+   "terms": {
+    "rwl": 2.282142591441219,
+    "of": 1.005905366850652
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.ls0.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0797457695007324,
+   "J_signoff": 0.5331782547250487,
+   "J_gated": 0.5331782547250487,
+   "terms": {
+    "rwl": 1.2818022442488881,
+    "of": 0.990917209669215
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.ls0.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0798230171203613,
+   "J_signoff": 0.5333084141940647,
+   "J_gated": 0.5333084141940647,
+   "terms": {
+    "rwl": 1.282224294695001,
+    "of": 0.9909408385704292
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.ls0.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0798089504241943,
+   "J_signoff": 0.5330435304050383,
+   "J_gated": 0.5330435304050383,
+   "terms": {
+    "rwl": 1.2813377645724064,
+    "of": 0.9909480068887752
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.ls0.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0798227787017822,
+   "J_signoff": 0.5333019727416884,
+   "J_gated": 0.5333019727416884,
+   "terms": {
+    "rwl": 1.282224626822049,
+    "of": 0.9908972313004918
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.ls0.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0798046588897705,
+   "J_signoff": 0.5335208658118504,
+   "J_gated": 0.5335208658118504,
+   "terms": {
+    "rwl": 1.282967345932905,
+    "of": 0.9908710802131929
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.ls0.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0798158645629883,
+   "J_signoff": 0.5334205780149108,
+   "J_gated": 0.5334205780149108,
+   "terms": {
+    "rwl": 1.2826032516566497,
+    "of": 0.9909306834527726
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.ls1.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0798094272613525,
+   "J_signoff": 0.5335043007344111,
+   "J_gated": 0.5335043007344111,
+   "terms": {
+    "rwl": 1.2828687872314422,
+    "of": 0.9909577637665238
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.ls1.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0798091888427734,
+   "J_signoff": 0.5333741597285929,
+   "J_gated": 0.5333741597285929,
+   "terms": {
+    "rwl": 1.2824194193356395,
+    "of": 0.990988892852674
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.ls1.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0798182487487793,
+   "J_signoff": 0.5333556322354537,
+   "J_gated": 0.5333556322354537,
+   "terms": {
+    "rwl": 1.282379730153416,
+    "of": 0.9909447545961924
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.ls1.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.079730749130249,
+   "J_signoff": 0.5333362595308503,
+   "J_gated": 0.5333362595308503,
+   "terms": {
+    "rwl": 1.2823021784877326,
+    "of": 0.9909707065635371
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.ls1.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0798139572143555,
+   "J_signoff": 0.5332951717729587,
+   "J_gated": 0.5332951717729587,
+   "terms": {
+    "rwl": 1.2821779629718197,
+    "of": 0.9909452192094185
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.ls2.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0798094272613525,
+   "J_signoff": 0.5332736226866062,
+   "J_gated": 0.5332736226866062,
+   "terms": {
+    "rwl": 1.2820961766862755,
+    "of": 0.9909651312048237
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.ls2.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0798089504241943,
+   "J_signoff": 0.5330968947024975,
+   "J_gated": 0.5330968947024975,
+   "terms": {
+    "rwl": 1.2815499937560115,
+    "of": 0.9908793105046271
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.ls2.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0782594680786133,
+   "J_signoff": 0.53352651921673,
+   "J_gated": 0.53352651921673,
+   "terms": {
+    "rwl": 1.2829605373284232,
+    "of": 0.9909223867880205
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.ls2.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.07975697517395,
+   "J_signoff": 0.5334717510161587,
+   "J_gated": 0.5334717510161587,
+   "terms": {
+    "rwl": 1.2828113292521561,
+    "of": 0.9908556816034129
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.ls3.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0798099040985107,
+   "J_signoff": 0.5332113245416272,
+   "J_gated": 0.5332113245416272,
+   "terms": {
+    "rwl": 1.2818910052024381,
+    "of": 0.9909601532059724
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.ls3.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.079822301864624,
+   "J_signoff": 0.5331181202710142,
+   "J_gated": 0.5331181202710142,
+   "terms": {
+    "rwl": 1.281589682938235,
+    "of": 0.9909414359302915
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.ls3.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0802783966064453,
+   "J_signoff": 0.5335844724835688,
+   "J_gated": 0.5335844724835688,
+   "terms": {
+    "rwl": 1.28314843820577,
+    "of": 0.9909329401455852
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.ls3.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.079784870147705,
+   "J_signoff": 0.5330974721405941,
+   "J_gated": 0.5330974721405941,
+   "terms": {
+    "rwl": 1.2814864744581016,
+    "of": 0.9910101986877575
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.ls3.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0798094272613525,
+   "J_signoff": 0.5333882379846819,
+   "J_gated": 0.5333882379846819,
+   "terms": {
+    "rwl": 1.2824637582965337,
+    "of": 0.9909940699714793
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.ls4.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.079827308654785,
+   "J_signoff": 0.53343535619587,
+   "J_gated": 0.53343535619587,
+   "terms": {
+    "rwl": 1.2826392044095845,
+    "of": 0.9909572991532977
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.ls4.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0798087120056152,
+   "J_signoff": 0.5336343654456399,
+   "J_gated": 0.5336343654456399,
+   "terms": {
+    "rwl": 1.2832900903916973,
+    "of": 0.9909822555208722
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.ls4.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0798091888427734,
+   "J_signoff": 0.5331133176058096,
+   "J_gated": 0.5331133176058096,
+   "terms": {
+    "rwl": 1.2815308964507575,
+    "of": 0.9910269911372159
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.ls5.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0798099040985107,
+   "J_signoff": 0.5334604555525859,
+   "J_gated": 0.5334604555525859,
+   "terms": {
+    "rwl": 1.2827250592514654,
+    "of": 0.9909529185143084
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.ls5.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0798091888427734,
+   "J_signoff": 0.533903616326597,
+   "J_gated": 0.533903616326597,
+   "terms": {
+    "rwl": 1.2841825157693922,
+    "of": 0.9909924106385288
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.ls5.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0798089504241943,
+   "J_signoff": 0.5337652647481678,
+   "J_gated": 0.5337652647481678,
+   "terms": {
+    "rwl": 1.2837464329555055,
+    "of": 0.9909422324101077
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.ls6.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0798089504241943,
+   "J_signoff": 0.5333850747122195,
+   "J_gated": 0.5333850747122195,
+   "terms": {
+    "rwl": 1.28247538274321,
+    "of": 0.9909497325950436
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.ls6.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0798099040985107,
+   "J_signoff": 0.5334263562832394,
+   "J_gated": 0.5334263562832394,
+   "terms": {
+    "rwl": 1.2826193598184727,
+    "of": 0.9909369889179843
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.ls6.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0798208713531494,
+   "J_signoff": 0.5333838835802995,
+   "J_gated": 0.5333838835802995,
+   "terms": {
+    "rwl": 1.2824483143888066,
+    "of": 0.9909959284243838
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.ls6.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0798089504241943,
+   "J_signoff": 0.5331589180157064,
+   "J_gated": 0.5331589180157064,
+   "terms": {
+    "rwl": 1.2817084183578575,
+    "of": 0.9909759500556605
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.ls6.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0798094272613525,
+   "J_signoff": 0.5331162755626829,
+   "J_gated": 0.5331162755626829,
+   "terms": {
+    "rwl": 1.28159873340029,
+    "of": 0.9909110369506394
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.ls6.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0798087120056152,
+   "J_signoff": 0.533164760118975,
+   "J_gated": 0.533164760118975,
+   "terms": {
+    "rwl": 1.2817207900903917,
+    "of": 0.9909901539457163
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.ls7.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0798087120056152,
+   "J_signoff": 0.5329915275072452,
+   "J_gated": 0.5329915275072452,
+   "terms": {
+    "rwl": 1.2811569213948273,
+    "of": 0.9909630072586472
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.ls7.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0799129009246826,
+   "J_signoff": 0.5335628845890109,
+   "J_gated": 0.5335628845890109,
+   "terms": {
+    "rwl": 1.2830709695718483,
+    "of": 0.9909439581163761
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.ls7.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.0798089504241943,
+   "J_signoff": 0.5334641291236515,
+   "J_gated": 0.5334641291236515,
+   "terms": {
+    "rwl": 1.282745402033149,
+    "of": 0.9909367234247122
+   }
+  },
+  {
+   "design": "bigblue3",
+   "run_id": "bigblue3.ls7.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.079805374145508,
+   "J_signoff": 0.5333686742864082,
+   "J_gated": 0.5333686742864082,
+   "terms": {
+    "rwl": 1.2824207478438312,
+    "of": 0.9909496662217256
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.M3.v0.s0.f1",
+   "program": "M3.v0",
+   "seed": 0,
+   "J_proxy": 2.6043899059295654,
+   "J_signoff": 0.735271407843098,
+   "J_gated": 0.735271407843098,
+   "terms": {
+    "rwl": 1.9448719766472733,
+    "of": 1.0120654323261062
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.M3.v0.s1.f1",
+   "program": "M3.v0",
+   "seed": 1,
+   "J_proxy": 2.6116323471069336,
+   "J_signoff": 0.7108429089128439,
+   "J_gated": 0.7108429089128439,
+   "terms": {
+    "rwl": 1.863146143427255,
+    "of": 1.0126604392311156
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.M3.v0.s2.f1",
+   "program": "M3.v0",
+   "seed": 2,
+   "J_proxy": 2.621471405029297,
+   "J_signoff": 0.7107003534995668,
+   "J_gated": 0.7107003534995668,
+   "terms": {
+    "rwl": 1.8628164411738755,
+    "of": 1.0123694743160288
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.M3.v0.s3.f1",
+   "program": "M3.v0",
+   "seed": 3,
+   "J_proxy": 2.6182548999786377,
+   "J_signoff": 0.721910207203502,
+   "J_gated": 0.721910207203502,
+   "terms": {
+    "rwl": 1.8999671426863927,
+    "of": 1.0128004293172284
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.M3.v0.s4.f1",
+   "program": "M3.v0",
+   "seed": 4,
+   "J_proxy": 2.596903085708618,
+   "J_signoff": 0.7060913239917392,
+   "J_gated": 0.7060913239917392,
+   "terms": {
+    "rwl": 1.8473102732092885,
+    "of": 1.0126549468596848
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.M3.v1.s0.f1",
+   "program": "M3.v1",
+   "seed": 0,
+   "J_proxy": 2.625694990158081,
+   "J_signoff": 0.7155386072130802,
+   "J_gated": 0.7155386072130802,
+   "terms": {
+    "rwl": 1.879348492862285,
+    "of": 1.0115603956959642
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.M3.v1.s1.f1",
+   "program": "M3.v1",
+   "seed": 1,
+   "J_proxy": 2.5912373065948486,
+   "J_signoff": 0.6850748500040653,
+   "J_gated": 0.6850748500040653,
+   "terms": {
+    "rwl": 1.7784065348147997,
+    "of": 1.0103525970641696
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.M3.v1.s2.f1",
+   "program": "M3.v1",
+   "seed": 2,
+   "J_proxy": 2.62614107131958,
+   "J_signoff": 0.6975601158190047,
+   "J_gated": 0.6975601158190047,
+   "terms": {
+    "rwl": 1.8200803189530566,
+    "of": 1.0102401342205853
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.M3.v1.s3.f1",
+   "program": "M3.v1",
+   "seed": 3,
+   "J_proxy": 2.5909979343414307,
+   "J_signoff": 0.6873997599336188,
+   "J_gated": 0.6873997599336188,
+   "terms": {
+    "rwl": 1.7861645385224985,
+    "of": 1.0103359891791286
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.M3.v1.s4.f1",
+   "program": "M3.v1",
+   "seed": 4,
+   "J_proxy": 2.561239719390869,
+   "J_signoff": 0.67869981687197,
+   "J_gated": 0.67869981687197,
+   "terms": {
+    "rwl": 1.7568094241937255,
+    "of": 1.0110465974256826
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.M6.v0.s0.f1",
+   "program": "M6.v0",
+   "seed": 0,
+   "J_proxy": 2.4059948921203613,
+   "J_signoff": 0.5995617997685879,
+   "J_gated": 0.5995617997685879,
+   "terms": {
+    "rwl": 1.490849391397707,
+    "of": 1.0153798823285052
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.M6.v1.s0.f1",
+   "program": "M6.v1",
+   "seed": 0,
+   "J_proxy": 2.4854278564453125,
+   "J_signoff": 0.6365830465777197,
+   "J_gated": 0.6365830465777197,
+   "terms": {
+    "rwl": 1.614105449555636,
+    "of": 1.0156760780735263
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.M6.v2.s0.f1",
+   "program": "M6.v2",
+   "seed": 0,
+   "J_proxy": 2.480896472930908,
+   "J_signoff": 0.613675053095728,
+   "J_gated": 0.613675053095728,
+   "terms": {
+    "rwl": 1.539978414503157,
+    "of": 1.0112101916318732
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.M7.v0.s0.f1",
+   "program": "M7.v0",
+   "seed": 0,
+   "J_proxy": 3.0735390186309814,
+   "J_signoff": 1.1031347532513243,
+   "J_gated": 1.1031347532513243,
+   "terms": {
+    "rwl": 3.1619259063545595,
+    "of": 1.030379875633043
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.M7.v0.s1.f1",
+   "program": "M7.v0",
+   "seed": 1,
+   "J_proxy": 3.0594866275787354,
+   "J_signoff": 0.9383461962297184,
+   "J_gated": 0.9383461962297184,
+   "terms": {
+    "rwl": 2.613395234770103,
+    "of": 1.0288508386579172
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.M7.v0.s2.f1",
+   "program": "M7.v0",
+   "seed": 2,
+   "J_proxy": 3.1196815967559814,
+   "J_signoff": 0.9386910906903445,
+   "J_gated": 0.9386910906903445,
+   "terms": {
+    "rwl": 2.614409666018392,
+    "of": 1.0291212725655126
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.M7.v0.s3.f1",
+   "program": "M7.v0",
+   "seed": 3,
+   "J_proxy": 3.0936856269836426,
+   "J_signoff": 0.9166478848272621,
+   "J_gated": 0.9166478848272621,
+   "terms": {
+    "rwl": 2.5414578807790846,
+    "of": 1.0280701372902457
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.M7.v0.s4.f1",
+   "program": "M7.v0",
+   "seed": 4,
+   "J_proxy": 3.14107346534729,
+   "J_signoff": 0.9455481052976402,
+   "J_gated": 0.9455481052976402,
+   "terms": {
+    "rwl": 2.6372497734910034,
+    "of": 1.0291544883355945
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.M7.v1.s0.f1",
+   "program": "M7.v1",
+   "seed": 0,
+   "J_proxy": 3.147573471069336,
+   "J_signoff": 0.9331668132741726,
+   "J_gated": 0.9331668132741726,
+   "terms": {
+    "rwl": 2.596654296380066,
+    "of": 1.0278034957343523
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.M7.v1.s1.f1",
+   "program": "M7.v1",
+   "seed": 1,
+   "J_proxy": 3.0558314323425293,
+   "J_signoff": 0.9198581148064704,
+   "J_gated": 0.9198581148064704,
+   "terms": {
+    "rwl": 2.553142631872433,
+    "of": 1.0261021682982707
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.M7.v1.s2.f1",
+   "program": "M7.v1",
+   "seed": 2,
+   "J_proxy": 3.1711063385009766,
+   "J_signoff": 0.9345381056076033,
+   "J_gated": 0.9345381056076033,
+   "terms": {
+    "rwl": 2.6013411010151892,
+    "of": 1.0275718353536438
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.M7.v1.s3.f1",
+   "program": "M7.v1",
+   "seed": 3,
+   "J_proxy": 3.1339762210845947,
+   "J_signoff": 0.9671566916819594,
+   "J_gated": 0.9671566916819594,
+   "terms": {
+    "rwl": 2.7098712112670422,
+    "of": 1.0279688553456456
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.M7.v1.s4.f1",
+   "program": "M7.v1",
+   "seed": 4,
+   "J_proxy": 3.1228420734405518,
+   "J_signoff": 0.9336918821867676,
+   "J_gated": 0.9336918821867676,
+   "terms": {
+    "rwl": 2.5989144666219213,
+    "of": 1.0267836146679419
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.ls0.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.4059906005859375,
+   "J_signoff": 0.5999319124054452,
+   "J_gated": 0.5999319124054452,
+   "terms": {
+    "rwl": 1.49206335380423,
+    "of": 1.015419375094508
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.ls0.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.4059951305389404,
+   "J_signoff": 0.5996874787020964,
+   "J_gated": 0.5996874787020964,
+   "terms": {
+    "rwl": 1.4912589383748744,
+    "of": 1.0153986479308938
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.ls0.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.4060170650482178,
+   "J_signoff": 0.5998403161964929,
+   "J_gated": 0.5998403161964929,
+   "terms": {
+    "rwl": 1.4917659120453106,
+    "of": 1.0154036172193315
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.ls0.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.4059948921203613,
+   "J_signoff": 0.5996950821335582,
+   "J_gated": 0.5996950821335582,
+   "terms": {
+    "rwl": 1.4912900697520282,
+    "of": 1.0153870747196647
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.ls0.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.406008720397949,
+   "J_signoff": 0.5995862111420965,
+   "J_gated": 0.5995862111420965,
+   "terms": {
+    "rwl": 1.4909177836459617,
+    "of": 1.0154058403220534
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.ls1.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.4059951305389404,
+   "J_signoff": 0.5996151039262329,
+   "J_gated": 0.5996151039262329,
+   "terms": {
+    "rwl": 1.4910400509199644,
+    "of": 1.015353924334957
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.ls1.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.4059994220733643,
+   "J_signoff": 0.6000830248750844,
+   "J_gated": 0.6000830248750844,
+   "terms": {
+    "rwl": 1.492584683394701,
+    "of": 1.0153841323778268
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.ls1.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.4059767723083496,
+   "J_signoff": 0.5998793276260361,
+   "J_gated": 0.5998793276260361,
+   "terms": {
+    "rwl": 1.49187672684378,
+    "of": 1.0154420638193473
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.ls1.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.405989646911621,
+   "J_signoff": 0.5998674252370051,
+   "J_gated": 0.5998674252370051,
+   "terms": {
+    "rwl": 1.4918683391152205,
+    "of": 1.01537949001626
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.ls1.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.406017780303955,
+   "J_signoff": 0.5995921841350014,
+   "J_gated": 0.5995921841350014,
+   "terms": {
+    "rwl": 1.4909568188442581,
+    "of": 1.01536758987816
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.ls2.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.4059953689575195,
+   "J_signoff": 0.5998089089941573,
+   "J_gated": 0.5998089089941573,
+   "terms": {
+    "rwl": 1.4916713887965432,
+    "of": 1.0153832823679625
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.ls2.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.4060115814208984,
+   "J_signoff": 0.5996325322697496,
+   "J_gated": 0.5996325322697496,
+   "terms": {
+    "rwl": 1.4910742470440919,
+    "of": 1.0154017210434803
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.ls2.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.4059996604919434,
+   "J_signoff": 0.5997110626640447,
+   "J_gated": 0.5997110626640447,
+   "terms": {
+    "rwl": 1.4913379765863009,
+    "of": 1.0153977979210296
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.ls2.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.4059982299804688,
+   "J_signoff": 0.5999836127878521,
+   "J_gated": 0.5999836127878521,
+   "terms": {
+    "rwl": 1.4922577232833505,
+    "of": 1.015375305352313
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.ls3.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.405999183654785,
+   "J_signoff": 0.5993452156910914,
+   "J_gated": 0.5993452156910914,
+   "terms": {
+    "rwl": 1.4901217559451656,
+    "of": 1.015391259383612
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.ls3.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.406017541885376,
+   "J_signoff": 0.5991654089946392,
+   "J_gated": 0.5991654089946392,
+   "terms": {
+    "rwl": 1.489528808056994,
+    "of": 1.0153784438502733
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.ls3.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.4059972763061523,
+   "J_signoff": 0.599476923370354,
+   "J_gated": 0.599476923370354,
+   "terms": {
+    "rwl": 1.4905564661080117,
+    "of": 1.0153998902530033
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.ls3.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.4059975147247314,
+   "J_signoff": 0.5998338256241198,
+   "J_gated": 0.5998338256241198,
+   "terms": {
+    "rwl": 1.491772686749147,
+    "of": 1.0153467973291717
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.ls4.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.4060182571411133,
+   "J_signoff": 0.5993801607068407,
+   "J_gated": 0.5993801607068407,
+   "terms": {
+    "rwl": 1.490248700990865,
+    "of": 1.0153703360638753
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.ls4.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.4060251712799072,
+   "J_signoff": 0.59970611992763,
+   "J_gated": 0.59970611992763,
+   "terms": {
+    "rwl": 1.4913305566725752,
+    "of": 1.0153796861723827
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.ls4.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.406034469604492,
+   "J_signoff": 0.599545441168726,
+   "J_gated": 0.599545441168726,
+   "terms": {
+    "rwl": 1.4907784183098953,
+    "of": 1.0154127711717162
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.ls4.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.4060208797454834,
+   "J_signoff": 0.5994860556064656,
+   "J_gated": 0.5994860556064656,
+   "terms": {
+    "rwl": 1.4905903396271944,
+    "of": 1.0153930247887148
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.ls4.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.406018018722534,
+   "J_signoff": 0.599560462331622,
+   "J_gated": 0.599560462331622,
+   "terms": {
+    "rwl": 1.4908405197617305,
+    "of": 1.015388709354019
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.ls4.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.406015396118164,
+   "J_signoff": 0.5994088063314702,
+   "J_gated": 0.5994088063314702,
+   "terms": {
+    "rwl": 1.4903519345731364,
+    "of": 1.0153548397301955
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.ls5.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.406017303466797,
+   "J_signoff": 0.5992425539785866,
+   "J_gated": 0.5992425539785866,
+   "terms": {
+    "rwl": 1.4897956023461767,
+    "of": 1.015359155164891
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.ls5.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.406017541885376,
+   "J_signoff": 0.5992699882681931,
+   "J_gated": 0.5992699882681931,
+   "terms": {
+    "rwl": 1.4898683497611835,
+    "of": 1.0153965555989204
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.ls5.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.406017780303955,
+   "J_signoff": 0.5996903057959596,
+   "J_gated": 0.5996903057959596,
+   "terms": {
+    "rwl": 1.4912729716899644,
+    "of": 1.015389428593135
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.ls5.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.406033515930176,
+   "J_signoff": 0.5995297134459159,
+   "J_gated": 0.5995297134459159,
+   "terms": {
+    "rwl": 1.4907237367717858,
+    "of": 1.0154172827625343
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.ls6.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.406017780303955,
+   "J_signoff": 0.5993942218788684,
+   "J_gated": 0.5993942218788684,
+   "terms": {
+    "rwl": 1.4902690251023747,
+    "of": 1.0154234289877069
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.ls6.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.4060215950012207,
+   "J_signoff": 0.5995746517563771,
+   "J_gated": 0.5995746517563771,
+   "terms": {
+    "rwl": 1.4908826197070004,
+    "of": 1.0153991056285132
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.ls6.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.406017780303955,
+   "J_signoff": 0.599728248508523,
+   "J_gated": 0.599728248508523,
+   "terms": {
+    "rwl": 1.491393464636772,
+    "of": 1.0154013941166093
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.ls6.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.406017303466797,
+   "J_signoff": 0.5993763029586145,
+   "J_gated": 0.5993763029586145,
+   "terms": {
+    "rwl": 1.49021047230493,
+    "of": 1.0154210751142365
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.ls6.n5.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.406017780303955,
+   "J_signoff": 0.5991913362070188,
+   "J_gated": 0.5991913362070188,
+   "terms": {
+    "rwl": 1.489603168496724,
+    "of": 1.0154025710533445
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.ls7.n0.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.406017780303955,
+   "J_signoff": 0.5999289582469493,
+   "J_gated": 0.5999289582469493,
+   "terms": {
+    "rwl": 1.4920809357737106,
+    "of": 1.0153645167655736
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.ls7.n1.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.4060113430023193,
+   "J_signoff": 0.5996829193688253,
+   "J_gated": 0.5996829193688253,
+   "terms": {
+    "rwl": 1.4912586157699297,
+    "of": 1.0153688975856434
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.ls7.n2.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.4060184955596924,
+   "J_signoff": 0.5995209566860238,
+   "J_gated": 0.5995209566860238,
+   "terms": {
+    "rwl": 1.490713574716031,
+    "of": 1.0153792284747634
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.ls7.n3.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.406017541885376,
+   "J_signoff": 0.599424717289122,
+   "J_gated": 0.599424717289122,
+   "terms": {
+    "rwl": 1.4903732264994798,
+    "of": 1.0154183289285212
+   }
+  },
+  {
+   "design": "bigblue4",
+   "run_id": "bigblue4.ls7.n4.f1",
+   "program": "LS",
+   "seed": null,
+   "J_proxy": 2.4060254096984863,
+   "J_signoff": 0.5995356992571426,
+   "J_gated": 0.5995356992571426,
+   "terms": {
+    "rwl": 1.4907742244456155,
+    "of": 1.015356212823053
+   }
+  }
+ ],
+ "failed": [
+  [
+   "adaptec1.M2.v2.s0.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "adaptec1.M2.v2.s1.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "adaptec1.M2.v2.s2.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "adaptec1.M2.v2.s3.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "adaptec1.M2.v2.s4.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "adaptec2.M2.v2.s0.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "adaptec2.M2.v2.s1.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "adaptec2.M2.v2.s2.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "adaptec2.M2.v2.s3.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "adaptec2.M2.v2.s4.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "adaptec3.M2.v0.s0.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "adaptec3.M2.v0.s1.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "adaptec3.M2.v0.s2.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "adaptec3.M2.v0.s3.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "adaptec3.M2.v0.s4.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "adaptec3.M2.v1.s0.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "adaptec3.M2.v1.s1.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "adaptec3.M2.v1.s2.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "adaptec3.M2.v1.s3.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "adaptec3.M2.v1.s4.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "adaptec3.M2.v2.s0.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "adaptec3.M2.v2.s1.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "adaptec3.M2.v2.s2.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "adaptec3.M2.v2.s3.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "adaptec3.M2.v2.s4.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "adaptec4.M2.v0.s0.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "adaptec4.M2.v0.s1.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "adaptec4.M2.v0.s2.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "adaptec4.M2.v0.s3.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "adaptec4.M2.v0.s4.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "adaptec4.M2.v1.s0.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "adaptec4.M2.v1.s1.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "adaptec4.M2.v1.s2.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "adaptec4.M2.v1.s3.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "adaptec4.M2.v1.s4.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "adaptec4.M2.v2.s0.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "adaptec4.M2.v2.s1.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "adaptec4.M2.v2.s2.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "adaptec4.M2.v2.s3.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "adaptec4.M2.v2.s4.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "bigblue1.M2.v2.s0.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "bigblue1.M2.v2.s1.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "bigblue1.M2.v2.s2.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "bigblue1.M2.v2.s3.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "bigblue1.M2.v2.s4.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "bigblue2.M2.v0.s0.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M2.v0.s1.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M2.v0.s2.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M2.v0.s3.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M2.v0.s4.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M2.v1.s0.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M2.v1.s1.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M2.v1.s2.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M2.v1.s3.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M2.v1.s4.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M2.v2.s0.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M2.v2.s1.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M2.v2.s2.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M2.v2.s3.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M2.v2.s4.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M3.v0.s0.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M3.v0.s1.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M3.v0.s2.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M3.v0.s3.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M3.v0.s4.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M3.v1.s0.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M3.v1.s1.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M3.v1.s2.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M3.v1.s3.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M3.v1.s4.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M3.v2.s0.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M3.v2.s1.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M3.v2.s2.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M3.v2.s3.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M3.v2.s4.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M4.v0.s0.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M4.v0.s1.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M4.v0.s2.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M4.v0.s3.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M4.v0.s4.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M4.v1.s0.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M4.v1.s1.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M4.v1.s2.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M4.v1.s3.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M4.v1.s4.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M4.v2.s0.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M4.v2.s1.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M4.v2.s2.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M4.v2.s3.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M4.v2.s4.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M5.v0.s0.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M5.v0.s1.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M5.v0.s2.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M5.v0.s3.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M5.v0.s4.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M5.v1.s0.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M5.v1.s1.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M5.v1.s2.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M5.v1.s3.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M5.v1.s4.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M6.v0.s0.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M6.v0.s1.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M6.v0.s2.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M6.v0.s3.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M6.v0.s4.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M6.v1.s0.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M6.v1.s1.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M6.v1.s2.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M6.v1.s3.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M6.v1.s4.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M6.v2.s0.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M6.v2.s1.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M6.v2.s2.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M6.v2.s3.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M6.v2.s4.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M7.v0.s0.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M7.v0.s1.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M7.v0.s2.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M7.v0.s3.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M7.v0.s4.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M7.v1.s0.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M7.v1.s1.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M7.v1.s2.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M7.v1.s3.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue2.M7.v1.s4.f1",
+   "program_crash",
+   "rc=1 Traceback (most recent call last):\n  File \"<string>\", line 52, in <module>\nMemoryError\n"
+  ],
+  [
+   "bigblue3.M2.v0.s0.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "bigblue3.M2.v0.s1.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "bigblue3.M2.v0.s2.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "bigblue3.M2.v0.s3.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "bigblue3.M2.v0.s4.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "bigblue3.M2.v1.s0.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "bigblue3.M2.v1.s1.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "bigblue3.M2.v1.s2.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "bigblue3.M2.v1.s3.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "bigblue3.M2.v1.s4.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "bigblue3.M2.v2.s0.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "bigblue3.M2.v2.s1.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "bigblue3.M2.v2.s2.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "bigblue3.M2.v2.s3.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "bigblue3.M2.v2.s4.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "bigblue3.M3.v2.s0.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "bigblue3.M3.v2.s1.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "bigblue3.M3.v2.s2.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "bigblue3.M3.v2.s3.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "bigblue3.M3.v2.s4.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "bigblue3.M5.v0.s0.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "bigblue3.M5.v0.s1.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "bigblue3.M5.v0.s2.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "bigblue3.M5.v0.s3.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "bigblue3.M5.v0.s4.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "bigblue3.M5.v1.s0.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "bigblue3.M5.v1.s1.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "bigblue3.M5.v1.s2.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "bigblue3.M5.v1.s3.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "bigblue3.M5.v1.s4.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "bigblue4.M2.v0.s0.f1",
+   "program_error",
+   "MemoryError: Unable to allocate 509. MiB for an array with shape (8170, 8170) and data type float64"
+  ],
+  [
+   "bigblue4.M2.v0.s1.f1",
+   "program_error",
+   "MemoryError: Unable to allocate 509. MiB for an array with shape (8170, 8170) and data type float64"
+  ],
+  [
+   "bigblue4.M2.v0.s2.f1",
+   "program_error",
+   "MemoryError: Unable to allocate 509. MiB for an array with shape (8170, 8170) and data type float64"
+  ],
+  [
+   "bigblue4.M2.v0.s3.f1",
+   "program_error",
+   "MemoryError: Unable to allocate 509. MiB for an array with shape (8170, 8170) and data type float64"
+  ],
+  [
+   "bigblue4.M2.v0.s4.f1",
+   "program_error",
+   "MemoryError: Unable to allocate 509. MiB for an array with shape (8170, 8170) and data type float64"
+  ],
+  [
+   "bigblue4.M2.v1.s0.f1",
+   "program_error",
+   "MemoryError: Unable to allocate 509. MiB for an array with shape (8170, 8170) and data type float64"
+  ],
+  [
+   "bigblue4.M2.v1.s1.f1",
+   "program_error",
+   "MemoryError: Unable to allocate 509. MiB for an array with shape (8170, 8170) and data type float64"
+  ],
+  [
+   "bigblue4.M2.v1.s2.f1",
+   "program_error",
+   "MemoryError: Unable to allocate 509. MiB for an array with shape (8170, 8170) and data type float64"
+  ],
+  [
+   "bigblue4.M2.v1.s3.f1",
+   "program_error",
+   "MemoryError: Unable to allocate 509. MiB for an array with shape (8170, 8170) and data type float64"
+  ],
+  [
+   "bigblue4.M2.v1.s4.f1",
+   "program_error",
+   "MemoryError: Unable to allocate 509. MiB for an array with shape (8170, 8170) and data type float64"
+  ],
+  [
+   "bigblue4.M2.v2.s0.f1",
+   "program_error",
+   "MemoryError: Unable to allocate 509. MiB for an array with shape (8170, 8170) and data type float64"
+  ],
+  [
+   "bigblue4.M2.v2.s1.f1",
+   "program_error",
+   "MemoryError: Unable to allocate 509. MiB for an array with shape (8170, 8170) and data type float64"
+  ],
+  [
+   "bigblue4.M2.v2.s2.f1",
+   "program_error",
+   "MemoryError: Unable to allocate 509. MiB for an array with shape (8170, 8170) and data type float64"
+  ],
+  [
+   "bigblue4.M2.v2.s3.f1",
+   "program_error",
+   "MemoryError: Unable to allocate 509. MiB for an array with shape (8170, 8170) and data type float64"
+  ],
+  [
+   "bigblue4.M2.v2.s4.f1",
+   "program_error",
+   "MemoryError: Unable to allocate 509. MiB for an array with shape (8170, 8170) and data type float64"
+  ],
+  [
+   "bigblue4.M3.v2.s0.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "bigblue4.M3.v2.s1.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "bigblue4.M3.v2.s2.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "bigblue4.M3.v2.s3.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "bigblue4.M3.v2.s4.f1",
+   "program_timeout",
+   "rc=-24 "
+  ],
+  [
+   "bigblue4.M4.v0.s0.f1",
+   "program_error",
+   "MemoryError: Unable to allocate 509. MiB for an array with shape (8170, 8170) and data type float64"
+  ],
+  [
+   "bigblue4.M4.v0.s1.f1",
+   "program_error",
+   "MemoryError: Unable to allocate 509. MiB for an array with shape (8170, 8170) and data type float64"
+  ],
+  [
+   "bigblue4.M4.v0.s2.f1",
+   "program_error",
+   "MemoryError: Unable to allocate 509. MiB for an array with shape (8170, 8170) and data type float64"
+  ],
+  [
+   "bigblue4.M4.v0.s3.f1",
+   "program_error",
+   "MemoryError: Unable to allocate 509. MiB for an array with shape (8170, 8170) and data type float64"
+  ],
+  [
+   "bigblue4.M4.v0.s4.f1",
+   "program_error",
+   "MemoryError: Unable to allocate 509. MiB for an array with shape (8170, 8170) and data type float64"
+  ],
+  [
+   "bigblue4.M4.v1.s0.f1",
+   "program_error",
+   "MemoryError: Unable to allocate 509. MiB for an array with shape (8170, 8170) and data type float64"
+  ],
+  [
+   "bigblue4.M4.v1.s1.f1",
+   "program_error",
+   "MemoryError: Unable to allocate 509. MiB for an array with shape (8170, 8170) and data type float64"
+  ],
+  [
+   "bigblue4.M4.v1.s2.f1",
+   "program_error",
+   "MemoryError: Unable to allocate 509. MiB for an array with shape (8170, 8170) and data type float64"
+  ],
+  [
+   "bigblue4.M4.v1.s3.f1",
+   "program_error",
+   "MemoryError: Unable to allocate 509. MiB for an array with shape (8170, 8170) and data type float64"
+  ],
+  [
+   "bigblue4.M4.v1.s4.f1",
+   "program_error",
+   "MemoryError: Unable to allocate 509. MiB for an array with shape (8170, 8170) and data type float64"
+  ],
+  [
+   "bigblue4.M4.v2.s0.f1",
+   "program_error",
+   "MemoryError: Unable to allocate 509. MiB for an array with shape (8170, 8170) and data type float64"
+  ],
+  [
+   "bigblue4.M4.v2.s1.f1",
+   "program_error",
+   "MemoryError: Unable to allocate 509. MiB for an array with shape (8170, 8170) and data type float64"
+  ],
+  [
+   "bigblue4.M4.v2.s2.f1",
+   "program_error",
+   "MemoryError: Unable to allocate 509. MiB for an array with shape (8170, 8170) and data type float64"
+  ],
+  [
+   "bigblue4.M4.v2.s3.f1",
+   "program_error",
+   "MemoryError: Unable to allocate 509. MiB for an array with shape (8170, 8170) and data type float64"
+  ],
+  [
+   "bigblue4.M4.v2.s4.f1",
+   "program_error",
+   "MemoryError: Unable to allocate 509. MiB for an array with shape (8170, 8170) and data type float64"
+  ],
+  [
+   "bigblue4.M5.v0.s0.f1",
+   "program_error",
+   "MemoryError: "
+  ],
+  [
+   "bigblue4.M5.v0.s1.f1",
+   "program_error",
+   "MemoryError: "
+  ],
+  [
+   "bigblue4.M5.v0.s2.f1",
+   "program_error",
+   "MemoryError: "
+  ],
+  [
+   "bigblue4.M5.v0.s3.f1",
+   "program_error",
+   "MemoryError: "
+  ],
+  [
+   "bigblue4.M5.v0.s4.f1",
+   "program_error",
+   "MemoryError: "
+  ],
+  [
+   "bigblue4.M5.v1.s0.f1",
+   "program_error",
+   "MemoryError: "
+  ],
+  [
+   "bigblue4.M5.v1.s1.f1",
+   "program_error",
+   "MemoryError: "
+  ],
+  [
+   "bigblue4.M5.v1.s2.f1",
+   "program_error",
+   "MemoryError: "
+  ],
+  [
+   "bigblue4.M5.v1.s3.f1",
+   "program_error",
+   "MemoryError: "
+  ],
+  [
+   "bigblue4.M5.v1.s4.f1",
+   "program_error",
+   "MemoryError: "
+  ]
+ ],
+ "study": {
+  "per_design": {
+   "adaptec1": {
+    "n": 82,
+    "spearman": 0.7285401769680349,
+    "kendall": 0.5898825654923215,
+    "top5_recall": 0.0,
+    "regret": 0.0971130798000967,
+    "regret_random": 0.02876822144060548
+   },
+   "adaptec2": {
+    "n": 89,
+    "spearman": 0.8018590477560187,
+    "kendall": 0.6377218798005084,
+    "top5_recall": 0.0,
+    "regret": 0.0014453500915326822,
+    "regret_random": 0.05325132055841464
+   },
+   "adaptec3": {
+    "n": 79,
+    "spearman": 0.6749394454085529,
+    "kendall": 0.4524931510014852,
+    "top5_recall": 0.0,
+    "regret": 0.019829599457055924,
+    "regret_random": 0.04181983825923635
+   },
+   "adaptec4": {
+    "n": 81,
+    "spearman": 0.660494573133776,
+    "kendall": 0.44479455938153856,
+    "top5_recall": 0.0,
+    "regret": 0.012268952384657972,
+    "regret_random": 0.05035032101861481
+   },
+   "bigblue1": {
+    "n": 81,
+    "spearman": 0.7243830419212219,
+    "kendall": 0.5695323420207099,
+    "top5_recall": 0.4,
+    "regret": 0.05293451088550316,
+    "regret_random": 0.016026792974367154
+   },
+   "bigblue3": {
+    "n": 62,
+    "spearman": 0.7933826018666786,
+    "kendall": 0.6217221123563677,
+    "top5_recall": 0.2,
+    "regret": 0.0005349917094847889,
+    "regret_random": 0.07529372831741976
+   },
+   "bigblue4": {
+    "n": 61,
+    "spearman": 0.6236673890355908,
+    "kendall": 0.45013115561434985,
+    "top5_recall": 0.0,
+    "regret": 0.0007139186313969148,
+    "regret_random": 0.07648380518702835
+   }
+  },
+  "mean": {
+   "spearman": 0.7153237537271249,
+   "kendall": 0.5380396808096116,
+   "top5_recall": 0.08571428571428573,
+   "regret": 0.026405771851389735,
+   "regret_random": 0.04885628967938379
+  },
+  "n_designs": 7
+ },
+ "gate_G0": {
+  "stage": "M",
+  "fidelity": "f0->f1",
+  "admissible": false,
+  "regret": 0.026405771851389735,
+  "regret_random": 0.04885628967938379,
+  "kendall_J": 0.5380396808096116,
+  "n_designs": 7
+ }
+}
