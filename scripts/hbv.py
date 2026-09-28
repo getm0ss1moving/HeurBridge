@@ -50,6 +50,9 @@ DEFAULT_ROOT = "/data/dzy/heura_repr/hb"           # 224: /data is a local disk 
 TRANSIENT_ROOT = "/tmp/.hbv"                       # hosts without a writable /data (e.g. 227): fetch results promptly,
                                                    # /tmp is cleared on reboot and by systemd-tmpfiles
 SSH = str(ROOT / "scripts" / "ssh_run.sh")
+# per host: 231's root disk is 99 % full, so its vault and caches live in RAM (/dev/shm; fetch results promptly)
+ROOTS = {224: DEFAULT_ROOT, 231: "/dev/shm/.hbv"}
+CACHES = {224: "/data/dzy/heura_repr/cache", 231: "/dev/shm/.hbcache"}
 
 # The detached job (stage 2).  Passed to `bash -c` as a command-line argument, so it must never contain a
 # secret: the key arrives on stdin through a pipe and is read into a shell variable.
@@ -191,7 +194,7 @@ def cmd_run(a):
         sys.exit("no command")
     # The account's $HOME is on a NAS whose per-user quota is exhausted (EDQUOT): tool caches go to a local disk.
     # They hold public packages only (conda/pip downloads, font and kernel caches), never our data.
-    cache = a.cache_dir or ("/data/dzy/heura_repr/cache" if a.port == 224 else "/tmp/.hbcache")
+    cache = a.cache_dir or CACHES.get(a.port, "/tmp/.hbcache")
     # PYTHONDONTWRITEBYTECODE: no __pycache__ next to modules imported from outside the workspace
     env = ["export PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1", "mkdir -p %s" % shlex.quote(cache)]
     for var, sub in (("XDG_CACHE_HOME", "xdg"), ("PIP_CACHE_DIR", "pip"), ("CONDA_PKGS_DIRS", "conda_pkgs"),
@@ -323,7 +326,7 @@ def main():
     p.add_argument("--snapshot", type=int, default=1800)
     p.add_argument("--exclude", default="", help="regex of repo-relative paths not to archive (e.g. '\\.odb$')")
     p.add_argument("--api-key-file", default="", help="server path of the LLM key file, read by the client itself")
-    p.add_argument("--cache-dir", default="", help="tool caches (default /data/dzy/heura_repr/cache on 224, else /tmp/.hbcache)")
+    p.add_argument("--cache-dir", default="", help="tool caches (default: CACHES per port, else /tmp/.hbcache)")
     p.add_argument("command", nargs=argparse.REMAINDER)
     p = add("status", cmd_status)
     p.add_argument("--run", default="")
@@ -336,7 +339,7 @@ def main():
     add("ls", cmd_ls)
     a = ap.parse_args()
     if hasattr(a, "port") and a.root is None:
-        a.root = DEFAULT_ROOT if a.port == 224 else TRANSIENT_ROOT
+        a.root = ROOTS.get(a.port, TRANSIENT_ROOT)
     a.fn(a)
 
 

@@ -4,6 +4,7 @@
 # env: CMake, Boost headers, bison/flex, gcc/g++ 11, CUDA 11.8 nvcc with the runtime, cuRAND and driver-stub
 # headers (NVIDIA channel).  The source (with submodules) is public and copied from the Mac: 225 cannot reach GitHub.
 #   bash build_dreamplace.sh SRC [PREFIX]        (default PREFIX /tmp/.hbtools/dreamplace)
+#   CUDA_ARCH (default 8.6 = RTX 3090 on 225; 8.9 = RTX 4090 on 231), HB_TOOLS, BUILD_ENV, HB_PYTHON
 set -eu
 SRC=${1:?DREAMPlace source dir}
 PREFIX=${2:-/tmp/.hbtools/dreamplace}
@@ -37,7 +38,7 @@ echo "TORCH $("$PY" -c 'import torch; print(torch.__version__)') CXX11_ABI=$ABI"
 B=$(mktemp -d /dev/shm/dpb.XXXXXXXX)      # build tree in RAM, removed at the end
 trap 'rm -rf "$B" "$B.make.log"' EXIT
 cmake -S "$SRC" -B "$B" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$PREFIX" -DPython_EXECUTABLE="$PY" \
-  -DCMAKE_CXX_ABI="$ABI" -DCMAKE_CUDA_ARCHITECTURES=8.6 -DCUDA_TOOLKIT_ROOT_DIR="$BENV" -DCUDA_HOST_COMPILER="$CXX" \
+  -DCMAKE_CXX_ABI="$ABI" -DCMAKE_CUDA_ARCHITECTURES="${CUDA_ARCH:-8.6}" -DCUDA_TOOLKIT_ROOT_DIR="$BENV" -DCUDA_HOST_COMPILER="$CXX" \
   -DTCL_TCLSH="$BENV/bin/tclsh8.6" -DPYTHON_EXECUTABLE="$PY" -DCMAKE_LIBRARY_PATH="$BENV/lib/stubs" \
   -DBOOST_ROOT="$BENV" -DZLIB_ROOT="$BENV" -DCMAKE_PREFIX_PATH="$BENV" 2>&1 | grep -E "TORCH|CUDA|Boost|Python|Error|error|WARN" | head -40
 rc=0; make -C "$B" -j"${JOBS:-8}" > "$B.make.log" 2>&1 || rc=$?

@@ -31,11 +31,15 @@ case "$CU" in
   11.[4-9]*|12.0*) IDX=https://download.pytorch.org/whl/cu118 ;;   # CUDA 11 minor-version compatibility (driver >= 450.80)
   *)              IDX=https://download.pytorch.org/whl/cpu ;;
 esac
+IDX=${TORCH_INDEX:-$IDX}          # e.g. .../cu118 on 231 (driver 12.4) to match 225's torch 2.6.0+cu118 exactly
 echo "DRIVER_CUDA=$CU TORCH_INDEX=$IDX"
 "$PY" -m pip install -q --upgrade pip
 # glibc < 2.28 (Ubuntu 18.04 on 225): pip skips the manylinux_2_28 torch wheels and takes the newest older one
 "$PY" -m pip install -q "${TORCH_SPEC:-torch}" --index-url "$IDX"
 "$PY" -m pip install -q torch_geometric numpy scipy scikit-learn pandas pyyaml networkx matplotlib hypothesis pytest gdown
+if [ -n "${PIN_FILE:-}" ]; then        # the exact versions of another host's env (scripts/server/hb_env_pins.txt: 225)
+  "$PY" -m pip install -q -r "$PIN_FILE" --extra-index-url "$IDX" && echo "PINNED $(grep -c '==' "$PIN_FILE") packages"
+fi
 "$PY" -m pip install -q pymetis 2>/dev/null && echo "PYMETIS_OK" || echo "PYMETIS_UNAVAILABLE"
 "$PY" -m pip install -q kahypar 2>/dev/null && echo "KAHYPAR_OK" || echo "KAHYPAR_UNAVAILABLE"
 "$PY" -c "import torch, torch_geometric as g; print('TORCH', torch.__version__, 'CUDA', torch.version.cuda, 'avail', torch.cuda.is_available(), 'PYG', g.__version__)"
