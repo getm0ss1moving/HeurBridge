@@ -7,6 +7,12 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 ## [Unreleased]
 
 ### Added
+- **DREAMPlace GPU out-of-memory is rerun, not scored** (`eval/dreamplace.run_placer`). With several E0 slices
+  sharing a GPU, a placer run can die because the GPU is momentarily full; that says nothing about the layout, and
+  recording it as a failed case (J = +inf) would add noise to the paired tests. Such a run is rerun after 30, 90,
+  270 s (DREAMPlace is deterministic, so the rerun gives the result the first run would have); any other failure is
+  returned as before; the log records the reruns. Test: `tests/test_dreamplace_retry.py`.
+
 - **E0 components split over processes** (`run_e0.py --slice K/N --sources-cache DIR --budget-s S --prepare-only`).
   The full E0 is CPU-bound (memetic and repertoire each spend the bridge's whole budget per case; measured 10-27 min
   per case on ISPD2005, adaptec4 ~27 h per component), so one component can now run as N contiguous slices of its

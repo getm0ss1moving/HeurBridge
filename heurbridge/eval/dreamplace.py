@@ -114,8 +114,16 @@ def params(aux: str, out_dir: str, gpu: bool = True, iters: int = 1000, target_d
             "num_threads": threads, "result_dir": out_dir, "routability_opt_flag": 0, "deterministic_flag": 1}
 
 
+GPU_OOM = ("CUDA out of memory", "CUDA error: out of memory", "cudaErrorMemoryAllocation")
+OOM_WAITS_S = (30, 90, 270)         # a GPU shared by several jobs can be full for a moment: wait and rerun
+
+
 def run_placer(param: dict, work: Path, timeout: int = 3600) -> tuple:
-    """Run DREAMPlace's Placer.py on a parameter dict; returns (returncode, log, wall seconds)."""
+    """Run DREAMPlace's Placer.py on a parameter dict; returns (returncode, log, wall seconds).
+
+    A run that dies because the GPU is momentarily out of memory is rerun after a pause (OOM_WAITS_S): it says
+    nothing about the layout, and DREAMPlace is deterministic, so the rerun gives the result the first run would
+    have.  Every other failure is returned as it is.  The log records the reruns."""
     root = os.environ.get("HB_DREAMPLACE")
     if not root:
         raise RuntimeError("HB_DREAMPLACE (DREAMPlace install prefix) is not set")
@@ -123,12 +131,18 @@ def run_placer(param: dict, work: Path, timeout: int = 3600) -> tuple:
     pj.write_text(json.dumps(param, indent=1))
     py = os.environ.get("HB_DREAMPLACE_PYTHON", sys.executable)
     t0 = time.time()
-    try:
-        p = tools.run_group([py, str(Path(root) / "dreamplace" / "Placer.py"), str(pj)], timeout=timeout, cwd=root)
-        rc, log = p.returncode, p.stdout + "\n" + p.stderr
-    except subprocess.TimeoutExpired as e:
-        rc, log = "timeout", str(e.stdout or "")
-    (work / "dreamplace.log").write_text(log)
+    notes = []
+    for wait in (*OOM_WAITS_S, None):
+        try:
+            p = tools.run_group([py, str(Path(root) / "dreamplace" / "Placer.py"), str(pj)], timeout=timeout, cwd=root)
+            rc, log = p.returncode, p.stdout + "\n" + p.stderr
+        except subprocess.TimeoutExpired as e:
+            rc, log = "timeout", str(e.stdout or "")
+        if rc == 0 or wait is None or not any(s in log for s in GPU_OOM):
+            break
+        notes.append("[heurbridge] GPU out of memory (rc %s): rerun after %d s" % (rc, wait))
+        time.sleep(wait)
+    (work / "dreamplace.log").write_text("\n".join(notes + [log]))
     return rc, log, round(time.time() - t0, 1)
 
 
