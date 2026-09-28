@@ -4,6 +4,22 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
+## 2026-09-28 — Session 3 (13:40): user decisions; T4 E0 demo started (0.14.0)
+
+**User decisions:** LLM = deepseek-flash (code default now); f1 timing gates reported, enforced at f2/f3 (cost_v2);
+every experiment first as a demo on 225, then at full capacity if the effect is good (possibly on another server in
+parallel -- 231 still needs explicit approval).
+
+**E0 demo** on 225 GPUs 1-3 (`e0demo_{spec,eq}_{ibm04,ibm06}`, CHANGELOG 0.14.0): ibm04/ibm06 are outside the
+confirmatory set (held-out ibm08/ibm12 + ISPD2005), so the go/no-go does not peek at the test designs. Results
+~18:00-18:30: fetch the four runs, `report_e0.py` per variant, compare spec vs equal guard and the random control.
+Then, with the final T3.7 checkpoint: pre-register and launch the full E0 (5 seeds) if the demo points the right way.
+
+**Track B**: `seedB_orfs6_*` run code 369689d (cost_v1); continue them with `--resume-from` on 0.14.0 before their
+f1 phase ends (stored rows are re-scored under cost_v2 on load) -- e.g. after their M1 replays finish.
+
+---
+
 ## 2026-09-28 — Session 3 (11:30): ISPD2005 campaign and E3 done; T3 exit gate passed; T0.3 complete
 
 - **ISPD2005 Track A done** (`reports/T2_trackA_ispd_dreamplace.md`): DREAMPlace's M1 best on all 8 designs;

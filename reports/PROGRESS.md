@@ -1,12 +1,12 @@
 # HeurBridge-PR — progress against the task list (T0–T7)
 
-Status as of **2026-09-28 13:25 CST**, code `369689d` (v0.13.4 + unreleased fixes). Measured against
+Status as of **2026-09-28 13:40 CST**, code `d1d3f54` (v0.14.0). Measured against
 `HEURBRIDGE_TASKS.md` (Part C tasks, Part D gates). Session history: `HANDOFF.md`; every code change: `CHANGELOG.md`.
 
 ## 1. Summary
 
 - **Position on the critical path:** T0 ✅ → T1 ✅ → T2 (Track-B seeding still running) → T3 (exit gate **passed**;
-  Algorithm R round 2 of max 3 running) → **T4 = E0 / gate G0′ is next** (needs your protocol decision) → T5 → T6.
+  Algorithm R round 2 of max 3 running) → **T4 = E0 / gate G0′ started: demo running on 225** → T5 → T6.
 - **Roughly 40 % of the planned effort is done** (weighted by the task list's own duration estimates, §5). The done
   part is the infrastructure: toolchains on the servers, data, evaluators f0/f1/f2, the 7 heuristic families,
   archive, the bridge and its training. The remaining part is mostly the **experiments** (E0, LLM evolution,
@@ -20,7 +20,7 @@ Status as of **2026-09-28 13:25 CST**, code `369689d` (v0.13.4 + unreleased fixe
 | 225 GPU 0 | `algR_trackA2` | T3.7 Algorithm R (Track A, 13 IBM training + 2 validation designs) | round 0 **promoted** (= T3 exit gate), round 1 **promoted**, round 2 training | round 2 result ~16:30; round 3 (if promoted by ≥ 0.5 %) ~20:30 |
 | 224 (5 jobs × 8 threads) | `seedB_orfs6_{bp_fe_top, bp_be_top, swerv_wrapper, ariane136, ariane133}` (continuing `seedB_orfs5_*`) | T1.7 / T2.7 Track-B seeding on the real ORFS 2024-12 flow | base runs done on all five (deterministic); candidates so far: 40 / 47 / 4 / 24 / 13; now evaluating the same-path M1 control, then the remaining candidates | several days (see §3, T2.7) |
 | 224 (1 job) | `probe_ariane133_place` | validity control for Track B | control **passed** (import is sound); remaining diagnostic variants running | ~1 h |
-| 225 GPU 1 | — | free (ISPD2005 campaign finished) | — | reserved for E0 |
+| 225 GPUs 1–3 | `e0demo_{spec,eq}_{ibm04,ibm06}` | **T4 E0 demo** (direction check, exploratory): all partners on ibm04/ibm06, 16 programs × 2 seeds, bridge = T3.7 round-1 checkpoint; `spec` = only the bridge guarded at f1, `eq` = every partner guarded at f1 | running | ~18:00–18:30; then the demo report |
 
 **What I just did:** the Track-B validity control passed — ORFS's own macro placement replayed through our import
 converges like the base run, so candidates that fail global placement (ariane133, swerv_wrapper) fail because of
@@ -81,13 +81,14 @@ Legend: ✅ done · 🔄 running · ⚠️ done with a limitation · ⏸ waiting
 | T3.9 cell / route bridges | ⬜ | only after G0′ passes (task list) |
 | T3.10 unit tests 1–6 | ✅ | `tests/test_bridge.py` (138 tests pass in total) |
 
-### T4 — E0 partner ablation, gate G0′ ⏸
+### T4 — E0 partner ablation, gate G0′ 🔄
 
 | Sub-task | Status | Evidence / note |
 |---|---|---|
 | partners + E0 driver | ✅ | `heurbridge/partners.py`, `scripts/run_e0.py` |
 | development E0 (local, CPU) | ✅ | `reports/E0_partner_ablation_dev*.md` (suggestive only) |
-| **pre-registered E0** | ⏸ | needs the final T3.7 checkpoint (today) **and your protocol decision** (§6) |
+| E0 demo (225) | 🔄 | ibm04/ibm06 (outside the confirmatory set), both guard protocols; results this evening |
+| **full E0 (confirmatory, G0′)** | ⬜ | after the demo, if its effect is good, with the final T3.7 checkpoint: held-out ibm08/ibm12 + ISPD2005 (7 usable designs), 5 seeds, on 225's four GPUs |
 
 ### T5 — LLM evolution ⏸ (after G0′)
 
@@ -141,20 +142,16 @@ Effort weights are the midpoints of the task list's own estimates; completion fr
 T7 runs alongside and is not weighted separately. The estimate assumes every gate passes; a G0′ failure ends the
 planned path at T4 ("stop and report", with a repositioning decision for you).
 
-## 6. Waiting for you
+## 6. Decisions
 
-1. **E0 protocol (T4, before it is pre-registered).** In the spec the co-trained bridge's guard sees f1 while the
-   memetic and repertoire partners decide on f0 — the bridge can win through the guard alone. Proposal: keep the
-   spec's comparison as the primary G0′ test and pre-register `--equal-guard` (every partner guarded at the same
-   fidelity) and `--random-control` (the bridge's guard along a random direction) as secondary analyses. Also the
-   design set: held-out ibm08 / ibm12 (≈ 0.5–1 GPU-day on one 225 GPU), and whether ISPD2005 (the held-out family,
-   7 usable designs) is included (≈ 4–5 more GPU-days, mostly bigblue3/4; ~2–3 days on two GPUs). "Cost" here is
-   compute time only: E0 makes no LLM calls and the servers are the lab's (the only paid resource is the DeepSeek
-   API in T5).
-2. **T5 LLM model:** `deepseek-v4-pro` (about 4× the price) or `deepseek-flash` (what the old `deepseek-reasoner`
-   name maps to now).
-3. **Timing gates at f1:** proposal — report them at f1, enforce them only at f2 / f3 (they predict f2 badly).
-4. Housekeeping: back up `~/.config/heurbridge/vault.key` (without it the server vault cannot be decrypted); ask
+Received 2026-09-28: LLM = **deepseek-flash** for every LLM call; timing gates **reported at f1, enforced at f2/f3**
+(cost_v2); each experiment runs as a **demo on 225 first**, then at full capacity if the effect is good.
+
+Open:
+1. **Another server for the full runs?** You mentioned running the full experiment "in another port at the same
+   time". 225's four GPUs are approved and will be used; 231 (5 × RTX 4090) needs your explicit approval (red line),
+   224 / 227 have no working CUDA.
+2. Housekeeping: back up `~/.config/heurbridge/vault.key` (without it the server vault cannot be decrypted); ask
    the admin about the faulty GPUs on 224 / 227.
 
 ## 7. Deviations and known limitations
