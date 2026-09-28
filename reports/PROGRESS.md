@@ -17,8 +17,9 @@ Status as of **2026-09-28 14:00 CST**, code `9546dd4` (v0.14.0 + unreleased). Me
 
 | Server | Job | Task | State | Expected |
 |---|---|---|---|---|
-| 225 GPUs 0–3 (8 slots) | `e0_{spec,eq}_adaptec4`, `e0_{spec,eq}_adaptec3`, `e0_spec_bigblue1_ibm08`, `e0_eq_bigblue1_spec_ibm12`, `e0_{spec,eq}_adaptec2_adaptec1` | **full E0** (pre-registered E0#1–#3, commit d186667): 5 seeds, bridge = T3.7 round 1 | running since 16:08 | **revised 19:00:** measured 10–27 min per case, 3–10 of 65 cases per design done; as launched ≈ 29 Sep 22:00 (adaptec4 last); split into slices ≈ 29 Sep 07:00–09:00 |
-| 231 GPU 4 (3 slots) | `e0_{spec,eq}_bigblue4`, `e0_bigblue3` | **full E0**: bigblue4, bigblue3 | running since 16:08 | **revised 19:00:** bigblue3 ≈ 77 min per case (probe still running at 19:00), bigblue4 still building its sources; as launched several days each; plan: bigblue3 in 8 slices on 231 (≈ 29 Sep midday), bigblue4 whole to 225 after its designs (≈ 30 Sep) |
+| 225 GPUs 0–3 (16 processes) | `e0x_{spec,eq}_adaptec4` (3 slices each), `e0x_{spec,eq}_adaptec3` (2 each), `e0x_spec_bigblue1_ibm08`, `e0x_eq_bigblue1_spec_ibm12`, `e0x_{spec,eq}_adaptec2`, `e0x_{spec,eq}_adaptec1` | **full E0** (pre-registered E0#1–#3, commit d186667), restarted 19:52 as slices with the user's approval (commit 9f38847: same sources, partners, budgets and tests; cases done before the restart kept) | running | ≈ 29 Sep 07:00–09:00 |
+| 231 GPU 4 (8 processes) | `e0x_{spec,eq}_bigblue3` (4 slices each) | **full E0**: bigblue3 (spec keeps its measured budget 845 s; eq measures its own) | running since 19:53 | ≈ 29 Sep midday |
+| 225, after the designs above | bigblue4 (spec, eq), whole on 225 | **full E0**: bigblue4; sources saved (encrypted `save_src_bigblue4`, sha256 62daf302…) | queued | ≈ 30 Sep |
 | 224 (5 jobs × 8 threads) | `seedB_orfs7_{bp_fe_top, bp_be_top, swerv_wrapper, ariane136, ariane133}` (continuing earlier runs) | T1.7 / T2.7 Track-B seeding on the real ORFS 2024-12 flow | base runs done (deterministic); candidates so far: 40 / 47 / 4 / 24 / 13; now the same-path M1 control and the noise band (M1 shifted by one site/row), then the remaining candidates | several days (see §3, T2.7) |
 
 **What I just did:** the Track-B validity control passed — ORFS's own macro placement replayed through our import

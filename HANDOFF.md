@@ -4,6 +4,33 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
+## 2026-09-28 — Session 3 (20:00): full E0 restarted as slices (user-approved); meeting brief
+
+- **Why:** the full E0 is CPU-bound -- memetic and repertoire each spend the bridge's whole budget per case, and
+  every output is scored with DREAMPlace: 10-27 min per case on adaptec1-4/bigblue1, ~77 min on bigblue3. As
+  launched, G0' would have come ~5 Oct (bigblue4 ~7 days per protocol).
+- **What:** `run_e0.py --slice K/N` (commit 9f38847) splits a component's source list over processes; the budget and
+  the random-control scale are fixed once per component (`<cache>/budget_<design>.json`; `--budget-s` carries the
+  first measurement over a restart, the scale is recomputed from the bridge's unguarded endpoints). Verified: smoke
+  test on ibm04 (`e0smoke_slices`: slices share the budget; recomputed displacements identical, diff 0.0; combine
+  OK) and on the restarted components (recomputed scale == the original probe's, bigblue1 0.07522169482228229,
+  adaptec2 0.08942288385014388). `e0_combine.py` refuses duplicate cases and mixed budgets. DREAMPlace GPU OOM is
+  rerun, not scored (4330c96).
+- **Restart (user: "yes, restart the E0 jobs as slices"):** the 8 jobs on 225 and `e0_bigblue3` on 231 were
+  stopped (each archived its rows: `e0_*` finals), sources saved encrypted (`save_src_{adaptec4,adaptec3,bigblue1,
+  adaptec2,bigblue3,bigblue4}`, identical spec/eq copies by sha256), and relaunched as `e0x_*` jobs with
+  `--resume-from` + `--after save_src_*` (scratchpad `e0split/relaunch.py`, command files `e0split/*.cmd`). 225: 16
+  processes; 231: bigblue3 spec (budget 845.246 s, carried over) and eq (measures its own), 4 slices each.
+  `e0_{spec,eq}_bigblue4` stopped on 231 before any row; bigblue4 runs whole on 225 once its designs finish
+  (the encrypted source archive was copied to 225's vault).
+- **When everything ends:** fetch the `e0x_*` jobs; E0#1 = `e0_combine.py --runs` all spec slices of the 7 ISPD
+  designs `--ledger-entry E0#1` (combine checks duplicates and one budget per design); E0#2 the eq slices; E0#3
+  spec ibm08 + ibm12. Then `report_e0.py` per entry; commit ledger + reports; T5 only if G0' passes.
+- **Track-B noise band** (live, `seedB_orfs7_*`): f2 J over replay + 3 one-site shifts 1.03-1.40 (bp_fe_top),
+  1.02-1.16 (bp_be_top), 1.001-1.009 (ariane136); the same-path replay fails the f2 timing gate on 4 of 5 designs
+  -> proposal (open, user): reference the f2 gates to the same-path replay.
+- **Meeting brief** (private artifact, refreshed 19:00): https://claude.ai/artifact/WEwo1A2vGXnV5a55BrYJAr
+
 ## 2026-09-28 — Session 3 (16:10): T3.7 done; E0 demo positive; full E0 pre-registered and running
 
 - **T3.7** finished: rounds 0 and 1 promoted, round 2 not -> final checkpoint round 1 (`reports/T3_algorithmR_trackA.md`).
