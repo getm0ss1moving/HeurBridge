@@ -48,7 +48,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from train_bridge import load_bundle  # noqa: E402
 
 
-SPEC_PARTNERS = ("none", "memetic", "repertoire", "frozen")      # T4 partners besides the co-trained bridge
+SPEC_PARTNERS = ("none", "memetic", "repertoire", "frozen_gen")      # T4 partners besides the co-trained bridge
 
 
 def main():

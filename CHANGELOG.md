@@ -43,7 +43,22 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
   flow stays the evaluation (the M1 baseline uses it); a run of base and candidates with timing-driven placement
   off would be a robustness check.
 
+### E0 demo results (exploratory, 2026-09-28; `reports/E0_demo_spec.md`, `reports/E0_demo_eq.md`)
+- ibm04 + ibm06 (T3.7's validation designs: optimistic for the bridge), 16 programs x 2 seeds = 64 paired cases,
+  T3.7 round-1 bridge, final cost DREAMPlace f1. **The co-trained bridge has the lowest final J under both
+  protocols** (mean J 0.482; task-list protocol: memetic 0.701, repertoire 0.749, frozen generator 0.746, raw 0.897;
+  equal guard: memetic 0.697, repertoire 0.699, frozen 0.503). Holm-adjusted one-sided p: task-list protocol <= 2.4e-10
+  against every partner; equal guard 4.2e-9 (memetic), 5.4e-9 (repertoire), 2.1e-6 (frozen). Learned direction vs
+  the random-direction control (same guard): p = 2.3e-9, mean J 0.482 vs 0.508. With the equal guard the bridge
+  improves the raw layout in 54 of 64 cases, never worsens it (geometric-mean J ratio 0.845; frozen 0.882, random
+  0.889, memetic 0.936, repertoire 0.936). Caveats: much of the gain over memetic/repertoire comes from the guard's
+  access to f1 (random direction + guard: 0.508); ibm06's raw layouts are poor (mean J 1.25), which inflates gains;
+  at the portfolio level (best program per design) the bridge's 0.437 is close to raw's 0.443. Go decision: the
+  demo points the right way; the full, pre-registered E0 follows with the final T3.7 checkpoint.
+
 ### Fixed
+- The new E0 Holm family named the frozen partner `frozen`; the partner is `frozen_gen`, so it had been left out of
+  the four comparisons (found in the demo analysis; `run_e0.SPEC_PARTNERS`, `e0_preregister.py`).
 - **E0 Holm family** (task list T4: "Holm over 4 comparisons"): Holm now runs over none / memetic / repertoire /
   frozen only; controls (the random-direction partner) are tested on their own (`controls`), and the G0' gate uses
   the Holm-adjusted p of memetic and repertoire (it used the unadjusted ones).

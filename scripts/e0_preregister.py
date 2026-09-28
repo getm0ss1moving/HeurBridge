@@ -44,8 +44,8 @@ def main():
     if led._entries():
         sys.exit("campaign %s already has ledger entries: pre-registration must come first" % a.campaign)
     common = {"final": "dreamplace", "seeds": a.seeds, "bridge_sha256_16": sha[:16], "frozen": a.frozen,
-              "partners": ["none", "memetic", "repertoire", "frozen", "cotrained"], "control": "random_guard",
-              "test": "paired one-sided Wilcoxon, co-trained < partner; Holm over none/memetic/repertoire/frozen",
+              "partners": ["none", "memetic", "repertoire", "frozen_gen", "cotrained"], "control": "random_guard",
+              "test": "paired one-sided Wilcoxon, co-trained < partner; Holm over none/memetic/repertoire/frozen_gen",
               "gate": "G0' passes iff Holm-adjusted p < 0.01 for memetic AND repertoire"}
     plan = [("primary", a.primary, "f1", False), ("secondary_equal_guard", a.primary, "f1", True),
             ("secondary_ibm_heldout", a.ibm, "f1", False)]

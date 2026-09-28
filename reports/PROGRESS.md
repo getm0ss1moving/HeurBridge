@@ -19,8 +19,8 @@ Status as of **2026-09-28 14:00 CST**, code `9546dd4` (v0.14.0 + unreleased). Me
 |---|---|---|---|---|
 | 225 GPU 0 | `algR_trackA2` | T3.7 Algorithm R (Track A, 13 IBM training + 2 validation designs) | round 0 **promoted** (= T3 exit gate), round 1 **promoted**, round 2 training | round 2 result ~16:30; round 3 (if promoted by ≥ 0.5 %) ~20:30 |
 | 224 (5 jobs × 8 threads) | `seedB_orfs7_{bp_fe_top, bp_be_top, swerv_wrapper, ariane136, ariane133}` (continuing earlier runs) | T1.7 / T2.7 Track-B seeding on the real ORFS 2024-12 flow | base runs done (deterministic); candidates so far: 40 / 47 / 4 / 24 / 13; now the same-path M1 control and the noise band (M1 shifted by one site/row), then the remaining candidates | several days (see §3, T2.7) |
-| 231 GPU 4 | `setup_231` | tools for the full E0 on 231 (env pinned to 225's, DREAMPlace for the RTX 4090) | building | ~1 h |
-| 225 GPUs 1–3 | `e0demo_{spec,eq}_{ibm04,ibm06}` | **T4 E0 demo** (direction check, exploratory): all partners on ibm04/ibm06, 16 programs × 2 seeds, bridge = T3.7 round-1 checkpoint; `spec` = only the bridge guarded at f1, `eq` = every partner guarded at f1 | running | ~18:00–18:30; then the demo report |
+| 231 GPU 4 | — | set up for the full E0 (env pinned to 225's; DREAMPlace for the RTX 4090, bit-identical to the 3090 on ibm01) | ready | full E0 after T3.7 ends |
+| 225 GPUs 1–3 | — | E0 demo finished 15:13 (positive, see T4); free until the full E0 | — | full E0 after T3.7 ends |
 
 **What I just did:** the Track-B validity control passed — ORFS's own macro placement replayed through our import
 converges like the base run, so candidates that fail global placement (ariane133, swerv_wrapper) fail because of
@@ -87,7 +87,7 @@ Legend: ✅ done · 🔄 running · ⚠️ done with a limitation · ⏸ waiting
 |---|---|---|
 | partners + E0 driver | ✅ | `heurbridge/partners.py`, `scripts/run_e0.py` |
 | development E0 (local, CPU) | ✅ | `reports/E0_partner_ablation_dev*.md` (suggestive only) |
-| E0 demo (225) | 🔄 | ibm04/ibm06 (outside the confirmatory set), both guard protocols; results this evening |
+| E0 demo (225) | ✅ | positive direction: the co-trained bridge has the lowest J under both protocols (`reports/E0_demo_spec.md`, `reports/E0_demo_eq.md`); much of the gain comes from the f1 guard (random direction + guard is close), the learned direction still beats it (p = 2.3e-9) |
 | **full E0 (confirmatory, G0′)** | ⬜ | after the demo, if its effect is good, with the final T3.7 checkpoint: held-out ibm08/ibm12 + ISPD2005 (7 usable designs), 5 seeds, on 225's four GPUs |
 
 ### T5 — LLM evolution ⏸ (after G0′)
