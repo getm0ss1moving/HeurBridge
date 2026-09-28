@@ -91,6 +91,8 @@ def main():
     ap.add_argument("--prior-pairs", default="", help="DAgger: directory of earlier rounds' aggregated pair shards "
                                                       "(<design>.pt), merged before this round's pairs, cap 4,000 newest")
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--cache-dir", default="", help="heuristic-source cache (default <out>/cache); Algorithm R "
+                                                    "shares one across rounds: the sources do not change")
     a = ap.parse_args()
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
@@ -109,7 +111,7 @@ def main():
         for name in names.split(","):
             t0 = time.time()
             b = load_bundle(a.suite, name, a.runs)
-            srcs = BD.run_sources(b, progs, a.seeds, cache=out / "cache")
+            srcs = BD.run_sources(b, progs, a.seeds, cache=Path(a.cache_dir) if a.cache_dir else out / "cache")
             el = BD.archive_elites(b, arch)
             if not el:
                 log(json.dumps({"skip": name, "reason": "no elites in archive"}))

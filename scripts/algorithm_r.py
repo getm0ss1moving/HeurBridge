@@ -120,7 +120,7 @@ def main():
             cmd = [sys.executable, str(ROOT / "scripts" / "train_bridge.py"), "--suite", a.suite, "--train", a.train,
                    "--val", a.val, "--archive", a.archive, "--runs", a.runs, "--out", str(rdir), "--steps", str(a.steps),
                    "--round", str(r), "--device", a.device, "--lr", "1e-4" if prev_ckpt else "2e-4",
-                   "--val-every", str(a.val_every or max(1, a.steps // 5))]
+                   "--val-every", str(a.val_every or max(1, a.steps // 5)), "--cache-dir", str(out / "cache")]
             if prev_ckpt:
                 cmd += ["--pretrained", prev_ckpt]
             if rdirs:                                    # DAgger (T3.7 step 4): rounds 0..r-1, newest last, cap 4,000

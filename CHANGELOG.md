@@ -11,6 +11,12 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
   meta.json holds its stream's whole list); now the designs are joined once. Crashes are named by their exception
   line (`program_crash (rc=1 MemoryError)`) instead of the whole traceback. The committed
   `reports/T2_trackA_ibm_dreamplace.md` had the repeated list; its command lines are corrected (nothing else changes).
+- **Algorithm R regenerated the heuristic sources every round** (~4 h of CPU on 225 for 15 IBM designs): each
+  round's `train_bridge.py` cached them in its own round directory. The sources do not change between rounds
+  (T3.7 step 2: "cached"), so `algorithm_r.py` now passes one cache (`--cache-dir <out>/cache`, the one its promotion
+  test already used; both use 8 seeds). In the running `algR_trackA2` (round 1 had already regenerated them), the
+  cache directories of rounds 2 and 3 were linked to round 0's before round 2 started (manual, 2026-09-28 11:19;
+  visible as ~100 s preparation per design in their train.log).
 
 ## [0.13.4] — 2026-09-28 — ORFS failures recorded by name
 
