@@ -1,6 +1,6 @@
 # HeurBridge-PR — progress against the task list (T0–T7)
 
-Status as of **2026-09-28 13:40 CST**, code `d1d3f54` (v0.14.0). Measured against
+Status as of **2026-09-28 14:00 CST**, code `9546dd4` (v0.14.0 + unreleased). Measured against
 `HEURBRIDGE_TASKS.md` (Part C tasks, Part D gates). Session history: `HANDOFF.md`; every code change: `CHANGELOG.md`.
 
 ## 1. Summary
@@ -18,8 +18,8 @@ Status as of **2026-09-28 13:40 CST**, code `d1d3f54` (v0.14.0). Measured agains
 | Server | Job | Task | State | Expected |
 |---|---|---|---|---|
 | 225 GPU 0 | `algR_trackA2` | T3.7 Algorithm R (Track A, 13 IBM training + 2 validation designs) | round 0 **promoted** (= T3 exit gate), round 1 **promoted**, round 2 training | round 2 result ~16:30; round 3 (if promoted by ≥ 0.5 %) ~20:30 |
-| 224 (5 jobs × 8 threads) | `seedB_orfs6_{bp_fe_top, bp_be_top, swerv_wrapper, ariane136, ariane133}` (continuing `seedB_orfs5_*`) | T1.7 / T2.7 Track-B seeding on the real ORFS 2024-12 flow | base runs done on all five (deterministic); candidates so far: 40 / 47 / 4 / 24 / 13; now evaluating the same-path M1 control, then the remaining candidates | several days (see §3, T2.7) |
-| 224 (1 job) | `probe_ariane133_place` | validity control for Track B | control **passed** (import is sound); remaining diagnostic variants running | ~1 h |
+| 224 (5 jobs × 8 threads) | `seedB_orfs7_{bp_fe_top, bp_be_top, swerv_wrapper, ariane136, ariane133}` (continuing earlier runs) | T1.7 / T2.7 Track-B seeding on the real ORFS 2024-12 flow | base runs done (deterministic); candidates so far: 40 / 47 / 4 / 24 / 13; now the same-path M1 control and the noise band (M1 shifted by one site/row), then the remaining candidates | several days (see §3, T2.7) |
+| 231 GPU 4 | `setup_231` | tools for the full E0 on 231 (env pinned to 225's, DREAMPlace for the RTX 4090) | building | ~1 h |
 | 225 GPUs 1–3 | `e0demo_{spec,eq}_{ibm04,ibm06}` | **T4 E0 demo** (direction check, exploratory): all partners on ibm04/ibm06, 16 programs × 2 seeds, bridge = T3.7 round-1 checkpoint; `spec` = only the bridge guarded at f1, `eq` = every partner guarded at f1 | running | ~18:00–18:30; then the demo report |
 
 **What I just did:** the Track-B validity control passed — ORFS's own macro placement replayed through our import
@@ -67,7 +67,7 @@ Legend: ✅ done · 🔄 running · ⚠️ done with a limitation · ⏸ waiting
 | T2.5 projections P_M / P_C / P_R | ✅ | `heurbridge/core/project.py` |
 | T2.6 elite archive | ✅ | `heurbridge/archive/` |
 | T2.7 seeding, Track A | ✅ | IBM 17 designs `reports/T2_trackA_ibm_dreamplace.md`; ISPD2005 8 designs `reports/T2_trackA_ispd_dreamplace.md` |
-| T2.7 seeding, Track B | 🔄 | 5 ORFS designs running (§2). Many heuristic layouts fail ORFS (GRT-0116 congestion, DPL-0036, 2-h timeouts); failures are recorded by name. Estimate: 2–4 more days for bp_*, longer for ariane/swerv unless the failure reuse speeds them up |
+| T2.7 seeding, Track B | 🔄 | 5 ORFS designs running (§2). Many heuristic layouts fail ORFS (GRT-0116 congestion, DPL-0036, 2-h timeouts; identical failing layouts are no longer re-run). **Findings:** (1) the failures come from ORFS 2024-12's timing-driven global placement diverging on scattered layouts (the same layout places fine with it off); (2) M1's own layout imported like a candidate scores worse than base M1 (bp_fe_top f2: J 1.32 vs 1.00, nearly all TNS) because Hier-RTLMP pre-places the standard cells — so candidates are paired with this same-path replay, and a per-design noise band (M1 shifted by one site/row) decides what counts as an improvement. Estimate: several more days |
 
 ### T3 — The bridge 🔄
 

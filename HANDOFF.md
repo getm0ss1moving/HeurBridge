@@ -20,8 +20,12 @@ Then, with the final T3.7 checkpoint: pre-register and launch the full E0 (5 see
 `.hbdata`). `setup_231` job builds and smoke-tests it (`scripts/server/setup_231.sh`). A reboot of 231 wipes all of
 it: fetch results promptly. Designs are assigned whole to one server (3090 vs 4090 results are not bit-identical).
 
-**Track B**: `seedB_orfs6_*` run code 369689d (cost_v1); continue them with `--resume-from` on 0.14.0 before their
-f1 phase ends (stored rows are re-scored under cost_v2 on load) -- e.g. after their M1 replays finish.
+**Track B** (14:00): continued as `seedB_orfs7_*` on 9546dd4 (cost_v2, noise band). Findings (CHANGELOG "Observed"):
+the same-path M1 replay is worse than base M1 (bp_fe_top f2 J 1.32, nearly all TNS) -> pair candidates with the
+replay and use the noise band; candidate placement failures come from timing-driven GPL (probe: fine with it off).
+
+**E0 tooling ready** for the full run: `e0_preregister.py` (reserve E0#1-3, write reports/E0_preregistration.md,
+commit), per-design `run_e0.py --component E0`, pooled `e0_combine.py --ledger-entry E0#1` (and #2, #3).
 
 ---
 
