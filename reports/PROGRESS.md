@@ -17,8 +17,8 @@ Status as of **2026-09-28 14:00 CST**, code `9546dd4` (v0.14.0 + unreleased). Me
 
 | Server | Job | Task | State | Expected |
 |---|---|---|---|---|
-| 225 GPUs 0–3 (8 slots) | `e0_{spec,eq}_adaptec4`, `e0_{spec,eq}_adaptec3`, `e0_spec_bigblue1_ibm08`, `e0_eq_bigblue1_spec_ibm12`, `e0_{spec,eq}_adaptec2_adaptec1` | **full E0** (pre-registered E0#1–#3, commit d186667): 5 seeds, bridge = T3.7 round 1 | running since 16:08 | ~10–13 h |
-| 231 GPU 4 (3 slots) | `e0_{spec,eq}_bigblue4`, `e0_bigblue3` | **full E0**: bigblue4, bigblue3 | running since 16:08 | ~15–25 h |
+| 225 GPUs 0–3 (8 slots) | `e0_{spec,eq}_adaptec4`, `e0_{spec,eq}_adaptec3`, `e0_spec_bigblue1_ibm08`, `e0_eq_bigblue1_spec_ibm12`, `e0_{spec,eq}_adaptec2_adaptec1` | **full E0** (pre-registered E0#1–#3, commit d186667): 5 seeds, bridge = T3.7 round 1 | running since 16:08 | **revised 19:00:** measured 10–27 min per case, 3–10 of 65 cases per design done; as launched ≈ 29 Sep 22:00 (adaptec4 last); split into slices ≈ 29 Sep 07:00–09:00 |
+| 231 GPU 4 (3 slots) | `e0_{spec,eq}_bigblue4`, `e0_bigblue3` | **full E0**: bigblue4, bigblue3 | running since 16:08 | **revised 19:00:** bigblue3 ≈ 77 min per case (probe still running at 19:00), bigblue4 still building its sources; as launched several days each; plan: bigblue3 in 8 slices on 231 (≈ 29 Sep midday), bigblue4 whole to 225 after its designs (≈ 30 Sep) |
 | 224 (5 jobs × 8 threads) | `seedB_orfs7_{bp_fe_top, bp_be_top, swerv_wrapper, ariane136, ariane133}` (continuing earlier runs) | T1.7 / T2.7 Track-B seeding on the real ORFS 2024-12 flow | base runs done (deterministic); candidates so far: 40 / 47 / 4 / 24 / 13; now the same-path M1 control and the noise band (M1 shifted by one site/row), then the remaining candidates | several days (see §3, T2.7) |
 
 **What I just did:** the Track-B validity control passed — ORFS's own macro placement replayed through our import
@@ -87,7 +87,7 @@ Legend: ✅ done · 🔄 running · ⚠️ done with a limitation · ⏸ waiting
 | partners + E0 driver | ✅ | `heurbridge/partners.py`, `scripts/run_e0.py` |
 | development E0 (local, CPU) | ✅ | `reports/E0_partner_ablation_dev*.md` (suggestive only) |
 | E0 demo (225) | ✅ | positive direction: the co-trained bridge has the lowest J under both protocols (`reports/E0_demo_spec.md`, `reports/E0_demo_eq.md`); much of the gain comes from the f1 guard (random direction + guard is close), the learned direction still beats it (p = 2.3e-9) |
-| **full E0 (confirmatory, G0′)** | 🔄 | pre-registered (`reports/E0_preregistration.md`, ledger E0#1–#3) and running on 225 (4 GPUs) + 231 (GPU 4): ISPD2005 7 designs × both protocols, ibm08/ibm12; the pooled G0′ test (E0#1) when all runs end |
+| **full E0 (confirmatory, G0′)** | 🔄 | pre-registered (`reports/E0_preregistration.md`, ledger E0#1–#3) and running on 225 (4 GPUs) + 231 (GPU 4): ISPD2005 7 designs × both protocols, ibm08/ibm12; the pooled G0′ test (E0#1) when all runs end. Revised 19:00: CPU-bound and slower than estimated; `run_e0.py --slice` (commit 9f38847) splits a component over processes under the same protocol; restarting the running jobs as slices awaits the user's approval; G0′ ≈ 30 Sep–1 Oct with slices |
 
 ### T5 — LLM evolution ⏸ (after G0′)
 
