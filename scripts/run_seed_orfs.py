@@ -144,6 +144,8 @@ def main():
     ap.add_argument("--base-timeout", type=int, default=4 * 7200, help="whole unmodified flow (each step < 7,200 s)")
     ap.add_argument("--timeout", type=int, default=7200, help="one candidate evaluation")
     ap.add_argument("--noise-replays", type=int, default=3, help="shifted M1 replays for the noise band (0-3)")
+    ap.add_argument("--gate-reference", default="replay", choices=["replay", "base"],
+                    help="timing gates vs the same-path replay band (cost_v3, default) or the unmodified flow (cost_v2)")
     ap.add_argument("--make-var", action="append", default=[],
                     help="KEY=VALUE override of the design config for every run (recorded in meta.json)")
     a = ap.parse_args()
@@ -212,6 +214,20 @@ def main():
                         {"program": "M1_replay", "seed": 0 if tag == "M1replay" else int(tag[-1]), "stage": "M"})
             print(json.dumps({"m1_replay": row["run_id"], "status": row.get("status"), "J": row.get("J"),
                               "J_raw": row.get("J_raw"), "wall_s": row.get("wall_s")}), flush=True)
+
+    # 2d. cost_v3 (user decision 2026-09-29): the candidates' timing gates compare with the same-path replay band
+    # (median over the replay and its shifts), not with the unmodified flow and its warm-started standard cells.
+    # J stays normalized to the unmodified flow (task list T1.6).
+    if a.gate_reference == "replay":
+        def _replay_recs(led):
+            p = rdir / led
+            rr = [json.loads(l) for l in p.read_text().splitlines()] if p.exists() else []
+            return [r["record"] for r in rr if r.get("program") == "M1_replay" and r.get("status") == "ok"
+                    and isinstance(r.get("record"), dict)]
+        base1 = cost.with_gate_reference(base1, _replay_recs("evals.jsonl"))
+        base2 = cost.with_gate_reference(base2, _replay_recs("evals_f2.jsonl"))
+        print(json.dumps({"gate_reference": {"f1": base1.timing, "f2": base2.timing,
+                                             "source": base2.sources.get("gate_reference")}}), flush=True)
 
     progs = all_programs()
     if a.programs:

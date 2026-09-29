@@ -6,7 +6,7 @@ Status as of **2026-09-29 13:10 CST**, code `7ecfc68` (v0.14.0 + unreleased). Me
 ## 1. Summary
 
 - **Position on the critical path:** T0 ✅ → T1 ✅ → T2 (Track-B seeding: 2 of 5 designs complete) → T3 ✅ (exit
-  gate passed) → **T4 = full E0 / gate G0′ running: 8 of 16 design × protocol parts complete** (blinded: no result
+  gate passed) → **T4 = full E0 / gate G0′ running: 10 of 16 design × protocol parts complete (13:47)** (blinded: no result
   has been read) → T5 → T6. **G0′ expected 30 Sep late evening – 1 Oct morning** (bigblue4 sets the date).
 - **Roughly 42 % of the planned effort is done** (weighted by the task list's own duration estimates, §5). The done
   part is the infrastructure: toolchains on the servers, data, evaluators f0/f1/f2, the 7 heuristic families,
@@ -78,7 +78,7 @@ Legend: ✅ done · 🔄 running · ⚠️ done with a limitation · ⏸ waiting
 | T2.5 projections P_M / P_C / P_R | ✅ | `heurbridge/core/project.py` |
 | T2.6 elite archive | ✅ | `heurbridge/archive/` |
 | T2.7 seeding, Track A | ✅ | IBM 17 designs `reports/T2_trackA_ibm_dreamplace.md`; ISPD2005 8 designs `reports/T2_trackA_ispd_dreamplace.md` |
-| T2.7 seeding, Track B | 🔄 | **bp_fe_top and bp_be_top complete** (`reports/T2_trackB_orfs_bp_fe_top.md`, `…_bp_be_top.md`): at signoff 15 / 13 of 20 layouts pass every gate, 14 / 9 of them below the unmodified flow (best 0.881 / 0.931, local search); the same-path replay of the tool's own layout scores 1.323 / 1.103 (band of one-site shifts 1.03–1.40 / 1.02–1.16); f1–f2 Kendall tau 0.51 / 0.78. Descriptive: candidates need their own noise band before any claim. swerv_wrapper, ariane136, ariane133 running. Many heuristic layouts fail ORFS (GRT-0116 congestion, DPL-0036, 2-h timeouts; identical failing layouts are no longer re-run). **Findings:** (1) the failures come from ORFS 2024-12's timing-driven global placement diverging on scattered layouts (the same layout places fine with it off); (2) M1's own layout imported like a candidate scores worse than base M1 (bp_fe_top f2: J 1.32 vs 1.00, nearly all TNS) because Hier-RTLMP pre-places the standard cells — so candidates are paired with this same-path replay, and a per-design noise band (M1 shifted by one site/row) decides what counts as an improvement. Estimate: several more days |
+| T2.7 seeding, Track B | 🔄 | **bp_fe_top and bp_be_top complete** (`reports/T2_trackB_orfs_bp_fe_top.md`, `…_bp_be_top.md`; cost_v3: gates vs the same-path replay): at signoff 16 / 9 of 20 layouts pass every gate, 14 / 7 of them below the unmodified flow (best 0.881 / 0.931, local search); the same-path replay of the tool's own layout scores 1.323 / 1.103 (band of one-site shifts 1.03–1.40 / 1.02–1.16); f1–f2 Kendall tau 0.51 / 0.78. Descriptive: candidates need their own noise band before any claim. swerv_wrapper, ariane136, ariane133 running. Many heuristic layouts fail ORFS (GRT-0116 congestion, DPL-0036, 2-h timeouts; identical failing layouts are no longer re-run). **Findings:** (1) the failures come from ORFS 2024-12's timing-driven global placement diverging on scattered layouts (the same layout places fine with it off); (2) M1's own layout imported like a candidate scores worse than base M1 (bp_fe_top f2: J 1.32 vs 1.00, nearly all TNS) because Hier-RTLMP pre-places the standard cells — so candidates are paired with this same-path replay, and a per-design noise band (M1 shifted by one site/row) decides what counts as an improvement. Estimate: several more days |
 
 ### T3 — The bridge ✅ (T3.9 after G0′)
 
@@ -165,15 +165,20 @@ repo, datasets, output, logs, results, evidence) and 231 (7 GB: envs, models, re
 results/ kept). The final delete is yours to run (I cannot delete files permanently). Kept on 224: hb, envs/hb,
 tools, cache, third_party, benchmarks, eda/{harness,flow,tools,pdk,...}, src, build.
 
+Received 2026-09-29 (afternoon): **Track-B timing gates referenced to the same-path replay** (cost_v3, done: code,
+tests, both Track-B reports re-scored); **225's reproduction monitors stopped** (`b_monitor`, `b_reason_monitor`;
+the other tmux sessions there, `agent1`, `agent2`, `tmp`, belong to another project -- `taorui/auto_project` -- and
+were left alone) and 225's reproduction folders staged for deletion (31 GB; result tables and docs kept).
+
 Open:
 1. **Stop the 4 newest bigblue4 slices?** (`e0x_{spec,eq}_bigblue4_w45`, launched 11:25.) 12 bigblue4 slices bring
    225 to within ~17 GB of its memory at peaks; stopping them does not change bigblue4's finish (the last slices
    wait for memory either way) and removes the risk. They run protected meanwhile (first OOM victims; killed placer
    runs are re-run). My recommendation: stop them.
-2. **Track-B gate reference:** reference the f2 timing gate to the same-path replay instead of the unmodified flow.
-3. **225's reproduction sessions** (tmux `agent1`, `agent2` with Claude Code, `b_monitor`, `b_reason_monitor`, `tmp`,
-   alive since 20–23 Sep) must be stopped by you before 225's reproduction folder can go.
-4. Housekeeping: back up `~/.config/heurbridge/vault.key` (without it the server vault cannot be decrypted); ask
+2. **Hold gate under cost_v3:** on bp_be_top the same-path replay has +0.055 ns hold slack, so B.3's "no more
+   than 0.02 ns worse" now fails candidates that still have positive hold slack (13 → 9 admitted). Keep B.3 as
+   frozen, or check hold only for new violations (cand ≥ 0)? A change to a frozen rule is your call.
+3. Housekeeping: back up `~/.config/heurbridge/vault.key` (without it the server vault cannot be decrypted); ask
    the admin about the faulty GPUs on 224 / 227.
 
 ## 7. Deviations and known limitations

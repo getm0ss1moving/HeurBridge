@@ -6,6 +6,19 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 
 ## [Unreleased]
 
+### Changed
+- **cost_v3 (user decision 2026-09-29): Track B's timing gates compare with the same-path replay.** The setup and
+  hold WNS gates (frozen rule B.3, guard 0.02 ns) now refer to the tool-native macro layout run through the
+  candidates' path -- median over the replay and its one-site shifts, per fidelity (`cost.with_gate_reference`,
+  `run_seed_orfs.py --gate-reference replay`, the default) -- instead of the unmodified flow, whose standard cells
+  start from Hier-RTLMP's placement. J is still normalized to the unmodified flow (task list T1.6); Track A has no
+  timing and is unchanged, so the running E0 is not affected. `configs/cost.yaml` version cost_v3_2026-09-29.
+  Effect (reports re-scored): bp_fe_top 16 of 20 signoff layouts pass every gate (was 15); bp_be_top 9 (was 13):
+  its same-path replay has more hold slack (+0.055 ns vs +0.010 ns), so candidates with small positive hold slack
+  now fail the "no more than 0.02 ns worse" part of B.3. The three Track-B jobs still running on 224 score with the
+  old reference at run time; their rows are re-scored in the reports and their archives are rebuilt before use.
+  Test: `test_cost.py::test_gate_reference_same_path_replay`.
+
 ### Added
 - **Track-B ORFS report** (`report_trackb_dev.py --label orfs`, first: `reports/T2_trackB_orfs_bp_fe_top.md`).
   Every stored row is re-scored from its record under the current cost rule (the campaign resumed rows written

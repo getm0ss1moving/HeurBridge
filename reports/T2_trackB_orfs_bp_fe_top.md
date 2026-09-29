@@ -3,12 +3,12 @@
 | Field | Value |
 |---|---|
 | Report | trackB_orfs_bp_fe_top |
-| Date | 2026-09-29 11:40 |
+| Date | 2026-09-29 13:47 |
 | Node | thinklab-105-224 |
 | Track | B (ORFS 2024-12-13 8ae3ae36); 8 threads |
 | Tool versions | native OpenROAD 676f8451bb-src; the flow's Yosys: /data/dzy/heura_repr/tools/yosys_048/bin/yosys (the Yosys version in the run's metadata is the one on PATH, not used) |
 | HeurBridge version / git | 0.14.0 / 9546dd4fc235383fe0df65b82f7db08ec8337ffe (9546dd4-20260928135525) |
-| Metric conventions | timing setup_hold_v1_2026-09-22; metrics_v2_2026-09-22; HPWL centre (pin_offset_v2); cost cost_v2_2026-09-28 |
+| Metric conventions | timing setup_hold_v1_2026-09-22; metrics_v2_2026-09-22; HPWL centre (pin_offset_v2); cost cost_v3_2026-09-29 |
 | Feeds gate | T2 exit (archive A0, Track B; f2 verification in the f2 campaign) — descriptive |
 | Pre-registered test | - |
 | alpha-ledger entry | - |
@@ -48,7 +48,7 @@ Below the baseline J 0.95: 12 layouts after the gates (12 distinct), 14 before t
 
 **Local search** (T2.7, 45 evaluations): best J among layouts passing the timing gates, after each step: 0.8992, 0.8992, 0.8992, 0.8942, 0.8942, 0.8942, 0.8942.
 
-**Signoff (f2, 6_report; every gate enforced):** 20 layouts (the top 10 of f1 and 10 more across its ranking): 20 completed, 0 failed; all gates pass on 15 (failing gates: setup 5); J before the gates median 0.9256, best 0.8809; best admitted J 0.8809. Rank agreement of f1 and f2 (Kendall tau of J before the gates) 0.5053 over 20 layouts. Admitted layouts below the f2 band's lower edge (1.0000): 14; below the same-path replay (1.3232): 15.
+**Signoff (f2, 6_report; every gate enforced):** 20 layouts (the top 10 of f1 and 10 more across its ranking): 20 completed, 0 failed; all gates pass on 16 (failing gates: setup 3, hold 2); J before the gates median 0.9256, best 0.8809; best admitted J 0.8809. Rank agreement of f1 and f2 (Kendall tau of J before the gates) 0.5053 over 20 layouts. Admitted layouts below the f2 band's lower edge (1.0000): 14; below the same-path replay (1.3232): 16.
 
 | admitted at f2 | program | seed | f1 J | f2 J |
 |---|---|---|---|---|
@@ -56,10 +56,10 @@ Below the baseline J 0.95: 12 layouts after the gates (12 distinct), 14 before t
 | bp_fe_top.ls7.n2.f2 | LS | None | 0.9017 | 0.8903 |
 | bp_fe_top.ls1.n1.f2 | LS | None | 0.9065 | 0.8920 |
 | bp_fe_top.ls3.n1.f2 | LS | None | 0.9019 | 0.8937 |
-| bp_fe_top.ls3.n3.f2 | LS | None | 0.8942 | 0.8971 |
 | bp_fe_top.ls6.n1.f2 | LS | None | 0.9010 | 0.9011 |
 | bp_fe_top.ls5.n2.f2 | LS | None | 0.9013 | 0.9085 |
 | bp_fe_top.ls7.n3.f2 | LS | None | 0.9161 | 0.9089 |
+| bp_fe_top.ls5.n3.f2 | LS | None | 0.8983 | 0.9133 |
 
 **Archive top-k (f2-admitted):** LS J=0.8809 (f2); LS J=0.8903 (f2); LS J=0.8920 (f2); LS J=0.8937 (f2); LS J=0.8971 (f2).
 
@@ -80,4 +80,4 @@ python scripts/report_trackb_dev.py --design bp_fe_top --runs runs/remote/seedB_
 
 ## Notes
 
-J before the gates ranks every completed layout. Every row is re-scored from its record under cost_v2_2026-09-28 (the campaign resumed rows written under the earlier rule): at f1 only a failed flow is enforced and 'timing gates passed' counts rows whose setup and hold WNS are within 0.02 ns of the baseline (frozen rule B.3); at f2 every gate is enforced (J = +inf on a failed gate).
+J before the gates ranks every completed layout. Every row is re-scored from its record under cost_v3_2026-09-29 (the campaign resumed rows written under the earlier rule): at f1 only a failed flow is enforced and 'timing gates passed' counts rows whose setup and hold WNS are within 0.02 ns of the reference (frozen rule B.3); at f2 every gate is enforced (J = +inf on a failed gate). The timing reference is the tool's own macro layout run through the candidates' path, median over the replay and its one-site shifts (user decision 2026-09-29): setup WNS -0.011 / hold WNS 0.015 ns at f1, -0.123 / -0.030 ns at f2; J stays normalized to the unmodified flow.

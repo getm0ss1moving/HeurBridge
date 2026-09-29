@@ -95,3 +95,18 @@ def test_legacy_fields_go_through_metrics_schema():
     r = cost.evaluate(rec, base())
     assert r.gates["setup"]["candidate"] == -0.50 and r.gates["hold"]["candidate"] == 0.10
     assert r.J == pytest.approx(1.0)
+
+
+def test_gate_reference_same_path_replay():
+    """cost_v3 (2026-09-29): Track-B timing gates compare with the same-path replay band (median), J unchanged."""
+    b = base()
+    ok = {"detailed_wirelength_um": 1000.0, "vias": 500, "gr_overflow_total": 2, "setup_tns_ns": -10.0,
+          "total_power_w": 0.010, "setup_wns_ns": -0.60, "hold_wns_ns": 0.08, "drc_violations": 0}
+    assert cost.evaluate(ok, b).gates["setup"]["status"] == "fail"             # -0.60 < -0.50 - 0.02
+    replays = [dict(ok, setup_wns_ns=w) for w in (-0.55, -0.62, -0.70, -0.58)]  # median -0.60
+    g = cost.with_gate_reference(b, replays)
+    assert g.timing["setup_wns_ns"] == pytest.approx(-0.60) and g.values == b.values
+    assert "median of 4" in g.sources["gate_reference"]
+    r_old, r_new = cost.evaluate(ok, b), cost.evaluate(ok, g)
+    assert r_new.gates["setup"]["status"] == "pass" and r_new.J == pytest.approx(r_old.J)   # same J, new gate
+    assert cost.with_gate_reference(b, []) is b                                  # nothing to refer to: unchanged

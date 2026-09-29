@@ -134,6 +134,7 @@ def _eval(ev: Evaluator, design, layout, base, run_id, work, ledger: Ledger, ext
 
 def rescore(row: dict, ev: Evaluator, base) -> dict:
     """A stored row scored under the current cost rule (cost_v2, 2026-09-28: at f1 only a failed flow is enforced;
+    cost_v3, 2026-09-29: Track B's timing gates refer to the same-path replay -- the caller passes that baseline;
     timing and DRC gates are reported).  The ledger keeps the values the row was written with."""
     if row.get("status") != "ok" or not isinstance(row.get("record"), dict) or base is None:
         return row

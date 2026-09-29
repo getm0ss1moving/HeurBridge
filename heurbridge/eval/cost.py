@@ -10,6 +10,9 @@ with y_base the per-design median over the baseline flow's seeds.  Gates:
 J_inf = +inf if an *enforced* gate fails (cost_v2, user decision 2026-09-28): at f0/f1 only a failed flow is
 enforced -- the timing and DRC gates are computed and reported ('enforced': False) but do not set J_inf, because
 f1 timing predicts f2 badly (reports/E3_calibration_dev_bp_fe_top_f1f2.md); at f2/f3 every gate is enforced.
+cost_v3 (user decision 2026-09-29), Track B: the timing gates compare with the tool-native macro layout run through
+the candidates' path (median over its replay and one-site shifts, ``with_gate_reference``), not with the unmodified
+flow, whose standard cells start from Hier-RTLMP's placement; J is still normalized to the unmodified flow.
 Missing inputs are *unchecked*, never passed: a missing J term makes J partial; a missing required gate makes the
 result inadmissible for the elite archive.
 """
@@ -110,6 +113,17 @@ class CostResult:
     def to_dict(self) -> dict:
         return {"J": self.J, "J_inf": self.J_inf, "partial": self.partial, "admissible": self.admissible,
                 "terms": self.terms, "gates": self.gates, "fidelity": self.fidelity, "unchecked": self.unchecked}
+
+
+def with_gate_reference(base: Baseline, records: list, what: str = "same-path replay") -> Baseline:
+    """A copy of ``base`` whose timing gates refer to ``records`` (median setup/hold WNS over them); the J
+    normalization (``values``) is unchanged.  Without usable records the timing reference stays ``base``'s."""
+    ref = Baseline.from_records(base.design, records) if records else None
+    if ref is None or not ref.timing:
+        return base
+    timing = dict(base.timing, **ref.timing)
+    return Baseline(base.design, dict(base.values), timing, base.n_seeds,
+                    dict(base.sources, gate_reference="%s, median of %d runs" % (what, len(records))))
 
 
 def _timing_gate(cand, base, guard=GUARD_NS):

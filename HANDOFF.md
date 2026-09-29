@@ -36,6 +36,10 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
   1.02-1.16 (bp_be_top), 1.001-1.009 (ariane136); the same-path replay fails the f2 timing gate on 4 of 5 designs
   -> proposal (open, user): reference the f2 gates to the same-path replay.
 - **Meeting brief** (private artifact, refreshed 19:00): https://claude.ai/artifact/WEwo1A2vGXnV5a55BrYJAr
+- **29 Sep afternoon (user decisions):** cost_v3 -- Track-B timing gates vs the same-path replay (median of replay
+  + shifts); 225's reproduction monitors stopped. **225's tmux sessions `agent1`, `agent2`, `tmp` belong to another
+  project (`/mnt/nas-new/home/<user>/taorui/auto_project`): never stop them.** Reproduction folders staged in
+  `/data/dzy/heura_repr/_to_delete_20260929/` on 224 (68 GB), 225 (31 GB), 231 (7 GB); the user runs the final rm.
 
 ---
 

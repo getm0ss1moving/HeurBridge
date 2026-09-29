@@ -35,7 +35,7 @@ def fmt(x, nd=4):
 
 
 def timing_ok(r) -> bool:
-    """Setup and hold gates pass (recorded gates; at f1 they are reported, not enforced, under cost_v2)."""
+    """Setup and hold gates pass (at f1 reported, not enforced; Track B: vs the same-path replay, cost_v3)."""
     g = r.get("gates") or {}
     return all((g.get(k) or {}).get("status") != "fail" for k in ("setup", "hold"))
 
@@ -43,9 +43,9 @@ def timing_ok(r) -> bool:
 def cost_version() -> str:
     import yaml
     try:
-        return str(yaml.safe_load((ROOT / "configs" / "cost.yaml").read_text()).get("version", "cost_v2"))
+        return str(yaml.safe_load((ROOT / "configs" / "cost.yaml").read_text()).get("version", "cost_v3"))
     except Exception:           # noqa: BLE001
-        return "cost_v2"
+        return "cost_v3"
 
 
 def tools_line(meta: dict) -> str:
@@ -82,10 +82,18 @@ def main():
     base = json.loads((rdir / "baseline.json").read_text())
     cfg = meta.get("config") or {}
     # ORFS campaigns resume rows written under earlier cost versions: every row is re-scored from its record under
-    # the current rule (cost_v2: at f1 only a failed flow is enforced, the timing gates are reported)
+    # the current rule (cost_v2: at f1 only a failed flow is enforced, the timing gates are reported; cost_v3: Track B
+    # gates vs the same-path replay, below)
     bases = {} if dev else {1: cost.Baseline.from_records(a.design, base["records"])}
     if not dev and (rdir / "baseline_f2.json").exists():
         bases[2] = cost.Baseline.from_records(a.design, json.loads((rdir / "baseline_f2.json").read_text())["records"])
+
+    # cost_v3 (2026-09-29): the timing gates compare with the same-path replay (median over replay and shifts)
+    for fid, led in ((1, "evals.jsonl"), (2, "evals_f2.jsonl")):
+        if fid in bases and (rdir / led).exists():
+            rr = [json.loads(l) for l in (rdir / led).read_text().splitlines() if '"M1_replay"' in l]
+            bases[fid] = cost.with_gate_reference(bases[fid], [r["record"] for r in rr if r.get("status") == "ok"
+                                                                and isinstance(r.get("record"), dict)])
 
     def rescored(r, fid):
         if fid not in bases or r.get("status") != "ok" or not isinstance(r.get("record"), dict):
@@ -232,8 +240,13 @@ def main():
                   "versions are kept under runs/seed_miniflow/%s/superseded_*." % a.design) if dev else
                  ("J before the gates ranks every completed layout. Every row is re-scored from its record under %s "
                   "(the campaign resumed rows written under the earlier rule): at f1 only a failed flow is enforced "
-                  "and 'timing gates passed' counts rows whose setup and hold WNS are within 0.02 ns of the baseline "
-                  "(frozen rule B.3); at f2 every gate is enforced (J = +inf on a failed gate)." % cost_version())},
+                  "and 'timing gates passed' counts rows whose setup and hold WNS are within 0.02 ns of the reference "
+                  "(frozen rule B.3); at f2 every gate is enforced (J = +inf on a failed gate). The timing reference is "
+                  "the tool's own macro layout run through the candidates' path, median over the replay and its "
+                  "one-site shifts (user decision 2026-09-29): setup WNS %s / hold WNS %s ns at f1, %s / %s ns at f2; "
+                  "J stays normalized to the unmodified flow." % (
+                      cost_version(), *[fmt((bases.get(f) and bases[f].timing or {}).get(k), 3)
+                                        for f in (1, 2) for k in ("setup_wns_ns", "hold_wns_ns")]))},
         gate_passed=None, out=out)
     print("REPORT_OK", out)
 
