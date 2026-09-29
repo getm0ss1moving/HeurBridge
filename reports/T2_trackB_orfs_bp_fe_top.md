@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Report | trackB_orfs_bp_fe_top |
-| Date | 2026-09-29 06:48 |
+| Date | 2026-09-29 11:40 |
 | Node | thinklab-105-224 |
 | Track | B (ORFS 2024-12-13 8ae3ae36); 8 threads |
 | Tool versions | native OpenROAD 676f8451bb-src; the flow's Yosys: /data/dzy/heura_repr/tools/yosys_048/bin/yosys (the Yosys version in the run's metadata is the one on PATH, not used) |
@@ -65,13 +65,11 @@ Below the baseline J 0.95: 12 layouts after the gates (12 distinct), 14 before t
 
 ## Failures (by name, counted as +inf in statistics)
 
+- GRT-0116 Global routing finished with congestion: 8
 - timeout in 5_1_grt: 7
-- GRT-0116 Global routing finished with congestion: 4
-- GPL-0307 RePlAce divergence detected. Re-run with a smaller max_phi_cof value.: 4
-- GRT-0116 Global routing finished with congestion. Check the congestion regions in the DRC Viewer.: 4
-- GPL-0307 RePlAce divergence detected: 3
-- DPL-0036 Detailed placement failed.: 2
-- GPL-0305 RePlAce diverged at newStepLength.: 1
+- GPL-0307 RePlAce divergence detected: 7
+- DPL-0036 Detailed placement failed: 2
+- GPL-0305 RePlAce diverged at newStepLength: 1
 
 ## Exact commands
 

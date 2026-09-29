@@ -78,6 +78,10 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
   fails the setup gate; its one-site shifts span 1.03-1.40. f1 and f2 agree only moderately (Kendall tau 0.51 over
   20 layouts). Descriptive: each candidate is one run, and a candidate's own one-site shifts could move it as much
   as M1's do, so no improvement is claimed before candidates get their own noise band.
+- bp_be_top (complete 11:39): 13 of 20 f2 layouts pass every gate, 9 below the unmodified flow, best 0.931 (local
+  search); the same-path replay is 1.103 and its shifts span 1.02-1.16 (band width 0.16); f1/f2 Kendall tau 0.78.
+  34 of 80 program runs fail at f1, all with GRT-0116 (global-routing congestion). Same caveat as bp_fe_top.
+  `reports/T2_trackB_orfs_bp_be_top.md`; the report now merges a tool message's variants into one failure line.
 
 ### Observed (T3.7 training data, 2026-09-28)
 - Algorithm R's rounds 1-2 trained on exactly round 0's pairs (checked on the fetched shards: x0, x1, weights and

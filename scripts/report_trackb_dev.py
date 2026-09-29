@@ -110,9 +110,10 @@ def main():
             name = rec.get("failure") or r.get("error") or r.get("status")
             if "design_config" in rec:                  # ORFS: the tool error or the step a timeout stopped
                 name = rec.get("failure") or orfs.failure_reason(rec.get("log_tail", ""), rec.get("returncode")) or name
-                fails[str(name).split(". ")[0]] += 1
+                fails[str(name).split(". ")[0].rstrip(".")] += 1         # one line per tool message
                 continue
-            fails[str(name).split(":")[0] + (": " + str(name).split("]")[0].split("[")[-1] if "[" in str(name) else "")] += 1
+            fails[(str(name).split(":")[0] + (": " + str(name).split("]")[0].split("[")[-1] if "[" in str(name) else "")
+                   ).split(". ")[0].rstrip(".")] += 1                    # one line per tool message
     # per program
     by = collections.defaultdict(list)
     for r in prog_rows:
