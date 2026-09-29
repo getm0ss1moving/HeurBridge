@@ -3,11 +3,11 @@
 | Field | Value |
 |---|---|
 | Report | trackB_orfs_bp_be_top |
-| Date | 2026-09-29 13:47 |
+| Date | 2026-09-29 21:57 |
 | Node | thinklab-105-224 |
 | Track | B (ORFS 2024-12-13 8ae3ae36); 8 threads |
-| Tool versions | native OpenROAD 676f8451bb-src; the flow's Yosys: /data/dzy/heura_repr/tools/yosys_048/bin/yosys (the Yosys version in the run's metadata is the one on PATH, not used) |
-| HeurBridge version / git | 0.14.0 / 9546dd4fc235383fe0df65b82f7db08ec8337ffe (9546dd4-20260928135525) |
+| Tool versions | native OpenROAD 676f8451bb-src; flow Yosys: Yosys 0.48 (/data/dzy/heura_repr/tools/yosys_048/bin/yosys) |
+| HeurBridge version / git | 0.14.0 / 5a70d06799f63858e13bfd99ab7c91c5c73a2ee8 (5a70d06-20260929142457) |
 | Metric conventions | timing setup_hold_v1_2026-09-22; metrics_v2_2026-09-22; HPWL centre (pin_offset_v2); cost cost_v3_2026-09-29 |
 | Feeds gate | T2 exit (archive A0, Track B; f2 verification in the f2 campaign) — descriptive |
 | Pre-registered test | - |
@@ -61,6 +61,26 @@ Below the baseline J 0.95: 2 layouts after the gates (2 distinct), 4 before the 
 | bp_be_top.M3.v2.s1.f2 | M3.v2 | 1 | 0.9708 | 0.9960 |
 | bp_be_top.ls6.n3.f2 | LS | None | 0.9672 | 1.0007 |
 
+**Warm-start demo** (J before the gates; the unmodified flow scores 0.95 at f1 and 1.00 at f2 by construction). The same macro layouts, once with every standard cell starting at the core centre (the flow's default for an imported layout) and once at its cluster's quadratic position (the imported layout's counterpart of Hier-RTLMP's warm start):
+
+| layout | f1 J, cells from the core centre | f1 J, warm start | f2 J, cells from the core centre | f2 J, warm start |
+|---|---|---|---|---|
+| M1replay | 1.0242 | 1.0891 | 1.1034 | 1.1139 |
+| M1replay.p1 | 1.0623 | 1.0385 | 1.1341 | 1.0612 |
+| M1replay.p2 | 0.9782 | 1.1912 | 1.0241 | 1.1670 |
+| M1replay.p3 | 1.1261 | eval_failed | 1.1623 | eval_failed |
+| ls7.n1 | 0.9178 | 1.0124 | 0.9306 | 1.0668 |
+| M2.v1.s0 | 0.8960 | eval_failed | 0.9500 | eval_failed |
+| M3.v1.s3 | 0.9255 | 1.1210 | 0.9522 | 1.1099 |
+
+**Candidate noise bands** (f2, J before the gates; the same one-site shifts as the tool's own layout). A candidate counts as better than the tool only if its whole band is below the tool's same-path band:
+
+| candidate | J (as run) | J after one-site / one-row shifts | band | all 4 below the tool's same-path band (min 1.0241) |
+|---|---|---|---|---|
+| bp_be_top.ls7.n1.f2 | 0.9306 | 0.9759, 0.9774, 1.0002 | 0.9306-1.0002 | yes |
+| bp_be_top.M2.v1.s0.f2 | 0.9500 | 1.0643, 1.0642, 1.0275 | 0.9500-1.0643 | no |
+| bp_be_top.M3.v1.s3.f2 | 0.9522 | 1.0386, 1.0022, 0.9779 | 0.9522-1.0386 | no |
+
 **Archive top-k (f2-admitted):** LS J=0.9306 (f2); LS J=0.9356 (f2); M2.v1 J=0.9500 (f2); M3.v1 J=0.9522 (f2); M3.v2 J=0.9659 (f2).
 
 ## Failures (by name, counted as +inf in statistics)
@@ -70,8 +90,8 @@ Below the baseline J 0.95: 2 layouts after the gates (2 distinct), 4 before the 
 ## Exact commands
 
 ```bash
-python scripts/run_seed_orfs.py --flow /data/dzy/heura_repr/third_party/ORFS-2024-12/flow --design nangate45/bp_be_top --seeds 5 --top 10 --spread 10 --ls 8 --base-runs 2 --timeout 7200 --base-timeout 28800 --noise-replays 3 --phase all --yosys /data/dzy/heura_repr/tools/yosys_048/bin/yosys
-python scripts/report_trackb_dev.py --design bp_be_top --runs runs/remote/seedB_orfs7_bp_be_top/runs/seed_orfs --archive runs/remote/seedB_orfs7_bp_be_top/archive_B0_orfs_bp_be_top --label orfs
+python scripts/run_seed_orfs.py --flow /data/dzy/heura_repr/third_party/ORFS-2024-12/flow --design nangate45/bp_be_top --seeds 5 --top 10 --spread 10 --ls 8 --base-runs 2 --timeout 7200 --base-timeout 28800 --noise-replays 3 --phase band --yosys /data/dzy/heura_repr/tools/yosys_048/bin/yosys
+python scripts/report_trackb_dev.py --design bp_be_top --runs runs/remote/seedB_bandws_bp_be_top/runs/seed_orfs --archive runs/remote/seedB_band_bp_be_top/archive_B0_orfs_bp_be_top --label orfs
 ```
 
 ## Notes

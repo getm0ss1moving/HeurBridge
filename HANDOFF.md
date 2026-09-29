@@ -4,6 +4,20 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
+## 2026-09-29 — Session 4 (22:00): new session; ibm12 done; bp_be_top report; watcher moved
+
+- **New session:** the scratchpad moved to `.../2d703b2c-f6de-4a89-b03d-30c5f7b1c57c/scratchpad`. The watcher
+  (`watch_events.sh`, its SEEN file), `e0_progress.py`, `e0_timing.py`, `e0split/` and the brief's source were
+  copied there. The brief artifact is updated by URL from now on.
+- **E0:** `e0x_eq_bigblue1_spec_ibm12` fetched and checked (ibm12 390 rows, rc 0). 14 of 16 parts are complete.
+  E0#3 = spec ibm08 (in `e0x_spec_bigblue1_ibm08`) + spec ibm12 (in `e0x_eq_bigblue1_spec_ibm12`).
+- **bigblue4 (22:00):** spec slices at 16 rows each (s2 needs 18), eq at 14-15, w45 at 13-14. Launch slices 6-7
+  when the watcher reports two finished slices (15:30 entry; code pinned to 5e1c009).
+- **Track B:** the bp_be_top report was regenerated (bands, and a warm start that hurts: see CHANGELOG). The
+  orfs7 seeding for swerv_wrapper, ariane136 and ariane133 continues (f1 rows 26/82/77).
+
+---
+
 ## 2026-09-29 — Session 3 (17:15): timing probes; DREAMPlace sketch demo on 231
 
 - **Timing probes** (224, `--phase timingprobe`; finals `seedB_tprobe2_bp_fe_top`, `seedB_tprobe_bp_be_top`;

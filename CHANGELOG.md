@@ -6,6 +6,21 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 
 ## [Unreleased]
 
+### Reports (29 Sep 22:00): bp_be_top noise bands and warm-start demo; E0 ibm12 complete
+- `reports/T2_trackB_orfs_bp_be_top.md` regenerated from the band and warm-start jobs (merged locally in
+  `runs/remote/seedB_bandws_bp_be_top`; descriptive).
+- **Bands.** The tool's own layout through our path spans 1.024-1.162 at f2. Only the best candidate's band
+  (0.931-1.000) lies wholly below it; the second and third reach 1.064 and 1.039 under some shifts.
+- **Warm start (cells at cluster quadratic positions) hurts on bp_be_top**, unlike bp_fe_top:
+  - the tool's layout: 1.103 / 1.134 / 1.024 / 1.162 -> 1.114 / 1.061 / 1.167 / GRT failure;
+  - the candidates: 0.931 -> 1.067, 0.950 -> GRT failure (GRT-0116 congestion), 0.952 -> 1.110.
+  A quadratic placement clumps the cells (the DREAMPlace demo measured a spread of 0.06-0.11 of the core against
+  0.24-0.30 after placement), and on the denser bp_be_top the incremental global placement does not recover. So
+  the quadratic warm start is not adopted for Track B: it helps the tool's own layout on one design and hurts or
+  breaks every layout on the other.
+- E0: `e0x_eq_bigblue1_spec_ibm12` done (ibm12: 390 rows = 65 x 6, rc 0, no duplicate, one budget 91.268 s).
+  14 of 16 parts complete; bigblue4 (both protocols) remains.
+
 ### Demo (owner's request, 29 Sep; 231 GPU 4): DREAMPlace started from the bridge's cell sketch -- no effect
 - `scripts/demo_sketch_start.py` (+ `--report`), report `reports/demo_sketch_start.md`, job `demo_sketch_ibm`.
 - **Setup.** The E0 demo's 64 bridge-refined macro layouts (ibm04/ibm06; the first case reproduces the E0 demo's J to

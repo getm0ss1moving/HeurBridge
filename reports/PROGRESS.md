@@ -1,12 +1,12 @@
 # HeurBridge-PR — progress against the task list (T0–T7)
 
-Status as of **2026-09-29 17:50 CST**, code: see `git log` (v0.14.0 + unreleased). Measured against
+Status as of **2026-09-29 22:10 CST**, code: see `git log` (v0.14.0 + unreleased). Measured against
 `HEURBRIDGE_TASKS.md` (Part C tasks, Part D gates). Session history: `HANDOFF.md`; every code change: `CHANGELOG.md`.
 
 ## 1. Summary
 
 - **Position on the critical path:** T0 ✅ → T1 ✅ → T2 (Track-B seeding: 2 of 5 designs complete) → T3 ✅ (exit
-  gate passed) → **T4 = full E0 / gate G0′ running: 13 of 16 design × protocol parts complete (16:00)** (blinded: no result
+  gate passed) → **T4 = full E0 / gate G0′ running: 14 of 16 design × protocol parts complete (22:00; only bigblue4 left)** (blinded: no result
   has been read) → T5 → T6. **G0′ expected the night of 30 Sep – morning of 1 Oct** (bigblue4 sets the date:
   ≈ 4.75 h per case, measured today).
 - **Roughly 42 % of the planned effort is done** (weighted by the task list's own duration estimates, §5). The done
@@ -19,10 +19,9 @@ Status as of **2026-09-29 17:50 CST**, code: see `git log` (v0.14.0 + unreleased
 
 | Server | Job | Task | State | Expected |
 |---|---|---|---|---|
-| 225 | `e0x_eq_bigblue1_spec_ibm12` → ibm12 | **full E0**, E0#3 held-out IBM (ibm08 done) | ibm12 245 of 390 rows | ≈ 18:00–19:00 today |
-| 225 GPUs 0–3 | `e0x_{spec,eq}_bigblue4` (slices 0–3), `e0x_{spec,eq}_bigblue4_w45` (slices 4–5) | **full E0** bigblue4, whole on 225: 30 legal sources (of 80), budgets 2259 / 2231 s, memory-lean RUDY (`HB_RUDY_IMPL=bmm`) | 12 slices (sources 0–22), first case of each 3–4 of 6 rows; ≈ 4.75 h per case (placer ≈ 10 min per row, memetic ≈ 44 min, repertoire ≈ 58 min) | 3-case slices end ≈ 01:00–03:00, the rest ≈ 06:00–07:30; slices 6–7 (sources 22–30) start as the first ones end (watcher) → **bigblue4 ≈ 30 Sep 22:00 – 1 Oct 01:00** |
-| 224 (≤ 8 OpenROAD) | `seedB_orfs7_{swerv_wrapper, ariane136, ariane133}` | T2.7 Track-B seeding (bp_fe_top, bp_be_top **complete**) | running since 28 Sep 13:55 | several days |
-| 224 | `seedB_band_bp_be_top`, `seedB_ws_{bp_fe_top,bp_be_top}` | Track-B plan (your go-ahead): the best candidates' own one-site-shift bands; standard-cell warm start demo (`seedB_band_bp_fe_top` done 15:56) | started 14:25–14:32 | ≈ 1 day |
+| 225 GPUs 0–3 | `e0x_{spec,eq}_bigblue4` (slices 0–3), `e0x_{spec,eq}_bigblue4_w45` (slices 4–5) | **full E0** bigblue4, whole on 225: 30 legal sources (of 80), budgets 2259 / 2231 s, memory-lean RUDY (`HB_RUDY_IMPL=bmm`) | 12 slices (sources 0–22) at 13–16 rows of their 18–24 (22:00); ≈ 4.2–4.6 h per case | 3-case slices end ≈ 23:30–02:00, the rest ≈ 03:30–06:00; slices 6–7 (sources 22–30) start as the first ones end (watcher) → **bigblue4 ≈ 30 Sep evening–night** |
+| 224 (≤ 8 OpenROAD) | `seedB_orfs7_{swerv_wrapper, ariane136, ariane133}` | T2.7 Track-B seeding (bp_fe_top, bp_be_top **complete**) | f1 rows 26 / 82 / 77 (22:00), then local search and f2 | several days |
+| 224 | — | Track-B plan: noise bands and warm-start demos done for bp_fe_top and bp_be_top (reports regenerated) | done | done |
 
 **Done in the full E0 (checked for completeness only):** adaptec1, adaptec2, adaptec3, adaptec4, bigblue1 in both
 protocols (390 rows = 65 cases × 6 partners each), ibm08 (480 rows), bigblue3 in both protocols (300 rows = 50 × 6
@@ -190,6 +189,13 @@ Received 2026-09-29 (16:00): **the T3.9 extension is adopted**. Parts used only 
 they leave G0′ unchanged. Anything that hands a bridge's sketch to another tool's standard-cell placement or global
 routing waits for G0′. The first package, the bridge-to-bridge hand-off, is written; nothing on the evaluation path
 uses it.
+
+**Track-B demos, bp_be_top (22:00; `reports/T2_trackB_orfs_bp_be_top.md`).**
+- Only the best candidate's noise band (0.931-1.000) lies wholly below the tool's same-path band (1.024-1.162).
+- The quadratic warm start hurts on bp_be_top: the candidates go from 0.93-0.95 to 1.07-1.11, two of seven runs
+  fail global routing (congestion), and the tool's layout does not improve. On bp_fe_top it had helped the tool's
+  layout. My recommendation, needing no change since the protocol does not use it: do not adopt the quadratic
+  warm start for Track B.
 
 **DREAMPlace sketch demo (done 17:34, `reports/demo_sketch_start.md`): no effect.**
 - Mean J 0.4822 with cells starting at the die centre, 0.4828 from the bridge's sketch, 0.4948 from a quadratic
