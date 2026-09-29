@@ -282,10 +282,12 @@ def parse_macro_slacks(text: str) -> dict:
     return out
 
 
-def macro_pin_slacks(r: OrfsRun, macro_names, out_tsv: Path, odb: str = "3_place.odb", sdc: str = "3_place.sdc",
+def macro_pin_slacks(r: OrfsRun, macro_names, out_tsv: Path, odb: str = "3_place.odb", sdc: str = "2_floorplan.sdc",
                      timeout: int = 1800) -> dict:
     """Timing probe on a finished run of ``r`` (``stage`` 'place' or later): placement-parasitic setup and hold slack
     at every signal pin of ``macro_names`` (exact database names), through ORFS's own environment (``make run``).
+    The constraints are 2_floorplan.sdc, the file every placement step reads (3_place.sdc is a copy of it that
+    the 3_place.odb target does not build).
     Returns ``parse_macro_slacks`` of the table written to ``out_tsv``; raises when the probe fails."""
     out_tsv = Path(out_tsv).resolve()
     names = out_tsv.with_suffix(".names")
