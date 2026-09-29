@@ -6,6 +6,13 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 
 ## [Unreleased]
 
+### Docs / housekeeping (29 Sep 15:30)
+- `.gitignore`: local proposal documents (`HEURBRIDGE_PLAN_*.md`) are unpublished research documents and stay out
+  of the public repository, like the task list and the proposal.
+- `reports/PROGRESS.md` 15:30: full E0 12 of 16 parts complete (bigblue3 equal guard: 300 rows, one budget over its
+  4 slices, rc 0, no duplicate case); bigblue4 measured at ~4.75 h per case (ETA 30 Sep 22:00 - 1 Oct 01:00); the
+  afternoon's decisions recorded (all bigblue4 slices kept, B.3 frozen, Track-B plan under way).
+
 ### Added (Track B, user decisions 2026-09-29: B.3 stays frozen; apply the Track-B plan)
 - **Candidate noise bands** (`run_seed_orfs.py --phase band --band-top K`): the K best f2-admitted candidates are
   shifted as a whole by one site (+x, -x) or one row (+y) and re-run through f2, exactly like M1's same-path

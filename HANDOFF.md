@@ -4,6 +4,24 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
+## 2026-09-29 — Session 3 (15:30): bigblue3 equal guard done; bigblue4 timing; slices 6-7 launch rule
+
+- **Done and checked:** `e0x_eq_bigblue3` (231, 14:44): fetched (`hbv.py fetch --port 231`; 231's vault is in RAM,
+  fetch promptly), 4 slice dirs `eq_bigblue3{,_s1,_s2,_s3}` = 300 rows = 50 cases x 6 partners, rc 0, no duplicate,
+  one budget 846.566 s (`cache:measured`). With ibm08, adaptec1-4 and bigblue1 x 2: 12 of 16 parts complete.
+- **bigblue4 timing (rows' wall_s and file times only):** per case ~4.75 h = placer ~10 min per row, memetic ~44 min,
+  repertoire ~58 min, bridge-type partners ~43 min + scoring. Slice sizes (30 sources / 8): 4,4,3,4 | 4,3 | 4,4.
+  The 3-case slices (s2, s5) end ~01:00-03:00 on 30 Sep, the others ~06:00-07:30.
+- **Launch rule for slices 6-7** (keeps at most 12 bigblue4 slices on 225): after two slices have finished (the
+  watcher prints `225 SLICE_DONE <run> <dir>`), `e0split/make_bigblue4.py wave spec 6,7 2259.007` then
+  `e0split/relaunch.py 225 plan_e0x_spec_bigblue4_w67.json`; after the next two, the same with `eq 6,7 2230.7`.
+  Check `free -g` first (available >= ~40 GB). Add the new job names to `watch_extra_225.txt`.
+- **Watcher:** also reports finished bigblue4 slices; a wave job's empty prepare dir is no longer flagged stale.
+- **Owner's question (downstream-aware bridges):** answered with a gated plan extending T3.9, in the meeting brief
+  (version 9) and in a local proposal document (`HEURBRIDGE_PLAN_*.md`, gitignored: unpublished). Open decision.
+
+---
+
 ## 2026-09-28 — Session 3 (20:00): full E0 restarted as slices (user-approved); meeting brief
 
 - **Why:** the full E0 is CPU-bound -- memetic and repertoire each spend the bridge's whole budget per case, and

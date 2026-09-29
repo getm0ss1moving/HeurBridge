@@ -1,13 +1,14 @@
 # HeurBridge-PR — progress against the task list (T0–T7)
 
-Status as of **2026-09-29 13:10 CST**, code `7ecfc68` (v0.14.0 + unreleased). Measured against
+Status as of **2026-09-29 15:30 CST**, code `a8f3111` (v0.14.0 + unreleased). Measured against
 `HEURBRIDGE_TASKS.md` (Part C tasks, Part D gates). Session history: `HANDOFF.md`; every code change: `CHANGELOG.md`.
 
 ## 1. Summary
 
 - **Position on the critical path:** T0 ✅ → T1 ✅ → T2 (Track-B seeding: 2 of 5 designs complete) → T3 ✅ (exit
-  gate passed) → **T4 = full E0 / gate G0′ running: 10 of 16 design × protocol parts complete (13:47)** (blinded: no result
-  has been read) → T5 → T6. **G0′ expected 30 Sep late evening – 1 Oct morning** (bigblue4 sets the date).
+  gate passed) → **T4 = full E0 / gate G0′ running: 12 of 16 design × protocol parts complete (15:30)** (blinded: no result
+  has been read) → T5 → T6. **G0′ expected the night of 30 Sep – morning of 1 Oct** (bigblue4 sets the date:
+  ≈ 4.75 h per case, measured today).
 - **Roughly 42 % of the planned effort is done** (weighted by the task list's own duration estimates, §5). The done
   part is the infrastructure: toolchains on the servers, data, evaluators f0/f1/f2, the 7 heuristic families,
   archive, the bridge and its training. The remaining part is mostly the **experiments** (E0, LLM evolution,
@@ -18,16 +19,26 @@ Status as of **2026-09-29 13:10 CST**, code `7ecfc68` (v0.14.0 + unreleased). Me
 
 | Server | Job | Task | State | Expected |
 |---|---|---|---|---|
-| 225 GPUs 0–3 | `e0x_{spec,eq}_adaptec1` | **full E0** adaptec1 | 380 / 376 of 390 rows | ≈ 13:30 today |
-| 225 | `e0x_spec_bigblue1_ibm08` → ibm08, `e0x_eq_bigblue1_spec_ibm12` → ibm12 | **full E0**, E0#3 held-out IBM designs (bigblue1 done in both jobs) | ibm08 388 of 480 rows; ibm12 170 of 390 | ibm08 ≈ 15:00, ibm12 ≈ 18:00 today |
-| 225 | `e0x_{spec,eq}_bigblue4` (slices 0–3), `e0x_{spec,eq}_bigblue4_w45` (slices 4–5) | **full E0** bigblue4, whole on 225: 30 legal sources (of 80), budgets 2259 / 2231 s, memory-lean RUDY (`HB_RUDY_IMPL=bmm`) | 12 slices running (sources 0–22), 1–2 rows each after 2 h: ≈ 4 h per case | slices 0–5 ≈ 30 Sep 01:00–05:00; slices 6–7 (sources 22–30) start then (memory) → **bigblue4 ≈ 30 Sep 19:00–22:00** |
-| 231 GPU 4 | `e0x_eq_bigblue3` (4 slices), `e0x_spec_bigblue3_r2` (sources 25–38, re-run of the OOM-killed slice) | **full E0** bigblue3 (spec slices 0, 1, 3 done: 37 of 50 cases) | eq 275 of 300 rows; spec re-run 64 of 78 | ≈ 14:30–16:00 today |
-| 224 (3 jobs × 8 threads) | `seedB_orfs7_{swerv_wrapper, ariane136, ariane133}` | T2.7 Track-B seeding (bp_fe_top, bp_be_top **complete**, reports committed) | f1 rows 21 / 77 / 59; noise-band replays done | several days |
+| 225 | `e0x_eq_bigblue1_spec_ibm12` → ibm12 | **full E0**, E0#3 held-out IBM (ibm08 done) | ibm12 245 of 390 rows | ≈ 18:00–19:00 today |
+| 225 GPUs 0–3 | `e0x_{spec,eq}_bigblue4` (slices 0–3), `e0x_{spec,eq}_bigblue4_w45` (slices 4–5) | **full E0** bigblue4, whole on 225: 30 legal sources (of 80), budgets 2259 / 2231 s, memory-lean RUDY (`HB_RUDY_IMPL=bmm`) | 12 slices (sources 0–22), first case of each 3–4 of 6 rows; ≈ 4.75 h per case (placer ≈ 10 min per row, memetic ≈ 44 min, repertoire ≈ 58 min) | 3-case slices end ≈ 01:00–03:00, the rest ≈ 06:00–07:30; slices 6–7 (sources 22–30) start as the first ones end (watcher) → **bigblue4 ≈ 30 Sep 22:00 – 1 Oct 01:00** |
+| 231 GPU 4 | `e0x_spec_bigblue3_r2` (sources 25–38, re-run of the OOM-killed slice) | **full E0** bigblue3 spec (slices 0, 1, 3 done: 37 of 50 cases) | 73 of 78 rows | ≈ 16:00–17:00 today |
+| 224 (≤ 8 OpenROAD) | `seedB_orfs7_{swerv_wrapper, ariane136, ariane133}` | T2.7 Track-B seeding (bp_fe_top, bp_be_top **complete**) | running since 28 Sep 13:55 | several days |
+| 224 | `seedB_band_{bp_fe_top,bp_be_top}`, `seedB_ws_{bp_fe_top,bp_be_top}` | Track-B plan (your go-ahead): the best candidates' own one-site-shift bands; standard-cell warm start demo | started 14:25–14:32 | ≈ 1 day |
 
-**Done in the full E0 (both protocols, checked for completeness only):** adaptec2, adaptec3, adaptec4, bigblue1 —
-390 rows = 65 cases × 6 partners each, exit code 0, no duplicate case.
+**Done in the full E0 (checked for completeness only):** adaptec1, adaptec2, adaptec3, adaptec4, bigblue1 in both
+protocols (390 rows = 65 cases × 6 partners each), ibm08 (480 rows), bigblue3 equal guard (300 rows = 50 × 6, one
+budget 846.6 s over its 4 slices); every one exit code 0, no duplicate case.
 
-**What I just did (28 Sep 19:50 – 29 Sep 13:00):**
+**What I did this afternoon (29 Sep 13:00 – 15:30):**
+- cost_v3 (your decision): Track-B timing gates referenced to the same-path replay; both Track-B reports re-scored.
+- Track-B plan started on 224: candidate noise bands (`--phase band`) and the standard-cell warm start for imported
+  macro layouts (`--phase warmstart`, cells from cluster quadratic positions).
+- Fetched and checked bigblue3 (equal guard). Measured bigblue4's per-case time (≈ 4.75 h, was estimated at 4 h)
+  and taught the watcher to report finished bigblue4 slices, so slices 6–7 start as soon as memory frees.
+- Your question on downstream-aware bridges: a proposal extending T3.9 is in the meeting brief (kept local, not in
+  this public repository); it waits for your decision (§6).
+
+**Earlier (28 Sep 19:50 – 29 Sep 13:00):**
 - **Restarted the full E0 as slices** (your approval, 19:52): every component keeps its sources, partners and first
   measured time budget; the recomputed random-control scale matched the original probe's exactly on all five
   restarted designs.
@@ -89,7 +100,7 @@ Legend: ✅ done · 🔄 running · ⚠️ done with a limitation · ⏸ waiting
 | T3.5–T3.6 loss, training, validation | ✅ | `heurbridge/bridge/train.py` |
 | T3.7 Algorithm R | ✅ | round 0 promoted (T3 exit gate: J 0.4815 vs raw 0.8870, p = 2.6e-9), round 1 promoted (0.4756, p = 1.2e-4), round 2 not promoted → final checkpoint round 1 (`reports/T3_algorithmR_trackA.md`) |
 | T3.8 guarded inference | ✅ | `heurbridge/bridge/sample.py` |
-| T3.9 cell / route bridges | ⬜ | only after G0′ passes (task list) |
+| T3.9 cell / route bridges | ⬜ | only after G0′ passes (task list); a proposal to extend it (kept local) waits for your decision |
 | T3.10 unit tests 1–6 | ✅ | `tests/test_bridge.py` (138 tests pass in total) |
 
 ### T4 — E0 partner ablation, gate G0′ 🔄
@@ -99,7 +110,7 @@ Legend: ✅ done · 🔄 running · ⚠️ done with a limitation · ⏸ waiting
 | partners + E0 driver | ✅ | `heurbridge/partners.py`, `scripts/run_e0.py` |
 | development E0 (local, CPU) | ✅ | `reports/E0_partner_ablation_dev*.md` (suggestive only) |
 | E0 demo (225) | ✅ | positive direction: the co-trained bridge has the lowest J under both protocols (`reports/E0_demo_spec.md`, `reports/E0_demo_eq.md`); much of the gain comes from the f1 guard (random direction + guard is close), the learned direction still beats it (p = 2.3e-9) |
-| **full E0 (confirmatory, G0′)** | 🔄 | pre-registered (`reports/E0_preregistration.md`, ledger E0#1–#3) and running on 225 (4 GPUs) + 231 (GPU 4): ISPD2005 7 designs × both protocols, ibm08/ibm12; the pooled G0′ test (E0#1) when all runs end. Revised 19:00: CPU-bound and slower than estimated; `run_e0.py --slice` (commit 9f38847) splits a component over processes under the same protocol; restarted as slices 28 Sep 19:52 (approved). 29 Sep 13:00: adaptec2, adaptec3, adaptec4, bigblue1 complete in both protocols; adaptec1, bigblue3, ibm08/ibm12 finish today; bigblue4 (30 sources, ≈ 4 h per case) ≈ 30 Sep 19:00–22:00 → pooled G0′ right after |
+| **full E0 (confirmatory, G0′)** | 🔄 | pre-registered (`reports/E0_preregistration.md`, ledger E0#1–#3) and running on 225 (4 GPUs) + 231 (GPU 4): ISPD2005 7 designs × both protocols, ibm08/ibm12; the pooled G0′ test (E0#1) when all runs end. Revised 19:00: CPU-bound and slower than estimated; `run_e0.py --slice` (commit 9f38847) splits a component over processes under the same protocol; restarted as slices 28 Sep 19:52 (approved). 29 Sep 15:30: adaptec1–4 and bigblue1 complete in both protocols, ibm08 and bigblue3 (equal guard) complete; bigblue3 (task-list protocol) and ibm12 finish today; bigblue4 (30 sources, ≈ 4.75 h per case) ≈ 30 Sep 22:00 – 1 Oct 01:00 → pooled G0′ right after |
 
 ### T5 — LLM evolution ⏸ (after G0′)
 
@@ -170,16 +181,16 @@ tests, both Track-B reports re-scored); **225's reproduction monitors stopped** 
 the other tmux sessions there, `agent1`, `agent2`, `tmp`, belong to another project -- `taorui/auto_project` -- and
 were left alone) and 225's reproduction folders staged for deletion (31 GB; result tables and docs kept).
 
+Received 2026-09-29 (15:00): **keep all bigblue4 slices running**; **B.3 stays frozen** (hold no more than 0.02 ns
+worse than the reference); **go ahead with the Track-B improvement plan** (candidate bands and the warm-start demo
+are running; next: timing-aware macro cost, f1 timing-aware local search, the Track-B bridge after G0′).
+
 Open:
-1. **Stop the 4 newest bigblue4 slices?** (`e0x_{spec,eq}_bigblue4_w45`, launched 11:25.) 12 bigblue4 slices bring
-   225 to within ~17 GB of its memory at peaks; stopping them does not change bigblue4's finish (the last slices
-   wait for memory either way) and removes the risk. They run protected meanwhile (first OOM victims; killed placer
-   runs are re-run). My recommendation: stop them.
-2. **Hold gate under cost_v3:** on bp_be_top the same-path replay has +0.055 ns hold slack, so B.3's "no more
-   than 0.02 ns worse" now fails candidates that still have positive hold slack (13 → 9 admitted). Keep B.3 as
-   frozen, or check hold only for new violations (cand ≥ 0)? A change to a frozen rule is your call.
-3. Housekeeping: back up `~/.config/heurbridge/vault.key` (without it the server vault cannot be decrypted); ask
-   the admin about the faulty GPUs on 224 / 227.
+1. **Downstream-aware bridges** (your question, 29 Sep): a gated plan extending T3.9 is in the meeting brief (kept
+   local as an unpublished research document). Adopt it, to start after G0′? May I write its first code package (no
+   server compute) now? Which endpoints (proposed: signoff J on the ORFS designs; placer J on ISPD2005)?
+2. Housekeeping: back up `~/.config/heurbridge/vault.key` (without it the server vault cannot be decrypted); ask
+   the admin about the faulty GPUs on 224 / 227; run the final delete of the staged reproduction folders.
 
 ## 7. Deviations and known limitations
 
