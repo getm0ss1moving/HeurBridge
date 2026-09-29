@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Report | trackB_orfs_bp_fe_top |
-| Date | 2026-09-29 16:05 |
+| Date | 2026-09-29 16:30 |
 | Node | thinklab-105-224 |
 | Track | B (ORFS 2024-12-13 8ae3ae36); 8 threads |
 | Tool versions | native OpenROAD 676f8451bb-src; flow Yosys: Yosys 0.48 (/data/dzy/heura_repr/tools/yosys_048/bin/yosys) |
@@ -61,6 +61,18 @@ Below the baseline J 0.95: 12 layouts after the gates (12 distinct), 14 before t
 | bp_fe_top.ls7.n3.f2 | LS | None | 0.9161 | 0.9089 |
 | bp_fe_top.ls5.n3.f2 | LS | None | 0.8983 | 0.9133 |
 
+**Warm-start demo** (J before the gates; the unmodified flow scores 0.95 at f1 and 1.00 at f2 by construction). The same macro layouts, once with every standard cell starting at the core centre (the flow's default for an imported layout) and once at its cluster's quadratic position (the imported layout's counterpart of Hier-RTLMP's warm start):
+
+| layout | f1 J, cells from the core centre | f1 J, warm start | f2 J, cells from the core centre | f2 J, warm start |
+|---|---|---|---|---|
+| M1replay | 0.9591 | 0.9405 | 1.3232 | 1.0359 |
+| M1replay.p1 | 0.9692 | 0.9459 | 1.4049 | 0.9858 |
+| M1replay.p2 | 0.9502 | 0.9492 | 1.1350 | 0.9697 |
+| M1replay.p3 | 0.9461 | 0.9434 | 1.0330 | 1.0094 |
+| ls0.n4 | 0.9001 | 0.9043 | 0.8809 | 0.8877 |
+| ls7.n2 | 0.9017 | 0.9132 | 0.8903 | 0.9199 |
+| ls1.n1 | 0.9065 | 0.9066 | 0.8920 | 0.8918 |
+
 **Candidate noise bands** (f2, J before the gates; the same one-site shifts as the tool's own layout). A candidate counts as better than the tool only if its whole band is below the tool's same-path band:
 
 | candidate | J (as run) | J after one-site / one-row shifts | band | all 4 below the tool's same-path band (min 1.0330) |
@@ -83,7 +95,7 @@ Below the baseline J 0.95: 12 layouts after the gates (12 distinct), 14 before t
 
 ```bash
 python scripts/run_seed_orfs.py --flow /data/dzy/heura_repr/third_party/ORFS-2024-12/flow --design nangate45/bp_fe_top --seeds 5 --top 10 --spread 10 --ls 8 --base-runs 2 --timeout 7200 --base-timeout 28800 --noise-replays 3 --phase band --yosys /data/dzy/heura_repr/tools/yosys_048/bin/yosys
-python scripts/report_trackb_dev.py --design bp_fe_top --runs runs/remote/seedB_band_bp_fe_top/runs/seed_orfs --archive runs/remote/seedB_band_bp_fe_top/archive_B0_orfs_bp_fe_top --label orfs
+python scripts/report_trackb_dev.py --design bp_fe_top --runs runs/remote/seedB_bandws_bp_fe_top/runs/seed_orfs --archive runs/remote/seedB_band_bp_fe_top/archive_B0_orfs_bp_fe_top --label orfs
 ```
 
 ## Notes
