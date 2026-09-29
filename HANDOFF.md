@@ -4,6 +4,22 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
+## 2026-09-29 — Session 3 (17:15): timing probes; DREAMPlace sketch demo on 231
+
+- **Timing probes** (224, `--phase timingprobe`; finals `seedB_tprobe2_bp_fe_top`, `seedB_tprobe_bp_be_top`;
+  the first `seedB_tprobe_bp_fe_top` failed on `3_place.sdc`, fixed in c1447c2). No macro pin is near-critical
+  (see CHANGELOG), so no weighted campaign was run. The launch recipe for Track-B jobs is `hbv.py run --port 224
+  --run <job> --resume-from <latest final of the design> --snapshot 1800 --exclude "$X"` with the trackb.sh
+  command; `$X` is in the 15:30 entry's source, HANDOFF of the band/ws launch.
+- **DREAMPlace sketch demo** (owner's request; 231 GPU 4 by the owner's choice): job `demo_sketch_ibm`,
+  `scripts/demo_sketch_start.py`. Inputs are the new small data bundle `sketch_demo_inputs` (IBM seeding baselines
+  and clusters, the E0 demo's rows and source caches for ibm04/ibm06), plus `bridge_final` (= the round-1
+  checkpoint the E0 demo used, same sha256) and `eda_harness`. Arms: centre / sketch / quadratic. The first case
+  reproduces the E0 demo's J to 1e-8. Fetch `hbv.py fetch --port 231 --run demo_sketch_ibm` (231's vault is in
+  RAM), summary at `runs/demo_sketch/summary.json`.
+
+---
+
 ## 2026-09-29 — Session 3 (16:30): spec bigblue3 done; stage hand-off written; code versions of bigblue4
 
 - **Done and checked:** `e0x_spec_bigblue3_r2` (231, 15:50). The task-list bigblue3 component is `e0x_spec_bigblue3`

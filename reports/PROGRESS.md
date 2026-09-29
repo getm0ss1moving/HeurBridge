@@ -1,6 +1,6 @@
 # HeurBridge-PR — progress against the task list (T0–T7)
 
-Status as of **2026-09-29 16:30 CST**, code: see `git log` (v0.14.0 + unreleased). Measured against
+Status as of **2026-09-29 17:15 CST**, code: see `git log` (v0.14.0 + unreleased). Measured against
 `HEURBRIDGE_TASKS.md` (Part C tasks, Part D gates). Session history: `HANDOFF.md`; every code change: `CHANGELOG.md`.
 
 ## 1. Summary
@@ -22,6 +22,7 @@ Status as of **2026-09-29 16:30 CST**, code: see `git log` (v0.14.0 + unreleased
 | 225 | `e0x_eq_bigblue1_spec_ibm12` → ibm12 | **full E0**, E0#3 held-out IBM (ibm08 done) | ibm12 245 of 390 rows | ≈ 18:00–19:00 today |
 | 225 GPUs 0–3 | `e0x_{spec,eq}_bigblue4` (slices 0–3), `e0x_{spec,eq}_bigblue4_w45` (slices 4–5) | **full E0** bigblue4, whole on 225: 30 legal sources (of 80), budgets 2259 / 2231 s, memory-lean RUDY (`HB_RUDY_IMPL=bmm`) | 12 slices (sources 0–22), first case of each 3–4 of 6 rows; ≈ 4.75 h per case (placer ≈ 10 min per row, memetic ≈ 44 min, repertoire ≈ 58 min) | 3-case slices end ≈ 01:00–03:00, the rest ≈ 06:00–07:30; slices 6–7 (sources 22–30) start as the first ones end (watcher) → **bigblue4 ≈ 30 Sep 22:00 – 1 Oct 01:00** |
 | 224 (≤ 8 OpenROAD) | `seedB_orfs7_{swerv_wrapper, ariane136, ariane133}` | T2.7 Track-B seeding (bp_fe_top, bp_be_top **complete**) | running since 28 Sep 13:55 | several days |
+| 231 GPU 4 | `demo_sketch_ibm` (your choice of server, 17:00) | DREAMPlace demo: the same 64 bridge-refined macro layouts of the E0 demo (ibm04/ibm06), cells starting at the die centre / the bridge's cluster sketch / a quadratic placement (exploratory) | first case reproduces the E0 demo's J to 1e-8 | ≈ 17:45 |
 | 224 | `seedB_band_bp_be_top`, `seedB_ws_{bp_fe_top,bp_be_top}` | Track-B plan (your go-ahead): the best candidates' own one-site-shift bands; standard-cell warm start demo (`seedB_band_bp_fe_top` done 15:56) | started 14:25–14:32 | ≈ 1 day |
 
 **Done in the full E0 (checked for completeness only):** adaptec1, adaptec2, adaptec3, adaptec4, bigblue1 in both
@@ -190,6 +191,17 @@ Received 2026-09-29 (16:00): **the T3.9 extension is adopted**. Parts used only 
 they leave G0′ unchanged. Anything that hands a bridge's sketch to another tool's standard-cell placement or global
 routing waits for G0′. The first package, the bridge-to-bridge hand-off, is written; nothing on the evaluation path
 uses it.
+
+Received 2026-09-29 (17:00): **run the DREAMPlace sketch demo now, on 231's GPU 4** (not on 225, where E0's
+wall-clock-budgeted partners run).
+
+Track-B timing plan, 17:10:
+- The timing probe (the unmodified flow to 3_place, then slack at every macro pin) finds no near-critical macro
+  pin. bp_fe_top's worst is +0.457 ns at a 1.8 ns clock, bp_be_top's +0.465 ns at 2.6 ns; no macro pin has
+  negative hold slack.
+- The timing-aware local search, replayed on both campaigns, would not have changed an accepted move.
+- So neither mechanism has leverage on these two designs, and no weighted campaign is run. Both stay available,
+  off by default, for designs whose macros are on critical paths.
 
 Open:
 1. Endpoints of the extension's tests (proposed: signoff J on the ORFS designs; placer J on ISPD2005) -- fixed in
