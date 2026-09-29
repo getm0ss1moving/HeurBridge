@@ -1,13 +1,14 @@
 # HeurBridge-PR — progress against the task list (T0–T7)
 
-Status as of **2026-09-28 14:00 CST**, code `9546dd4` (v0.14.0 + unreleased). Measured against
+Status as of **2026-09-29 13:10 CST**, code `7ecfc68` (v0.14.0 + unreleased). Measured against
 `HEURBRIDGE_TASKS.md` (Part C tasks, Part D gates). Session history: `HANDOFF.md`; every code change: `CHANGELOG.md`.
 
 ## 1. Summary
 
-- **Position on the critical path:** T0 ✅ → T1 ✅ → T2 (Track-B seeding still running) → T3 (exit gate **passed**;
-  Algorithm R round 2 of max 3 running) → **T4 = E0 / gate G0′ started: demo running on 225** → T5 → T6.
-- **Roughly 40 % of the planned effort is done** (weighted by the task list's own duration estimates, §5). The done
+- **Position on the critical path:** T0 ✅ → T1 ✅ → T2 (Track-B seeding: 2 of 5 designs complete) → T3 ✅ (exit
+  gate passed) → **T4 = full E0 / gate G0′ running: 8 of 16 design × protocol parts complete** (blinded: no result
+  has been read) → T5 → T6. **G0′ expected 30 Sep late evening – 1 Oct morning** (bigblue4 sets the date).
+- **Roughly 42 % of the planned effort is done** (weighted by the task list's own duration estimates, §5). The done
   part is the infrastructure: toolchains on the servers, data, evaluators f0/f1/f2, the 7 heuristic families,
   archive, the bridge and its training. The remaining part is mostly the **experiments** (E0, LLM evolution,
   E1/E2, H1–H9): compute-bound and gated — **G0′ can stop the project** (task list Part D).
@@ -17,18 +18,28 @@ Status as of **2026-09-28 14:00 CST**, code `9546dd4` (v0.14.0 + unreleased). Me
 
 | Server | Job | Task | State | Expected |
 |---|---|---|---|---|
-| 225 GPUs 0–3 (16 processes) | `e0x_{spec,eq}_adaptec4` (3 slices each), `e0x_{spec,eq}_adaptec3` (2 each), `e0x_spec_bigblue1_ibm08`, `e0x_eq_bigblue1_spec_ibm12`, `e0x_{spec,eq}_adaptec2`, `e0x_{spec,eq}_adaptec1` | **full E0** (pre-registered E0#1–#3, commit d186667), restarted 19:52 as slices with the user's approval (commit 9f38847: same sources, partners, budgets and tests; cases done before the restart kept) | running | ≈ 29 Sep 07:00–09:00; adaptec1 (one process per protocol, budgets 221.8 / 219.3 s measured 20:39) ≈ 14:00–15:00 |
-| 231 GPU 4 (8 processes) | `e0x_{spec,eq}_bigblue3` (4 slices each) | **full E0**: bigblue3 (spec keeps its measured budget 845 s; eq measures its own) | running since 19:53 | ≈ 29 Sep midday |
-| 225, after the designs above | bigblue4 (spec, eq), whole on 225 | **full E0**: bigblue4; sources saved (encrypted `save_src_bigblue4`, sha256 62daf302…) | queued | ≈ 30 Sep |
-| 224 (5 jobs × 8 threads) | `seedB_orfs7_{bp_fe_top, bp_be_top, swerv_wrapper, ariane136, ariane133}` (continuing earlier runs) | T1.7 / T2.7 Track-B seeding on the real ORFS 2024-12 flow | base runs done (deterministic); candidates so far: 40 / 47 / 4 / 24 / 13; now the same-path M1 control and the noise band (M1 shifted by one site/row), then the remaining candidates | several days (see §3, T2.7) |
+| 225 GPUs 0–3 | `e0x_{spec,eq}_adaptec1` | **full E0** adaptec1 | 380 / 376 of 390 rows | ≈ 13:30 today |
+| 225 | `e0x_spec_bigblue1_ibm08` → ibm08, `e0x_eq_bigblue1_spec_ibm12` → ibm12 | **full E0**, E0#3 held-out IBM designs (bigblue1 done in both jobs) | ibm08 388 of 480 rows; ibm12 170 of 390 | ibm08 ≈ 15:00, ibm12 ≈ 18:00 today |
+| 225 | `e0x_{spec,eq}_bigblue4` (slices 0–3), `e0x_{spec,eq}_bigblue4_w45` (slices 4–5) | **full E0** bigblue4, whole on 225: 30 legal sources (of 80), budgets 2259 / 2231 s, memory-lean RUDY (`HB_RUDY_IMPL=bmm`) | 12 slices running (sources 0–22), 1–2 rows each after 2 h: ≈ 4 h per case | slices 0–5 ≈ 30 Sep 01:00–05:00; slices 6–7 (sources 22–30) start then (memory) → **bigblue4 ≈ 30 Sep 19:00–22:00** |
+| 231 GPU 4 | `e0x_eq_bigblue3` (4 slices), `e0x_spec_bigblue3_r2` (sources 25–38, re-run of the OOM-killed slice) | **full E0** bigblue3 (spec slices 0, 1, 3 done: 37 of 50 cases) | eq 275 of 300 rows; spec re-run 64 of 78 | ≈ 14:30–16:00 today |
+| 224 (3 jobs × 8 threads) | `seedB_orfs7_{swerv_wrapper, ariane136, ariane133}` | T2.7 Track-B seeding (bp_fe_top, bp_be_top **complete**, reports committed) | f1 rows 21 / 77 / 59; noise-band replays done | several days |
 
-**What I just did:** the Track-B validity control passed — ORFS's own macro placement replayed through our import
-converges like the base run, so candidates that fail global placement (ariane133, swerv_wrapper) fail because of
-their layouts. The probe also found that Hier-RTLMP pre-places every standard cell (a warm start that imported
-layouts do not get); M1 is therefore now also evaluated through the candidates' path, and candidate deltas are paired
-with that same-path control. The five ORFS jobs were continued (`hbv.py run --resume-from`) with this control and
-with reuse of deterministic failures (identical layouts no longer re-run a 1–2 h failure). Everything is monitored
-automatically (completions, failures, thread cap, orphaned processes).
+**Done in the full E0 (both protocols, checked for completeness only):** adaptec2, adaptec3, adaptec4, bigblue1 —
+390 rows = 65 cases × 6 partners each, exit code 0, no duplicate case.
+
+**What I just did (28 Sep 19:50 – 29 Sep 13:00):**
+- **Restarted the full E0 as slices** (your approval, 19:52): every component keeps its sources, partners and first
+  measured time budget; the recomputed random-control scale matched the original probe's exactly on all five
+  restarted designs.
+- **Found and fixed an out-of-memory kill** (bigblue3 spec slice 2 at 22:46, 21 GB): RUDY's three-operand einsum
+  builds an 18 GB temporary without `opt_einsum`. Fix: a memory-lean equivalent (`HB_RUDY_IMPL=bmm`, used for
+  bigblue4 only, so every design stays internally consistent) and a per-host slot cap; the killed slice was re-run
+  from its 11 finished rows (bit-identical settings). The watcher now reports kernel OOM kills, stalled slices and
+  low memory. A placer run killed by the host OOM killer is now re-run instead of being scored as a failure.
+- **Moved bigblue4 whole to 225** (sources saved encrypted on 231 and copied as ciphertext; identical sha256).
+- **Track B:** bp_fe_top and bp_be_top finished; reports re-score every row under cost_v2 and add the signoff (f2)
+  results (§3, T2.7). The report generator now records the Yosys the flow actually runs (0.48).
+- **Cleanup survey** of the HeurAgenix reproduction folders (your request, §6).
 
 ## 3. Status per task
 
@@ -67,7 +78,7 @@ Legend: ✅ done · 🔄 running · ⚠️ done with a limitation · ⏸ waiting
 | T2.5 projections P_M / P_C / P_R | ✅ | `heurbridge/core/project.py` |
 | T2.6 elite archive | ✅ | `heurbridge/archive/` |
 | T2.7 seeding, Track A | ✅ | IBM 17 designs `reports/T2_trackA_ibm_dreamplace.md`; ISPD2005 8 designs `reports/T2_trackA_ispd_dreamplace.md` |
-| T2.7 seeding, Track B | 🔄 | 5 ORFS designs running (§2). Many heuristic layouts fail ORFS (GRT-0116 congestion, DPL-0036, 2-h timeouts; identical failing layouts are no longer re-run). **Findings:** (1) the failures come from ORFS 2024-12's timing-driven global placement diverging on scattered layouts (the same layout places fine with it off); (2) M1's own layout imported like a candidate scores worse than base M1 (bp_fe_top f2: J 1.32 vs 1.00, nearly all TNS) because Hier-RTLMP pre-places the standard cells — so candidates are paired with this same-path replay, and a per-design noise band (M1 shifted by one site/row) decides what counts as an improvement. Estimate: several more days |
+| T2.7 seeding, Track B | 🔄 | **bp_fe_top and bp_be_top complete** (`reports/T2_trackB_orfs_bp_fe_top.md`, `…_bp_be_top.md`): at signoff 15 / 13 of 20 layouts pass every gate, 14 / 9 of them below the unmodified flow (best 0.881 / 0.931, local search); the same-path replay of the tool's own layout scores 1.323 / 1.103 (band of one-site shifts 1.03–1.40 / 1.02–1.16); f1–f2 Kendall tau 0.51 / 0.78. Descriptive: candidates need their own noise band before any claim. swerv_wrapper, ariane136, ariane133 running. Many heuristic layouts fail ORFS (GRT-0116 congestion, DPL-0036, 2-h timeouts; identical failing layouts are no longer re-run). **Findings:** (1) the failures come from ORFS 2024-12's timing-driven global placement diverging on scattered layouts (the same layout places fine with it off); (2) M1's own layout imported like a candidate scores worse than base M1 (bp_fe_top f2: J 1.32 vs 1.00, nearly all TNS) because Hier-RTLMP pre-places the standard cells — so candidates are paired with this same-path replay, and a per-design noise band (M1 shifted by one site/row) decides what counts as an improvement. Estimate: several more days |
 
 ### T3 — The bridge ✅ (T3.9 after G0′)
 
@@ -88,7 +99,7 @@ Legend: ✅ done · 🔄 running · ⚠️ done with a limitation · ⏸ waiting
 | partners + E0 driver | ✅ | `heurbridge/partners.py`, `scripts/run_e0.py` |
 | development E0 (local, CPU) | ✅ | `reports/E0_partner_ablation_dev*.md` (suggestive only) |
 | E0 demo (225) | ✅ | positive direction: the co-trained bridge has the lowest J under both protocols (`reports/E0_demo_spec.md`, `reports/E0_demo_eq.md`); much of the gain comes from the f1 guard (random direction + guard is close), the learned direction still beats it (p = 2.3e-9) |
-| **full E0 (confirmatory, G0′)** | 🔄 | pre-registered (`reports/E0_preregistration.md`, ledger E0#1–#3) and running on 225 (4 GPUs) + 231 (GPU 4): ISPD2005 7 designs × both protocols, ibm08/ibm12; the pooled G0′ test (E0#1) when all runs end. Revised 19:00: CPU-bound and slower than estimated; `run_e0.py --slice` (commit 9f38847) splits a component over processes under the same protocol; restarting the running jobs as slices awaits the user's approval; G0′ ≈ 30 Sep–1 Oct with slices |
+| **full E0 (confirmatory, G0′)** | 🔄 | pre-registered (`reports/E0_preregistration.md`, ledger E0#1–#3) and running on 225 (4 GPUs) + 231 (GPU 4): ISPD2005 7 designs × both protocols, ibm08/ibm12; the pooled G0′ test (E0#1) when all runs end. Revised 19:00: CPU-bound and slower than estimated; `run_e0.py --slice` (commit 9f38847) splits a component over processes under the same protocol; restarted as slices 28 Sep 19:52 (approved). 29 Sep 13:00: adaptec2, adaptec3, adaptec4, bigblue1 complete in both protocols; adaptec1, bigblue3, ibm08/ibm12 finish today; bigblue4 (30 sources, ≈ 4 h per case) ≈ 30 Sep 19:00–22:00 → pooled G0′ right after |
 
 ### T5 — LLM evolution ⏸ (after G0′)
 
@@ -132,12 +143,12 @@ Effort weights are the midpoints of the task list's own estimates; completion fr
 |---|---|---|---|
 | T0 | 1.5 d | 95 % | 1.4 |
 | T1 | 5 d | 95 % | 4.8 |
-| T2 | 6 d | 85 % | 5.1 |
+| T2 | 6 d | 90 % | 5.4 |
 | T3 | 8.5 d | 80 % | 6.8 |
-| T4 | 3.5 d | 25 % | 0.9 |
+| T4 | 3.5 d | 60 % | 2.1 |
 | T5 | 12 d | 30 % | 3.6 |
 | T6 | 28 d | 10 % | 2.8 |
-| **Total** | **64.5 d** | **≈ 39 %** | **25.4** |
+| **Total** | **64.5 d** | **≈ 42 %** | **26.9** |
 
 T7 runs alongside and is not weighted separately. The estimate assumes every gate passes; a G0′ failure ends the
 planned path at T4 ("stop and report", with a repositioning decision for you).
@@ -147,15 +158,30 @@ planned path at T4 ("stop and report", with a repositioning decision for you).
 Received 2026-09-28: LLM = **deepseek-flash** for every LLM call; timing gates **reported at f1, enforced at f2/f3**
 (cost_v2); each experiment runs as a **demo on 225 first**, then at full capacity if the effect is good.
 
+Received 2026-09-28: 231 approved for the full E0 (GPU 4 only); restart of the full E0 as slices approved (19:52).
+Received 2026-09-29: clean the HeurAgenix reproduction folders HeurBridge does not need. Staged (moved, reversible)
+into `/data/dzy/heura_repr/_to_delete_20260929/` on 224 (68 GB: eda/runs*, models, envs/heura, envs/miniconda3,
+repo, datasets, output, logs, results, evidence) and 231 (7 GB: envs, models, repo, datasets, output, logs; its
+results/ kept). The final delete is yours to run (I cannot delete files permanently). Kept on 224: hb, envs/hb,
+tools, cache, third_party, benchmarks, eda/{harness,flow,tools,pdk,...}, src, build.
+
 Open:
-1. **Another server for the full runs?** You mentioned running the full experiment "in another port at the same
-   time". 225's four GPUs are approved and will be used; 231 (5 × RTX 4090) needs your explicit approval (red line),
-   224 / 227 have no working CUDA.
-2. Housekeeping: back up `~/.config/heurbridge/vault.key` (without it the server vault cannot be decrypted); ask
+1. **Stop the 4 newest bigblue4 slices?** (`e0x_{spec,eq}_bigblue4_w45`, launched 11:25.) 12 bigblue4 slices bring
+   225 to within ~17 GB of its memory at peaks; stopping them does not change bigblue4's finish (the last slices
+   wait for memory either way) and removes the risk. They run protected meanwhile (first OOM victims; killed placer
+   runs are re-run). My recommendation: stop them.
+2. **Track-B gate reference:** reference the f2 timing gate to the same-path replay instead of the unmodified flow.
+3. **225's reproduction sessions** (tmux `agent1`, `agent2` with Claude Code, `b_monitor`, `b_reason_monitor`, `tmp`,
+   alive since 20–23 Sep) must be stopped by you before 225's reproduction folder can go.
+4. Housekeeping: back up `~/.config/heurbridge/vault.key` (without it the server vault cannot be decrypted); ask
    the admin about the faulty GPUs on 224 / 227.
 
 ## 7. Deviations and known limitations
 
+- Full E0: bigblue4 has 30 legal sources (only 30 of its 80 program runs project legally) and uses the memory-lean
+  RUDY (`HB_RUDY_IMPL=bmm`, equal to the reference to ~1e-6); bigblue3 spec's slice 2 was OOM-killed and re-run
+  from its 11 finished rows as two sub-slices (same settings, bit-identical scale). Neither changes the registered
+  protocol; both are listed for the report.
 - ariane133 runs with `RTLMP_MAX_LEVEL=1` (upstream's MPL workaround); ORFS's own macro placer does not converge
   otherwise at the 8-thread cap. Everything else is the 2024-12 configuration.
 - Track A has no f2 (bookshelf benchmarks have no timing): its final cost is f1 (DREAMPlace).
