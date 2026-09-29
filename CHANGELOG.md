@@ -6,6 +6,26 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 
 ## [Unreleased]
 
+### Added (Track-B plan: timing-aware macro cost and local search)
+- **Timing probe** (`run_seed_orfs.py --phase timingprobe`; `orfs.macro_pin_slacks`, `MACRO_SLACK_TCL`). The
+  unmodified flow (ORFS's own macro placer, seeded from the base run's synthesis and floorplan) runs to 3_place
+  in its own variant `<design>.tprobe`. A script run through ORFS's `make run RUN_SCRIPT=` (the flow's libraries,
+  constraints and RC) then reads placement-parasitic setup and hold slack at every signal pin of every macro. The
+  macros are found by exact database name (`findInst`), the pins by `sta::find_pin` with a `get_pins` fallback.
+  Output: `macro_pin_slack.json`, with the clock period from `clock_period.txt`.
+- **Critical-net weights** `heurbridge/core/timing_weights.py`. A net at a critical macro pin gets
+  `w = w0 (1 + beta c^2)`, where `c = clip((s_thr - s)/(s_thr - s_min), 0, 1)`, `s` is the worst setup slack over
+  the net's macro pins and `s_thr = 0.1 x clock period`. Nets with more slack, unconstrained pins and nets without
+  macro pins keep their weight. Every program (through the sandbox view), P_M's affinity and f0 read
+  `Design.net_weight`, so no program changes. `run_seed_orfs.py --timing-weights [--tw-beta 4 --tw-frac 0.1]` runs
+  f1/f2 as a separate campaign `<design>_tw` (its own ledgers and meta, with the weights' hash and summary).
+  Baselines, replays and gate references stay shared, and J is measured by the real flow as before.
+- **Timing-aware local search** (`SeedConfig.ls_timing`, `run_seed_orfs.py --ls-timing`). A move is accepted
+  only if its f1 setup and hold gates pass (reported, not enforced, at f1). The search starts from the best
+  timing-clean verified layout if there is one. Test: on a toy whose setup fails once a macro moves right, J alone
+  accepts 3 failing moves of 4 and the timing-aware search accepts none (`tests/test_timing_weights.py`, 8 tests).
+  Defaults are unchanged. Full suite 174 passed.
+
 ### Added (T3.9 interface; owner's decision 29 Sep: bridge-to-bridge parts now, tool hand-off after G0')
 - **Stage hand-off** `heurbridge/bridge/handoff.py`. The macro-stage graph already carries the standard cells as
   clusters that the bridge moves together with the macros, but only the macros were kept. The hand-off keeps the

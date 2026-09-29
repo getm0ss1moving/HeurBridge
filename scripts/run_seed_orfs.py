@@ -24,6 +24,12 @@ Resumable; everything lands in runs/seed_orfs/<design>/:
   5. band    (--phase band) the --band-top best f2-admitted candidates shifted by one site (+x, -x) or one row
              (+y) through f2, like M1's replays (rows <run>.p1-3.f2, program CAND_BAND): each candidate's own noise
              band, so a candidate counts as better than the tool only if its band is (user decision 2026-09-29).
+  7. timingprobe (--phase timingprobe) the unmodified flow (ORFS's own macro placer) to 3_place in its own variant
+             (<design>.tprobe), then placement-parasitic setup/hold slack at every macro signal pin
+             (macro_pin_slack.json).  With --timing-weights the f1/f2 phases run a separate campaign <design>_tw
+             (runs/seed_orfs/<design>_tw/): nets at critical macro pins weigh more for every program, P_M and f0
+             (core/timing_weights.py); --ls-timing makes the local search accept only moves whose f1 setup and hold
+             gates pass (reported, not enforced, at f1).  Replays, baselines and gate references stay shared.
 """
 
 import argparse
@@ -43,6 +49,7 @@ from heurbridge.archive.store import Archive, Candidate  # noqa: E402
 from heurbridge.core import orient as O  # noqa: E402
 from heurbridge.core.defio import load_def_design  # noqa: E402
 from heurbridge.core.odb import odb_to_def  # noqa: E402
+from heurbridge.core import timing_weights as TW  # noqa: E402
 from heurbridge.eval import cost, miniflow as MF, orfs  # noqa: E402
 from heurbridge.heuristics.cell.cluster import cluster_cells  # noqa: E402
 from heurbridge.heuristics.macro.registry import all_programs  # noqa: E402
@@ -147,13 +154,19 @@ def main():
     ap.add_argument("--base-runs", type=int, default=2, help="repeats of the unmodified flow (determinism check)")
     ap.add_argument("--work-home", default=str(ROOT / "runs" / "orfs_work"))
     ap.add_argument("--yosys", default=None, help="Yosys for ORFS (default HB_YOSYS)")
-    ap.add_argument("--phase", default="all", choices=["base", "f1", "f2", "all", "band", "warmstart"])
+    ap.add_argument("--phase", default="all", choices=["base", "f1", "f2", "all", "band", "warmstart", "timingprobe"])
     ap.add_argument("--base-timeout", type=int, default=4 * 7200, help="whole unmodified flow (each step < 7,200 s)")
     ap.add_argument("--timeout", type=int, default=7200, help="one candidate evaluation")
     ap.add_argument("--noise-replays", type=int, default=3, help="shifted M1 replays for the noise band (0-3)")
     ap.add_argument("--band-top", type=int, default=3, help="--phase band: candidates that get their own noise band")
     ap.add_argument("--gate-reference", default="replay", choices=["replay", "base"],
                     help="timing gates vs the same-path replay band (cost_v3, default) or the unmodified flow (cost_v2)")
+    ap.add_argument("--timing-weights", action="store_true",
+                    help="f1/f2 as the campaign <design>_tw with critical-net weights from macro_pin_slack.json")
+    ap.add_argument("--tw-beta", type=float, default=4.0, help="weight of the most critical net: 1 + beta")
+    ap.add_argument("--tw-frac", type=float, default=0.1, help="nets with more setup slack than this x period: 1")
+    ap.add_argument("--ls-timing", action="store_true",
+                    help="local search accepts only moves whose f1 setup and hold gates pass")
     ap.add_argument("--make-var", action="append", default=[],
                     help="KEY=VALUE override of the design config for every run (recorded in meta.json)")
     a = ap.parse_args()
@@ -199,10 +212,42 @@ def main():
         c = ev.score(rec, base1 if fid == 1 else base2)
         arch.insert(Candidate(design_id=des.id, stage="M", layout=m1, fidelity=fid, J=c.J_inf, admissible=c.admissible,
                               metrics=rec, gates=c.gates, provenance={"program": "M1_orfs_rtl_macro_placer"}))
-    write_meta(rdir, "seed_orfs_%s" % des.id, des.id, config={k: v for k, v in vars(a).items() if k != "work_home_abs"},
+    camp, cdir, tw_info = des, rdir, None          # the campaign's design and directory (rdir unless --timing-weights)
+    if a.timing_weights:
+        slacks, smeta = TW.load_slacks(rdir / "macro_pin_slack.json")
+        w, tw_info = TW.critical_net_weights(des, slacks, smeta["clock_period_ns"], a.tw_beta, a.tw_frac)
+        camp = TW.weighted_design(des, w, tag="tw")
+        camp.id = des.id + "_tw"
+        cdir = out / camp.id
+        cdir.mkdir(parents=True, exist_ok=True)
+        tw_info["probe"] = smeta
+        (cdir / "timing_weights.json").write_text(json.dumps(tw_info, indent=1, default=str))
+        print(json.dumps({"timing_weights": {k: v for k, v in tw_info.items() if k != "probe"}}), flush=True)
+    write_meta(cdir, "seed_orfs_%s" % camp.id, camp.id, config={k: v for k, v in vars(a).items() if k != "work_home_abs"},
                baseline=base1.to_dict(), baseline_f2=base2.to_dict(), track=track, eda_threads=tools.eda_threads(8),
-               record_host=True)
+               record_host=True, **({"timing_weights": tw_info} if tw_info else {}))
     if a.phase == "base":
+        return
+    if a.phase == "timingprobe":                        # 7. critical macro pins in the unmodified flow's placement
+        probe = orfs.OrfsRun(flow_dir=a.flow, design_config=cfg, variant="%s.tprobe" % name, stage="place",
+                             threads=tools.eda_threads(8), timeout_s=a.timeout, work_home=a.work_home_abs,
+                             base_variant="base", yosys=a.yosys, make_vars_extra=tuple(a.make_var),
+                             env={"EDA_THREADS": tools.eda_threads(8)})
+        rec = orfs.run(probe)
+        if rec.get("returncode") != 0:
+            sys.exit("timing probe: the flow to 3_place failed: %s" % rec.get("failure"))
+        pdir = rdir / "work_probe"
+        pdir.mkdir(parents=True, exist_ok=True)
+        slacks = orfs.macro_pin_slacks(probe, [des.names[i] for i in np.flatnonzero(des.is_macro)],
+                                       pdir / "macro_pin_slack.tsv")
+        period = float((base_dirs["results"] / "clock_period.txt").read_text().split()[0])
+        smeta = {"variant": probe.variant, "stage": "3_place", "parasitics": "placement",
+                 "macro_placement": "ORFS rtl_macro_placer (the unmodified flow)", "clock_period_ns": period,
+                 "flow_s": rec.get("duration_s")}
+        TW.save_slacks(rdir / "macro_pin_slack.json", slacks, smeta)
+        s_ok = [v[0] for v in slacks.values() if v[0] is not None]
+        print(json.dumps({"timing_probe": {"pins": len(slacks), "constrained": len(s_ok),
+                                           "worst_setup_ns": min(s_ok) if s_ok else None, **smeta}}), flush=True)
         return
 
     # 2b. same-path control (red line: pairing).  Hier-RTLMP leaves every standard cell PLACED at its cluster
@@ -245,8 +290,9 @@ def main():
         cl = np.load(cpath) if cpath.exists() else cluster_cells(des, seed=0)
         np.save(cpath, cl)
         halo = 2 * max(d.halo)          # P_M spacing = 2 x the per-side platform halo (see run_seed_miniflow.py)
-        s = SA.seed_design(des, lay, progs, ev1, None, arch, base1, out, SA.SeedConfig(
-            seeds=a.seeds, top_f2=a.top, ls_steps=a.ls, halo=halo), cluster=cl, log=lambda x: print(x, flush=True))
+        s = SA.seed_design(camp, lay, progs, ev1, None, arch, base1, out, SA.SeedConfig(
+            seeds=a.seeds, top_f2=a.top, ls_steps=a.ls, halo=halo, ls_timing=a.ls_timing), cluster=cl,
+            log=lambda x: print(x, flush=True))
         print(json.dumps(s), flush=True)
     if a.phase == "warmstart":                          # 6. demo: the same layouts with a standard-cell warm start
         import dataclasses
@@ -290,26 +336,26 @@ def main():
                 print(json.dumps({"band_of": r["run_id"], "run_id": row["run_id"], "status": row.get("status"),
                                   "J": row.get("J"), "J_raw": row.get("J_raw")}), flush=True)
     if a.phase in ("f2", "all"):                        # 4. f2 verification
-        ev_path = rdir / "evals.jsonl"
+        ev_path = cdir / "evals.jsonl"
         rows = [json.loads(l) for l in ev_path.read_text().splitlines()] if ev_path.exists() else []
-        ledger = Ledger(rdir / "evals_f2.jsonl")
+        ledger = Ledger(cdir / "evals_f2.jsonl")
         done = 0
         for r in select(rows, a.top, a.spread):
             lay_r = _layout_from_row(des, lay, r)
             rid = r["run_id"][:-3] + ".f2"
-            row = _eval(ev2, des, lay_r, base2, rid, rdir / "work_f2", ledger,
+            row = _eval(ev2, des, lay_r, base2, rid, cdir / "work_f2", ledger,
                         {"program": r.get("program"), "seed": r.get("seed"), "stage": "M", "f1_J": r["J"],
                          "f1_J_raw": r["J_raw"], "f1_run_id": r["run_id"]})
             done += 1
             if row.get("status") == "ok" and math.isfinite(row["J"]):
-                arch.insert(Candidate(design_id=des.id, stage="M", layout=lay_r, fidelity=2, J=row["J"],
+                arch.insert(Candidate(design_id=camp.id, stage="M", layout=lay_r, fidelity=2, J=row["J"],
                                       admissible=row.get("admissible", False), metrics=row.get("record", {}),
                                       gates=row.get("gates", {}), provenance={"program": r.get("program"),
                                                                                "seed": r.get("seed"), "run_id": rid,
                                                                                "f1_run_id": r["run_id"]}))
             print(json.dumps({"run_id": rid, "status": row.get("status"), "f1_J_raw": r["J_raw"], "f2_J": row.get("J"),
                               "f2_J_raw": row.get("J_raw")}), flush=True)
-        print(json.dumps({"f2_done": done, "snapshot": arch.snapshot("B0_%s" % des.id)}), flush=True)
+        print(json.dumps({"f2_done": done, "snapshot": arch.snapshot("B0_%s" % camp.id)}), flush=True)
 
 
 if __name__ == "__main__":

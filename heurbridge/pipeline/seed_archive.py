@@ -36,6 +36,7 @@ class SeedConfig:
     halo: float = 0.0
     cpu_s: float = 60.0
     seed: int = 0
+    ls_timing: bool = False      # local search accepts only neighbours whose f1 setup and hold gates pass
 
 
 class Ledger:
@@ -170,6 +171,12 @@ def _layout_from_row(design: Design, base: Layout, row: dict) -> Layout:
     return l
 
 
+def timing_ok(row: dict) -> bool:
+    """True unless the row's setup or hold gate failed (the status is reported at f1 even where not enforced)."""
+    g = row.get("gates") or {}
+    return all((g.get(k) or {}).get("status") != "fail" for k in ("setup", "hold"))
+
+
 def neighbours(design: Design, layout: Layout, rng: np.random.Generator, n: int) -> list:
     """T2.7 local-search moves on movable macros."""
     mm = np.flatnonzero(design.is_macro & ~design.is_fixed)
@@ -259,7 +266,8 @@ def seed_design(design: Design, base_layout: Layout, programs: list, f1: Evaluat
     # local search from the best verified layout
     rng = np.random.default_rng(cfg.seed)
     if verified:
-        best_row, best_lay = min(verified, key=lambda t: t[0]["J"])
+        pool = [t for t in verified if timing_ok(t[0])] if cfg.ls_timing else []
+        best_row, best_lay = min(pool or verified, key=lambda t: t[0]["J"])     # timing-clean start if any
         cur_J = best_row["J"]
         for step in range(cfg.ls_steps):
             cands = []
@@ -270,6 +278,8 @@ def seed_design(design: Design, base_layout: Layout, programs: list, f1: Evaluat
                 rid = "%s.ls%d.n%d.f1" % (design.id, step, n)
                 row = _eval(f1, design, lp, baseline, rid, work, ledger, {"program": "LS", "move": move, "stage": "M"})
                 cands.append((row["J"], row, lp))
+            if cfg.ls_timing:                       # a move that breaks f1 timing is not taken, however low its J
+                cands = [c for c in cands if timing_ok(c[1])]
             if not cands:
                 continue
             j, row, lp = min(cands, key=lambda t: t[0])

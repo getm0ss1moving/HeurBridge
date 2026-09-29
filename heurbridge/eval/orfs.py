@@ -232,6 +232,76 @@ def extract_macros(r: OrfsRun, d: dict, out_tcl: Path, timeout: int = 1800) -> P
     return Path(out_tcl)
 
 
+MACRO_SLACK_TCL = r"""# heurbridge timing probe: setup / hold slack at every signal pin of the listed macros
+source $::env(SCRIPTS_DIR)/load.tcl
+load_design %(odb)s %(sdc)s
+estimate_parasitics -placement
+set block [ord::get_db_block]
+set fin [open {%(names)s} r]
+set out [open {%(out)s} w]
+puts $out "inst\tpin\tslack_max\tslack_min"
+while {[gets $fin name] >= 0} {
+  if {$name == ""} { continue }
+  set inst [$block findInst $name]
+  if {$inst == "NULL"} { puts $out "$name\t-\tMISSING\tMISSING"; continue }
+  foreach it [$inst getITerms] {
+    if {[$it getNet] == "NULL"} { continue }
+    set mt [$it getMTerm]
+    set t [$mt getSigType]
+    if {$t == "POWER" || $t == "GROUND"} { continue }
+    set path "[$inst getName]/[$mt getName]"
+    set pin ""
+    if {[catch {set pin [sta::find_pin $path]}] || $pin == "NULL"} { set pin [get_pins -quiet $path] }
+    if {$pin == "" || $pin == "NULL"} { puts $out "$name\t[$mt getName]\tNOPIN\tNOPIN"; continue }
+    puts $out "$name\t[$mt getName]\t[get_property $pin slack_max]\t[get_property $pin slack_min]"
+  }
+}
+close $out
+close $fin
+puts "HB_MACRO_SLACK done"
+"""
+
+
+def _slack(v: str):
+    """A slack field of the probe: float in ns, or None when unconstrained (INF) or not found."""
+    try:
+        x = float(v)
+    except ValueError:
+        return None
+    return x if abs(x) < 1e20 else None
+
+
+def parse_macro_slacks(text: str) -> dict:
+    """{(inst, pin): (setup slack, hold slack)} from the probe's table; unconstrained pins give None."""
+    out = {}
+    for line in text.splitlines()[1:]:
+        f = line.split("\t")
+        if len(f) != 4 or f[1] == "-":
+            continue
+        out[(f[0], f[1])] = (_slack(f[2]), _slack(f[3]))
+    return out
+
+
+def macro_pin_slacks(r: OrfsRun, macro_names, out_tsv: Path, odb: str = "3_place.odb", sdc: str = "3_place.sdc",
+                     timeout: int = 1800) -> dict:
+    """Timing probe on a finished run of ``r`` (``stage`` 'place' or later): placement-parasitic setup and hold slack
+    at every signal pin of ``macro_names`` (exact database names), through ORFS's own environment (``make run``).
+    Returns ``parse_macro_slacks`` of the table written to ``out_tsv``; raises when the probe fails."""
+    out_tsv = Path(out_tsv).resolve()
+    names = out_tsv.with_suffix(".names")
+    names.write_text("".join("%s\n" % n for n in macro_names))
+    script = out_tsv.with_suffix(".tcl")
+    script.write_text(MACRO_SLACK_TCL % {"odb": odb, "sdc": sdc, "names": names, "out": out_tsv})
+    env = os.environ.copy()
+    env.update({k: str(v) for k, v in r.env.items()})
+    env.setdefault("OMP_NUM_THREADS", str(r.threads))
+    p = tools.run_group(["make", "-C", r.flow_dir] + r.make_vars() + ["run", "RUN_SCRIPT=%s" % script],
+                        timeout=timeout, env=env)
+    if p.returncode != 0 or not out_tsv.exists() or "HB_MACRO_SLACK done" not in p.stdout:
+        raise RuntimeError("timing probe failed: %s" % (p.stdout + p.stderr)[-800:])
+    return parse_macro_slacks(out_tsv.read_text())
+
+
 def failure_reason(tail: str, returncode) -> str | None:
     """Name of a failed ORFS run from its log tail: the last tool error ('GRT-0116 Global routing finished with
     congestion. ...'), or for a timeout the step it stopped ('timeout in 5_1_grt').  None for a successful run."""
