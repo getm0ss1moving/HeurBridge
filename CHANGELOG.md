@@ -31,7 +31,9 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
   sharing a GPU, a placer run can die because the GPU is momentarily full; that says nothing about the layout, and
   recording it as a failed case (J = +inf) would add noise to the paired tests. Such a run is rerun after 30, 90,
   270 s (DREAMPlace is deterministic, so the rerun gives the result the first run would have); any other failure is
-  returned as before; the log records the reruns. Test: `tests/test_dreamplace_retry.py`.
+  returned as before; the log records the reruns. A placer run SIGKILLed by the host's OOM killer (rc -9) is
+  rerun the same way (2026-09-29: bigblue4's placer reaches 10 GB of host memory; a killed run would otherwise
+  be recorded as a failed case). Test: `tests/test_dreamplace_retry.py`.
 
 - **E0 components split over processes** (`run_e0.py --slice K/N --sources-cache DIR --budget-s S --prepare-only`).
   The full E0 is CPU-bound (memetic and repertoire each spend the bridge's whole budget per case; measured 10-27 min

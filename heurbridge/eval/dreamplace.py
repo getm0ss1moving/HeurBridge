@@ -121,9 +121,10 @@ OOM_WAITS_S = (30, 90, 270)         # a GPU shared by several jobs can be full f
 def run_placer(param: dict, work: Path, timeout: int = 3600) -> tuple:
     """Run DREAMPlace's Placer.py on a parameter dict; returns (returncode, log, wall seconds).
 
-    A run that dies because the GPU is momentarily out of memory is rerun after a pause (OOM_WAITS_S): it says
-    nothing about the layout, and DREAMPlace is deterministic, so the rerun gives the result the first run would
-    have.  Every other failure is returned as it is.  The log records the reruns."""
+    A run that dies because the GPU is momentarily out of memory, or is SIGKILLed (the host's OOM killer), is rerun
+    after a pause (OOM_WAITS_S): it says nothing about the layout, and DREAMPlace is deterministic, so the rerun
+    gives the result the first run would have.  Every other failure is returned as it is.  The log records the
+    reruns."""
     root = os.environ.get("HB_DREAMPLACE")
     if not root:
         raise RuntimeError("HB_DREAMPLACE (DREAMPlace install prefix) is not set")
@@ -138,9 +139,11 @@ def run_placer(param: dict, work: Path, timeout: int = 3600) -> tuple:
             rc, log = p.returncode, p.stdout + "\n" + p.stderr
         except subprocess.TimeoutExpired as e:
             rc, log = "timeout", str(e.stdout or "")
-        if rc == 0 or wait is None or not any(s in log for s in GPU_OOM):
+        killed = rc in (-9, 137)            # SIGKILL: the kernel's OOM killer (our timeout returns "timeout")
+        if rc == 0 or wait is None or not (killed or any(s in log for s in GPU_OOM)):
             break
-        notes.append("[heurbridge] GPU out of memory (rc %s): rerun after %d s" % (rc, wait))
+        notes.append("[heurbridge] %s (rc %s): rerun after %d s" % ("killed (host out of memory)" if killed
+                                                                  else "GPU out of memory", rc, wait))
         time.sleep(wait)
     (work / "dreamplace.log").write_text("\n".join(notes + [log]))
     return rc, log, round(time.time() - t0, 1)
