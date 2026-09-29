@@ -4,6 +4,25 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
+## 2026-09-29 — Session 3 (16:30): spec bigblue3 done; stage hand-off written; code versions of bigblue4
+
+- **Done and checked:** `e0x_spec_bigblue3_r2` (231, 15:50). The task-list bigblue3 component is `e0x_spec_bigblue3`
+  {spec_bigblue3, _s1, _s3} + `e0x_spec_bigblue3_r2` {_s2, _s2b}: 300 rows = 50 x 6, no duplicate, one budget
+  845.246 s. **Exclude** the dead `spec_bigblue3_s2` inside `e0x_spec_bigblue3` (11 rows, no meta). 13 of 16 parts
+  complete; 231 is idle.
+- **Code versions of bigblue4 (for the E0 report's deviations):** slices 0-3 run `9b3c8e8`, slices 4-5 `5e1c009`.
+  The only change on the E0 path is that `run_placer` reruns a placer SIGKILLed by the host OOM killer instead of
+  scoring the case as failed. Results are identical unless such a kill happens. At combine time, check that no
+  placer failure appears in slices 0-3 and no `killed (host out of memory)` note in slices 4-7. Slices 6-7 are
+  pinned to `5e1c009-20260929112219` (plan key `code`, passed by `relaunch.py` as `hbv run --code`). **Do not
+  push code to 225 before bigblue4 ends** (pinning also guards it).
+- **T3.9 extension adopted** (owner, 16:00). Bridge-to-bridge parts go ahead now; anything handed to DREAMPlace or
+  OpenROAD waits for G0'. `heurbridge/bridge/handoff.py` + `tests/test_handoff.py` (bc19c89); nothing on the
+  evaluation path uses it (tested). The plan is kept local (gitignored).
+- **Track B:** `seedB_band_bp_fe_top` done (15:56); `reports/T2_trackB_orfs_bp_fe_top.md` regenerated from it.
+
+---
+
 ## 2026-09-29 — Session 3 (15:30): bigblue3 equal guard done; bigblue4 timing; slices 6-7 launch rule
 
 - **Done and checked:** `e0x_eq_bigblue3` (231, 14:44): fetched (`hbv.py fetch --port 231`; 231's vault is in RAM,
