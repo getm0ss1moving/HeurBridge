@@ -190,5 +190,84 @@ def summarize(rows: list) -> dict:
     return out
 
 
+def report(run_dir: Path, out_md: Path) -> None:
+    """Markdown report of a finished demo: the arms, paired comparisons, DA0 fidelity and the placement-to-placement
+    spread of the final cluster centroids (records' cluster_pos), from rows.jsonl and work/*/record.json."""
+    import glob
+    import os
+    from heurbridge.reporting import METRIC_CONVENTIONS
+    rows = [json.loads(l) for l in (run_dir / "rows.jsonl").read_text().splitlines() if l.strip()]
+    sm = summarize(rows)
+    meta = json.loads((run_dir / "meta.json").read_text())
+    recs = {}
+    for f in glob.glob(str(run_dir / "work" / "*" / "record.json")):
+        r = json.loads(Path(f).read_text())
+        if r.get("cluster_pos") is not None:
+            base, arm = os.path.basename(os.path.dirname(f)).rsplit(".", 1)
+            recs.setdefault(base, {})[arm] = np.asarray(r["cluster_pos"])
+    full = [v for v in recs.values() if len(v) == 3]
+
+    def rms(a, b):
+        return float(np.sqrt(((a - b) ** 2).sum(1).mean()))
+    spread = {x: float(np.median([rms(v["centre"], v[x]) for v in full])) if full else None for x in ("sketch", "quadratic")}
+    L = ["# Demo: DREAMPlace started from the macro bridge's cell sketch", "",
+         "| Field | Value |", "|---|---|",
+         "| Report | demo_sketch_start |",
+         "| Date | %s |" % time.strftime("%Y-%m-%d %H:%M"),
+         "| Node | 231 (RTX 4090, GPU 4) |",
+         "| Track | A (DREAMPlace f1: GP + LG with the macros fixed, f0 metrics; J on the seeding campaign's M1 scale) |",
+         "| HeurBridge version / git | %s / %s |" % (meta.get("heurbridge_version"), meta.get("git_sha")),
+         "| Metric conventions | %s |" % METRIC_CONVENTIONS,
+         "| Feeds gate | none (owner's request, 29 Sep; exploratory) |",
+         "| Pre-registered test | - |", "| alpha-ledger entry | - |",
+         "| Status of the claim | no claim (exploratory demo) |", "",
+         "## Setup", "",
+         "The 64 bridge-refined macro layouts of the E0 demo (ibm04, ibm06: 16 programs x 2 seeds; the guard's alpha "
+         "read from the E0 demo's rows, the bridge endpoint recomputed; the first case reproduces the E0 demo's J to "
+         "1e-8). Each layout is placed three times; only where the standard cells start differs:", "",
+         "- **centre**: DREAMPlace's default (random_center_init_flag = 1), today's f1;",
+         "- **sketch**: every cell at its cluster's position in the bridge's guarded output (the stage hand-off, "
+         "`heurbridge/bridge/handoff.py`);",
+         "- **quadratic**: every cell at its cluster's quadratic position around the same macros (control).", "",
+         "## Results", "",
+         "| arm | mean J |", "|---|---|"]
+    for arm in ARMS:
+        L.append("| %s | %.4f |" % (arm, sm["mean_J_" + arm]))
+    L += ["", "| comparison (paired, J difference; negative = first is better) | n | median | mean | wins | losses | "
+          "one-sided p (first < second) |", "|---|---|---|---|---|---|---|"]
+    for k, v in sm.items():
+        if isinstance(v, dict) and "median_delta" in v:
+            L.append("| %s | %d | %+.4f | %+.4f | %d | %d | %s |" % (k, v["n"], v["median_delta"], v["mean_delta"],
+                                                                v["wins"], v["losses"],
+                                                                "%.3g" % v["p_less"] if v["p_less"] is not None else "-"))
+    f = sm.get("DA0_fidelity", {})
+    L += ["", "**Where the cells end up (DA0).** Area-weighted RMS distance, in normalized core units, from each start "
+          "to the cluster centroids of the centre-start placement: sketch median %.3f, quadratic median %.3f (the sketch "
+          "is closer in %d of %d cases). The final cluster centroids of the three placements of one layout differ far "
+          "less: centre vs sketch start median RMS %.3f, centre vs quadratic %.3f (unweighted)." %
+          (f.get("sketch_median", float("nan")), f.get("quadratic_median", float("nan")), f.get("sketch_closer", 0),
+           f.get("n", 0), spread["sketch"] or float("nan"), spread["quadratic"] or float("nan")), "",
+          "**Determinism.** The %d cases whose guard kept the raw heuristic (alpha = 0) give the sketch and the "
+          "quadratic arm the same start; their J are identical in %d." % (sm["determinism_alpha0"]["n"],
+                                                                           sm["determinism_alpha0"]["identical"]), "",
+          "## Reading", "",
+          "DREAMPlace's global placement converges to nearly the same placement from any of the three starts, and the "
+          "bridge's cluster sketch is about ten times farther from that placement than the placements are from each "
+          "other. Starting positions are therefore not a useful port for handing the sketch to DREAMPlace, and the "
+          "sketch itself is a weak prediction of where the cells go (the bridge weights clusters at 0.1 x their area "
+          "relative to macros in its loss).", "",
+          "## Reproduce", "", "```",
+          "python scripts/demo_sketch_start.py --designs ibm04,ibm06 --runs runs/seed_trackA_dp --e0-demo runs/e0_demo "
+          "--bridge checkpoints/algR_trackA_final/best.pt --out runs/demo_sketch",
+          "python scripts/demo_sketch_start.py --report runs/demo_sketch --out reports/demo_sketch_start.md", "```", ""]
+    out_md.write_text("\n".join(L))
+    print("REPORT_OK", out_md)
+
+
 if __name__ == "__main__":
-    main()
+    if "--report" in sys.argv:
+        i = sys.argv.index("--report")
+        o = sys.argv[sys.argv.index("--out") + 1] if "--out" in sys.argv else "reports/demo_sketch_start.md"
+        report(Path(sys.argv[i + 1]), Path(o))
+    else:
+        main()

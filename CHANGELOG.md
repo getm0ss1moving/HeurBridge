@@ -6,6 +6,20 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 
 ## [Unreleased]
 
+### Demo (owner's request, 29 Sep; 231 GPU 4): DREAMPlace started from the bridge's cell sketch -- no effect
+- `scripts/demo_sketch_start.py` (+ `--report`), report `reports/demo_sketch_start.md`, job `demo_sketch_ibm`.
+- **Setup.** The E0 demo's 64 bridge-refined macro layouts (ibm04/ibm06; the first case reproduces the E0 demo's J to
+  1e-8), each placed three times by DREAMPlace, with the standard cells starting at the die centre (today), at the
+  bridge's guarded cluster sketch, or at a quadratic placement (control).
+- **Mean J:** 0.4822 (centre), 0.4828 (sketch), 0.4948 (quadratic, one outlier +0.75). Sketch vs centre: 28 better,
+  36 worse, median +0.0004, one-sided p = 0.97. Sketch vs quadratic: 28 vs 26, p = 0.44.
+- **Why.** DREAMPlace converges to nearly the same placement from any start: the final cluster centroids of one
+  layout's three placements differ by a median RMS of 0.02 of the core. The sketch is 0.24 away from that
+  placement (quadratic: 0.26; the sketch is closer in 35 of 64 cases). Start positions are not a useful port for
+  DREAMPlace, and the bridge's cell sketch is a weak prediction of where the cells go (clusters weigh 0.1 x their
+  relative area in its loss).
+- Determinism: the 10 alpha = 0 cases give identical sketch and quadratic results.
+
 ### Findings (Track-B plan, 29 Sep 17:10): the timing mechanisms have nothing to act on in bp_fe_top/bp_be_top
 - **Timing probes** (`seedB_tprobe2_bp_fe_top`, `seedB_tprobe_bp_be_top`; the unmodified flow to 3_place, 3 and 5
   min). No macro pin is close to critical:
