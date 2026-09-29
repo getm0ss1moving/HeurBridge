@@ -8,9 +8,17 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 - **Timing probes** (224, `--phase timingprobe`; finals `seedB_tprobe2_bp_fe_top`, `seedB_tprobe_bp_be_top`;
   the first `seedB_tprobe_bp_fe_top` failed on `3_place.sdc`, fixed in c1447c2). No macro pin is near-critical
-  (see CHANGELOG), so no weighted campaign was run. The launch recipe for Track-B jobs is `hbv.py run --port 224
-  --run <job> --resume-from <latest final of the design> --snapshot 1800 --exclude "$X"` with the trackb.sh
-  command; `$X` is in the 15:30 entry's source, HANDOFF of the band/ws launch.
+  (see CHANGELOG), so no weighted campaign was run.
+- **Launch recipe for Track-B jobs** (band, warm start and probes all used it): `hbv.py run --port 224 --run <job>
+  --resume-from <latest final of the design> --snapshot 1800 --exclude "$X" -- "export
+  HB_OPENROAD=\$PWD/scripts/server/openroad_676.sh; bash scripts/server/trackb.sh python scripts/run_seed_orfs.py
+  --flow /data/dzy/heura_repr/third_party/ORFS-2024-12/flow --design nangate45/<d> --seeds 5 --top 10 --spread 10
+  --ls 8 --base-runs 2 --yosys /data/dzy/heura_repr/tools/yosys_048/bin/yosys --archive archive_B0_orfs_<d>
+  --phase <phase>"`, with
+  `X='(/(objects|results)/[^/]+/[^/]+/([^/]*[.][^/]*|base_r[0-9]+)/|/results/[^/]+/[^/]+/base/([3-6]_|2_[3-9]|2_floorplan)|\.png$)'`
+  (it keeps the base run's synthesis and floorplan and drops every candidate variant's databases). The band and
+  warm-start finals of a design branch from the same orfs7 final: merge their ledgers locally for one report
+  (`runs/remote/seedB_bandws_bp_fe_top`).
 - **DREAMPlace sketch demo** (owner's request; 231 GPU 4 by the owner's choice): job `demo_sketch_ibm`,
   `scripts/demo_sketch_start.py`. Inputs are the new small data bundle `sketch_demo_inputs` (IBM seeding baselines
   and clusters, the E0 demo's rows and source caches for ibm04/ibm06), plus `bridge_final` (= the round-1
