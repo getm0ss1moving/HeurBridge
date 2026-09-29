@@ -6,6 +6,33 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 
 ## [Unreleased]
 
+### Added (T3.9 interface; owner's decision 29 Sep: bridge-to-bridge parts now, tool hand-off after G0')
+- **Stage hand-off** `heurbridge/bridge/handoff.py`. The macro-stage graph already carries the standard cells as
+  clusters that the bridge moves together with the macros, but only the macros were kept. The hand-off keeps the
+  clusters' guarded positions (the clusters of `src + alpha (end - src)` at the guard's alpha; alpha = 0 gives the
+  quadratic placement) as a sketch for the next bridge stage:
+  - `Handoff` (.npz, format `heurbridge.handoff.v1`): the sketch, the legal macro positions it belongs to and the
+    graph hash; `check` refuses another design, another clustering, another layout's macros and values outside
+    [0, 1];
+  - `next_stage_source(graph, layout, handoff=None)`: without a hand-off exactly `source_nodes`;
+  - `transfer_sketch` (onto another clustering; exact for nested ones) and `member_positions`;
+  - `anchored_clusters` (quadratic placement pulled toward the sketch; mu = 0 is `quadratic_clusters`);
+  - `sketch_fidelity` (area-weighted RMS distance to reference cluster centres).
+  `solve_macro(keep_handoff=True)` attaches a hand-off to each beam candidate; the default output and every
+  decision are unchanged (tested). Nothing on the evaluation path (partners, `run_e0.py`, evaluators, f0,
+  DREAMPlace) uses it, and a test enforces that: G0' is unaffected. Handing the sketch to DREAMPlace or OpenROAD
+  waits for G0'. Tests: `tests/test_handoff.py` (12); full suite 166 passed.
+
+### Fixed
+- `report_trackb_dev.py` `tools_line` dropped the closing parenthesis of the new-format Yosys path; it now strips
+  only an unbalanced one.
+
+### Reports
+- `reports/T2_trackB_orfs_bp_fe_top.md` regenerated from `seedB_band_bp_fe_top` (the finished band job; the same
+  129 f1 and 24 f2 rows plus 9 band rows). The candidate noise bands are descriptive: the 3 best candidates stay
+  at 0.874-0.949 under every one-site or one-row shift. The tool's own layout through the same path spans
+  1.033-1.405.
+
 ### Docs / housekeeping (29 Sep 15:30)
 - `.gitignore`: local proposal documents (`HEURBRIDGE_PLAN_*.md`) are unpublished research documents and stay out
   of the public repository, like the task list and the proposal.

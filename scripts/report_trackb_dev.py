@@ -51,7 +51,9 @@ def cost_version() -> str:
 def tools_line(meta: dict) -> str:
     """Tool versions of an ORFS campaign.  Runs before 2026-09-29 recorded the Yosys on PATH; the flow ran the
     binary in config['yosys'] (ORFS YOSYS_EXE)."""
-    tr = (meta.get("track") or "?").split("; ", 1)[-1].rstrip(")")
+    tr = (meta.get("track") or "?").split("; ", 1)[-1]
+    if tr.endswith(")") and tr.count(")") > tr.count("("):         # the old format's closing parenthesis only
+        tr = tr[:-1]
     y = (meta.get("config") or {}).get("yosys")
     if y and y not in tr:
         tr = tr.split(", Yosys")[0] + "; the flow's Yosys: %s (the Yosys version in the run's metadata is the one on PATH, not used)" % y

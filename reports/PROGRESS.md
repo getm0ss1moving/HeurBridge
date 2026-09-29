@@ -1,12 +1,12 @@
 # HeurBridge-PR — progress against the task list (T0–T7)
 
-Status as of **2026-09-29 15:30 CST**, code `a8f3111` (v0.14.0 + unreleased). Measured against
+Status as of **2026-09-29 16:30 CST**, code: see `git log` (v0.14.0 + unreleased). Measured against
 `HEURBRIDGE_TASKS.md` (Part C tasks, Part D gates). Session history: `HANDOFF.md`; every code change: `CHANGELOG.md`.
 
 ## 1. Summary
 
 - **Position on the critical path:** T0 ✅ → T1 ✅ → T2 (Track-B seeding: 2 of 5 designs complete) → T3 ✅ (exit
-  gate passed) → **T4 = full E0 / gate G0′ running: 12 of 16 design × protocol parts complete (15:30)** (blinded: no result
+  gate passed) → **T4 = full E0 / gate G0′ running: 13 of 16 design × protocol parts complete (16:00)** (blinded: no result
   has been read) → T5 → T6. **G0′ expected the night of 30 Sep – morning of 1 Oct** (bigblue4 sets the date:
   ≈ 4.75 h per case, measured today).
 - **Roughly 42 % of the planned effort is done** (weighted by the task list's own duration estimates, §5). The done
@@ -21,13 +21,14 @@ Status as of **2026-09-29 15:30 CST**, code `a8f3111` (v0.14.0 + unreleased). Me
 |---|---|---|---|---|
 | 225 | `e0x_eq_bigblue1_spec_ibm12` → ibm12 | **full E0**, E0#3 held-out IBM (ibm08 done) | ibm12 245 of 390 rows | ≈ 18:00–19:00 today |
 | 225 GPUs 0–3 | `e0x_{spec,eq}_bigblue4` (slices 0–3), `e0x_{spec,eq}_bigblue4_w45` (slices 4–5) | **full E0** bigblue4, whole on 225: 30 legal sources (of 80), budgets 2259 / 2231 s, memory-lean RUDY (`HB_RUDY_IMPL=bmm`) | 12 slices (sources 0–22), first case of each 3–4 of 6 rows; ≈ 4.75 h per case (placer ≈ 10 min per row, memetic ≈ 44 min, repertoire ≈ 58 min) | 3-case slices end ≈ 01:00–03:00, the rest ≈ 06:00–07:30; slices 6–7 (sources 22–30) start as the first ones end (watcher) → **bigblue4 ≈ 30 Sep 22:00 – 1 Oct 01:00** |
-| 231 GPU 4 | `e0x_spec_bigblue3_r2` (sources 25–38, re-run of the OOM-killed slice) | **full E0** bigblue3 spec (slices 0, 1, 3 done: 37 of 50 cases) | 73 of 78 rows | ≈ 16:00–17:00 today |
 | 224 (≤ 8 OpenROAD) | `seedB_orfs7_{swerv_wrapper, ariane136, ariane133}` | T2.7 Track-B seeding (bp_fe_top, bp_be_top **complete**) | running since 28 Sep 13:55 | several days |
-| 224 | `seedB_band_{bp_fe_top,bp_be_top}`, `seedB_ws_{bp_fe_top,bp_be_top}` | Track-B plan (your go-ahead): the best candidates' own one-site-shift bands; standard-cell warm start demo | started 14:25–14:32 | ≈ 1 day |
+| 224 | `seedB_band_bp_be_top`, `seedB_ws_{bp_fe_top,bp_be_top}` | Track-B plan (your go-ahead): the best candidates' own one-site-shift bands; standard-cell warm start demo (`seedB_band_bp_fe_top` done 15:56) | started 14:25–14:32 | ≈ 1 day |
 
 **Done in the full E0 (checked for completeness only):** adaptec1, adaptec2, adaptec3, adaptec4, bigblue1 in both
-protocols (390 rows = 65 cases × 6 partners each), ibm08 (480 rows), bigblue3 equal guard (300 rows = 50 × 6, one
-budget 846.6 s over its 4 slices); every one exit code 0, no duplicate case.
+protocols (390 rows = 65 cases × 6 partners each), ibm08 (480 rows), bigblue3 in both protocols (300 rows = 50 × 6
+each; one budget per protocol: 846.6 s equal guard, 845.2 s task list; the task-list component is
+`e0x_spec_bigblue3` {spec_bigblue3, _s1, _s3} + `e0x_spec_bigblue3_r2` {_s2, _s2b}); every one exit code 0, no
+duplicate case.
 
 **What I did this afternoon (29 Sep 13:00 – 15:30):**
 - cost_v3 (your decision): Track-B timing gates referenced to the same-path replay; both Track-B reports re-scored.
@@ -100,7 +101,7 @@ Legend: ✅ done · 🔄 running · ⚠️ done with a limitation · ⏸ waiting
 | T3.5–T3.6 loss, training, validation | ✅ | `heurbridge/bridge/train.py` |
 | T3.7 Algorithm R | ✅ | round 0 promoted (T3 exit gate: J 0.4815 vs raw 0.8870, p = 2.6e-9), round 1 promoted (0.4756, p = 1.2e-4), round 2 not promoted → final checkpoint round 1 (`reports/T3_algorithmR_trackA.md`) |
 | T3.8 guarded inference | ✅ | `heurbridge/bridge/sample.py` |
-| T3.9 cell / route bridges | ⬜ | only after G0′ passes (task list); a proposal to extend it (kept local) waits for your decision |
+| T3.9 cell / route bridges | ⬜ | only after G0′ passes (task list). Extension adopted 29 Sep (kept local); its first package, the bridge-to-bridge stage hand-off, is written and tested (`heurbridge/bridge/handoff.py`, off the evaluation path); anything handed to DREAMPlace or OpenROAD waits for G0′ |
 | T3.10 unit tests 1–6 | ✅ | `tests/test_bridge.py` (138 tests pass in total) |
 
 ### T4 — E0 partner ablation, gate G0′ 🔄
@@ -185,10 +186,14 @@ Received 2026-09-29 (15:00): **keep all bigblue4 slices running**; **B.3 stays f
 worse than the reference); **go ahead with the Track-B improvement plan** (candidate bands and the warm-start demo
 are running; next: timing-aware macro cost, f1 timing-aware local search, the Track-B bridge after G0′).
 
+Received 2026-09-29 (16:00): **the T3.9 extension is adopted**. Parts used only among bridges go ahead now, since
+they leave G0′ unchanged. Anything that hands a bridge's sketch to another tool's standard-cell placement or global
+routing waits for G0′. The first package, the bridge-to-bridge hand-off, is written; nothing on the evaluation path
+uses it.
+
 Open:
-1. **Downstream-aware bridges** (your question, 29 Sep): a gated plan extending T3.9 is in the meeting brief (kept
-   local as an unpublished research document). Adopt it, to start after G0′? May I write its first code package (no
-   server compute) now? Which endpoints (proposed: signoff J on the ORFS designs; placer J on ISPD2005)?
+1. Endpoints of the extension's tests (proposed: signoff J on the ORFS designs; placer J on ISPD2005) -- fixed in
+   its pre-registration after G0′.
 2. Housekeeping: back up `~/.config/heurbridge/vault.key` (without it the server vault cannot be decrypted); ask
    the admin about the faulty GPUs on 224 / 227; run the final delete of the staged reproduction folders.
 

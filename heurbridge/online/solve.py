@@ -16,7 +16,8 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-from ..bridge.sample import refine
+from ..bridge import handoff
+from ..bridge.sample import refine, source_nodes
 from ..core import contract, project
 from ..core.design import Design, Layout
 from ..evolve import sandbox as SB
@@ -46,8 +47,10 @@ class OnlineResult:
 
 def solve_macro(design: Design, base: Layout, view, graph, programs: list, bridge, f1, f2=None, baseline_J2: float = math.inf,
                 k: int = 6, seeds: int = 3, beam: int = 2, ranker=None, K: int = 20, halo: float = 0.0,
-                device: str = "cpu") -> OnlineResult:
-    """f1(layout) -> float (guard fidelity); f2(layout) -> float or None (verification)."""
+                device: str = "cpu", keep_handoff: bool = False) -> OnlineResult:
+    """f1(layout) -> float (guard fidelity); f2(layout) -> float or None (verification).
+    keep_handoff: every beam candidate also carries ``handoff`` -- the bridge's sketch of the cell stage
+    (``bridge.handoff``) for the next bridge stage; the decisions are the same either way."""
     t0 = time.time()
     card = state_card(design, base)
     progs = ranker(card, programs)[:k] if ranker else programs[:k]
@@ -69,17 +72,27 @@ def solve_macro(design: Design, base: Layout, view, graph, programs: list, bridg
             if not rep.ok:
                 cands.append({"id": cid, "status": "projection_failed", "J1": math.inf})
                 continue
-            res = refine(bridge, graph, design, [lay], f1, K=K, halo=halo, device=device)[0] if bridge is not None else None
+            if keep_handoff and bridge is not None:
+                src = source_nodes(graph, lay)                  # what refine() computes itself: same result
+                res = refine(bridge, graph, design, [lay], f1, K=K, halo=halo, device=device, sources=src[None])[0]
+            else:
+                res = refine(bridge, graph, design, [lay], f1, K=K, halo=halo, device=device)[0] if bridge is not None else None
             out = res.layout if res else lay
             cands.append({"id": cid, "status": "ok", "J1": min(res.scores) if res else float(f1(lay)),
                           "alpha": res.alpha if res else None, "layout": out})
+            if keep_handoff:
+                cands[-1]["handoff"] = (handoff.handoff_from_result(graph, res, src, {"candidate": cid}) if res
+                                        else handoff.quadratic_handoff(graph, out, {"candidate": cid}))
     ok = sorted([c for c in cands if c["status"] == "ok"], key=lambda c: c["J1"])
     best_id, best_J = "baseline", baseline_J2
     for c in ok[:beam]:
         c["J2"] = float(f2(c["layout"])) if f2 is not None else math.nan
         if f2 is not None and math.isfinite(c["J2"]) and c["J2"] < best_J:
             best_id, best_J = c["id"], c["J2"]
+    in_beam = {id(c) for c in ok[:beam]}
     for c in cands:
         c.pop("layout", None)
+        if id(c) not in in_beam:
+            c.pop("handoff", None)                              # only the beam goes on to the next stage
     return OnlineResult(deployed=best_id, J=best_J, baseline_J=baseline_J2, candidates=cands, card=card,
                         wall_s=round(time.time() - t0, 2), llm_calls=0)

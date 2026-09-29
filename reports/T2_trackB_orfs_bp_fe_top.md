@@ -3,11 +3,11 @@
 | Field | Value |
 |---|---|
 | Report | trackB_orfs_bp_fe_top |
-| Date | 2026-09-29 13:47 |
+| Date | 2026-09-29 16:05 |
 | Node | thinklab-105-224 |
 | Track | B (ORFS 2024-12-13 8ae3ae36); 8 threads |
-| Tool versions | native OpenROAD 676f8451bb-src; the flow's Yosys: /data/dzy/heura_repr/tools/yosys_048/bin/yosys (the Yosys version in the run's metadata is the one on PATH, not used) |
-| HeurBridge version / git | 0.14.0 / 9546dd4fc235383fe0df65b82f7db08ec8337ffe (9546dd4-20260928135525) |
+| Tool versions | native OpenROAD 676f8451bb-src; flow Yosys: Yosys 0.48 (/data/dzy/heura_repr/tools/yosys_048/bin/yosys) |
+| HeurBridge version / git | 0.14.0 / 5a70d06799f63858e13bfd99ab7c91c5c73a2ee8 (5a70d06-20260929142457) |
 | Metric conventions | timing setup_hold_v1_2026-09-22; metrics_v2_2026-09-22; HPWL centre (pin_offset_v2); cost cost_v3_2026-09-29 |
 | Feeds gate | T2 exit (archive A0, Track B; f2 verification in the f2 campaign) — descriptive |
 | Pre-registered test | - |
@@ -61,6 +61,14 @@ Below the baseline J 0.95: 12 layouts after the gates (12 distinct), 14 before t
 | bp_fe_top.ls7.n3.f2 | LS | None | 0.9161 | 0.9089 |
 | bp_fe_top.ls5.n3.f2 | LS | None | 0.8983 | 0.9133 |
 
+**Candidate noise bands** (f2, J before the gates; the same one-site shifts as the tool's own layout). A candidate counts as better than the tool only if its whole band is below the tool's same-path band:
+
+| candidate | J (as run) | J after one-site / one-row shifts | band | all 4 below the tool's same-path band (min 1.0330) |
+|---|---|---|---|---|
+| bp_fe_top.ls0.n4.f2 | 0.8809 | 0.8945, 0.9060, 0.8939 | 0.8809-0.9060 | yes |
+| bp_fe_top.ls7.n2.f2 | 0.8903 | 0.8971, 0.8741, 0.9344 | 0.8741-0.9344 | yes |
+| bp_fe_top.ls1.n1.f2 | 0.8920 | 0.9200, 0.8788, 0.9487 | 0.8788-0.9487 | yes |
+
 **Archive top-k (f2-admitted):** LS J=0.8809 (f2); LS J=0.8903 (f2); LS J=0.8920 (f2); LS J=0.8937 (f2); LS J=0.8971 (f2).
 
 ## Failures (by name, counted as +inf in statistics)
@@ -74,8 +82,8 @@ Below the baseline J 0.95: 12 layouts after the gates (12 distinct), 14 before t
 ## Exact commands
 
 ```bash
-python scripts/run_seed_orfs.py --flow /data/dzy/heura_repr/third_party/ORFS-2024-12/flow --design nangate45/bp_fe_top --seeds 5 --top 10 --spread 10 --ls 8 --base-runs 2 --timeout 7200 --base-timeout 28800 --noise-replays 3 --phase all --yosys /data/dzy/heura_repr/tools/yosys_048/bin/yosys
-python scripts/report_trackb_dev.py --design bp_fe_top --runs runs/remote/seedB_orfs7_bp_fe_top/runs/seed_orfs --archive runs/remote/seedB_orfs7_bp_fe_top/archive_B0_orfs_bp_fe_top --label orfs
+python scripts/run_seed_orfs.py --flow /data/dzy/heura_repr/third_party/ORFS-2024-12/flow --design nangate45/bp_fe_top --seeds 5 --top 10 --spread 10 --ls 8 --base-runs 2 --timeout 7200 --base-timeout 28800 --noise-replays 3 --phase band --yosys /data/dzy/heura_repr/tools/yosys_048/bin/yosys
+python scripts/report_trackb_dev.py --design bp_fe_top --runs runs/remote/seedB_band_bp_fe_top/runs/seed_orfs --archive runs/remote/seedB_band_bp_fe_top/archive_B0_orfs_bp_fe_top --label orfs
 ```
 
 ## Notes
