@@ -11,8 +11,13 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
   copied there. The brief artifact is updated by URL from now on.
 - **E0:** `e0x_eq_bigblue1_spec_ibm12` fetched and checked (ibm12 390 rows, rc 0). 14 of 16 parts are complete.
   E0#3 = spec ibm08 (in `e0x_spec_bigblue1_ibm08`) + spec ibm12 (in `e0x_eq_bigblue1_spec_ibm12`).
-- **bigblue4 (22:00):** spec slices at 16 rows each (s2 needs 18), eq at 14-15, w45 at 13-14. Launch slices 6-7
-  when the watcher reports two finished slices (15:30 entry; code pinned to 5e1c009).
+- **bigblue4 (22:00):** spec slices at 16 rows each (s2 needs 18), eq at 14-15, w45 at 13-14.
+- **23:08: spec slice 2 finished** (18 rows, meta). Slice 6 of the task-list protocol was launched in its place,
+  one for one, so the load stays at the 12 slices the machine has carried since 11:22; 56 GB were free. Job
+  `e0x_spec_bigblue4_w6` (GPU 2, code `5e1c009-20260929112219` verified in its CODE_VERSION; plan and cmd in this
+  session's `e0split/`). The next finished slices are replaced the same way: spec 7, then eq 6 and eq 7
+  (`make_bigblue4.py wave <spec|eq> <k> <budget>` + `relaunch.py 225 plan_<run>.json`; budgets spec 2259.007,
+  eq 2230.7). Add each new job to `watch_extra_225.txt`.
 - **Track B:** the bp_be_top report was regenerated (bands, and a warm start that hurts: see CHANGELOG). The
   orfs7 seeding for swerv_wrapper, ariane136 and ariane133 continues (f1 rows 26/82/77).
 
