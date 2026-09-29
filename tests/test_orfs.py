@@ -70,3 +70,19 @@ def test_failure_reason_names_the_tool_error():
     assert orfs.failure_reason("", "timeout") == "timeout"
     assert orfs.failure_reason("make[1]: *** [Makefile:1: do-3_3_place_gp] Error 1\n", 2) == "make returncode 2 in 3_3_place_gp"
     assert orfs.failure_reason("anything", 0) is None
+
+
+def test_warm_start_places_every_cell():
+    """Track-B warm start: every standard cell gets a location (OpenROAD locks placed cells if any stay unplaced),
+    at its cluster's quadratic position; a missing name stops the flow with a named error."""
+    import re
+    import numpy as np
+    from heurbridge.core import synth
+    from heurbridge.heuristics.cell.cluster import cluster_cells
+    from heurbridge.pipeline.evaluators import OrfsEvaluator
+    des, ref = synth.make_design(seed=3, n_macros=6, n_cells=200, n_io=10)
+    cl = cluster_cells(des, n=16)
+    t = OrfsEvaluator(fidelity=1, warm_start="quadratic", cluster_of=cl)._warm_start_tcl(des, ref)
+    xy = [(float(a), float(b)) for a, b in re.findall(r"^  \{[^}]+\} ([-0-9.]+) ([-0-9.]+)$", t, re.M)]
+    assert len(xy) == int((cl >= 0).sum()) and np.isfinite(np.array(xy)).all()
+    assert "setPlacementStatus PLACED" in t and "HB-WARM-START" in t

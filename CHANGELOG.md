@@ -12,6 +12,14 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
   replays (rows `<run>.p1-3.f2`, program CAND_BAND). `report_trackb_dev.py` adds a "Candidate noise bands" table
   and counts a candidate as better than the tool only if its whole band lies below the tool's same-path band;
   CAND_BAND rows stay out of the signoff statistics.
+- **Standard-cell warm start for imported macro layouts** (`OrfsEvaluator(warm_start="quadratic", cluster_of=...)`,
+  `orfs.cell_locations_tcl`; demo `run_seed_orfs.py --phase warmstart`). In OpenROAD 676f8451 the first global
+  placement (ORFS 3_1, -skip_io, no initial placement) keeps already placed cells only when every cell is placed
+  (mpl2's warm start in the unmodified flow) and starts all others at the core centre -- which is what every
+  imported layout got. Now each standard cell can start at its cluster's position from a quadratic placement of
+  the clustered netlist with the layout's macros and the IOs fixed; every cell is placed (placed cells are locked
+  otherwise) and a name that does not resolve stops the flow (HB-WARM-START). The demo re-runs M1's replay, its
+  shifts and the best candidates at f1/f2 with the warm start (evals_ws*.jsonl); the report compares both starts.
 
 ### Changed
 - **cost_v3 (user decision 2026-09-29): Track B's timing gates compare with the same-path replay.** The setup and

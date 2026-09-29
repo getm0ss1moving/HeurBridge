@@ -17,6 +17,10 @@ Resumable; everything lands in runs/seed_orfs/<design>/:
              and pre-macro floorplan; local search around the best (evals.jsonl).
   4. f2      the --top distinct f1 layouts and --spread more across the f1 ranking to 6_report (evals_f2.jsonl);
              every f2-admissible layout enters the archive at fidelity 2.
+  6. warmstart (--phase warmstart, demo) M1's replay, its shifts and the --band-top best candidates again at f1 and
+             f2 with every standard cell pre-placed at its cluster's quadratic position (OrfsEvaluator warm_start):
+             ORFS's first global placement then starts like the unmodified flow does from Hier-RTLMP's placement
+             (evals_ws*.jsonl, run ids <design>.ws.<tag>.f1/f2, program WS_DEMO).
   5. band    (--phase band) the --band-top best f2-admitted candidates shifted by one site (+x, -x) or one row
              (+y) through f2, like M1's replays (rows <run>.p1-3.f2, program CAND_BAND): each candidate's own noise
              band, so a candidate counts as better than the tool only if its band is (user decision 2026-09-29).
@@ -143,7 +147,7 @@ def main():
     ap.add_argument("--base-runs", type=int, default=2, help="repeats of the unmodified flow (determinism check)")
     ap.add_argument("--work-home", default=str(ROOT / "runs" / "orfs_work"))
     ap.add_argument("--yosys", default=None, help="Yosys for ORFS (default HB_YOSYS)")
-    ap.add_argument("--phase", default="all", choices=["base", "f1", "f2", "all", "band"])
+    ap.add_argument("--phase", default="all", choices=["base", "f1", "f2", "all", "band", "warmstart"])
     ap.add_argument("--base-timeout", type=int, default=4 * 7200, help="whole unmodified flow (each step < 7,200 s)")
     ap.add_argument("--timeout", type=int, default=7200, help="one candidate evaluation")
     ap.add_argument("--noise-replays", type=int, default=3, help="shifted M1 replays for the noise band (0-3)")
@@ -244,6 +248,28 @@ def main():
         s = SA.seed_design(des, lay, progs, ev1, None, arch, base1, out, SA.SeedConfig(
             seeds=a.seeds, top_f2=a.top, ls_steps=a.ls, halo=halo), cluster=cl, log=lambda x: print(x, flush=True))
         print(json.dumps(s), flush=True)
+    if a.phase == "warmstart":                          # 6. demo: the same layouts with a standard-cell warm start
+        import dataclasses
+        cpath = rdir / "clusters.npy"
+        cl = np.load(cpath) if cpath.exists() else cluster_cells(des, seed=0)
+        ev1w = dataclasses.replace(ev1, warm_start="quadratic", cluster_of=cl)
+        ev2w = dataclasses.replace(ev2, warm_start="quadratic", cluster_of=cl)
+        p2 = rdir / "evals_f2.jsonl"
+        rows2 = [json.loads(l) for l in p2.read_text().splitlines()] if p2.exists() else []
+        cands = [SA.rescore(r, ev2, base2) for r in rows2 if r.get("program") not in ("M1_replay", "CAND_BAND")]
+        best = distinct(sorted([r for r in cands if r.get("status") == "ok" and math.isfinite(r["J"])],
+                               key=lambda r: r["J"]))[:a.band_top]
+        items = [("M1replay", m1, "M1")] + [("M1replay.p%d" % k, shifted_m1(des, m1, dx, dy), "M1")
+                                            for k, (dx, dy) in enumerate(((1, 0), (-1, 0), (0, 1)), 1)]
+        items += [(r["run_id"][len(name) + 1:-3], _layout_from_row(des, lay, r), r["run_id"]) for r in best]
+        for tag, lay_x, of in items:
+            if lay_x is None:
+                continue
+            for ev, base, led, work in ((ev1w, base1, "evals_ws.jsonl", "work"), (ev2w, base2, "evals_ws_f2.jsonl", "work_f2")):
+                row = _eval(ev, des, lay_x, base, "%s.ws.%s.f%d" % (name, tag, ev.fidelity), rdir / work,
+                            Ledger(rdir / led), {"program": "WS_DEMO", "tag": tag, "of": of, "stage": "M"})
+                print(json.dumps({"warm_start": row["run_id"], "status": row.get("status"), "J_raw": row.get("J_raw"),
+                                  "failure": (row.get("record") or {}).get("failure")}), flush=True)
     if a.phase == "band":                               # 5. the best candidates' own noise band at f2
         p2 = rdir / "evals_f2.jsonl"
         rows2 = [json.loads(l) for l in p2.read_text().splitlines()] if p2.exists() else []

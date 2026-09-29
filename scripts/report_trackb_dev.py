@@ -208,6 +208,31 @@ def main():
             res += ["", "| admitted at f2 | program | seed | f1 J | f2 J |", "|---|---|---|---|---|"] + [
                 "| %s | %s | %s | %s | %s |" % (r["run_id"], r.get("program"), r.get("seed"), fmt(r.get("f1_J_raw")),
                                               fmt(r["J"])) for r in adm[:8]]
+    ws1p, ws2p = rdir / "evals_ws.jsonl", rdir / "evals_ws_f2.jsonl"
+    if ws1p.exists() or ws2p.exists():          # demo: the same layouts with a standard-cell warm start
+        ws = {1: [rescored(json.loads(l), 1) for l in ws1p.read_text().splitlines()] if ws1p.exists() else [],
+              2: [rescored(json.loads(l), 2) for l in ws2p.read_text().splitlines()] if ws2p.exists() else []}
+        old1, old2 = {r["run_id"]: r for r in rows}, {r["run_id"]: r for r in rows2}
+        tags = []
+        for fid in (1, 2):
+            for r in ws[fid]:
+                if r.get("tag") and r["tag"] not in tags:
+                    tags.append(r["tag"])
+
+        def jv(r):
+            return "-" if r is None else (fmt(r.get("J_raw")) if r.get("status") == "ok" else str(r.get("status")))
+        lines_w = ["| layout | f1 J, cells from the core centre | f1 J, warm start | f2 J, cells from the core centre | f2 J, warm start |",
+                   "|---|---|---|---|---|"]
+        for t in tags:
+            w1 = next((r for r in ws[1] if r.get("tag") == t), None)
+            w2 = next((r for r in ws[2] if r.get("tag") == t), None)
+            lines_w.append("| %s | %s | %s | %s | %s |" % (t, jv(old1.get("%s.%s.f1" % (a.design, t))), jv(w1),
+                                                         jv(old2.get("%s.%s.f2" % (a.design, t))), jv(w2)))
+        res += ["", "**Warm-start demo** (J before the gates; the unmodified flow scores 0.95 at f1 and 1.00 at f2 by "
+                "construction). The same macro layouts, once with every standard cell starting at the core centre (the "
+                "flow's default for an imported layout) and once at its cluster's quadratic position (the imported "
+                "layout's counterpart of Hier-RTLMP's warm start):", ""] + lines_w
+
     band = [r for r in rows2 if r.get("program") == "CAND_BAND"]
     if band:                                    # the best candidates' own one-site-shift band (user decision 29 Sep)
         by_id = {r["run_id"]: r for r in rows2}

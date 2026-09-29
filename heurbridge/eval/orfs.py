@@ -82,6 +82,29 @@ def macro_placement_tcl(design: Design, layout: Layout, exact: bool = False) -> 
     return "\n".join(lines) + "\n"
 
 
+def cell_locations_tcl(design: Design, cells, ll_um, note: str = "") -> str:
+    """odb commands giving standard cells a starting placement (lower-left in microns, status PLACED).
+
+    ORFS's first global placement (3_1, -skip_io) starts from the cells' current locations when every cell is
+    placed -- the warm start Hier-RTLMP leaves behind -- and from the core centre otherwise; OpenROAD locks placed
+    cells if some are still unplaced, so every standard cell must be given a location: a name that does not
+    resolve stops the flow (named error HB-WARM-START) instead of leaving a partially locked design."""
+    lines = ["# HeurBridge standard-cell warm start (%s)" % note,
+             "set _hb_block [ord::get_db_block]", "set _hb_dbu [$_hb_block getDbUnitsPerMicron]",
+             "set _hb_miss {}", "foreach {_hb_n _hb_x _hb_y} {"]
+    for i, (x, y) in zip(cells, ll_um):
+        lines.append("  {%s} %.4f %.4f" % (design.names[int(i)], float(x), float(y)))
+    lines += ["} {",
+              "  set _hb_i [$_hb_block findInst $_hb_n]",
+              "  if {$_hb_i == \"NULL\"} { lappend _hb_miss $_hb_n; continue }",
+              "  $_hb_i setLocation [expr {round($_hb_x * $_hb_dbu)}] [expr {round($_hb_y * $_hb_dbu)}]",
+              "  $_hb_i setPlacementStatus PLACED",
+              "}",
+              "if {[llength $_hb_miss] > 0} { error \"HB-WARM-START [llength $_hb_miss] cells not found, e.g. [lindex $_hb_miss 0]\" }",
+              "puts \"HB_WARM_START placed %d cells\"" % len(cells)]
+    return "\n".join(lines) + "\n"
+
+
 def parse_macro_tcl(text: str) -> dict:
     """Read ORFS' own 2_2_floorplan_macro.tcl (M1 layouts): {inst: (x_ll, y_ll, orient)}."""
     out = {}

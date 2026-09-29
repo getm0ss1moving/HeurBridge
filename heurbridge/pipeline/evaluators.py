@@ -11,6 +11,8 @@ import time
 from dataclasses import dataclass, field
 from pathlib import Path
 
+import numpy as np
+
 from .. import tools
 from ..core.design import Design, Layout
 from ..eval import cost
@@ -133,17 +135,40 @@ class OrfsEvaluator(Evaluator):
     yosys: str | None = None
     keep_results: bool = False          # False: delete the variant's results/objects after reading (RAM workspace)
     make_vars_extra: tuple = ()          # design-config overrides (e.g. ariane133's RTLMP settings)
+    warm_start: str = ""                 # "quadratic": standard cells start at their cluster's quadratic position
+    cluster_of: object = None            # (N_obj,) std-cell cluster ids for warm_start
 
     def __post_init__(self):
         if self.fidelity < 2 and self.weights == cost.WEIGHTS:
             self.weights = dict(F1_B_WEIGHTS)          # no vias before detailed routing
+
+    def _warm_start_tcl(self, design, layout) -> str:
+        """Every standard cell at its cluster's position from a quadratic placement of the clustered netlist with
+        this layout's macros and the IOs fixed: the imported layout's counterpart of Hier-RTLMP's warm start."""
+        from ..bridge.graph import build_graph
+        from ..bridge.sample import source_nodes
+        from ..eval import orfs
+        cl = np.asarray(self.cluster_of)
+        if getattr(self, "_ws_graph_design", None) != design.id:
+            self._ws_graph, self._ws_graph_design = build_graph(design, layout, cl), design.id
+        g = self._ws_graph
+        x = source_nodes(g, layout)                              # clusters by quadratic placement
+        cpos = design.to_abs(x[g.cluster_nodes])                 # cluster c -> node n_obj_nodes + c
+        cells = np.flatnonzero(cl >= 0)
+        ll = cpos[cl[cells]] - design.size[cells] / 2
+        return orfs.cell_locations_tcl(design, cells, ll, "quadratic cluster positions, macros and IOs fixed")
 
     def evaluate(self, design, layout, run_id, workdir):
         from ..eval import orfs
         workdir = Path(workdir)
         workdir.mkdir(parents=True, exist_ok=True)
         tcl = workdir / ("%s.macros.tcl" % run_id)
-        tcl.write_text(orfs.macro_placement_tcl(design, layout))
+        text = orfs.macro_placement_tcl(design, layout)
+        if self.warm_start == "quadratic":
+            text += self._warm_start_tcl(design, layout)
+        elif self.warm_start:
+            raise ValueError("unknown warm_start %r" % self.warm_start)
+        tcl.write_text(text)
         stage = "finish" if self.fidelity >= 2 else "grt"
         run = orfs.OrfsRun(flow_dir=self.flow_dir, design_config=self.design_config, variant=run_id,
                            macro_tcl=str(tcl.resolve()), stage=stage, threads=self.threads, timeout_s=self.timeout_s,
