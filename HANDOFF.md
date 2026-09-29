@@ -25,7 +25,13 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
   (the encrypted source archive was copied to 225's vault).
 - **When everything ends:** fetch the `e0x_*` jobs; E0#1 = `e0_combine.py --runs` all spec slices of the 7 ISPD
   designs `--ledger-entry E0#1` (combine checks duplicates and one budget per design); E0#2 the eq slices; E0#3
-  spec ibm08 + ibm12. Then `report_e0.py` per entry; commit ledger + reports; T5 only if G0' passes.
+  spec ibm08 + ibm12.
+  **Which directories (29 Sep):** spec bigblue3 = `e0x_spec_bigblue3` {spec_bigblue3, _s1, _s3} (37 cases; its
+  slice 2 was OOM-killed at 22:46 on 28 Sep -- its dir there holds 11 rows and no meta: do NOT include it) +
+  `e0x_spec_bigblue3_r2` {spec_bigblue3_s2 (restored 11 rows + the rest of sources 25-31), spec_bigblue3_s2b
+  (31-38)}. bigblue4 (30 sources) = `e0x_{spec,eq}_bigblue4` {_bigblue4, _s1, _s2, _s3} + `e0x_{spec,eq}_bigblue4_w45`
+  {_s4, _s5} + the later wave for slices 6 and 7 (not the w45 jobs' empty prepare dir). Budgets: spec bigblue4
+  2259.007 s, eq 2230.7 s (HB_RUDY_IMPL=bmm for every bigblue4 process). Then `report_e0.py` per entry; commit ledger + reports; T5 only if G0' passes.
 - **Track-B noise band** (live, `seedB_orfs7_*`): f2 J over replay + 3 one-site shifts 1.03-1.40 (bp_fe_top),
   1.02-1.16 (bp_be_top), 1.001-1.009 (ariane136); the same-path replay fails the f2 timing gate on 4 of 5 designs
   -> proposal (open, user): reference the f2 gates to the same-path replay.
