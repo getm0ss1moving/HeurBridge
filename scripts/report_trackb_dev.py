@@ -181,7 +181,7 @@ def main():
             traj.append(best)
         res += ["", "**Local search** (T2.7, %d evaluations): best J among layouts passing the timing gates, after each step: %s." % (
             len(ls_rows), ", ".join(fmt(x) for x in traj[5::6]) or "-")]
-    cand2 = [r for r in rows2 if r.get("program") != "M1_replay"]
+    cand2 = [r for r in rows2 if r.get("program") not in ("M1_replay", "CAND_BAND")]
     if cand2:
         ok2 = [r for r in cand2 if r.get("status") == "ok"]
         adm = sorted([r for r in ok2 if math.isfinite(r["J"])], key=lambda r: r["J"])
@@ -208,6 +208,26 @@ def main():
             res += ["", "| admitted at f2 | program | seed | f1 J | f2 J |", "|---|---|---|---|---|"] + [
                 "| %s | %s | %s | %s | %s |" % (r["run_id"], r.get("program"), r.get("seed"), fmt(r.get("f1_J_raw")),
                                               fmt(r["J"])) for r in adm[:8]]
+    band = [r for r in rows2 if r.get("program") == "CAND_BAND"]
+    if band:                                    # the best candidates' own one-site-shift band (user decision 29 Sep)
+        by_id = {r["run_id"]: r for r in rows2}
+        rp = [r["J_raw"] for r in replay[2] if r.get("status") == "ok" and r.get("J_raw") is not None]
+        lo_m1 = min(rp) if rp else None
+        lines_b = ["| candidate | J (as run) | J after one-site / one-row shifts | band | all 4 below the tool's same-path band (min %s) |"
+                   % fmt(lo_m1), "|---|---|---|---|---|"]
+        for cid in sorted({r["band_of"] for r in band}, key=lambda c: (by_id.get(c) or {}).get("J_raw") or 9):
+            c0 = by_id.get(cid) or {}
+            sh = sorted([r for r in band if r["band_of"] == cid], key=lambda r: r.get("seed") or 0)
+            js = [c0.get("J_raw")] + [r.get("J_raw") if r.get("status") == "ok" else None for r in sh]
+            ok = [x for x in js if x is not None]
+            lines_b.append("| %s | %s | %s | %s | %s |" % (
+                cid, fmt(c0.get("J_raw")), ", ".join(fmt(r.get("J_raw")) if r.get("status") == "ok" else str(r.get("status"))
+                                                   for r in sh) or "-",
+                "%s-%s" % (fmt(min(ok)), fmt(max(ok))) if ok else "-",
+                ("yes" if len(ok) == len(js) and lo_m1 is not None and max(ok) < lo_m1 else "no") if ok else "-"))
+        res += ["", "**Candidate noise bands** (f2, J before the gates; the same one-site shifts as the tool's own "
+                "layout). A candidate counts as better than the tool only if its whole band is below the tool's "
+                "same-path band:", ""] + lines_b
     arch_txt = "no archive"
     if Path(a.archive).exists():
         top = Archive(a.archive, min_fidelity=1 if dev else 2).topk(a.design, "M")

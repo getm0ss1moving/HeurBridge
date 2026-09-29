@@ -6,6 +6,13 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 
 ## [Unreleased]
 
+### Added (Track B, user decisions 2026-09-29: B.3 stays frozen; apply the Track-B plan)
+- **Candidate noise bands** (`run_seed_orfs.py --phase band --band-top K`): the K best f2-admitted candidates are
+  shifted as a whole by one site (+x, -x) or one row (+y) and re-run through f2, exactly like M1's same-path
+  replays (rows `<run>.p1-3.f2`, program CAND_BAND). `report_trackb_dev.py` adds a "Candidate noise bands" table
+  and counts a candidate as better than the tool only if its whole band lies below the tool's same-path band;
+  CAND_BAND rows stay out of the signoff statistics.
+
 ### Changed
 - **cost_v3 (user decision 2026-09-29): Track B's timing gates compare with the same-path replay.** The setup and
   hold WNS gates (frozen rule B.3, guard 0.02 ns) now refer to the tool-native macro layout run through the
