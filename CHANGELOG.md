@@ -6,6 +6,22 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 
 ## [Unreleased]
 
+### Findings (Track-B plan, 29 Sep 17:10): the timing mechanisms have nothing to act on in bp_fe_top/bp_be_top
+- **Timing probes** (`seedB_tprobe2_bp_fe_top`, `seedB_tprobe_bp_be_top`; the unmodified flow to 3_place, 3 and 5
+  min). No macro pin is close to critical:
+  - bp_fe_top: 2,163 macro signal pins, 1,639 timed, worst setup slack +0.457 ns at a 1.8 ns clock;
+  - bp_be_top: 1,983 pins, 1,973 timed, worst +0.465 ns at 2.6 ns;
+  - no pin is within 10 % of the period, and no macro pin has negative hold slack.
+  The designs' setup violations (WNS about -0.1 ns at f2) lie on logic paths that do not touch a macro pin, so
+  critical-net weights leave every net at weight 1 on these designs. No weighted campaign is run: it would repeat
+  the unweighted one.
+- **Timing-aware local search**, replayed on the existing campaigns: no step's accepted move failed f1 timing on
+  either design. bp_fe_top's search had 8 of 45 timing-failing neighbours and bp_be_top's 24 of 45, but none was
+  both the step's best and an improvement. The option would not have changed either campaign.
+- So the f2 timing failures come from what changes between f1 and signoff and, for the tool's own layout, from
+  the missing cell warm start, which the warm-start demo addresses. Both mechanisms stay in the code, off by
+  default, for designs whose macros are on critical paths.
+
 ### Added (Track-B plan: timing-aware macro cost and local search)
 - **Timing probe** (`run_seed_orfs.py --phase timingprobe`; `orfs.macro_pin_slacks`, `MACRO_SLACK_TCL`). The
   unmodified flow (ORFS's own macro placer, seeded from the base run's synthesis and floorplan) runs to 3_place
