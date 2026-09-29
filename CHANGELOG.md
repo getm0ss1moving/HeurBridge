@@ -28,6 +28,15 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
   only an unbalanced one.
 
 ### Reports
+- **Warm-start demo, bp_fe_top** (`seedB_ws_bp_fe_top`, merged with the band rows; descriptive). The same macro
+  layouts were run with every standard cell starting at its cluster's quadratic position instead of the core centre:
+  - the tool's own layout through our path: f2 J 1.323 / 1.405 / 1.135 / 1.033 -> 1.036 / 0.986 / 0.970 / 1.009
+    (replay and its 3 shifts). Its band narrows from 0.37 to 0.07 and its median goes from 1.23 to 1.00, the
+    unmodified flow's own level. So most of its handicap on our path was the cells starting at the centre;
+  - the 3 best candidates: 0.881 / 0.890 / 0.892 -> 0.888 / 0.920 / 0.892 (little change);
+  - with the warm start, the candidates stay below the tool's own layout, by 0.05-0.15 instead of 0.08-0.52. All
+    14 warm-start f2 runs pass every gate.
+  The candidates' warm-start bands are not measured.
 - `reports/T2_trackB_orfs_bp_fe_top.md` regenerated from `seedB_band_bp_fe_top` (the finished band job; the same
   129 f1 and 24 f2 rows plus 9 band rows). The candidate noise bands are descriptive: the 3 best candidates stay
   at 0.874-0.949 under every one-site or one-row shift. The tool's own layout through the same path spans
