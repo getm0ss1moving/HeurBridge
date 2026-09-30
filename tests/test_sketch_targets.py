@@ -73,3 +73,18 @@ def test_cluster_weight_default_and_scaling():
     fm = (a * ((v - ut) ** 2).sum(-1)).sum(-1) / a.sum()
     assert abs(float(l10) - float(fm.mean())) < 1e-5
     assert float(l10) != float(l1)
+
+
+def test_keep_val_ckpts(tmp_path):
+    from heurbridge.bridge.train import Trainer
+    b, ref = bundle(3)
+    g = b.graph
+    x1 = source_nodes(g, ref).astype(np.float32)
+    x0 = source_nodes(g, b.base).astype(np.float32)
+    ps = BD.PairSet(g, x0[None], x1[None], np.ones(1, np.float32), np.zeros((1, g.n), np.int8), [{}])
+    for keep, out in ((False, tmp_path / "plain"), (True, tmp_path / "keep")):
+        cfg = TrainConfig(steps=4, batch=2, lr=1e-3, warmup=1, val_every=2, device="cpu", bf16=False, keep_val_ckpts=keep)
+        torch.manual_seed(0)
+        Trainer(BridgeNet(TINY), cfg, [ps], out_dir=out, log=lambda s: None).fit()
+        assert (out / "best.pt").exists()
+        assert sorted(p.name for p in out.glob("step*.pt")) == (["step2.pt", "step4.pt"] if keep else [])

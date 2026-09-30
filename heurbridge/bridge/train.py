@@ -45,6 +45,7 @@ class TrainConfig:
     tau_dist: str = "logit_normal"     # or "uniform"
     lam_ov: float = 0.1
     cluster_weight: float = 1.0        # extra loss weight on cell-cluster nodes (1 = the graph's area weights as built)
+    keep_val_ckpts: bool = False       # also save the weights of every validation as step<N>.pt (best.pt is unchanged)
     bf16: bool = True
     val_every: int = 2000
     patience: int = 5
@@ -284,9 +285,11 @@ class Trainer:
                         self.save(self.out / "best.pt", {"step": it + 1, "val": val})
                 else:
                     bad += 1
-                    if bad >= cfg.patience:
-                        self.log(json.dumps({"early_stop": it + 1, "best": self.best[0]}))
-                        break
+                if self.out and cfg.keep_val_ckpts:
+                    self.save(self.out / ("step%d.pt" % (it + 1)), {"step": it + 1, "val": val})
+                if bad >= cfg.patience:
+                    self.log(json.dumps({"early_stop": it + 1, "best": self.best[0]}))
+                    break
         if self.best[1] is not None:
             self.ema.shadow.load_state_dict(self.best[1])
         return {"best": self.best[0], "steps": self.hist.steps[-1] if self.hist.steps else 0}

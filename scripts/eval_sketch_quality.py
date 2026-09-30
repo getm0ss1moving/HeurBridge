@@ -6,7 +6,12 @@ nearest symmetry-matched elite exactly as in training, whose cluster targets are
 (including the baselines' from scripts/m1_cluster_pos.py):
   cluster error  area-weighted RMS distance (normalized core units) of the cluster nodes
   macro error    area-weighted RMS distance of the movable-macro nodes
-The source itself is the reference (its clusters are the quadratic placement).  No placer runs.
+The source itself is the reference (its clusters are the quadratic placement).
+
+--placer adds DA0 (what a hand-off would face): each model's endpoint is legalized and placed by DREAMPlace (Track-A
+f1, cells from the centre as always), and its sketch is compared with the placed cluster centroids of that very
+layout; the control is the quadratic placement of the same legalized macros.  The endpoint's f1 J is recorded too
+(does a fine-tune keep the macro quality?).
 
   python scripts/eval_sketch_quality.py --val ibm04,ibm06 --runs runs/seed_trackA_dp --archive archive_A0_trackA \
       --m1-cluster-pos runs/m1_cluster_pos --cache-dir cache --ckpt final=checkpoints/algR_trackA_final/best.pt \
@@ -37,6 +42,33 @@ def rms(x, y, w):
     return float(np.sqrt((w * ((x - y) ** 2).sum(1)).sum() / max(w.sum(), 1e-12)))
 
 
+def placed_da0(a, b, xs, srcs, ends, rows, name):
+    """DA0 for every model endpoint (alpha 1): the sketch and the quadratic control against DREAMPlace's placement."""
+    from heurbridge.bridge import handoff as H
+    from heurbridge.core import project
+    from heurbridge.eval import cost
+    from heurbridge.pipeline.evaluators import track_a_final
+    g, des = b.graph, b.design
+    final = track_a_final("dreamplace", cluster_of=b.cluster_of)
+    baseline = cost.Baseline.from_records(des.id, json.loads((Path(a.runs) / des.id / "baseline.json").read_text())["records"])
+    for m, e in ends.items():
+        for i, (pid, s, lay) in enumerate(srcs):
+            rows[i][m]["da0"] = None
+            dep, rep = project.legalize_macros(des, g.to_layout(e[i], lay))
+            if not rep.ok:
+                continue
+            rec = final.evaluate(des, dep, "%s.%s.%s.s%d" % (name, m, pid, s), Path(a.work))
+            if rec.get("cluster_pos") is None:
+                continue
+            cp = np.asarray(rec["cluster_pos"], np.float64)
+            rows[i][m]["da0"] = {"sketch": H.sketch_fidelity(g, H.guarded_sketch(g, xs[i], e[i], 1.0), cp),
+                                 "quad": H.sketch_fidelity(g, source_nodes(g, dep)[g.cluster_nodes], cp),
+                                 "J": float(final.score(rec, baseline).J_inf)}
+        d = [rows[i][m]["da0"] for i in range(len(srcs)) if rows[i][m]["da0"]]
+        print(json.dumps({"design": name, "model": m, "da0_placed": len(d),
+                          "sketch_closer": sum(x["sketch"] < x["quad"] for x in d)}), flush=True)
+
+
 def main():
     from train_bridge import load_bundle
     ap = argparse.ArgumentParser()
@@ -50,9 +82,12 @@ def main():
     ap.add_argument("--K", type=int, default=20)
     ap.add_argument("--ckpt", action="append", default=[], help="name=path (repeatable)")
     ap.add_argument("--out", default="sketch_quality.json")
+    ap.add_argument("--placer", action="store_true", help="also DA0 with DREAMPlace placements (see above)")
+    ap.add_argument("--work", default="runs/sketch_quality_work")
+    ap.add_argument("--device", default="cpu", help="where the bridges run (cuda on a GPU server)")
     a = ap.parse_args()
     arch = Archive(a.archive, min_fidelity=1)
-    models = {k: load_bridge(v) for k, v in (c.split("=", 1) for c in a.ckpt)}
+    models = {k: load_bridge(v, device=a.device) for k, v in (c.split("=", 1) for c in a.ckpt)}
     res = {"cases": {}, "config": vars(a)}
     per = {m: {"cluster": [], "macro": []} for m in ["source"] + list(models)}
     for name in a.val.split(","):
@@ -81,6 +116,8 @@ def main():
                 per[m]["cluster"].append(r[m]["cluster"])
                 per[m]["macro"].append(r[m]["macro"])
             rows.append(r)
+        if a.placer:
+            placed_da0(a, b, xs, srcs, ends, rows, name)
         res["cases"][name] = rows
         print(json.dumps({"design": name, "sources": len(srcs), "elites": len(elites),
                           "elites_with_override": sum(1 for e in arch.topk(b.design.id, "M", 5) if ov and int(e["id"]) in ov)}),
@@ -88,6 +125,16 @@ def main():
     res["summary"] = {m: {"n": len(v["cluster"]), "cluster_median": float(np.median(v["cluster"])),
                           "cluster_mean": float(np.mean(v["cluster"])), "macro_median": float(np.median(v["macro"])),
                           "macro_mean": float(np.mean(v["macro"]))} for m, v in per.items()}
+    if a.placer:
+        for m in models:
+            d = [r[m]["da0"] for rows in res["cases"].values() for r in rows if r[m].get("da0")]
+            if d:
+                res["summary"][m]["da0"] = {"n": len(d), "sketch_median": float(np.median([x["sketch"] for x in d])),
+                                            "quad_median": float(np.median([x["quad"] for x in d])),
+                                            "sketch_closer": int(sum(x["sketch"] < x["quad"] for x in d)),
+                                            "J_median": float(np.median([x["J"] for x in d])),
+                                            "failures": sum(1 for rows in res["cases"].values() for r in rows
+                                                            if r[m].get("da0") is None)}
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
     Path(a.out).write_text(json.dumps(res, indent=1, default=str))
     print(json.dumps(res["summary"]), flush=True)

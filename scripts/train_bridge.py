@@ -83,6 +83,7 @@ def main():
     ap.add_argument("--batch", type=int, default=16)
     ap.add_argument("--lr", type=float, default=2e-4)
     ap.add_argument("--val-every", type=int, default=500)
+    ap.add_argument("--keep-val-ckpts", action="store_true", help="also keep the weights of every validation (step<N>.pt)")
     ap.add_argument("--lam-ov", type=float, default=0.1)
     ap.add_argument("--sigma", type=float, default=0.01)
     ap.add_argument("--K", type=int, default=20)
@@ -147,7 +148,8 @@ def main():
         z = torch.load(a.pretrained, map_location="cpu", weights_only=False)
         model.load_state_dict(z["ema"])
     tcfg = TrainConfig(steps=a.steps, batch=a.batch, lr=a.lr, val_every=a.val_every, lam_ov=a.lam_ov, sigma=a.sigma,
-                       K=a.K, device=a.device, warmup=min(1000, a.steps // 10), seed=a.seed, cluster_weight=a.cluster_weight)
+                       K=a.K, device=a.device, warmup=min(1000, a.steps // 10), seed=a.seed, cluster_weight=a.cluster_weight,
+                       keep_val_ckpts=a.keep_val_ckpts)
     tr = Trainer(model, tcfg, sets, [p for p in [sets_val]] if val else [], evaluator=guard_evaluator(val, a.K, log),
                  out_dir=out, log=log)
     log(json.dumps({"params": model.n_params(), "train_designs": [s.graph.design_id for s in sets],
