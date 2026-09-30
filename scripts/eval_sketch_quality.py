@@ -51,8 +51,10 @@ def placed_da0(a, b, xs, srcs, ends, rows, name):
     g, des = b.graph, b.design
     final = track_a_final("dreamplace", cluster_of=b.cluster_of)
     baseline = cost.Baseline.from_records(des.id, json.loads((Path(a.runs) / des.id / "baseline.json").read_text())["records"])
+    pick = sorted(int(i) for i in np.random.default_rng(0).choice(len(srcs), size=min(a.da0_sources, len(srcs)), replace=False))
     for m, e in ends.items():
-        for i, (pid, s, lay) in enumerate(srcs):
+        for i in pick:
+            pid, s, lay = srcs[i]
             rows[i][m]["da0"] = None
             dep, rep = project.legalize_macros(des, g.to_layout(e[i], lay))
             if not rep.ok:
@@ -64,7 +66,7 @@ def placed_da0(a, b, xs, srcs, ends, rows, name):
             rows[i][m]["da0"] = {"sketch": H.sketch_fidelity(g, H.guarded_sketch(g, xs[i], e[i], 1.0), cp),
                                  "quad": H.sketch_fidelity(g, source_nodes(g, dep)[g.cluster_nodes], cp),
                                  "J": float(final.score(rec, baseline).J_inf)}
-        d = [rows[i][m]["da0"] for i in range(len(srcs)) if rows[i][m]["da0"]]
+        d = [rows[i][m]["da0"] for i in pick if rows[i][m]["da0"]]
         print(json.dumps({"design": name, "model": m, "da0_placed": len(d),
                           "sketch_closer": sum(x["sketch"] < x["quad"] for x in d)}), flush=True)
 
@@ -85,6 +87,10 @@ def main():
     ap.add_argument("--placer", action="store_true", help="also DA0 with DREAMPlace placements (see above)")
     ap.add_argument("--work", default="runs/sketch_quality_work")
     ap.add_argument("--device", default="cpu", help="where the bridges run (cuda on a GPU server)")
+    ap.add_argument("--chunk", type=int, default=16, help="sources per bridge batch (a cached design has all its "
+                    "cached sources, e.g. 128, whatever --seeds says)")
+    ap.add_argument("--da0-sources", type=int, default=32, help="sources per design placed for DA0: the same subset "
+                    "rule as training's validation (rng 0, without replacement)")
     a = ap.parse_args()
     arch = Archive(a.archive, min_fidelity=1)
     models = {k: load_bridge(v, device=a.device) for k, v in (c.split("=", 1) for c in a.ckpt)}
@@ -104,7 +110,8 @@ def main():
         wc, wm = g.area_w[cl].astype(np.float64), g.area_w[mm].astype(np.float64)
         xs = np.stack([source_nodes(g, lay) for _, _, lay in srcs])
         targets = [make_pair(g, xs[i], BD.node_orient(g, lay), elites)["x1"] for i, (_, _, lay) in enumerate(srcs)]
-        ends = {m: bridge_endpoints(model, g, xs, K=a.K) for m, model in models.items()}
+        ends = {m: np.concatenate([bridge_endpoints(model, g, xs[i:i + a.chunk], K=a.K) for i in range(0, len(xs), a.chunk)])
+                for m, model in models.items()}
         rows = []
         for i in range(len(srcs)):
             t = np.asarray(targets[i], np.float64)
@@ -134,7 +141,7 @@ def main():
                                             "sketch_closer": int(sum(x["sketch"] < x["quad"] for x in d)),
                                             "J_median": float(np.median([x["J"] for x in d])),
                                             "failures": sum(1 for rows in res["cases"].values() for r in rows
-                                                            if r[m].get("da0") is None)}
+                                                            if "da0" in r[m] and r[m]["da0"] is None)}
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
     Path(a.out).write_text(json.dumps(res, indent=1, default=str))
     print(json.dumps(res["summary"]), flush=True)
