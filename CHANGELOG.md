@@ -6,6 +6,23 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 
 ## [Unreleased]
 
+### Finding (30 Sep): the bridge's cell-sketch targets were partly quadratic placements
+- `archive_elites` takes each elite's cluster targets from the DREAMPlace cluster centroids stored with it, and falls
+  back to a quadratic placement when an elite has none. The seeding baseline (provenance BASELINE: DREAMPlace's own
+  macro placement, the lowest-J elite on most designs) was stored without them, because its baseline records were
+  scored without the clustering: ibm01, ibm04, ibm10 and ibm18 in the Track-A archive (snapshot 2ebe74fadcf0, the one
+  the final bridge was trained on). Pairs are weighted by exp(-(J - Jmin)/0.02), so this elite carries most of the
+  pair weight. The macro targets are unaffected, and so are E0 and G0'; the cell sketch is what suffered. This
+  explains demo 1's result that the sketch is no better than a quadratic placement.
+- Fix (opt-in, defaults unchanged): `scripts/m1_cluster_pos.py` scores each baseline layout once more with the
+  clustering, and `archive_elites(..., cluster_pos_override)` / `train_bridge.py --m1-cluster-pos` use the result.
+  `TrainConfig.cluster_weight` / `--cluster-weight` scales the cell clusters' loss weight (today 0.1 x their area
+  relative to macros). `scripts/eval_sketch_quality.py` measures the cluster and macro error of bridge endpoints
+  against the corrected targets on validation designs, with no placer runs. Tests: `tests/test_sketch_targets.py`.
+- Fine-tune (owner's go-ahead) queued on 231 after demo 2: three separate checkpoints from the final bridge, 8,000
+  steps at lr 1e-4 on the same 13 training designs and sources: control (unchanged data), corrected targets, and
+  corrected targets with the cluster weight x10. G0''s checkpoint is untouched.
+
 ### E0 operations (30 Sep 08:40)
 - bigblue4 slices 0-5 of both protocols are complete (22 of 30 cases each, counts only). The last three slices
   were launched at 08:25 after a watcher failure: a newline in the job list silenced the 225 check overnight
