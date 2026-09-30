@@ -20,6 +20,11 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 - **Bridge backup before any fine-tune** (owner's request): `bridge_v1_e0_frozen`, sha256 f95bdde8… (the E0 bridge).
   It is read-only on the Mac and in the encrypted vaults of 224 (disk), 225 and 231. The fine-tune checks this sha
   before and after training.
+- **Correction to the finding below (checked on snapshot 2ebe74fadcf0):** the baseline elite lacks cell targets on
+  15 of the 17 IBM designs, not 4. It is in the top 5 on every design except ibm02 and ibm06, and it is the lowest-J
+  elite on all 15. That covers 12 of the 13 training designs (all but ibm02) and the validation design ibm04. All 70
+  other top-5 elites carry DREAMPlace's centroids. `m1_cluster_pos.py` covers all 15, since it scans every design's
+  top 5.
 - **Fine-tune `ft_sketch_ibm` launched on 231 GPU 4** (88ca4a9) with the three arms below. It keeps the weights of
   every validation (`--keep-val-ckpts`). It measures DA0 against DREAMPlace's placement of each model's own layout
   (`eval_sketch_quality.py --placer`), with the quadratic placement of the same macros as control, and the f1 J.
