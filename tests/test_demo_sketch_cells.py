@@ -32,11 +32,12 @@ def row(prog, seed, arm, J):
     return {"design": "ibm04", "program": prog, "seed": seed, "arm": arm, "J": J}
 
 
-def test_merged_rows_rerun_replaces(tmp_path):
-    rows_file(tmp_path / "a", [row("M1", 0, "centre", 0.5), row("M1", 0, "infl", float("inf"))])
-    rows_file(tmp_path / "b", [row("M1", 0, "infl", 0.49)])
+def test_merged_rows_rerun_replaces_the_arm(tmp_path):
+    rows_file(tmp_path / "a", [row("M1", 0, "centre", 0.5), row("M1", 0, "infl", float("inf")),
+                               row("M2", 0, "centre", 0.6), row("M2", 0, "infl", float("inf"))])
+    rows_file(tmp_path / "b", [row("M1", 0, "infl", 0.49)])                     # the re-run did not reach M2
     m = {(r["program"], r["arm"]): r["J"] for r in merged_rows(tmp_path / "a", [tmp_path / "b"])}
-    assert m == {("M1", "centre"): 0.5, ("M1", "infl"): 0.49}
+    assert m == {("M1", "centre"): 0.5, ("M1", "infl"): 0.49, ("M2", "centre"): 0.6}
 
 
 def test_distinct_rows_drops_exact_repeats_only():
@@ -46,3 +47,12 @@ def test_distinct_rows_drops_exact_repeats_only():
     out, dropped = distinct_rows(rows)
     assert dropped == 1
     assert {(r["program"], r["seed"]) for r in out} == {("M1", 0), ("M2", 0), ("M2", 1), ("M3", 0)}   # other programs never merge
+
+
+def test_distinct_rows_shared_arms():
+    # the re-run reached seed 1 but not seed 0 of the same layout: one case, with every arm
+    rows = [row("M1", 0, "centre", 0.5), row("M1", 0, "keep", 0.51), row("M1", 1, "centre", 0.5), row("M1", 1, "keep", 0.51),
+            row("M1", 1, "infl", 0.505)]
+    out, dropped = distinct_rows(rows)
+    assert dropped == 1
+    assert sorted((r["seed"], r["arm"], r["J"]) for r in out) == [(0, "centre", 0.5), (0, "infl", 0.505), (0, "keep", 0.51)]

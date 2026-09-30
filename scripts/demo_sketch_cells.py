@@ -406,35 +406,49 @@ def summarize(rows, arms=ARMS):
 
 
 def merged_rows(run_dir: Path, also=()):
-    """Rows of ``run_dir``, with rows of each later run directory replacing those of the same case and arm (a re-run
-    of some arms)."""
+    """Rows of ``run_dir`` and of later run directories that re-ran some arms: an arm that a later directory has
+    replaces that arm everywhere (cases the re-run did not reach are then missing, not taken from the old run)."""
     rows = {}
     for d in (run_dir, *also):
-        for l in (Path(d) / "rows.jsonl").read_text().splitlines():
-            if l.strip():
-                r = json.loads(l)
-                rows[(r["design"], r["program"], r["seed"], r["arm"])] = r
+        new = [json.loads(l) for l in (Path(d) / "rows.jsonl").read_text().splitlines() if l.strip()]
+        arms = {r["arm"] for r in new}
+        rows = {k: r for k, r in rows.items() if k[3] not in arms}
+        rows.update({(r["design"], r["program"], r["seed"], r["arm"]): r for r in new})
     return list(rows.values())
 
 
 def distinct_rows(rows):
-    """Drop a case whose arms all give exactly the J of an earlier case of the same design and program (the other
-    seed produced the same layout): counted twice it would overstate the evidence.  Returns (rows, dropped)."""
+    """Drop a case whose arms give exactly the J of an earlier kept case of the same design and program in every arm
+    both have (the other seed produced the same layout): counted twice it would overstate the evidence.  The arm
+    the dropped case has alone are kept on the earlier case when it lacks them.  Returns (rows, dropped)."""
     by = {}
     for r in rows:
-        by.setdefault((r["design"], r["program"], r["seed"]), {})[r["arm"]] = r["J"]
-    seen, drop = set(), set()
-    for k in sorted(by):
-        sig = (k[0], k[1], tuple(sorted((a, round(j, 12) if math.isfinite(j) else str(j)) for a, j in by[k].items())))
-        if sig in seen:
-            drop.add(k)
-        seen.add(sig)
-    return [r for r in rows if (r["design"], r["program"], r["seed"]) not in drop], len(drop)
+        by.setdefault((r["design"], r["program"], r["seed"]), {})[r["arm"]] = r
+    kept, drop, out = {}, 0, []
+    for k in sorted(by, key=lambda k: (k[0], k[1], k[2])):
+        same = None
+        for k1 in kept.get(k[:2], []):
+            shared = set(by[k]) & set(by[k1])
+            if shared and all(abs(by[k][a]["J"] - by[k1][a]["J"]) < 1e-12 or by[k][a]["J"] == by[k1][a]["J"] for a in shared):
+                same = k1
+                break
+        if same is None:
+            kept.setdefault(k[:2], []).append(k)
+            continue
+        drop += 1
+        for a in set(by[k]) - set(by[same]):
+            by[same][a] = dict(by[k][a], seed=same[2])
+    for ks in kept.values():
+        for k in ks:
+            out += list(by[k].values())
+    return out, drop
 
 
-def report(run_dir: Path, out_md: Path, also=()) -> None:
+def report(run_dir: Path, out_md: Path, also=(), only=None, note="") -> None:
     from heurbridge.reporting import METRIC_CONVENTIONS
-    rows, dup = distinct_rows(merged_rows(run_dir, also))
+    allrows = merged_rows(run_dir, also)
+    rows, dup = distinct_rows([r for r in allrows if only is None or r["design"] in only])
+    left = sorted({r["design"] for r in allrows} - {r["design"] for r in rows})
     meta = json.loads((run_dir / "meta.json").read_text())
     arms = [x for x in (meta.get("config") or {}).get("arms", ",".join(ARMS)).split(",") if x]
     sm = summarize(rows, arms)
@@ -458,13 +472,15 @@ def report(run_dir: Path, out_md: Path, also=()) -> None:
          "cells in the top 10 %% of the spread sketch's RUDY utilization (factor u / u_q90, at most 1.3, total added "
          "area at most 10 %%), through the cell sizes DREAMPlace reads (whole sites: each fraction rounded up with its own "
          "probability); J is measured with the real sizes." % keep, "",
-         "## Results", "",
+         "## Results", ""] + ([note, ""] if note else []) + (
+        ["Rows of %s are kept in the run directory but not analysed (incomplete)." % ", ".join(left), ""] if left else []) + [
          "%d cases repeat another case exactly (the same program with the other seed gave the same layout, and every arm "
          "the same J); each is counted once below, leaving %d distinct cases." % (dup, len({(r["design"], r["program"], r["seed"]) for r in rows})),
+         "", "Arm means are over the cases each arm has (n); the paired comparisons below use the cases both arms have.",
          "", "| arm | n | mean J | mean rWL term | mean OF term | median GP iterations |", "|---|---|---|---|---|---|"]
     for arm in arms:
         v = sm.get(arm) or {}
-        L.append("| %s | %s | %s | %s | %s | %s |" % (arm, v.get("n"), "%.4f" % v["mean_J"] if v.get("mean_J") is not None else "-",
+        L.append("| %s | %s | %s | %s | %s | %s |" % (arm, v.get("finite"), "%.4f" % v["mean_J"] if v.get("mean_J") is not None else "-",
                                                     "%.4g" % v["mean_rwl"] if v.get("mean_rwl") else "-",
                                                     "%.4f" % v["mean_of"] if v.get("mean_of") is not None else "-",
                                                     "%.0f" % v["median_iterations"] if v.get("median_iterations") else "-"))
@@ -498,12 +514,14 @@ def report(run_dir: Path, out_md: Path, also=()) -> None:
     L += ["", "## Reproduce", "", "```",
           "python scripts/demo_sketch_cells.py --designs ibm04,ibm06 --runs runs/seed_trackA_dp --e0-demo runs/e0_demo "
           "--bridge checkpoints/algR_trackA_final/best.pt --out runs/demo_sketch2 --keep %s" % keep]
+    outs = []
     for d in also:
         m = json.loads((Path(d) / "meta.json").read_text()).get("config") or {}
+        outs.append(m.get("out") or str(d))
         L.append("python scripts/demo_sketch_cells.py --designs %s --runs %s --e0-demo %s --bridge %s --out %s --keep %s --arms %s"
                  % (m.get("designs"), m.get("runs"), m.get("e0_demo"), m.get("bridge"), m.get("out"), m.get("keep"), m.get("arms")))
-    L += ["python scripts/demo_sketch_cells.py --report runs/demo_sketch2%s --out reports/demo_sketch_cells.md"
-          % "".join(" --also %s" % d for d in also), "```", ""]
+    L += ["python scripts/demo_sketch_cells.py --report runs/demo_sketch2%s%s --out reports/demo_sketch_cells.md"
+          % ("".join(" --also %s" % d for d in outs), " --designs %s" % ",".join(only) if only else ""), "```", ""]
     out_md.write_text("\n".join(L))
     print("REPORT_OK", out_md)
 
@@ -513,6 +531,8 @@ if __name__ == "__main__":
         i = sys.argv.index("--report")
         report(Path(sys.argv[i + 1]), Path(sys.argv[sys.argv.index("--out") + 1]) if "--out" in sys.argv
                else Path("reports/demo_sketch_cells.md"),
-               [Path(sys.argv[j + 1]) for j, x in enumerate(sys.argv) if x == "--also"])
+               [Path(sys.argv[j + 1]) for j, x in enumerate(sys.argv) if x == "--also"],
+               sys.argv[sys.argv.index("--designs") + 1].split(",") if "--designs" in sys.argv else None,
+               sys.argv[sys.argv.index("--note") + 1] if "--note" in sys.argv else "")
     else:
         main()
