@@ -20,7 +20,7 @@ Status as of **2026-09-30 23:30 CST**, code: see `git log` (v0.14.0 + unreleased
 |---|---|---|---|---|
 | 225 GPUs 0–3 | — | **full E0 done** (bigblue4 whole on 225: 30 legal sources of 80, budgets 2259 / 2231 s, memory-lean RUDY `HB_RUDY_IMPL=bmm`) | all components complete 30 Sep 23:18 (task list 405 + equal guard 405 + IBM 145 cases) | done: G0′ passed |
 | 231 GPU 4 | `ft_sketch_ibm2` | cell-sketch fine-tune (S1 of the sketch redesign) | **done 14:09: fails its pass rule** (`reports/sketch_finetune_s1.md`); the dedicated predictor (S2) is next | done |
-| 234 (CPU only) | `cell_labels_234` | sketch redesign S2: labels for the look-ahead predictor (DREAMPlace placements of ≈ 3,900 macro layouts on 15 IBM designs) | started 15:46 | ≈ 30 Sep late evening |
+| 234 (CPU only) → 225 GPU 0 | `cell_labels_234`, `s2_lookahead_225` | sketch redesign S2: 3,838 DREAMPlace labels (0 failures), then the cell-stage predictor | **done 1 Oct 07:14: misses its bar** (DA0 ratio 0.747 / 0.642 vs ≤ 0.5; `reports/sketch_predictor_s2.md`) | done |
 | 224 (≤ 8 OpenROAD) | `seedB_orfs7_{swerv_wrapper, ariane136}` | T2.7 Track-B seeding (bp_fe_top, bp_be_top **complete**; ariane133 finished 10:44 with no evaluable heuristic layout, HANDOFF 30 Sep 13:50) | f1 ok 16 of 49 / 72 of 112 (13:50), then local search and f2 | several days |
 | 224 | — | Track-B plan: noise bands and warm-start demos done for bp_fe_top and bp_be_top (reports regenerated) | done | done |
 
