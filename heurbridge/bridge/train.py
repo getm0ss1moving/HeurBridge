@@ -28,7 +28,7 @@ import numpy as np
 import torch
 
 from .data import PairSet, augment_graph, random_augmentation, transform_positions
-from .graph import KIND_FIX, KIND_MOV
+from .graph import KIND_FIX, KIND_MOV, KIND_CL
 from .model import BridgeConfig, BridgeNet
 
 
@@ -44,6 +44,7 @@ class TrainConfig:
     sigma: float = 0.01
     tau_dist: str = "logit_normal"     # or "uniform"
     lam_ov: float = 0.1
+    cluster_weight: float = 1.0        # extra loss weight on cell-cluster nodes (1 = the graph's area weights as built)
     bf16: bool = True
     val_every: int = 2000
     patience: int = 5
@@ -103,6 +104,8 @@ def bridge_loss(model: BridgeNet, gt: dict, x0: torch.Tensor, x1: torch.Tensor, 
     ut = x1 - x0 + cfg.sigma * (1 - 2 * t) * eps
     v = model(xt, tau, gt, xh=x0).float()
     a = gt["area_w"].view(1, -1)
+    if cfg.cluster_weight != 1.0:
+        a = a * torch.where(gt["kind"].view(1, -1) == KIND_CL, cfg.cluster_weight, 1.0)
     fm = (a * ((v - ut) ** 2).sum(-1)).sum(-1) / a.sum().clamp_min(1e-12)       # (B,)
     loss_fm = (w * fm).mean()
     loss = loss_fm

@@ -76,11 +76,16 @@ def run_sources(b: Bundle, programs: list, seeds: int, cache: Path | None = None
     return rows
 
 
-def archive_elites(b: Bundle, archive: Archive, k: int = 5, stage: str = "M") -> list:
+def archive_elites(b: Bundle, archive: Archive, k: int = 5, stage: str = "M", cluster_pos_override: dict | None = None) -> list:
+    """The archive's top-k elites as bridge targets.  Cluster targets are the elite's post-placement cluster centroids
+    (``routes['cluster_pos']``); ``cluster_pos_override`` ({elite id: (n_clusters,2)}) supplies them for elites stored
+    without (the seeding baselines, see scripts/m1_cluster_pos.py); otherwise a quadratic placement stands in."""
     out = []
     for e in archive.topk(b.design.id, stage, k):
         lay = archive.layout(e)
         cp = (lay.routes or {}).get("cluster_pos")
+        if cp is None and cluster_pos_override and int(e["id"]) in cluster_pos_override:
+            cp = cluster_pos_override[int(e["id"])]
         if cp is not None and len(cp) == b.graph.n_clusters:
             x = b.graph.node_positions(lay, cluster_pos=np.asarray(cp))
         else:

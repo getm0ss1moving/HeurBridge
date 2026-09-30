@@ -91,6 +91,9 @@ def main():
     ap.add_argument("--prior-pairs", default="", help="DAgger: directory of earlier rounds' aggregated pair shards "
                                                       "(<design>.pt), merged before this round's pairs, cap 4,000 newest")
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--cluster-weight", type=float, default=1.0, help="extra loss weight on cell-cluster nodes")
+    ap.add_argument("--m1-cluster-pos", default="", help="directory of <design>.npz (scripts/m1_cluster_pos.py): "
+                                                         "post-placement cluster targets for elites stored without")
     ap.add_argument("--cache-dir", default="", help="heuristic-source cache (default <out>/cache); Algorithm R "
                                                     "shares one across rounds: the sources do not change")
     a = ap.parse_args()
@@ -112,7 +115,11 @@ def main():
             t0 = time.time()
             b = load_bundle(a.suite, name, a.runs)
             srcs = BD.run_sources(b, progs, a.seeds, cache=Path(a.cache_dir) if a.cache_dir else out / "cache")
-            el = BD.archive_elites(b, arch)
+            ov = None
+            if a.m1_cluster_pos and (Path(a.m1_cluster_pos) / (b.design.id + ".npz")).exists():
+                z = np.load(Path(a.m1_cluster_pos) / (b.design.id + ".npz"))
+                ov = {int(i): z["cluster_pos"][j] for j, i in enumerate(z["elite_ids"])}
+            el = BD.archive_elites(b, arch, cluster_pos_override=ov)
             if not el:
                 log(json.dumps({"skip": name, "reason": "no elites in archive"}))
                 continue
@@ -140,7 +147,7 @@ def main():
         z = torch.load(a.pretrained, map_location="cpu", weights_only=False)
         model.load_state_dict(z["ema"])
     tcfg = TrainConfig(steps=a.steps, batch=a.batch, lr=a.lr, val_every=a.val_every, lam_ov=a.lam_ov, sigma=a.sigma,
-                       K=a.K, device=a.device, warmup=min(1000, a.steps // 10), seed=a.seed)
+                       K=a.K, device=a.device, warmup=min(1000, a.steps // 10), seed=a.seed, cluster_weight=a.cluster_weight)
     tr = Trainer(model, tcfg, sets, [p for p in [sets_val]] if val else [], evaluator=guard_evaluator(val, a.K, log),
                  out_dir=out, log=log)
     log(json.dumps({"params": model.n_params(), "train_designs": [s.graph.design_id for s in sets],
