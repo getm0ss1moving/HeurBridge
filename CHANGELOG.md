@@ -6,6 +6,19 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 
 ## [Unreleased]
 
+### Full E0: gate G0′ PASSED (30 Sep 23:18)
+- All three pre-registered tests pass (Holm-adjusted p, co-trained bridge vs memetic / repertoire):
+  - **E0#1** (primary, ISPD2005, 405 cases): 3.3e-65 / 2.4e-61.
+  - **E0#2** (equal guard): 3.5e-63 / 3.2e-57.
+  - **E0#3** (ibm08/ibm12, 145 cases): 4.3e-17 / 1.6e-21.
+  - Reports: `reports/E0_partner_ablation.md`, `…_eq.md`, `…_ibm_heldout.md`; ledger E0#1-#3 recorded.
+- **Mean J (E0#1):** bridge 0.5579; raw 0.5863; random-direction control 0.5807 (p 1.3e-59); memetic 0.5843;
+  repertoire 0.6137; frozen generator 0.5874. No failed rows.
+- **Scope of the claim:** the bridge improves the heuristics' layouts by 1.9-6.9 % per design. Every partner stays
+  above DREAMPlace's own macro placement (J 0.45).
+- `scripts/run_e0.py`: the gate note's stale sentence about pre-registration is replaced.
+- **Report header:** it shows cost_v3; the rows were scored under cost_v2, and Track-A J is the same under both.
+
 ### Sketch fine-tune (S1) done: it fails the pass rule fixed in advance (30 Sep 14:40)
 - `reports/sketch_finetune_s1.md` (from `eval_sketch_quality.py --report`). No claim.
 - **Rule:** on both validation designs, the sketch's distance to DREAMPlace's placement (DA0, 32 sources per design,

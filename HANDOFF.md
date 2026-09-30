@@ -4,6 +4,34 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
+## 2026-09-30 — Session 4 (23:30): full E0 complete — gate G0′ PASSED
+
+- **Last components:** `e0x_spec_bigblue4_w7` (22:36) and `e0x_eq_bigblue4_w67` (23:18). Checked by counts before
+  combining: 24 rows per slice, no duplicates, rc 0. Totals task list 2,430 rows (405 cases), equal guard 2,430,
+  IBM held-out 870 (145 cases).
+- **Combined** with `e0_combine.py --ledger-entry` (commands in the session scratchpad, `e0_final_combine.sh`).
+  - Excluded by design: the wave jobs' empty prepare dirs, and the dead bigblue3 spec slice 2 of the original job
+    (11 rows, no meta; re-run as `e0x_spec_bigblue3_r2`).
+  - Ledger E0#1-#3 are recorded (`stats/alpha_ledger.jsonl`:22-24).
+- **Results (reports/E0_partner_ablation*.md):**
+  - E0#1 primary (ISPD2005): bridge 0.5579; memetic 0.5843, repertoire 0.6137, frozen_gen 0.5874, raw 0.5863,
+    random_guard 0.5807. Holm p vs memetic 3.3e-65, vs repertoire 2.4e-61: **G0′ PASS**.
+  - E0#2 equal guard: p 3.5e-63 / 3.2e-57. E0#3 ibm08/ibm12: p 4.3e-17 / 1.6e-21.
+  - Learned direction beats the random-direction control: p 1.3e-59 on ISPD2005.
+  - No failed rows.
+- **Context for any statement:**
+  - Per design the bridge lowers mean J by 1.9-6.9 % against the raw heuristic.
+  - Every partner's mean J, and every bridge-refined layout on these designs, stays above 0.45, DREAMPlace's own
+    macro placement.
+  - The reports' header shows cost_v3 (the reporting code's version); the rows were scored under cost_v2. Track-A J
+    is identical under both (`configs/cost.yaml`:3-4).
+- **Decision per the pre-registration:** continue to T5 (LLM evolution, deepseek-flash). Per the workflow, a demo
+  comes first; waiting for the owner's go.
+- `scripts/run_e0.py`'s gate note no longer says the protocol awaits pre-registration. It was a stale string,
+  also recorded in the ledger entries' `extra`.
+
+---
+
 ## 2026-09-30 — Session 4 (14:45): sketch fine-tune (S1) fails its pass rule; S2 next
 
 - `ft_sketch_ibm2` done 14:09 (rc 0), fetched to `runs/remote/ft_sketch_ibm2`. The ciphertext was also copied to

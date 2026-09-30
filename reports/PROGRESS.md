@@ -1,25 +1,24 @@
 # HeurBridge-PR — progress against the task list (T0–T7)
 
-Status as of **2026-09-30 16:30 CST**, code: see `git log` (v0.14.0 + unreleased). Measured against
+Status as of **2026-09-30 23:30 CST**, code: see `git log` (v0.14.0 + unreleased). Measured against
 `HEURBRIDGE_TASKS.md` (Part C tasks, Part D gates). Session history: `HANDOFF.md`; every code change: `CHANGELOG.md`.
 
 ## 1. Summary
 
 - **Position on the critical path:** T0 ✅ → T1 ✅ → T2 (Track-B seeding: 2 of 5 designs complete) → T3 ✅ (exit
-  gate passed) → **T4 = full E0 / gate G0′ running: 14 of 16 design × protocol parts complete; bigblue4 26 of 30 cases (task-list protocol) and 22 of 30 (equal guard) (30 Sep 13:45)** (blinded: no result
-  has been read) → T5 → T6. **G0′ expected the night of 30 Sep – morning of 1 Oct** (bigblue4 sets the date:
-  ≈ 4.75 h per case, measured today).
-- **Roughly 42 % of the planned effort is done** (weighted by the task list's own duration estimates, §5). The done
+  gate passed) → **T4 = full E0: gate G0′ PASSED (30 Sep 23:18, all three pre-registered tests; `reports/E0_partner_ablation.md`)**
+  → T5 (next, per the pre-registered decision) → T6.
+- **Roughly 44 % of the planned effort is done** (weighted by the task list's own duration estimates, §5). The done
   part is the infrastructure: toolchains on the servers, data, evaluators f0/f1/f2, the 7 heuristic families,
   archive, the bridge and its training. The remaining part is mostly the **experiments** (E0, LLM evolution,
-  E1/E2, H1–H9): compute-bound and gated — **G0′ can stop the project** (task list Part D).
-- **Remaining time if every gate passes:** about 6–9 weeks (T4 ≈ 1 week incl. compute, T5 ≈ 2 weeks, T6 ≈ 3–5 weeks).
+  E1/E2, H1–H9): compute-bound and gated. G0′, the gate that could stop the project, has passed.
+- **Remaining time if every later gate passes:** about 5–8 weeks (T5 ≈ 2 weeks, T6 ≈ 3–5 weeks).
 
 ## 2. What is running right now
 
 | Server | Job | Task | State | Expected |
 |---|---|---|---|---|
-| 225 GPUs 0–3 | `e0x_{spec,eq}_bigblue4` (slices 0–3), `e0x_{spec,eq}_bigblue4_w45` (slices 4–5) | **full E0** bigblue4, whole on 225: 30 legal sources (of 80), budgets 2259 / 2231 s, memory-lean RUDY (`HB_RUDY_IMPL=bmm`) | task-list protocol: slices 0–6 complete (26 cases); equal guard: slices 0–5 complete (22 cases); spec 7 and eq 6–7 running since 08:25 (late start: see below) | **bigblue4 ≈ 30 Sep late evening – 1 Oct early morning** (4 slices share the machine now, so cases run faster than at 12) |
+| 225 GPUs 0–3 | — | **full E0 done** (bigblue4 whole on 225: 30 legal sources of 80, budgets 2259 / 2231 s, memory-lean RUDY `HB_RUDY_IMPL=bmm`) | all components complete 30 Sep 23:18 (task list 405 + equal guard 405 + IBM 145 cases) | done: G0′ passed |
 | 231 GPU 4 | `ft_sketch_ibm2` | cell-sketch fine-tune (S1 of the sketch redesign) | **done 14:09: fails its pass rule** (`reports/sketch_finetune_s1.md`); the dedicated predictor (S2) is next | done |
 | 234 (CPU only) | `cell_labels_234` | sketch redesign S2: labels for the look-ahead predictor (DREAMPlace placements of ≈ 3,900 macro layouts on 15 IBM designs) | started 15:46 | ≈ 30 Sep late evening |
 | 224 (≤ 8 OpenROAD) | `seedB_orfs7_{swerv_wrapper, ariane136}` | T2.7 Track-B seeding (bp_fe_top, bp_be_top **complete**; ariane133 finished 10:44 with no evaluable heuristic layout, HANDOFF 30 Sep 13:50) | f1 ok 16 of 49 / 72 of 112 (13:50), then local search and f2 | several days |
@@ -107,14 +106,14 @@ Legend: ✅ done · 🔄 running · ⚠️ done with a limitation · ⏸ waiting
 | T3.9 cell / route bridges | ⬜ | only after G0′ passes (task list). Extension adopted 29 Sep (kept local); its first package, the bridge-to-bridge stage hand-off, is written and tested (`heurbridge/bridge/handoff.py`, off the evaluation path); anything handed to DREAMPlace or OpenROAD waits for G0′ |
 | T3.10 unit tests 1–6 | ✅ | `tests/test_bridge.py` (138 tests pass in total) |
 
-### T4 — E0 partner ablation, gate G0′ 🔄
+### T4 — E0 partner ablation, gate G0′ ✅
 
 | Sub-task | Status | Evidence / note |
 |---|---|---|
 | partners + E0 driver | ✅ | `heurbridge/partners.py`, `scripts/run_e0.py` |
 | development E0 (local, CPU) | ✅ | `reports/E0_partner_ablation_dev*.md` (suggestive only) |
 | E0 demo (225) | ✅ | positive direction: the co-trained bridge has the lowest J under both protocols (`reports/E0_demo_spec.md`, `reports/E0_demo_eq.md`); much of the gain comes from the f1 guard (random direction + guard is close), the learned direction still beats it (p = 2.3e-9) |
-| **full E0 (confirmatory, G0′)** | 🔄 | pre-registered (`reports/E0_preregistration.md`, ledger E0#1–#3) and running on 225 (4 GPUs) + 231 (GPU 4): ISPD2005 7 designs × both protocols, ibm08/ibm12; the pooled G0′ test (E0#1) when all runs end. Revised 19:00: CPU-bound and slower than estimated; `run_e0.py --slice` (commit 9f38847) splits a component over processes under the same protocol; restarted as slices 28 Sep 19:52 (approved). 29 Sep 15:30: adaptec1–4 and bigblue1 complete in both protocols, ibm08 and bigblue3 (equal guard) complete; bigblue3 (task-list protocol) and ibm12 finish today; bigblue4 (30 sources, ≈ 4.75 h per case) ≈ 30 Sep 22:00 – 1 Oct 01:00 → pooled G0′ right after |
+| **full E0 (confirmatory, G0′)** | ✅ | **G0′ PASSED** (30 Sep 23:18). E0#1 (primary; ISPD2005, 7 designs, 405 cases): co-trained bridge mean J 0.5579 vs memetic 0.5843, repertoire 0.6137, raw 0.5863; Holm p 3.3e-65 / 2.4e-61 (`reports/E0_partner_ablation.md`). E0#2 (equal guard): p 3.5e-63 / 3.2e-57 (`…_eq.md`). E0#3 (ibm08/ibm12, 145 cases): p 4.3e-17 / 1.6e-21 (`…_ibm_heldout.md`). Learned direction vs random direction p = 1.3e-59. No failed rows. Every partner's mean J (and every bridge-refined layout) stays above DREAMPlace's own macro placement, J 0.45: the bridge improves the heuristics by 1.9–6.9 % per design, it does not reach the tool |
 
 ### T5 — LLM evolution ⏸ (after G0′)
 
@@ -123,7 +122,7 @@ Legend: ✅ done · 🔄 running · ⚠️ done with a limitation · ⏸ waiting
 | T5.1–T5.4 prompts, fitness, population, RLCE | ✅ | `heurbridge/evolve/`; end-to-end with a mock LLM (`scripts/run_evolution.py --llm mock`) |
 | T5.5 baseline engines | ✅ | five proposers implemented |
 | T5.6 knowledge loop | ⬜ | later (after H1) |
-| real evolution runs | ⬜ | need G0′ pass and the LLM choice (§6) |
+| real evolution runs | ⬜ | G0′ passed and the LLM is chosen (deepseek-flash, §6); per the workflow a demo comes first, on your go |
 
 ### T6 — Online solving and main experiments ⬜ (mostly)
 
@@ -146,7 +145,7 @@ report template (`reports/templates/`), originality tool (`heurbridge/verify/ori
 |---|---|
 | T0 exit (a track available) | ✅ both tracks |
 | T3 exit (bridge beats raw on validation, paired) | ✅ passed (p = 2.6e-9); caveat: its guard uses the same f1 as the final cost |
-| **G0′** (bridge beats memetic and repertoire, p < 0.01) | ⏸ next — decides whether the project continues as planned |
+| **G0′** (bridge beats memetic and repertoire, p < 0.01) | ✅ passed 30 Sep 23:18 (E0#1 Holm p 3.3e-65 / 2.4e-61; E0#2, E0#3 also pass) |
 | G0 (proxy admissible) | ❌ not met on Track A (IBM, ISPD2005); Track B pending → fitness stays at f1 |
 | G1, G2, G3, G4 | ⬜ later (T5, T3.9, T6) |
 
@@ -160,10 +159,10 @@ Effort weights are the midpoints of the task list's own estimates; completion fr
 | T1 | 5 d | 95 % | 4.8 |
 | T2 | 6 d | 90 % | 5.4 |
 | T3 | 8.5 d | 80 % | 6.8 |
-| T4 | 3.5 d | 60 % | 2.1 |
+| T4 | 3.5 d | 100 % | 3.5 |
 | T5 | 12 d | 30 % | 3.6 |
 | T6 | 28 d | 10 % | 2.8 |
-| **Total** | **64.5 d** | **≈ 42 %** | **26.9** |
+| **Total** | **64.5 d** | **≈ 44 %** | **28.3** |
 
 T7 runs alongside and is not weighted separately. The estimate assumes every gate passes; a G0′ failure ends the
 planned path at T4 ("stop and report", with a repositioning decision for you).
