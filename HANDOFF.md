@@ -4,6 +4,21 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
+## 2026-09-30 — Session 4 (14:45): sketch fine-tune (S1) fails its pass rule; S2 next
+
+- `ft_sketch_ibm2` done 14:09 (rc 0), fetched to `runs/remote/ft_sketch_ibm2`. The ciphertext was also copied to
+  224's disk vault (sha256 09840de3..., identical).
+- **Report:** `reports/sketch_finetune_s1.md`. The pass rule fails on ibm04 for every model; see CHANGELOG. S2 (the
+  dedicated predictor) goes ahead.
+- **S2 infrastructure:**
+  - `heurbridge/bridge/lookahead.py` (labels) and `DreamplaceEvaluator.evaluate_placed` are committed (b671f21).
+  - The label server is 234 (CPU-only, idle, 64 cores). 231's Python env and DREAMPlace are copied to 234 at the
+    same paths (`/dev/shm/.hbenv/hb`, `/dev/shm/.hbtools/dreamplace`; env checked: torch 2.6.0, no CUDA).
+  - Still to do on 234: copy the IBM benchmarks, push code and data through hbv, run one test placement. Then
+    write `scripts/make_cell_labels.py`.
+
+---
+
 ## 2026-09-30 — Session 4 (13:50): bigblue4 spec slice 6 done; ariane133 Track-B campaign yields nothing
 
 - **E0:** `e0x_spec_bigblue4_w6` done 13:45 and checked (counts only): `spec_bigblue4_s6` has 24 rows = 4 cases x 6

@@ -6,6 +6,19 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 
 ## [Unreleased]
 
+### Sketch fine-tune (S1) done: it fails the pass rule fixed in advance (30 Sep 14:40)
+- `reports/sketch_finetune_s1.md` (from `eval_sketch_quality.py --report`). No claim.
+- **Rule:** on both validation designs, the sketch's distance to DREAMPlace's placement (DA0, 32 sources per design,
+  alpha 1) is at most 0.7 x the quadratic control's, with f1 J at most 0.5 % worse than the frozen bridge.
+- **Outcome: no fine-tune passes on both designs.** On ibm04 every model stays at 0.89-0.95. On ibm06 the
+  frozen bridge is at 0.81 and the fine-tunes at 0.70-0.77; only `ft_both` meets 0.70 there.
+- **Offline error against the corrected targets grows with training:** `ft_targets` 0.343 -> 0.368; the quadratic
+  source is at 0.299.
+- **Consequence:** correcting the targets does not turn the transport's cluster output into a predictor of the
+  placement, so the redesign's dedicated predictor (S2) goes ahead.
+- **Checkpoints kept, the frozen bridge untouched:** the fine-tuned checkpoints (best, last and one per validation)
+  are in the 231 vault and on 224's disk (identical sha256). The frozen bridge's sha was checked before and after.
+
 ### Demo 2 stopped; bridge backed up; fine-tune launched (30 Sep 09:30)
 - **Demo 2 stopped at the owner's request** (09:14), once ibm04 was complete (23 distinct layouts); ibm06 had 4
   cases. `reports/demo_sketch_cells.md`, exploratory, no claim.

@@ -147,5 +147,88 @@ def main():
     print(json.dumps(res["summary"]), flush=True)
 
 
+
+
+def report(json_path: Path, out_md: Path, steps_json: Path | None = None, rule_ratio: float = 0.7,
+           rule_j: float = 0.005, reference: str = "final") -> None:
+    """Markdown report of one evaluation (and of the per-step one), with the pass rule of the sketch redesign's S1:
+    on every design, median DA0 <= rule_ratio x the quadratic control's, and median f1 J at most rule_j above the
+    reference model's."""
+    import time
+    from heurbridge.reporting import METRIC_CONVENTIONS
+    r = json.loads(Path(json_path).read_text())
+    cfg = r.get("config") or {}
+    models = [m for m in r["summary"] if m != "source"]
+    L = ["# Sketch fine-tune (redesign step S1): corrected cell targets", "",
+         "| Field | Value |", "|---|---|", "| Report | sketch_quality |", "| Date | %s |" % time.strftime("%Y-%m-%d %H:%M"),
+         "| Node | 231 (RTX 4090, GPU 4) |", "| Track | A (DREAMPlace f1 with the macros fixed; J on the seeding campaign's M1 scale) |",
+         "| Metric conventions | %s |" % METRIC_CONVENTIONS, "| Feeds gate | none (diagnostic step of the sketch redesign) |",
+         "| Pre-registered test | - (pass rule fixed before any result: HANDOFF 30 Sep 09:30) |", "| alpha-ledger entry | - |",
+         "| Status of the claim | no claim |", "",
+         "## Setup", "",
+         "Three fine-tunes of the E0 bridge (`bridge_v1_e0_frozen`, sha256 f95bdde8...; 8,000 steps at lr 1e-4 on the 13 "
+         "IBM training designs, best checkpoint by the usual validation criterion): `ft_ctrl` on unchanged data, "
+         "`ft_targets` with the baselines' cell targets corrected (DREAMPlace's centroids, `m1_cluster_pos.py`), `ft_both` "
+         "with the corrected targets and 10x the loss weight on the cell clusters. Validation designs %s." % cfg.get("val"), "",
+         "- **Offline error:** each of the %s sources' bridge endpoint (alpha 1) against its paired elite (the training "
+         "target, with the corrected cell targets); area-weighted RMS in core units, for the cell clusters and the macros." % "128",
+         "- **DA0:** %s sources per design; each model's endpoint is legalized and placed by DREAMPlace (cells from the "
+         "centre, as always); its sketch and the quadratic placement of the same macros are compared with the placed "
+         "cluster centroids. The same placements give the endpoint's f1 J." % cfg.get("da0_sources", 32), "",
+         "## Result", "",
+         "| model | offline cluster error | offline macro error | DA0 sketch | DA0 quadratic | ratio | sketch closer | f1 J (median) |",
+         "|---|---|---|---|---|---|---|---|"]
+    s = r["summary"]
+    L.append("| source (quadratic) | %.3f | %.3f | - | - | - | - | - |" % (s["source"]["cluster_median"], s["source"]["macro_median"]))
+    for m in models:
+        d = s[m].get("da0") or {}
+        L.append("| %s | %.3f | %.3f | %s | %s | %s | %s | %s |" % (
+            m, s[m]["cluster_median"], s[m]["macro_median"],
+            "%.3f" % d["sketch_median"] if d else "-", "%.3f" % d["quad_median"] if d else "-",
+            "%.2f" % (d["sketch_median"] / d["quad_median"]) if d else "-",
+            "%d / %d" % (d["sketch_closer"], d["n"]) if d else "-", "%.4f" % d["J_median"] if d else "-"))
+    L += ["", "**Pass rule, per design** (fixed before any result): DA0 ratio <= %.2f and f1 J at most %.1f %% above "
+          "`%s`." % (rule_ratio, 100 * rule_j, reference), "",
+          "| design | model | DA0 sketch | DA0 quadratic | ratio | f1 J (median) | vs %s | passes |" % reference, "|---|---|---|---|---|---|---|---|"]
+    verdict = {}
+    for name, rows in r["cases"].items():
+        ref = [x[reference]["da0"]["J"] for x in rows if x.get(reference, {}).get("da0")]
+        jref = float(np.median(ref)) if ref else float("nan")
+        for m in models:
+            d = [x[m]["da0"] for x in rows if x[m].get("da0")]
+            if not d:
+                continue
+            sk, q, J = (float(np.median([x[k] for x in d])) for k in ("sketch", "quad", "J"))
+            ok = sk <= rule_ratio * q and J <= jref * (1 + rule_j)
+            verdict.setdefault(m, []).append(ok)
+            L.append("| %s | %s | %.3f | %.3f | %.2f | %.4f | %+.1f %% | %s |" % (name, m, sk, q, sk / q, J,
+                                                                                100 * (J / jref - 1), "yes" if ok else "no"))
+    passed = [m for m, v in verdict.items() if m != reference and all(v)]
+    L += ["", "**Outcome:** %s" % ("passes: " + ", ".join(passed) if passed else
+                                    "no fine-tuned model passes on every design; correcting the targets alone does not "
+                                    "make the transport's cluster output a good predictor of the placement.")]
+    if steps_json and Path(steps_json).exists():
+        st = json.loads(Path(steps_json).read_text())["summary"]
+        L += ["", "## Offline error by training step (cluster / macro)", "", "| model | " +
+              " | ".join("step %d" % k for k in (1600, 3200, 4800, 6400, 8000)) + " |", "|---|" + "---|" * 5]
+        for arm in ("ft_ctrl", "ft_targets", "ft_both"):
+            cells = ["%.3f / %.3f" % (st[k]["cluster_median"], st[k]["macro_median"]) if k in st else "-"
+                     for k in ("%s.step%d" % (arm, n) for n in (1600, 3200, 4800, 6400, 8000))]
+            L.append("| %s | %s |" % (arm, " | ".join(cells)))
+        L.append("")
+        L.append("The quadratic source's offline error is %.3f / %.3f." % (st["source"]["cluster_median"], st["source"]["macro_median"]))
+    L += ["", "## Reproduce", "", "The job file `ft_job2.cmd` (HANDOFF 30 Sep): `m1_cluster_pos.py`, three `train_bridge.py` "
+          "fine-tunes, then `eval_sketch_quality.py --placer` and the per-step evaluation;",
+          "`python scripts/eval_sketch_quality.py --report runs/sketch_quality.json --steps runs/sketch_quality_steps.json "
+          "--out reports/sketch_finetune_s1.md`.", ""]
+    Path(out_md).write_text("\n".join(L))
+    print("REPORT_OK", out_md)
+
+
 if __name__ == "__main__":
-    main()
+    if "--report" in sys.argv:
+        a = sys.argv
+        report(Path(a[a.index("--report") + 1]), Path(a[a.index("--out") + 1]),
+               Path(a[a.index("--steps") + 1]) if "--steps" in a else None)
+    else:
+        main()
