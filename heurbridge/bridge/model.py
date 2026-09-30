@@ -128,6 +128,12 @@ class BridgeNet(nn.Module):
     def forward(self, x: torch.Tensor, tau: torch.Tensor, g: dict, xh: torch.Tensor | None = None) -> torch.Tensor:
         """x, xh: (B, N, 2) normalized positions; tau: (B,); g: BridgeGraph.tensors() (optionally augmented)."""
         B, N, _ = x.shape
+        v = self.dec(self.n_out(self.encode(x, tau, g, xh))).view(B, N, 2)
+        return v * g["movable"].view(1, N, 1)
+
+    def encode(self, x: torch.Tensor, tau: torch.Tensor, g: dict, xh: torch.Tensor | None = None) -> torch.Tensor:
+        """Node states after the last block, (B * N, W): everything of ``forward`` but the decoder."""
+        B, N, _ = x.shape
         cfg = self.cfg
         feats = [g["static"].unsqueeze(0).expand(B, N, -1), x, pos_encoding(x, cfg.pe_freqs)]
         if cfg.use_source:
@@ -143,8 +149,7 @@ class BridgeNet(nn.Module):
         ea = self.edge_enc(g["edge_attr"]).repeat(B, 1) if E else g["edge_attr"].new_zeros((0, cfg.edge_dim))
         for blk in self.blocks:
             h = blk(h, ei, ea, cond, g["attn"], B, N)
-        v = self.dec(self.n_out(h)).view(B, N, 2)
-        return v * g["movable"].view(1, N, 1)
+        return h
 
     def export_config(self) -> dict:
         return asdict(self.cfg)
