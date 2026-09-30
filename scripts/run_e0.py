@@ -265,8 +265,8 @@ def summarize(rows, a) -> dict:
     res["guard"] = {"fidelity": a.guard_fidelity, "equal_guard": a.equal_guard, "random_control": a.random_control}
     res["gate_G0prime"] = {"pass": bool(pm < 0.01 and pr < 0.01), "p_memetic": pm, "p_repertoire": pr,
                            "note": "development run (Track-A stand-in final cost); not the pre-registered f2 test"
-                           if a.final == "hbgp" else "Track-A final cost = DREAMPlace f1 (spec T1.4); the E0 protocol "
-                           "is pre-registered only after the user's decision (HANDOFF open issue 8)"}
+                           if a.final == "hbgp" else "Track-A final cost = DREAMPlace f1 (spec T1.4); the pre-registered "
+                           "test is the combined E0#1 (reports/E0_preregistration.md), not a single component"}
     return res
 
 
