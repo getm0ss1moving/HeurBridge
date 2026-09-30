@@ -13,16 +13,21 @@ within that square each cell sits where its outside connections pull it (macros 
 other clusters at their clusters' positions; cells assigned to grid slots by column-then-row order of their pull).
 The quadratic control gets the same construction around its own cluster positions.
 
+Global spreading ("spread" sketches).  The cluster sketch itself is bunched (spread 0.06-0.11 of the core against
+0.22-0.30 after placement): alternately along x and y, within bands of the other axis, each cluster moves to the
+free-area quantile that matches its cumulative cluster area (macros removed), which keeps the sketch's order.
+
 Arms (the same 64 bridge-refined layouts and the same J as demo 1 / E0):
-  centre        cells start at the die centre (today's f1)
-  cells_sketch  cells start at the reinforced sketch, default schedule
-  cells_quad    cells start at the reinforced quadratic sketch (control)
-  keep_centre   centre start, initial density weight x KEEP (control for the next two)
-  keep_sketch   reinforced sketch start, density weight x KEEP: DREAMPlace keeps the start instead of collapsing it
-  keep_quad     reinforced quadratic start, density weight x KEEP (control)
-  infl_sketch   centre start; cells inflated where the reinforced sketch predicts routing congestion (RUDY), via
-                the cell sizes DREAMPlace reads (.nodes); J is measured with the real cell sizes
-  infl_quad     the same with the quadratic sketch's prediction (control)
+  centre              cells start at the die centre (today's f1)
+  cells_sketch        cells start at the cell-level sketch (clusters as predicted), default schedule
+  keep_centre         centre start, initial density weight x KEEP (control for the keep arms)
+  keep_sketch         cell-level sketch start, density weight x KEEP: DREAMPlace keeps the start
+  keep_quad           cell-level quadratic start, density weight x KEEP (control)
+  spread_keep_sketch  cell-level start from the spread sketch, density weight x KEEP
+  spread_keep_quad    the same from the spread quadratic placement (control)
+  infl_sketch         centre start; cells inflated where the spread sketch predicts routing congestion (RUDY), via
+                      the cell sizes DREAMPlace reads (.nodes); J is measured with the real cell sizes
+  infl_quad           the same with the spread quadratic placement's prediction (control)
 
 Only this process changes DREAMPlace's parameters or cell sizes; the evaluation code on G0''s path is unchanged.
 
@@ -57,7 +62,8 @@ from heurbridge.meta import write_meta  # noqa: E402
 from heurbridge.pipeline import bridge_data as BD  # noqa: E402
 from heurbridge.pipeline.evaluators import cluster_centroids, track_a_final  # noqa: E402
 
-ARMS = ("centre", "cells_sketch", "cells_quad", "keep_centre", "keep_sketch", "keep_quad", "infl_sketch", "infl_quad")
+ARMS = ("centre", "cells_sketch", "keep_centre", "keep_sketch", "keep_quad", "spread_keep_sketch", "spread_keep_quad",
+        "infl_sketch", "infl_quad")
 DENSITY = 0.9                       # DREAMPlace target_density of our f1
 
 
@@ -133,6 +139,52 @@ def cell_sketch(design, layout, cluster_of, cluster_pos, density=DENSITY):
             out[cells[chunk], 0] = centre[0] + gx[col]
             out[cells[chunk], 1] = centre[1] + gy[:len(chunk)]
     return np.clip(out, 0.0, 1.0)
+
+
+def free_profile(design, layout, lo, hi, axis, n=256):
+    """Free (non-macro) area per slice of [0,1] along ``axis``, within the band [lo, hi) of the other axis (normalized
+    units; macros at the layout's positions, orientation-aware sizes)."""
+    from heurbridge.core import orient as O
+    mac = np.flatnonzero(design.is_macro & np.isfinite(layout.pos).all(1))
+    eff = O.effective_size(design.size[mac], layout.orient[mac]) / design.core_wh
+    c = layout.pos[mac]
+    other = 1 - axis
+    free = np.full(n, (hi - lo) / n)
+    edges = np.linspace(0.0, 1.0, n + 1)
+    for (p, e) in zip(c, eff):
+        a0, a1 = p[axis] - e[axis] / 2, p[axis] + e[axis] / 2
+        b0, b1 = max(p[other] - e[other] / 2, lo), min(p[other] + e[other] / 2, hi)
+        if b1 <= b0:
+            continue
+        ov = np.clip(np.minimum(edges[1:], a1) - np.maximum(edges[:-1], a0), 0, None)
+        free -= ov * (b1 - b0)
+    return np.clip(free, 1e-9, None)
+
+
+def spread_clusters(design, layout, cluster_pos, cluster_area, bands=16, iters=6, mix=0.7, n=256):
+    """Density-aware spreading of a cluster sketch that keeps its order: alternately along x and y, within bands of
+    the other axis, each cluster's coordinate is moved to the free-area quantile that matches its cumulative cluster
+    area (macros removed from the capacity), mixed with the old coordinate (``mix``)."""
+    x = np.array(cluster_pos, np.float64)
+    a = np.asarray(cluster_area, np.float64)
+    grid = (np.arange(n) + 0.5) / n
+    for _ in range(iters):
+        for axis in (0, 1):
+            other = 1 - axis
+            edges = np.linspace(0.0, 1.0, bands + 1)
+            band = np.clip(np.searchsorted(edges, x[:, other], side="right") - 1, 0, bands - 1)
+            new = x[:, axis].copy()
+            for bi in range(bands):
+                idx = np.flatnonzero(band == bi)
+                if len(idx) < 2:
+                    continue
+                cap = free_profile(design, layout, edges[bi], edges[bi + 1], axis, n)
+                cap_cdf = np.cumsum(cap) / cap.sum()
+                o = idx[np.argsort(x[idx, axis], kind="stable")]
+                q = (np.cumsum(a[o]) - a[o] / 2) / a[o].sum()             # mid-quantile of each cluster's area
+                new[o] = np.interp(q, cap_cdf, grid)
+            x[:, axis] = (1 - mix) * x[:, axis] + mix * new
+    return np.clip(x, 0.0, 1.0)
 
 
 def with_positions(layout, pos):
@@ -254,7 +306,11 @@ def main():
                 continue
             sk = H.guarded_sketch(g, src, end, alpha)
             qd = source_nodes(g, dep)[g.cluster_nodes]
-            cells = {"sketch": cell_sketch(des, dep, b.cluster_of, sk), "quad": cell_sketch(des, dep, b.cluster_of, qd)}
+            carea = np.bincount(b.cluster_of[b.cluster_of >= 0], weights=des.area[b.cluster_of >= 0], minlength=g.n_clusters)
+            ssk, sqd = spread_clusters(des, dep, sk, carea), spread_clusters(des, dep, qd, carea)
+            cells = {"sketch": cell_sketch(des, dep, b.cluster_of, sk), "quad": cell_sketch(des, dep, b.cluster_of, qd),
+                     "spread_sketch": cell_sketch(des, dep, b.cluster_of, ssk),
+                     "spread_quad": cell_sketch(des, dep, b.cluster_of, sqd)}
             for arm in arms:
                 key = (des.id, pid, s, arm)
                 if key in done:
@@ -264,10 +320,11 @@ def main():
                 extra = {}
                 if arm == "centre":
                     rec = final.evaluate(des, dep, rid, out / "work")
-                elif arm.startswith("cells_") or arm in ("keep_sketch", "keep_quad"):
-                    which = arm.split("_")[1]
+                elif arm in ("cells_sketch", "keep_sketch", "keep_quad", "spread_keep_sketch", "spread_keep_quad"):
+                    which = {"cells_sketch": "sketch", "keep_sketch": "sketch", "keep_quad": "quad",
+                             "spread_keep_sketch": "spread_sketch", "spread_keep_quad": "spread_quad"}[arm]
                     over = {"random_center_init_flag": 0}
-                    if arm.startswith("keep_"):
+                    if "keep" in arm:
                         over["density_weight"] = base_dw * a.keep
                     with dreamplace_params(**over):
                         rec = final.evaluate(des, with_positions(dep, cells[which]), rid, out / "work")
@@ -275,7 +332,7 @@ def main():
                     with dreamplace_params(density_weight=base_dw * a.keep):
                         rec = final.evaluate(des, dep, rid, out / "work")
                 elif arm.startswith("infl_"):
-                    f, extra = inflation(des, dep, cells[arm.split("_")[1]])
+                    f, extra = inflation(des, dep, cells["spread_" + arm.split("_")[1]])
                     rec = inflated_run(final, des, dep, f, rid, out / "work", b.cluster_of)
                 else:
                     raise ValueError(arm)
@@ -286,7 +343,9 @@ def main():
                        "wall_s": round(time.time() - t0, 1), **({"inflation": extra} if extra else {})}
                 if rec.get("cluster_pos") is not None:
                     cp = np.asarray(rec["cluster_pos"])
-                    row["fidelity"] = {"sketch": H.sketch_fidelity(g, sk, cp), "quad": H.sketch_fidelity(g, qd, cp)}
+                    row["fidelity"] = {"sketch": H.sketch_fidelity(g, sk, cp), "quad": H.sketch_fidelity(g, qd, cp),
+                                       "spread_sketch": H.sketch_fidelity(g, ssk, cp),
+                                       "spread_quad": H.sketch_fidelity(g, sqd, cp)}
                 fh.write(json.dumps(row, default=str) + "\n")
                 fh.flush()
                 rows.append(row)
@@ -298,9 +357,10 @@ def main():
     print(json.dumps(s, default=str), flush=True)
 
 
-PAIRS = (("cells_sketch", "centre"), ("cells_quad", "centre"), ("cells_sketch", "cells_quad"),
-         ("keep_sketch", "keep_centre"), ("keep_quad", "keep_centre"), ("keep_sketch", "keep_quad"),
-         ("keep_sketch", "centre"), ("infl_sketch", "centre"), ("infl_quad", "centre"), ("infl_sketch", "infl_quad"))
+PAIRS = (("cells_sketch", "centre"), ("keep_sketch", "keep_centre"), ("keep_quad", "keep_centre"),
+         ("keep_sketch", "keep_quad"), ("spread_keep_sketch", "keep_centre"), ("spread_keep_quad", "keep_centre"),
+         ("spread_keep_sketch", "spread_keep_quad"), ("keep_centre", "centre"), ("spread_keep_sketch", "centre"),
+         ("infl_sketch", "centre"), ("infl_quad", "centre"), ("infl_sketch", "infl_quad"))
 
 
 def summarize(rows, arms=ARMS):
@@ -349,11 +409,13 @@ def report(run_dir: Path, out_md: Path) -> None:
          "The E0 demo's 64 bridge-refined macro layouts (ibm04, ibm06), as in demo 1 (`reports/demo_sketch_start.md`). "
          "Each is placed by DREAMPlace in every arm below; J is the E0 cost. The reinforced sketch spreads each cluster's "
          "cells over the cluster's own area (total cell area / 0.9, a square around the cluster's sketch position) and "
-         "orders them inside it by where their outside connections pull them. keep_* arms multiply DREAMPlace's initial "
+         "orders them inside it by where their outside connections pull them; the spread_* arms first spread the "
+         "clusters globally to the free area, keeping their order (alternating x/y quantile mapping in bands, macros "
+         "removed). keep arms multiply DREAMPlace's initial "
          "density weight (8e-5 x the wirelength/density gradient ratio) by %s, so the density penalty is felt from the "
-         "first iteration and the start is not first collapsed into a wirelength-optimal clump. infl_* arms widen cells "
-         "where the sketch's RUDY utilization exceeds 1 (factor 1 + (u - 1), at most 1.5), through the cell sizes "
-         "DREAMPlace reads; J is measured with the real sizes." % keep, "",
+         "first iteration and the start is not first collapsed into a wirelength-optimal clump. infl_* arms widen the "
+         "cells in the top 10 %% of the spread sketch's RUDY utilization (factor u / u_q90, at most 1.3, total added "
+         "area at most 10 %%), through the cell sizes DREAMPlace reads; J is measured with the real sizes." % keep, "",
          "## Results", "", "| arm | n | mean J | mean rWL term | mean OF term | median GP iterations |", "|---|---|---|---|---|---|"]
     for arm in arms:
         v = sm.get(arm) or {}
@@ -369,6 +431,18 @@ def report(run_dir: Path, out_md: Path) -> None:
             v = sm[k]
             L.append("| %s | %d | %+.4f | %+.4f | %d | %d | %s |" % (k, v["n"], v["median_delta"], v["mean_delta"], v["wins"],
                                                                 v["losses"], "%.3g" % v["p_less"] if v["p_less"] is not None else "-"))
+    fid = [r["fidelity"] for r in rows if r["arm"] == "centre" and r.get("fidelity")]
+    if fid:
+        L += ["", "**Where the clusters end up (DA0).** Area-weighted RMS distance, in normalized core units, from each "
+              "cluster prediction to the cluster centroids of the centre-start placement (median over %d cases):" % len(fid), "",
+              "| prediction | median distance |", "|---|---|"]
+        for k in ("sketch", "spread_sketch", "quad", "spread_quad"):
+            v = [f[k] for f in fid if k in f]
+            if v:
+                L.append("| %s | %.3f |" % (k, float(np.median(v))))
+        closer = sum(f["spread_sketch"] < f["spread_quad"] for f in fid if "spread_sketch" in f)
+        L.append("")
+        L.append("The spread sketch is closer than the spread quadratic placement in %d of %d cases." % (closer, len(fid)))
     L += ["", "## Reproduce", "", "```",
           "python scripts/demo_sketch_cells.py --designs ibm04,ibm06 --runs runs/seed_trackA_dp --e0-demo runs/e0_demo "
           "--bridge checkpoints/algR_trackA_final/best.pt --out runs/demo_sketch2 --keep %s" % keep,
