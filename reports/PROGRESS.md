@@ -1,12 +1,12 @@
 # HeurBridge-PR — progress against the task list (T0–T7)
 
-Status as of **2026-09-30 09:30 CST**, code: see `git log` (v0.14.0 + unreleased). Measured against
+Status as of **2026-09-30 16:30 CST**, code: see `git log` (v0.14.0 + unreleased). Measured against
 `HEURBRIDGE_TASKS.md` (Part C tasks, Part D gates). Session history: `HANDOFF.md`; every code change: `CHANGELOG.md`.
 
 ## 1. Summary
 
 - **Position on the critical path:** T0 ✅ → T1 ✅ → T2 (Track-B seeding: 2 of 5 designs complete) → T3 ✅ (exit
-  gate passed) → **T4 = full E0 / gate G0′ running: 14 of 16 design × protocol parts complete; bigblue4 22 of 30 cases per protocol (30 Sep 08:40)** (blinded: no result
+  gate passed) → **T4 = full E0 / gate G0′ running: 14 of 16 design × protocol parts complete; bigblue4 26 of 30 cases (task-list protocol) and 22 of 30 (equal guard) (30 Sep 13:45)** (blinded: no result
   has been read) → T5 → T6. **G0′ expected the night of 30 Sep – morning of 1 Oct** (bigblue4 sets the date:
   ≈ 4.75 h per case, measured today).
 - **Roughly 42 % of the planned effort is done** (weighted by the task list's own duration estimates, §5). The done
@@ -19,10 +19,10 @@ Status as of **2026-09-30 09:30 CST**, code: see `git log` (v0.14.0 + unreleased
 
 | Server | Job | Task | State | Expected |
 |---|---|---|---|---|
-| 225 GPUs 0–3 | `e0x_{spec,eq}_bigblue4` (slices 0–3), `e0x_{spec,eq}_bigblue4_w45` (slices 4–5) | **full E0** bigblue4, whole on 225: 30 legal sources (of 80), budgets 2259 / 2231 s, memory-lean RUDY (`HB_RUDY_IMPL=bmm`) | slices 0–5 complete (22 cases per protocol); slices 6–7 running: spec 6 since 23:10 (14 of 24 rows at 08:20), spec 7 and eq 6–7 since 08:25 (late start: see below) | **bigblue4 ≈ 30 Sep late evening – 1 Oct early morning** (4 slices share the machine now, so cases run faster than at 12) |
+| 225 GPUs 0–3 | `e0x_{spec,eq}_bigblue4` (slices 0–3), `e0x_{spec,eq}_bigblue4_w45` (slices 4–5) | **full E0** bigblue4, whole on 225: 30 legal sources (of 80), budgets 2259 / 2231 s, memory-lean RUDY (`HB_RUDY_IMPL=bmm`) | task-list protocol: slices 0–6 complete (26 cases); equal guard: slices 0–5 complete (22 cases); spec 7 and eq 6–7 running since 08:25 (late start: see below) | **bigblue4 ≈ 30 Sep late evening – 1 Oct early morning** (4 slices share the machine now, so cases run faster than at 12) |
 | 231 GPU 4 | `ft_sketch_ibm2` | cell-sketch fine-tune (S1 of the sketch redesign) | **done 14:09: fails its pass rule** (`reports/sketch_finetune_s1.md`); the dedicated predictor (S2) is next | done |
 | 234 (CPU only) | `cell_labels_234` | sketch redesign S2: labels for the look-ahead predictor (DREAMPlace placements of ≈ 3,900 macro layouts on 15 IBM designs) | started 15:46 | ≈ 30 Sep late evening |
-| 224 (≤ 8 OpenROAD) | `seedB_orfs7_{swerv_wrapper, ariane136, ariane133}` | T2.7 Track-B seeding (bp_fe_top, bp_be_top **complete**) | f1 rows 26 / 82 / 77 (22:00), then local search and f2 | several days |
+| 224 (≤ 8 OpenROAD) | `seedB_orfs7_{swerv_wrapper, ariane136}` | T2.7 Track-B seeding (bp_fe_top, bp_be_top **complete**; ariane133 finished 10:44 with no evaluable heuristic layout, HANDOFF 30 Sep 13:50) | f1 ok 16 of 49 / 72 of 112 (13:50), then local search and f2 | several days |
 | 224 | — | Track-B plan: noise bands and warm-start demos done for bp_fe_top and bp_be_top (reports regenerated) | done | done |
 
 **Overnight (my error):** the watcher stopped seeing 225 at 23:15 (a newline in its job list), so the last three bigblue4 slices started at 08:25 instead of ~01:00–05:00, 3–7 h later. Fixed, and the watcher now reports a failed check instead of going quiet.
@@ -93,7 +93,7 @@ Legend: ✅ done · 🔄 running · ⚠️ done with a limitation · ⏸ waiting
 | T2.5 projections P_M / P_C / P_R | ✅ | `heurbridge/core/project.py` |
 | T2.6 elite archive | ✅ | `heurbridge/archive/` |
 | T2.7 seeding, Track A | ✅ | IBM 17 designs `reports/T2_trackA_ibm_dreamplace.md`; ISPD2005 8 designs `reports/T2_trackA_ispd_dreamplace.md` |
-| T2.7 seeding, Track B | 🔄 | **bp_fe_top and bp_be_top complete** (`reports/T2_trackB_orfs_bp_fe_top.md`, `…_bp_be_top.md`; cost_v3: gates vs the same-path replay): at signoff 16 / 9 of 20 layouts pass every gate, 14 / 7 of them below the unmodified flow (best 0.881 / 0.931, local search); the same-path replay of the tool's own layout scores 1.323 / 1.103 (band of one-site shifts 1.03–1.40 / 1.02–1.16); f1–f2 Kendall tau 0.51 / 0.78. Descriptive: candidates need their own noise band before any claim. swerv_wrapper, ariane136, ariane133 running. Many heuristic layouts fail ORFS (GRT-0116 congestion, DPL-0036, 2-h timeouts; identical failing layouts are no longer re-run). **Findings:** (1) the failures come from ORFS 2024-12's timing-driven global placement diverging on scattered layouts (the same layout places fine with it off); (2) M1's own layout imported like a candidate scores worse than base M1 (bp_fe_top f2: J 1.32 vs 1.00, nearly all TNS) because Hier-RTLMP pre-places the standard cells — so candidates are paired with this same-path replay, and a per-design noise band (M1 shifted by one site/row) decides what counts as an improvement. Estimate: several more days |
+| T2.7 seeding, Track B | 🔄 | **bp_fe_top and bp_be_top complete** (`reports/T2_trackB_orfs_bp_fe_top.md`, `…_bp_be_top.md`; cost_v3: gates vs the same-path replay): at signoff 16 / 9 of 20 layouts pass every gate, 14 / 7 of them below the unmodified flow (best 0.881 / 0.931, local search); the same-path replay of the tool's own layout scores 1.323 / 1.103 (band of one-site shifts 1.03–1.40 / 1.02–1.16); f1–f2 Kendall tau 0.51 / 0.78. Descriptive: candidates need their own noise band before any claim. swerv_wrapper and ariane136 running; ariane133 finished with 0 of 80 heuristic layouts evaluable (detailed placement failures and timeouts; HANDOFF 30 Sep 13:50), decision pending. Many heuristic layouts fail ORFS (GRT-0116 congestion, DPL-0036, 2-h timeouts; identical failing layouts are no longer re-run). **Findings:** (1) the failures come from ORFS 2024-12's timing-driven global placement diverging on scattered layouts (the same layout places fine with it off); (2) M1's own layout imported like a candidate scores worse than base M1 (bp_fe_top f2: J 1.32 vs 1.00, nearly all TNS) because Hier-RTLMP pre-places the standard cells — so candidates are paired with this same-path replay, and a per-design noise band (M1 shifted by one site/row) decides what counts as an improvement. Estimate: several more days |
 
 ### T3 — The bridge ✅ (T3.9 after G0′)
 
@@ -231,6 +231,7 @@ Track-B timing plan, 17:10:
 Received 2026-09-30 (09:10): **stop the demo if it is not useful** (done); **keep a checkpoint of the bridge before fine-tuning** (done: `bridge_v1_e0_frozen`, sha256 f95bdde8…, on the Mac and in all three vaults); **no heavy compute on the Mac**; CPU-only servers for CPU work.
 
 Open:
+0. ariane133 (Track B): diagnose, possibly with another flow deviation, or drop it as a documented deviation (HANDOFF 30 Sep 13:50).
 1. Endpoints of the extension's tests (proposed: signoff J on the ORFS designs; placer J on ISPD2005) -- fixed in
    its pre-registration after G0′.
 2. Housekeeping: back up `~/.config/heurbridge/vault.key` (without it the server vault cannot be decrypted); ask
