@@ -21,6 +21,7 @@ Status as of **2026-09-30 09:30 CST**, code: see `git log` (v0.14.0 + unreleased
 |---|---|---|---|---|
 | 225 GPUs 0–3 | `e0x_{spec,eq}_bigblue4` (slices 0–3), `e0x_{spec,eq}_bigblue4_w45` (slices 4–5) | **full E0** bigblue4, whole on 225: 30 legal sources (of 80), budgets 2259 / 2231 s, memory-lean RUDY (`HB_RUDY_IMPL=bmm`) | slices 0–5 complete (22 cases per protocol); slices 6–7 running: spec 6 since 23:10 (14 of 24 rows at 08:20), spec 7 and eq 6–7 since 08:25 (late start: see below) | **bigblue4 ≈ 30 Sep late evening – 1 Oct early morning** (4 slices share the machine now, so cases run faster than at 12) |
 | 231 GPU 4 | `ft_sketch_ibm2` | cell-sketch fine-tune (S1 of the sketch redesign) | **done 14:09: fails its pass rule** (`reports/sketch_finetune_s1.md`); the dedicated predictor (S2) is next | done |
+| 234 (CPU only) | `cell_labels_234` | sketch redesign S2: labels for the look-ahead predictor (DREAMPlace placements of ≈ 3,900 macro layouts on 15 IBM designs) | started 15:46 | ≈ 30 Sep late evening |
 | 224 (≤ 8 OpenROAD) | `seedB_orfs7_{swerv_wrapper, ariane136, ariane133}` | T2.7 Track-B seeding (bp_fe_top, bp_be_top **complete**) | f1 rows 26 / 82 / 77 (22:00), then local search and f2 | several days |
 | 224 | — | Track-B plan: noise bands and warm-start demos done for bp_fe_top and bp_be_top (reports regenerated) | done | done |
 

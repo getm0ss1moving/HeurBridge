@@ -14,8 +14,17 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
   - `heurbridge/bridge/lookahead.py` (labels) and `DreamplaceEvaluator.evaluate_placed` are committed (b671f21).
   - The label server is 234 (CPU-only, idle, 64 cores). 231's Python env and DREAMPlace are copied to 234 at the
     same paths (`/dev/shm/.hbenv/hb`, `/dev/shm/.hbtools/dreamplace`; env checked: torch 2.6.0, no CUDA).
-  - Still to do on 234: copy the IBM benchmarks, push code and data through hbv, run one test placement. Then
-    write `scripts/make_cell_labels.py`.
+  - 234 is set up: IBM benchmarks in `/dev/shm/.hbdata/benchmarks`, and the encrypted inputs copied from 231 with
+    identical sha256 (`bridge_v1_e0_frozen`, `eda_harness`, the finals of `seedA_dp_s1/s2` and `algR_trackA2`). hbv's
+    default root there is `/tmp/.hbv`.
+  - `scripts/make_cell_labels.py` (2d210ab): trial `labels_smoke_234` passed. Three ibm01 placements on the CPU took
+    25-28 s each, with labels of the expected shapes.
+  - **Running on 234 since 15:46: `cell_labels_234`.** 15 designs (13 training and ibm04/ibm06), about 260 layouts
+    each, 14 placements at a time. ETA roughly 6-8 h.
+  - DREAMPlace's `num_threads` defaults to 8 (not `OMP_NUM_THREADS`), so 14 x 8 threads oversubscribe the 64
+    cores (load ~90). That is slower but consistent, and 234 is otherwise idle. Next time use 8 workers or 4
+    threads per placement.
+  - The watcher now checks 234 too (`J234`).
 
 ---
 
