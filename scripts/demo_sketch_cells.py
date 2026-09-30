@@ -33,7 +33,7 @@ Only this process changes DREAMPlace's parameters or cell sizes; the evaluation 
 
   python scripts/demo_sketch_cells.py --designs ibm04,ibm06 --runs runs/seed_trackA_dp --e0-demo runs/e0_demo \
       --bridge checkpoints/algR_trackA_final/best.pt --out runs/demo_sketch2 [--keep 80] [--pilot 2]
-  python scripts/demo_sketch_cells.py --report runs/demo_sketch2 --out reports/demo_sketch_cells.md
+  python scripts/demo_sketch_cells.py --report runs/demo_sketch2 [--also runs/demo_sketch2_infl] --out reports/demo_sketch_cells.md
 """
 
 import argparse
@@ -223,20 +223,33 @@ def inflation(design, layout, cell_pos, q=0.9, cap=1.3, budget=0.10):
                "area_added_frac": float(((f - 1) * design.area).sum() / max(area, 1e-12))}
 
 
+def widened_widths(width, factors, seed=0):
+    """Integer widths for ``width * factors``: DREAMPlace's Bookshelf parser takes whole widths only (the IBM site
+    width is 1).  The IBM cells are 2-20 sites wide, so plain rounding would drop most small factors and ceiling
+    would inflate a 2-site cell by 50 %; each fraction is rounded up with its own probability instead (fixed seed),
+    which keeps the added area of the rule in expectation."""
+    w = width * factors
+    lo = np.floor(w + 1e-9)
+    up = np.random.default_rng(seed).random(len(w)) < (w - lo)
+    return np.where(factors > 1.0, lo + up, width)
+
+
 def inflated_run(final, design, layout, factors, run_id, workdir, cluster_of):
     """DREAMPlace with cells widened by ``factors`` (the sizes it reads), metrics with the real cell sizes."""
     from heurbridge.eval.dreamplace import run_dreamplace_f1
     from heurbridge.eval.f1 import trackA_metrics
     di = copy.copy(design)
     di.size = design.size.copy()
-    di.size[:, 0] *= factors
+    di.size[:, 0] = widened_widths(design.size[:, 0], factors)
+    cells = ~design.is_macro & ~design.is_io & ~design.is_fixed
+    written = float(((di.size[:, 0] - design.size[:, 0]) * design.size[:, 1]).sum() / max(design.area[cells].sum(), 1e-12))
     work = Path(workdir) / run_id
     work.mkdir(parents=True, exist_ok=True)
     out, placed = run_dreamplace_f1(di, layout, work, None, gpu=final.gpu, iters=final.iters, seed=final.seed,
                                     timeout=final.timeout_s)
     rec = {"run_id": run_id, "backend": "dreamplace", "returncode": out["returncode"], "failure": out.get("failure"),
            "runtime_s": out["wall_s"], "unchecked": out["unchecked"], "gp_overflow": out.get("gp_overflow"),
-           "macro_max_shift": out.get("macro_max_shift")}
+           "macro_max_shift": out.get("macro_max_shift"), "area_added_frac_written": written}
     if placed is not None and out.get("failure") is None:
         m = trackA_metrics(design, placed, None)                 # the real cell sizes at the placed centres
         rec.update({"hpwl_um": m["hpwl"], "rudy_overflow": m["rudy_overflow"], "rudy_overflow_ratio": m["rudy_overflow_ratio"],
@@ -334,6 +347,7 @@ def main():
                 elif arm.startswith("infl_"):
                     f, extra = inflation(des, dep, cells["spread_" + arm.split("_")[1]])
                     rec = inflated_run(final, des, dep, f, rid, out / "work", b.cluster_of)
+                    extra["area_added_frac_written"] = rec["area_added_frac_written"]
                 else:
                     raise ValueError(arm)
                 c = final.score(rec, baseline)
@@ -391,9 +405,36 @@ def summarize(rows, arms=ARMS):
     return out
 
 
-def report(run_dir: Path, out_md: Path) -> None:
+def merged_rows(run_dir: Path, also=()):
+    """Rows of ``run_dir``, with rows of each later run directory replacing those of the same case and arm (a re-run
+    of some arms)."""
+    rows = {}
+    for d in (run_dir, *also):
+        for l in (Path(d) / "rows.jsonl").read_text().splitlines():
+            if l.strip():
+                r = json.loads(l)
+                rows[(r["design"], r["program"], r["seed"], r["arm"])] = r
+    return list(rows.values())
+
+
+def distinct_rows(rows):
+    """Drop a case whose arms all give exactly the J of an earlier case of the same design and program (the other
+    seed produced the same layout): counted twice it would overstate the evidence.  Returns (rows, dropped)."""
+    by = {}
+    for r in rows:
+        by.setdefault((r["design"], r["program"], r["seed"]), {})[r["arm"]] = r["J"]
+    seen, drop = set(), set()
+    for k in sorted(by):
+        sig = (k[0], k[1], tuple(sorted((a, round(j, 12) if math.isfinite(j) else str(j)) for a, j in by[k].items())))
+        if sig in seen:
+            drop.add(k)
+        seen.add(sig)
+    return [r for r in rows if (r["design"], r["program"], r["seed"]) not in drop], len(drop)
+
+
+def report(run_dir: Path, out_md: Path, also=()) -> None:
     from heurbridge.reporting import METRIC_CONVENTIONS
-    rows = [json.loads(l) for l in (run_dir / "rows.jsonl").read_text().splitlines() if l.strip()]
+    rows, dup = distinct_rows(merged_rows(run_dir, also))
     meta = json.loads((run_dir / "meta.json").read_text())
     arms = [x for x in (meta.get("config") or {}).get("arms", ",".join(ARMS)).split(",") if x]
     sm = summarize(rows, arms)
@@ -415,8 +456,12 @@ def report(run_dir: Path, out_md: Path) -> None:
          "density weight (8e-5 x the wirelength/density gradient ratio) by %s, so the density penalty is felt from the "
          "first iteration and the start is not first collapsed into a wirelength-optimal clump. infl_* arms widen the "
          "cells in the top 10 %% of the spread sketch's RUDY utilization (factor u / u_q90, at most 1.3, total added "
-         "area at most 10 %%), through the cell sizes DREAMPlace reads; J is measured with the real sizes." % keep, "",
-         "## Results", "", "| arm | n | mean J | mean rWL term | mean OF term | median GP iterations |", "|---|---|---|---|---|---|"]
+         "area at most 10 %%), through the cell sizes DREAMPlace reads (whole sites: each fraction rounded up with its own "
+         "probability); J is measured with the real sizes." % keep, "",
+         "## Results", "",
+         "%d cases repeat another case exactly (the same program with the other seed gave the same layout, and every arm "
+         "the same J); each is counted once below, leaving %d distinct cases." % (dup, len({(r["design"], r["program"], r["seed"]) for r in rows})),
+         "", "| arm | n | mean J | mean rWL term | mean OF term | median GP iterations |", "|---|---|---|---|---|---|"]
     for arm in arms:
         v = sm.get(arm) or {}
         L.append("| %s | %s | %s | %s | %s | %s |" % (arm, v.get("n"), "%.4f" % v["mean_J"] if v.get("mean_J") is not None else "-",
@@ -431,6 +476,13 @@ def report(run_dir: Path, out_md: Path) -> None:
             v = sm[k]
             L.append("| %s | %d | %+.4f | %+.4f | %d | %d | %s |" % (k, v["n"], v["median_delta"], v["mean_delta"], v["wins"],
                                                                 v["losses"], "%.3g" % v["p_less"] if v["p_less"] is not None else "-"))
+    infl = [r["inflation"] for r in rows if r["arm"].startswith("infl_") and (r.get("inflation") or {}).get("area_added_frac_written") is not None]
+    if infl:
+        L += ["", "Inflation: a median %d cells widened per run; the widths DREAMPlace read added a median %.1f %% "
+              "(range %.1f-%.1f %%) of the cell area." % (float(np.median([x["cells_inflated"] for x in infl])),
+                                                        100 * float(np.median([x["area_added_frac_written"] for x in infl])),
+                                                        100 * min(x["area_added_frac_written"] for x in infl),
+                                                        100 * max(x["area_added_frac_written"] for x in infl))]
     fid = [r["fidelity"] for r in rows if r["arm"] == "centre" and r.get("fidelity")]
     if fid:
         L += ["", "**Where the clusters end up (DA0).** Area-weighted RMS distance, in normalized core units, from each "
@@ -445,8 +497,13 @@ def report(run_dir: Path, out_md: Path) -> None:
         L.append("The spread sketch is closer than the spread quadratic placement in %d of %d cases." % (closer, len(fid)))
     L += ["", "## Reproduce", "", "```",
           "python scripts/demo_sketch_cells.py --designs ibm04,ibm06 --runs runs/seed_trackA_dp --e0-demo runs/e0_demo "
-          "--bridge checkpoints/algR_trackA_final/best.pt --out runs/demo_sketch2 --keep %s" % keep,
-          "python scripts/demo_sketch_cells.py --report runs/demo_sketch2 --out reports/demo_sketch_cells.md", "```", ""]
+          "--bridge checkpoints/algR_trackA_final/best.pt --out runs/demo_sketch2 --keep %s" % keep]
+    for d in also:
+        m = json.loads((Path(d) / "meta.json").read_text()).get("config") or {}
+        L.append("python scripts/demo_sketch_cells.py --designs %s --runs %s --e0-demo %s --bridge %s --out %s --keep %s --arms %s"
+                 % (m.get("designs"), m.get("runs"), m.get("e0_demo"), m.get("bridge"), m.get("out"), m.get("keep"), m.get("arms")))
+    L += ["python scripts/demo_sketch_cells.py --report runs/demo_sketch2%s --out reports/demo_sketch_cells.md"
+          % "".join(" --also %s" % d for d in also), "```", ""]
     out_md.write_text("\n".join(L))
     print("REPORT_OK", out_md)
 
@@ -455,6 +512,7 @@ if __name__ == "__main__":
     if "--report" in sys.argv:
         i = sys.argv.index("--report")
         report(Path(sys.argv[i + 1]), Path(sys.argv[sys.argv.index("--out") + 1]) if "--out" in sys.argv
-               else Path("reports/demo_sketch_cells.md"))
+               else Path("reports/demo_sketch_cells.md"),
+               [Path(sys.argv[j + 1]) for j, x in enumerate(sys.argv) if x == "--also"])
     else:
         main()
