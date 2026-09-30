@@ -4,6 +4,22 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
+## 2026-10-01 — Session 4 (07:30): S2 predictor trained; misses its bar
+
+- **`s2_lookahead_225` (225 GPU 0, code 9366ae1):**
+  - Checks: the frozen bridge's sha was checked before and after; core tests 14 passed.
+  - Input preparation took 854 s; 20,000 steps; rc 0. Fetched to `runs/remote/s2_lookahead_225`.
+- **Report:** `reports/sketch_predictor_s2.md`.
+  - Best step 4,000: DA0 ratio ibm04 0.747, ibm06 0.642; closer than quadratic in 239 / 252 of 261.
+  - Bar <= 0.5 not met; it overfits after 4k steps.
+- **Options, not started (owner's call):**
+  - Dihedral and aspect augmentation, as the bridge uses (the S2 training has none).
+  - Regularization or a smaller model.
+  - Using the predictor where ranking matters rather than precision: the S2 look-ahead check (Kendall of
+    predicted vs actual f1 J) is not computed yet.
+
+---
+
 ## 2026-10-01 — Session 4 (05:40): S2 labels complete on 234
 
 - **`cell_labels_234` done 05:13**, final archive 2.88 GB. Summarized on 234 by `labels_summary_234`, which

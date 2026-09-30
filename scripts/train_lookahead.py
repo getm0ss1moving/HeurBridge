@@ -162,5 +162,51 @@ def main():
                                                         min(hist, key=lambda h: h["criterion"])["val"].values()))}))
 
 
+def report(run_dir: Path, out_md: Path, bar: float = 0.5) -> None:
+    """Markdown report of one training run (history.json, meta.json), with the S2 bar fixed before any result."""
+    from heurbridge.reporting import METRIC_CONVENTIONS
+    h = json.loads((run_dir / "history.json").read_text())
+    meta = json.loads((run_dir / "meta.json").read_text())
+    cfg = meta.get("config") or {}
+    best = min(h["hist"], key=lambda e: e["criterion"])
+    vals = list(best["val"])
+    L = ["# Sketch redesign S2: cell-stage predictor", "",
+         "| Field | Value |", "|---|---|", "| Report | lookahead_s2 |", "| Date | %s |" % time.strftime("%Y-%m-%d %H:%M"),
+         "| Node | 225 (RTX 3090, GPU 0) |", "| Track | A (labels: DREAMPlace f1 placements on the CPU, 234) |",
+         "| HeurBridge version / git | %s / %s |" % (meta.get("heurbridge_version"), meta.get("git_sha")),
+         "| Metric conventions | %s |" % METRIC_CONVENTIONS, "| Feeds gate | none (diagnostic step S2 of the sketch redesign) |",
+         "| Pre-registered test | - (bar fixed before any result: local plan, S2) |", "| alpha-ledger entry | - |",
+         "| Status of the claim | no claim |", "",
+         "## Setup", "",
+         "Predictor: the bridge's encoder (initialized from %s) with a centroid-shift and a spread head, one forward pass "
+         "from the committed macros with the clusters at their quadratic placement. Training designs %s; validation %s; "
+         "%s steps, batch %s, lr %s, spread weight %s. Labels: `scripts/make_cell_labels.py` on 234 (3,838 DREAMPlace "
+         "placements, 0 failures). Measure: per sample, the area-weighted RMS distance of the predicted cluster centroids "
+         "to the placed ones, divided by the same distance for the quadratic placement; median per design. **Bar: <= %.1f "
+         "on every validation design.**" % (cfg.get("init") or "scratch", cfg.get("train"), cfg.get("val"), cfg.get("steps"),
+                                               cfg.get("batch"), cfg.get("lr"), cfg.get("lam_cov"), bar), "",
+         "## Result", "",
+         "| step | " + " | ".join("%s ratio" % d for d in vals) + " | mean | train ratio |", "|---|" + "---|" * (len(vals) + 2),
+         "| 0 (initialization) | " + " | ".join("%.3f" % h["val0"][d]["ratio_median"] for d in vals) + " | %.3f | - |"
+         % (sum(h["val0"][d]["ratio_median"] for d in vals) / len(vals))]
+    for e in h["hist"]:
+        L.append("| %d | %s | %.3f | %.3f |" % (e["step"], " | ".join("%.3f" % e["val"][d]["ratio_median"] for d in vals),
+                                                e["criterion"], e["train"]["rms"] / e["train"]["rms_quad"]))
+    L += ["", "**Best checkpoint (step %d):** " % best["step"] + "; ".join(
+        "%s median distance %.3f against %.3f for the quadratic placement (ratio %.3f; closer in %d of %d; by kind %s)"
+        % (d, v["rms_median"], v["quad_median"], v["ratio_median"], v["closer"], v["n"],
+           ", ".join("%s %.3f" % (k, x["ratio_median"]) for k, x in v["by_kind"].items())) for d, v in best["val"].items()) + ".",
+          "", "**Outcome:** %s" % ("passes the bar on every validation design." if all(v["ratio_median"] <= bar for v in best["val"].values())
+                                   else "does not reach the bar of %.1f; the training ratio keeps falling while validation "
+                                        "rises after the best step (fitting the training designs, not generalizing)." % bar),
+          "", "## Reproduce", "", "`python scripts/train_lookahead.py %s`; `python scripts/train_lookahead.py --report %s --out %s`." % (
+              " ".join("--%s %s" % (k.replace("_", "-"), v) for k, v in cfg.items() if v not in ("", None)), run_dir, out_md), ""]
+    Path(out_md).write_text("\n".join(L))
+    print("REPORT_OK", out_md)
+
+
 if __name__ == "__main__":
-    main()
+    if "--report" in sys.argv:
+        report(Path(sys.argv[sys.argv.index("--report") + 1]), Path(sys.argv[sys.argv.index("--out") + 1]))
+    else:
+        main()

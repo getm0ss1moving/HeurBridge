@@ -6,6 +6,18 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 
 ## [Unreleased]
 
+### Sketch redesign S2: labels and predictor (1 Oct 07:20): the predictor misses its bar
+- **Labels:** `scripts/make_cell_labels.py` on 234 produced 3,838 DREAMPlace placements on 15 IBM designs, with 0
+  failures. They cover sources, bridge endpoints at alpha 0.25-1, and elites.
+- **Predictor:** `heurbridge/bridge/lookahead_net.py`, `scripts/train_lookahead.py`, trained on 225 GPU 0.
+  - The bridge's encoder plus centroid-shift and spread heads, one forward pass from the committed macros.
+  - `BridgeNet.encode` is split out of `forward` (outputs bit-identical).
+- **Result** (`reports/sketch_predictor_s2.md`): the median distance ratio to the placed clusters, against the
+  quadratic placement.
+  - ibm04 0.747 and ibm06 0.642 at the best step (4,000); 0.860 / 0.843 at initialization.
+  - The bar fixed before any result was <= 0.5: **not met**.
+  - It overfits after step 4,000: the training ratio falls to 0.54 while validation rises again.
+
 ### Full E0: gate G0′ PASSED (30 Sep 23:18)
 - All three pre-registered tests pass (Holm-adjusted p, co-trained bridge vs memetic / repertoire):
   - **E0#1** (primary, ISPD2005, 405 cases): 3.3e-65 / 2.4e-61.
