@@ -77,6 +77,10 @@ class DreamplaceEvaluator(Evaluator):
     timeout_s: int = 3600
 
     def evaluate(self, design, layout, run_id, workdir):
+        return self.evaluate_placed(design, layout, run_id, workdir)[0]
+
+    def evaluate_placed(self, design, layout, run_id, workdir):
+        """``evaluate`` plus the placed layout (None on failure), for callers that need the cells' positions."""
         from ..eval.dreamplace import run_dreamplace_f1
         work = Path(workdir) / run_id
         out, placed = run_dreamplace_f1(design, layout, work, self.f0cfg, gpu=self.gpu, iters=self.iters,
@@ -91,8 +95,10 @@ class DreamplaceEvaluator(Evaluator):
                         "density_overflow": r["density_overflow"], "rudy_of_pct": 100.0 * r["rudy_overflow_ratio"]})
             if self.cluster_of is not None:
                 rec["cluster_pos"] = cluster_centroids(design, placed, self.cluster_of).tolist()
+        else:
+            placed = None
         (work / "record.json").write_text(json.dumps(rec, indent=1, default=str))
-        return rec
+        return rec, placed
 
 
 TRACK_A_FINAL = {"hbgp": HBGPEvaluator, "dreamplace": DreamplaceEvaluator}
