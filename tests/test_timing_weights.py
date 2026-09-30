@@ -1,5 +1,7 @@
 """Track-B timing-aware macro cost: the timing probe's table, critical-net weights, timing-aware local search."""
 
+import math
+import types
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -9,7 +11,6 @@ from heurbridge.archive.store import Archive
 from heurbridge.core import synth
 from heurbridge.core import timing_weights as TW
 from heurbridge.eval import cost, orfs
-from heurbridge.eval import f0
 from heurbridge.heuristics.cell.cluster import cluster_cells
 from heurbridge.heuristics.macro.registry import all_programs
 from heurbridge.pipeline import seed_archive as SA
@@ -107,22 +108,22 @@ def test_slacks_roundtrip(tmp_path):
 
 
 @dataclass
-class RightIsLate(Evaluator):
-    """f1-like record: wirelength from f0, setup fails (against the baseline) once macro ``m`` is right of x0."""
-    name: str = "timing_fake"
+class ScriptedTiming(Evaluator):
+    """f1-like record for a scripted local search: wirelength falls as macro ``m`` moves right (twice as fast as up);
+    setup fails (against the baseline) once m is right of ``state['x0']``, the local search's start (set by the
+    scripted neighbours; the heuristics' layouts before it are all on time)."""
+    name: str = "timing_scripted"
     fidelity: int = 1
     weights: dict = field(default_factory=lambda: {"rwl": 0.3, "of": 0.15})
     required_gates: tuple = ("setup", "hold")
     m: int = 0
-    x0: float = 0.5
+    state: dict = field(default_factory=dict)
 
     def evaluate(self, design, layout, run_id, workdir):
-        import torch
-        ctx = f0.F0Context(design, layout.orient)
-        hp = float(ctx.hpwl_exact(torch.as_tensor(layout.pos, dtype=torch.float32))[0])
-        late = layout.pos[self.m, 0] > self.x0
-        return {"returncode": 0, "gr_wl": hp, "gr_overflow_total": 0, "setup_wns_ns": -0.6 if late else -0.5,
-                "hold_wns_ns": 0.1}
+        x, y = float(layout.pos[self.m, 0]), float(layout.pos[self.m, 1])
+        late = x > self.state.get("x0", math.inf) + 1e-12
+        return {"returncode": 0, "gr_wl": 10.0 - 2.0 * x - y, "gr_overflow_total": 0,
+                "setup_wns_ns": -0.6 if late else -0.5, "hold_wns_ns": 0.1}
 
 
 def test_timing_ok():
@@ -133,20 +134,34 @@ def test_timing_ok():
 
 
 def test_ls_timing_accepts_only_timing_clean_moves(tmp_path, monkeypatch):
+    # Scripted, so the result does not hang on a random search path (it did: the clustering differs between METIS
+    # versions, and on 231 the unscripted search never proposed a late move).  Each step offers two moves of one
+    # macro: right (the lower J, and late) and up (lower J than staying, on time).
     des, ref = synth.make_design(seed=11, n_macros=6, n_cells=60, n_io=8)
     cl = cluster_cells(des, n=8)
     m = int(np.flatnonzero(des.is_macro & ~des.is_fixed)[0])
-    ev = RightIsLate(m=m, x0=float(ref.pos[m, 0]))
     base = cost.Baseline.from_records(des.id, [{"gr_wl": 1.0, "gr_overflow_total": 0, "setup_wns_ns": -0.5,
                                                 "hold_wns_ns": 0.1}])
     progs = [p for p in all_programs() if p["id"] in ("M6.v0", "M7.v0")]
+    monkeypatch.setattr(SA.project, "legalize_macros",
+                        lambda design, lay, halo=0.0: (lay, types.SimpleNamespace(ok=True, failed=[], mean_disp=0.0)))
     runs = {}
     for flag in (False, True):
+        ev = ScriptedTiming(m=m)
+
+        def scripted(design, layout, rng, n, state=ev.state, d=0.01):
+            state.setdefault("x0", float(layout.pos[m, 0]))
+            right, up = layout.copy(), layout.copy()
+            right.pos[m, 0] += d
+            up.pos[m, 1] += d
+            return [("right", right), ("up", up)]
+
         accepted = []
+        monkeypatch.setattr(SA, "neighbours", scripted)
         monkeypatch.setattr(SA, "_insert", lambda archive, design, lay, row, e, acc=accepted: acc.append(row))
-        cfg = SA.SeedConfig(seeds=1, top_f2=2, ls_steps=6, ls_neighbours=6, ls_timing=flag, seed=3)
+        cfg = SA.SeedConfig(seeds=1, top_f2=2, ls_steps=6, ls_neighbours=2, ls_timing=flag, seed=3)
         SA.seed_design(des, ref, progs, ev, None, Archive(tmp_path / str(flag) / "a", min_fidelity=1), base,
                        tmp_path / str(flag) / "o", cfg, cluster=cl, log=lambda x: None)
         runs[flag] = [r for r in accepted if r.get("program") == "LS"]
-    assert any(not SA.timing_ok(r) for r in runs[False])                          # control: J alone takes late moves
+    assert runs[False] and not any(SA.timing_ok(r) for r in runs[False])        # control: J alone takes the late move
     assert runs[True] and all(SA.timing_ok(r) for r in runs[True])
