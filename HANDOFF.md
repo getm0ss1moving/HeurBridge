@@ -4,6 +4,24 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
+## 2026-09-30 — Session 4 (13:50): bigblue4 spec slice 6 done; ariane133 Track-B campaign yields nothing
+
+- **E0:** `e0x_spec_bigblue4_w6` done 13:45 and checked (counts only): `spec_bigblue4_s6` has 24 rows = 4 cases x 6
+  partners, no duplicates, rc 0 (plus the wave's empty prepare dir, excluded as planned). Still running on 225:
+  `e0x_spec_bigblue4_w7` (slice 7) and `e0x_eq_bigblue4_w67` (slices 6-7).
+- **Track B, ariane133 (`seedB_orfs7_ariane133`, done 10:44, rc 0): no heuristic layout could be evaluated.**
+  - f1 ok 0 of 80. Failures: DPL-0036 detailed placement 37, timeout in `3_5_place_dp` 25, no parsed reason 14,
+    GPL-0307 divergence 5, PDN-0179 1. The archive holds only the tool's layout (M1 replay f1 J 0.948).
+  - That layout's f2 failed a gate (J_raw 5.17), and its one-site-shift replays failed.
+  - Our P_M already keeps macros 2 x the flow's halo apart (MACRO_PLACE_HALO 10 10 -> 20 um), so the halo is
+    not the cause. Unlike ariane136, ariane133's config sets no PLACE_DENSITY: a lead, not a finding.
+  - The other two designs are usable: ariane136 72 of 112 f1 ok, swerv_wrapper 16 of 49 (mostly detailed-placement
+    timeouts at 7200 s).
+  - Needs the owner's decision: diagnose ariane133 (a flow deviation may be needed), or drop it from Track B as a
+    documented deviation.
+
+---
+
 ## 2026-09-30 — Session 4 (09:30): demo 2 stopped; bridge backed up; fine-tune running; sketch redesign
 
 - **Demo 2 stopped** (owner: "is the current demo useful now, if not stop it"), 09:14, once ibm04 was complete.
