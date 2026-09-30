@@ -6,6 +6,13 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 
 ## [Unreleased]
 
+### E0 operations (30 Sep 08:40)
+- bigblue4 slices 0-5 of both protocols are complete (22 of 30 cases each, counts only). The last three slices
+  were launched at 08:25 after a watcher failure: a newline in the job list silenced the 225 check overnight
+  (HANDOFF). The watcher now reports a failed server check instead of staying quiet.
+- The bigblue4 code-version deviation (slices 0-3 ran 9b3c8e8, slices 4-7 run 5e1c009) had no effect: no host
+  OOM kill and no placer failure in slices 0-5.
+
 ### Reports (29 Sep 22:00): bp_be_top noise bands and warm-start demo; E0 ibm12 complete
 - `reports/T2_trackB_orfs_bp_be_top.md` regenerated from the band and warm-start jobs (merged locally in
   `runs/remote/seedB_bandws_bp_be_top`; descriptive).

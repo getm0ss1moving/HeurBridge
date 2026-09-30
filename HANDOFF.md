@@ -4,6 +4,29 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
+## 2026-09-30 — Session 4 (08:40): bigblue4 slices 0-5 done overnight; watcher failure; last slices launched
+
+- **Watcher failure (my error).** Appending slice 6's job to `watch_extra_225.txt` at 23:10 put a newline into the
+  job list, which broke the remote `for` loop of the 225 check; its stderr was discarded, so 225 went unwatched from
+  23:15 until 08:20 (224 and 231 were still watched). Every slice 0-5 finished in that window (by ~05:00), so slices
+  spec 7 and eq 6/7 were not launched overnight. That cost about 3-7 h on E0's critical path.
+  Fixed: the list is flattened to one line, and every server check now ends with a heartbeat; a missing heartbeat
+  is reported once as `WATCHER_CHECK_FAILED <host>`.
+- **Launched 08:25:** `e0x_spec_bigblue4_w7` (slice 7, GPU 3) and `e0x_eq_bigblue4_w67` (slices 6-7, GPU 2/3; eq
+  budget 2230.7). Both are pinned to code 5e1c009 through their plan files. With slice 6 (spec, 14 of 24 rows at
+  08:20) that makes 4 slices on 225; 114 GB were free.
+- **Checked (counts only):** slices 0-5 of both protocols are complete: 22 cases = 132 rows per protocol, no
+  duplicates, one budget per protocol, rc 0. The code-version deviation had no effect: no placer failure and no
+  host OOM kill in any slice; the one rerun note (eq slice 3) is a GPU-OOM rerun, which both code versions do.
+- **E0 bigblue4 components for the combine:**
+  - spec = `e0x_spec_bigblue4` {spec_bigblue4, _s1, _s2, _s3} + `e0x_spec_bigblue4_w45` {_s4, _s5} +
+    `e0x_spec_bigblue4_w6` {_s6} + `e0x_spec_bigblue4_w7` {_s7};
+  - eq = `e0x_eq_bigblue4` {eq_bigblue4, _s1, _s2, _s3} + `e0x_eq_bigblue4_w45` {_s4, _s5} +
+    `e0x_eq_bigblue4_w67` {_s6, _s7};
+  - exclude every wave job's empty prepare dir (`spec_bigblue4` / `eq_bigblue4` inside `_w*`).
+
+---
+
 ## 2026-09-29 — Session 4 (22:00): new session; ibm12 done; bp_be_top report; watcher moved
 
 - **New session:** the scratchpad moved to `.../2d703b2c-f6de-4a89-b03d-30c5f7b1c57c/scratchpad`. The watcher
