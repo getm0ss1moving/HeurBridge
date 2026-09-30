@@ -28,6 +28,13 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
     at every validation); the sha guard again; then `runs/sketch_quality.json` (DA0 with DREAMPlace, f1 J) and
     `runs/sketch_quality_steps.json`.
   - ETA about 13:30-14:00. It is on the watcher's 231 list.
+- **Recomputed baseline cell targets** (`m1_cluster_pos`, 14 designs; ibm02 has no baseline in its top 5). J now
+  against the archive's (the median of three runs):
+  - ibm01, ibm03, ibm04 and ibm07 reproduce the first archived run exactly; ibm10, 11, 13-17 are within 0.2 %.
+  - ibm09 (0.4596 against 0.45) and ibm18 (0.4596 against 0.4503) are about 2 % worse. They are ordinary
+    placement variation: ibm09's congestion 0.58 % against 0.39-0.52 % on a nearly uncongested design; ibm18's
+    wirelength +1 % and congestion 12.2 % against 11.6-11.7 %. Equal J to four decimals is a coincidence: the
+    terms differ. The targets are DREAMPlace's placements of those macros either way.
 - **Sketch redesign** (owner's question): written in the local plan (unpublished) and the meeting brief.
 - **The fine-tune's pass rule, fixed before any result:** on both ibm04 and ibm06, median DA0 ≤ 0.7 × the quadratic
   control's (today 0.93×), and median f1 J no more than 0.5 % above the frozen bridge's.
