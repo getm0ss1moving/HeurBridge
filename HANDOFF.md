@@ -4,6 +4,20 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
+## 2026-10-01 — Session 4 (05:40): S2 labels complete on 234
+
+- **`cell_labels_234` done 05:13**, final archive 2.88 GB. Summarized on 234 by `labels_summary_234`, which
+  restores it and reads the shards; the Mac only fetched the summary.
+  - **Scale:** 3,838 DREAMPlace placements (CPU, `num_threads` 8) on 15 IBM designs, **0 failures**.
+  - **Per design:** 128 bridge endpoints (32 sources x alpha 0.25/0.5/0.75/1), 5 elites, and 104-128 heuristic
+    sources.
+  - **Clusters:** 512 on ibm01-07, 2,048 on ibm09-18.
+- **J tails:** a few placements are extreme (J_max 12.4-13.1 on ibm03/06/07/09; 7.7 on ibm11; 6.0 on ibm15). They are
+  heavily congested layouts. They are valid labels, but any J-based loss needs a robust form (rank or log).
+- **Wall time:** 23-81 min per design, ~13.5 h in total. The ciphertext is copied to 224's disk vault (sha256 fdbf1ee5..., identical).
+
+---
+
 ## 2026-09-30 — Session 4 (23:30): full E0 complete — gate G0′ PASSED
 
 - **Last components:** `e0x_spec_bigblue4_w7` (22:36) and `e0x_eq_bigblue4_w67` (23:18). Checked by counts before
