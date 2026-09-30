@@ -20,7 +20,7 @@ Status as of **2026-09-30 09:30 CST**, code: see `git log` (v0.14.0 + unreleased
 | Server | Job | Task | State | Expected |
 |---|---|---|---|---|
 | 225 GPUs 0–3 | `e0x_{spec,eq}_bigblue4` (slices 0–3), `e0x_{spec,eq}_bigblue4_w45` (slices 4–5) | **full E0** bigblue4, whole on 225: 30 legal sources (of 80), budgets 2259 / 2231 s, memory-lean RUDY (`HB_RUDY_IMPL=bmm`) | slices 0–5 complete (22 cases per protocol); slices 6–7 running: spec 6 since 23:10 (14 of 24 rows at 08:20), spec 7 and eq 6–7 since 08:25 (late start: see below) | **bigblue4 ≈ 30 Sep late evening – 1 Oct early morning** (4 slices share the machine now, so cases run faster than at 12) |
-| 231 GPU 4 | `ft_sketch_ibm` | cell-sketch fine-tune (owner's go-ahead; E0 bridge backed up first as `bridge_v1_e0_frozen`): corrected cluster targets, three arms, then DA0 against DREAMPlace's placements | started 09:20; tests passed | ≈ 13:30–14:00 |
+| 231 GPU 4 | `ft_sketch_ibm2` | cell-sketch fine-tune (owner's go-ahead; E0 bridge backed up first as `bridge_v1_e0_frozen`): corrected cluster targets, three arms, then DA0 against DREAMPlace's placements | relaunched 09:35 after an evaluation fix (no training was lost) | ≈ 13:30–14:00 |
 | 224 (≤ 8 OpenROAD) | `seedB_orfs7_{swerv_wrapper, ariane136, ariane133}` | T2.7 Track-B seeding (bp_fe_top, bp_be_top **complete**) | f1 rows 26 / 82 / 77 (22:00), then local search and f2 | several days |
 | 224 | — | Track-B plan: noise bands and warm-start demos done for bp_fe_top and bp_be_top (reports regenerated) | done | done |
 

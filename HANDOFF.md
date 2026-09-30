@@ -17,7 +17,12 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
   - Mac: `checkpoints/bridge_v1_e0_frozen/` (read-only, with MANIFEST.json).
   - Vaults: `vault/data/bridge_v1_e0_frozen.tgz.enc` on 224 (disk), 225 and 231. The plaintext was checked by
     decrypting the 225 and 231 copies; 224's ciphertext is identical to 231's.
-- **Running on 231 GPU 4: `ft_sketch_ibm`** (code 88ca4a9; job file in the session scratchpad, `ft_job.cmd`).
+- **Running on 231 GPU 4: `ft_sketch_ibm2`** (code 1c42f8d, launched 09:35; job file in the session scratchpad, `ft_job2.cmd`).
+  The first launch, `ft_sketch_ibm` (88ca4a9), stopped at its DA0 smoke step (exit 11, before any training). With a
+  cache, `run_sources` returns every cached source (128 per design) whatever `--seeds` says, and the evaluation sent
+  them to the GPU in one batch (out of memory). Fixed: batches of 16, and DA0 places a fixed 32 per design.
+  Its full test suite had one failure (the timing local-search test, which relied on a random path that differs
+  with the METIS version); the test is now scripted (d586701).
   - Steps: sha guard; tests (core blocking, full suite logged); merge + snapshot check 2ebe74fadcf0; a DA0 smoke run;
     `m1_cluster_pos` (15 designs); fine-tunes `ft_ctrl`, `ft_targets` and `ft_both` (8,000 steps each, a checkpoint
     at every validation); the sha guard again; then `runs/sketch_quality.json` (DA0 with DREAMPlace, f1 J) and

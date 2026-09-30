@@ -20,6 +20,14 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 - **Bridge backup before any fine-tune** (owner's request): `bridge_v1_e0_frozen`, sha256 f95bdde8… (the E0 bridge).
   It is read-only on the Mac and in the encrypted vaults of 224 (disk), 225 and 231. The fine-tune checks this sha
   before and after training.
+- **Relaunched as `ft_sketch_ibm2`** (1c42f8d). The first launch stopped at its DA0 smoke step before training.
+  `run_sources` with a cache returns all cached sources (128 per design) whatever `--seeds` says, and
+  `eval_sketch_quality.py` ran them through the bridge in one GPU batch (out of memory). It now uses batches of
+  `--chunk` sources (16), and DA0 places a fixed subset of `--da0-sources` (32) per design, drawn by the same rule
+  as training's validation.
+- **Test fix (d586701):** `test_ls_timing_accepts_only_timing_clean_moves` failed on 231. Its control relied on a
+  random local-search path, which changes with the METIS version behind the clustering. The moves and the cost are
+  now scripted, so it checks the timing filter itself.
 - **Correction to the finding below (checked on snapshot 2ebe74fadcf0):** the baseline elite lacks cell targets on
   15 of the 17 IBM designs, not 4. It is in the top 5 on every design except ibm02 and ibm06, and it is the lowest-J
   elite on all 15. That covers 12 of the 13 training designs (all but ibm02) and the validation design ibm04. All 70
