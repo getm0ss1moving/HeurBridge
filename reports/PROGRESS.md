@@ -1,6 +1,6 @@
 # HeurBridge-PR — progress against the task list (T0–T7)
 
-Status as of **2026-09-30 08:40 CST**, code: see `git log` (v0.14.0 + unreleased). Measured against
+Status as of **2026-09-30 09:30 CST**, code: see `git log` (v0.14.0 + unreleased). Measured against
 `HEURBRIDGE_TASKS.md` (Part C tasks, Part D gates). Session history: `HANDOFF.md`; every code change: `CHANGELOG.md`.
 
 ## 1. Summary
@@ -20,6 +20,7 @@ Status as of **2026-09-30 08:40 CST**, code: see `git log` (v0.14.0 + unreleased
 | Server | Job | Task | State | Expected |
 |---|---|---|---|---|
 | 225 GPUs 0–3 | `e0x_{spec,eq}_bigblue4` (slices 0–3), `e0x_{spec,eq}_bigblue4_w45` (slices 4–5) | **full E0** bigblue4, whole on 225: 30 legal sources (of 80), budgets 2259 / 2231 s, memory-lean RUDY (`HB_RUDY_IMPL=bmm`) | slices 0–5 complete (22 cases per protocol); slices 6–7 running: spec 6 since 23:10 (14 of 24 rows at 08:20), spec 7 and eq 6–7 since 08:25 (late start: see below) | **bigblue4 ≈ 30 Sep late evening – 1 Oct early morning** (4 slices share the machine now, so cases run faster than at 12) |
+| 231 GPU 4 | `ft_sketch_ibm` | cell-sketch fine-tune (owner's go-ahead; E0 bridge backed up first as `bridge_v1_e0_frozen`): corrected cluster targets, three arms, then DA0 against DREAMPlace's placements | started 09:20; tests passed | ≈ 13:30–14:00 |
 | 224 (≤ 8 OpenROAD) | `seedB_orfs7_{swerv_wrapper, ariane136, ariane133}` | T2.7 Track-B seeding (bp_fe_top, bp_be_top **complete**) | f1 rows 26 / 82 / 77 (22:00), then local search and f2 | several days |
 | 224 | — | Track-B plan: noise bands and warm-start demos done for bp_fe_top and bp_be_top (reports regenerated) | done | done |
 
@@ -217,6 +218,16 @@ Track-B timing plan, 17:10:
 - The timing-aware local search, replayed on both campaigns, would not have changed an accepted move.
 - So neither mechanism has leverage on these two designs, and no weighted campaign is run. Both stay available,
   off by default, for designs whose macros are on critical paths.
+
+**Demo 2 (30 Sep, `reports/demo_sketch_cells.md`), stopped at your request at 09:14 once ibm04 was complete.**
+- Nothing built from the sketch improves DREAMPlace.
+  - Sketch start: +0.4 % J (5 better, 18 worse).
+  - Held sketch start: +1.4 % (2 / 21).
+  - Cell widening from the sketch's congestion: +0.6 % (1 / 15).
+- The sketch is barely closer than a quadratic placement to where DREAMPlace puts the cells (0.235 against 0.253).
+- Causes and a redesign of the sketch are in the meeting brief (the plan itself stays local). The fine-tune above is its first stage.
+
+Received 2026-09-30 (09:10): **stop the demo if it is not useful** (done); **keep a checkpoint of the bridge before fine-tuning** (done: `bridge_v1_e0_frozen`, sha256 f95bdde8…, on the Mac and in all three vaults); **no heavy compute on the Mac**; CPU-only servers for CPU work.
 
 Open:
 1. Endpoints of the extension's tests (proposed: signoff J on the ORFS designs; placer J on ISPD2005) -- fixed in

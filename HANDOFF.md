@@ -4,6 +4,31 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
+## 2026-09-30 — Session 4 (09:30): demo 2 stopped; bridge backed up; fine-tune running; sketch redesign
+
+- **Demo 2 stopped** (owner: "is the current demo useful now, if not stop it"), 09:14, once ibm04 was complete.
+  - Report: `reports/demo_sketch_cells.md`.
+  - Result: no start and no cell widening from the sketch helps DREAMPlace, and the sketch is barely closer than a
+    quadratic placement (0.235 against 0.253).
+  - The inflation arms' first attempt failed on a bug of mine (fractional widths; fixed in 159ee95). The re-run
+    `demo_sketch2_infl` was stopped at 22 of 32 ibm04 cases.
+- **Bridge backup** (owner: keep a checkpoint before any fine-tune): `bridge_v1_e0_frozen`, sha256
+  f95bdde8485316349a1a47b8b1e8115018085f518419f46c903c65f773a525a5, the E0 bridge.
+  - Mac: `checkpoints/bridge_v1_e0_frozen/` (read-only, with MANIFEST.json).
+  - Vaults: `vault/data/bridge_v1_e0_frozen.tgz.enc` on 224 (disk), 225 and 231. The plaintext was checked by
+    decrypting the 225 and 231 copies; 224's ciphertext is identical to 231's.
+- **Running on 231 GPU 4: `ft_sketch_ibm`** (code 88ca4a9; job file in the session scratchpad, `ft_job.cmd`).
+  - Steps: sha guard; tests (core blocking, full suite logged); merge + snapshot check 2ebe74fadcf0; a DA0 smoke run;
+    `m1_cluster_pos` (15 designs); fine-tunes `ft_ctrl`, `ft_targets` and `ft_both` (8,000 steps each, a checkpoint
+    at every validation); the sha guard again; then `runs/sketch_quality.json` (DA0 with DREAMPlace, f1 J) and
+    `runs/sketch_quality_steps.json`.
+  - ETA about 13:30-14:00. It is on the watcher's 231 list.
+- **Sketch redesign** (owner's question): written in the local plan (unpublished) and the meeting brief.
+- **The fine-tune's pass rule, fixed before any result:** on both ibm04 and ibm06, median DA0 ≤ 0.7 × the quadratic
+  control's (today 0.93×), and median f1 J no more than 0.5 % above the frozen bridge's.
+
+---
+
 ## 2026-09-30 — Session 4 (08:40): bigblue4 slices 0-5 done overnight; watcher failure; last slices launched
 
 - **Watcher failure (my error).** Appending slice 6's job to `watch_extra_225.txt` at 23:10 put a newline into the

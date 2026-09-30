@@ -6,6 +6,24 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 
 ## [Unreleased]
 
+### Demo 2 stopped; bridge backed up; fine-tune launched (30 Sep 09:30)
+- **Demo 2 stopped at the owner's request** (09:14), once ibm04 was complete (23 distinct layouts); ibm06 had 4
+  cases. `reports/demo_sketch_cells.md`, exploratory, no claim.
+  - No start and no cell widening built from the sketch improves DREAMPlace. The sketch start costs +0.4 % J
+    (5 better, 18 worse) with 19 % fewer GP iterations; a held sketch start costs +1.4 % (2 / 21); widening
+    costs +0.6 % (1 / 15).
+  - The sketch is no better than a quadratic placement: 0.235 from the placed cluster centroids, against 0.253.
+- **Bug in the demo's inflation arms (fixed, 159ee95):** widened widths were written as fractions, which
+  DREAMPlace's Bookshelf parser rejects, so every first-attempt inflation run failed. Widths are now whole sites,
+  with each fraction rounded up with its own probability. The report counts a layout that both seeds produced only
+  once, and a re-run of an arm replaces that arm.
+- **Bridge backup before any fine-tune** (owner's request): `bridge_v1_e0_frozen`, sha256 f95bdde8… (the E0 bridge).
+  It is read-only on the Mac and in the encrypted vaults of 224 (disk), 225 and 231. The fine-tune checks this sha
+  before and after training.
+- **Fine-tune `ft_sketch_ibm` launched on 231 GPU 4** (88ca4a9) with the three arms below. It keeps the weights of
+  every validation (`--keep-val-ckpts`). It measures DA0 against DREAMPlace's placement of each model's own layout
+  (`eval_sketch_quality.py --placer`), with the quadratic placement of the same macros as control, and the f1 J.
+
 ### Finding (30 Sep): the bridge's cell-sketch targets were partly quadratic placements
 - `archive_elites` takes each elite's cluster targets from the DREAMPlace cluster centroids stored with it, and falls
   back to a quadratic placement when an elite has none. The seeding baseline (provenance BASELINE: DREAMPlace's own
