@@ -230,10 +230,10 @@ def report(summaries: list, out_md: Path, title: str, note: str = "") -> None:
          "| Metric conventions | %s |" % METRIC_CONVENTIONS, "| Feeds gate | none (S2 diagnostic) |",
          "| Pre-registered test | - (bar fixed before any S2 result: local plan, S2 row) |", "| alpha-ledger entry | - |",
          "| Status of the claim | no claim |", ""]
-    if note:
-        L += [note, ""]
     L += ["**Bar (fixed before any S2 result):** DA0 ratio <= 0.5 against the quadratic placement; Kendall tau(predicted "
           "J, actual f1 J) >= 0.5 per design; top-1 regret <= 25 % of random's.", ""]
+    if note:
+        L += [note, ""]
     for r in res:
         L += ["## %s (%d layouts: %s; S2 checkpoint step %s)" % (r["design"], r["n"], ", ".join(
             "%s %d" % kv for kv in r["kinds"].items()), r["s2_checkpoint_step"]), "",
