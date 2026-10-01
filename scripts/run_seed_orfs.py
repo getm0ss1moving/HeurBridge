@@ -24,6 +24,10 @@ Resumable; everything lands in runs/seed_orfs/<design>/:
   5. band    (--phase band) the --band-top best f2-admitted candidates shifted by one site (+x, -x) or one row
              (+y) through f2, like M1's replays (rows <run>.p1-3.f2, program CAND_BAND): each candidate's own noise
              band, so a candidate counts as better than the tool only if its band is (user decision 2026-09-29).
+  8. probe   (--phase probe, diagnosis) given f1 rows (--probe-runs, run ids of evals.jsonl) evaluated again at f1
+             with extra make variables (--probe-var KEY=VALUE, e.g. PLACE_DENSITY=0.35) in their own ledger
+             evals_probe_<tag>.jsonl (rows <design>.probe_<tag>.<run>.f1, program PROBE), --probe-workers at a time;
+             the baselines and every other ledger are untouched.
   7. timingprobe (--phase timingprobe) the unmodified flow (ORFS's own macro placer) to 3_place in its own variant
              (<design>.tprobe), then placement-parasitic setup/hold slack at every macro signal pin
              (macro_pin_slack.json).  With --timing-weights the f1/f2 phases run a separate campaign <design>_tw
@@ -154,7 +158,8 @@ def main():
     ap.add_argument("--base-runs", type=int, default=2, help="repeats of the unmodified flow (determinism check)")
     ap.add_argument("--work-home", default=str(ROOT / "runs" / "orfs_work"))
     ap.add_argument("--yosys", default=None, help="Yosys for ORFS (default HB_YOSYS)")
-    ap.add_argument("--phase", default="all", choices=["base", "f1", "f2", "all", "band", "warmstart", "timingprobe"])
+    ap.add_argument("--phase", default="all",
+                    choices=["base", "f1", "f2", "all", "band", "warmstart", "timingprobe", "probe"])
     ap.add_argument("--base-timeout", type=int, default=4 * 7200, help="whole unmodified flow (each step < 7,200 s)")
     ap.add_argument("--timeout", type=int, default=7200, help="one candidate evaluation")
     ap.add_argument("--noise-replays", type=int, default=3, help="shifted M1 replays for the noise band (0-3)")
@@ -169,6 +174,11 @@ def main():
                     help="local search accepts only moves whose f1 setup and hold gates pass")
     ap.add_argument("--make-var", action="append", default=[],
                     help="KEY=VALUE override of the design config for every run (recorded in meta.json)")
+    ap.add_argument("--probe-runs", default="", help="--phase probe: f1 run ids of evals.jsonl (comma separated)")
+    ap.add_argument("--probe-tag", default="", help="--phase probe: names the ledger and the variants")
+    ap.add_argument("--probe-var", action="append", default=[],
+                    help="--phase probe: KEY=VALUE make variable for the probe runs only (after --make-var)")
+    ap.add_argument("--probe-workers", type=int, default=3, help="--phase probe: ORFS runs at a time")
     a = ap.parse_args()
     a.flow = str(Path(a.flow).resolve())
     a.work_home_abs = str(Path(a.work_home).resolve())
@@ -248,6 +258,37 @@ def main():
         s_ok = [v[0] for v in slacks.values() if v[0] is not None]
         print(json.dumps({"timing_probe": {"pins": len(slacks), "constrained": len(s_ok),
                                            "worst_setup_ns": min(s_ok) if s_ok else None, **smeta}}), flush=True)
+        return
+    if a.phase == "probe":                              # 8. diagnosis: f1 layouts again under extra make variables
+        import dataclasses
+        from concurrent.futures import ThreadPoolExecutor
+        if not (a.probe_runs and a.probe_tag and a.probe_var):
+            sys.exit("--phase probe needs --probe-runs, --probe-tag and --probe-var")
+        p1 = cdir / "evals.jsonl"
+        rows = {r["run_id"]: r for r in (json.loads(l) for l in (p1.read_text().splitlines() if p1.exists() else [])
+                                         if l.strip())}
+        evp = dataclasses.replace(ev1, make_vars_extra=tuple(a.make_var) + tuple(a.probe_var))
+        ledger = Ledger(cdir / ("evals_probe_%s.jsonl" % a.probe_tag))
+        jobs = []
+        for rid in a.probe_runs.split(","):
+            r = rows.get(rid)
+            if r is None or r.get("pos_macros") is None:
+                print(json.dumps({"probe": rid, "skipped": "no f1 row with a layout"}), flush=True)
+                continue
+            jobs.append((rid, _layout_from_row(des, lay, r), r))
+
+        def probe_one(job):
+            rid, lay_p, r = job
+            pid = "%s.probe_%s.%s" % (name, a.probe_tag, rid[len(name) + 1:] if rid.startswith(name + ".") else rid)
+            return rid, _eval(evp, camp, lay_p, base1, pid, cdir / "work_probe", ledger,
+                              {"program": "PROBE", "probe_of": rid, "probe_of_program": r.get("program"),
+                               "probe_of_status": r.get("status"), "probe_tag": a.probe_tag,
+                               "probe_vars": list(a.probe_var), "seed": r.get("seed"), "stage": "M"})
+        with ThreadPoolExecutor(max_workers=max(1, a.probe_workers)) as pool:
+            for rid, row in pool.map(probe_one, jobs):
+                print(json.dumps({"probe_of": rid, "run_id": row["run_id"], "status": row.get("status"),
+                                  "J_raw": row.get("J_raw"), "failure": (row.get("record") or {}).get("failure"),
+                                  "wall_s": row.get("wall_s")}), flush=True)
         return
 
     # 2b. same-path control (red line: pairing).  Hier-RTLMP leaves every standard cell PLACED at its cluster

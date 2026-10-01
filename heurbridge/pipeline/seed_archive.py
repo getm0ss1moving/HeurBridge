@@ -13,6 +13,7 @@ from __future__ import annotations
 import json
 import math
 import re
+import threading
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -45,6 +46,7 @@ class Ledger:
     def __init__(self, path: Path):
         self.path = path
         path.parent.mkdir(parents=True, exist_ok=True)
+        self._lock = threading.Lock()
         self.rows = {}
         self.by_layout = {}                     # (evaluator, fidelity, layout key) -> run_id of a reusable row
         if path.exists():
@@ -61,9 +63,10 @@ class Ledger:
         return self.rows.get(run_id)
 
     def add(self, row: dict):
-        self._index(row)
-        with open(self.path, "a") as fh:
-            fh.write(json.dumps(row, default=str) + "\n")
+        with self._lock:                        # evaluations may run in threads (run_seed_orfs.py --phase probe)
+            self._index(row)
+            with open(self.path, "a") as fh:
+                fh.write(json.dumps(row, default=str) + "\n")
 
 
 REUSE_KEYS = ("status", "fidelity", "evaluator", "J", "J_raw", "admissible", "partial", "terms", "gates", "unchecked",
