@@ -215,7 +215,62 @@ def run_design(name: str, a, model, s2_step: int, out: Path) -> dict:
     return res
 
 
+def report(summaries: list, out_md: Path, title: str, note: str = "") -> None:
+    """Markdown report of one or more summary.json files.  The bar is the one fixed before any S2 result
+    (HEURBRIDGE_PLAN_downstream_aware.md, S2 row): DA0 ratio <= 0.5, Kendall tau >= 0.5 per design, top-1 regret
+    <= 25 % of random."""
+    from heurbridge.reporting import METRIC_CONVENTIONS
+    res = [r for s in summaries for r in json.loads(Path(s).read_text())]
+    names = {"quad": "quadratic placement (S2 control)", "s2": "S2 predictor", "s2_fp": "S2 centroids, footprint spread",
+             "coarse": "HB-GP coarse placement (exploratory reference)", "placed": "placed clusters (oracle)",
+             "f0": "f0 surrogate (macro stage)"}
+    L = ["# %s" % title, "", "| Field | Value |", "|---|---|", "| Report | lookahead_rank |",
+         "| Date | %s |" % time.strftime("%Y-%m-%d %H:%M"), "| Node | 225 (RTX 3090) |",
+         "| Track | A (labels: DREAMPlace f1 placements, scripts/make_cell_labels.py) |",
+         "| Metric conventions | %s |" % METRIC_CONVENTIONS, "| Feeds gate | none (S2 diagnostic) |",
+         "| Pre-registered test | - (bar fixed before any S2 result: local plan, S2 row) |", "| alpha-ledger entry | - |",
+         "| Status of the claim | no claim |", ""]
+    if note:
+        L += [note, ""]
+    L += ["**Bar (fixed before any S2 result):** DA0 ratio <= 0.5 against the quadratic placement; Kendall tau(predicted "
+          "J, actual f1 J) >= 0.5 per design; top-1 regret <= 25 % of random's.", ""]
+    for r in res:
+        L += ["## %s (%d layouts: %s; S2 checkpoint step %s)" % (r["design"], r["n"], ", ".join(
+            "%s %d" % kv for kv in r["kinds"].items()), r["s2_checkpoint_step"]), "",
+              "Sanity: the label's own placed cells through the same metric code reproduce its J within a relative %.1e."
+              % (r["sanity_rel_err_max"] or float("nan")), "",
+              "| predictor | DA0 ratio (median) | Kendall tau, all | tau, heuristic sources | tau, bridge endpoints | "
+              "top-5 recall | regret@1 / random's | regret@5 / random's | tau of HPWL | tau of overflow |",
+              "|---|---|---|---|---|---|---|---|---|---|"]
+        for p, v in r["rank"].items():
+            a = v["all"]
+            da = r["da0_median"].get(p)
+
+            def rr(k):
+                x, y = a.get("regret@%d" % k), a.get("random_regret@%d" % k)
+                return "%.4f / %.4f" % (x, y) if x is not None and y else "-"
+            L.append("| %s | %s | %.3f | %s | %s | %.2f | %s | %s | %s | %s |" % (
+                names.get(p, p), "%.3f" % da if da is not None else ("1 (by definition)" if p == "quad" else "-"),
+                a.get("kendall_tau", float("nan")),
+                "%.3f" % v["src"]["kendall_tau"] if "src" in v and "kendall_tau" in v["src"] else "-",
+                "%.3f" % v["br"]["kendall_tau"] if "br" in v and "kendall_tau" in v["br"] else "-",
+                a.get("top5_recall", float("nan")), rr(1), rr(5),
+                "%.3f" % v["hpwl_vs_actual_hpwl"]["kendall_tau"] if "hpwl_vs_actual_hpwl" in v else "-",
+                "%.3f" % v["of_vs_actual_of"]["kendall_tau"] if "of_vs_actual_of" in v else "-"))
+        L.append("")
+    Path(out_md).write_text("\n".join(L) + "\n")
+
+
 def main():
+    if "--report" in sys.argv:
+        ap = argparse.ArgumentParser()
+        ap.add_argument("--report", nargs="+", required=True)
+        ap.add_argument("--title", default="Sketch redesign S2: ranking check")
+        ap.add_argument("--note", default="")
+        ap.add_argument("--out", required=True)
+        a = ap.parse_args()
+        report(a.report, Path(a.out), a.title, a.note)
+        return
     ap = argparse.ArgumentParser()
     ap.add_argument("--suite", default="ibm")
     ap.add_argument("--designs", default="ibm04,ibm06")
