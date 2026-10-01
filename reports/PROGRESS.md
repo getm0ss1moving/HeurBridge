@@ -1,6 +1,6 @@
 # HeurBridge-PR — progress against the task list (T0–T7)
 
-Status as of **2026-09-30 23:30 CST**, code: see `git log` (v0.14.0 + unreleased). Measured against
+Status as of **2026-10-01 19:30 CST**, code: see `git log` (v0.14.0 + unreleased). Measured against
 `HEURBRIDGE_TASKS.md` (Part C tasks, Part D gates). Session history: `HANDOFF.md`; every code change: `CHANGELOG.md`.
 
 ## 1. Summary
