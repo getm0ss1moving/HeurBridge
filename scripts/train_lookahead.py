@@ -26,7 +26,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from heurbridge.bridge.lookahead_net import LookaheadNet, from_bridge, lookahead_loss  # noqa: E402
+from heurbridge.bridge.data import augment_graph, random_augmentation, transform_positions  # noqa: E402
+from heurbridge.bridge.lookahead_net import LookaheadNet, from_bridge, lookahead_loss, transform_cov  # noqa: E402
 from heurbridge.bridge.model import BridgeConfig  # noqa: E402
 from heurbridge.bridge.sample import source_nodes  # noqa: E402
 from heurbridge.bridge.train import EMA  # noqa: E402
@@ -97,6 +98,9 @@ def main():
     ap.add_argument("--warmup", type=int, default=1000)
     ap.add_argument("--lam-cov", type=float, default=0.1)
     ap.add_argument("--val-every", type=int, default=2000)
+    ap.add_argument("--augment", action="store_true",
+                    help="the bridge's training augmentation: a random dihedral transform of the die and +-5 %% aspect "
+                         "jitter of the conditioning features per batch (inputs, targets and spreads transformed alike)")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
     ap.add_argument("--out", default="checkpoints/lookahead_s2")
@@ -132,9 +136,13 @@ def main():
         n = names[int(rng.choice(len(names), p=sizes / sizes.sum()))]
         b, X, yp, yc, _ = train[n]
         idx = rng.integers(0, len(X), size=a.batch)
-        loss, info = lookahead_loss(model, gts[n], torch.as_tensor(X[idx], device=a.device),
-                                    torch.as_tensor(yp[idx], device=a.device), torch.as_tensor(yc[idx], device=a.device),
-                                    lam_cov=a.lam_cov)
+        gt, xb = gts[n], torch.as_tensor(X[idx], device=a.device)
+        ypb, ycb = torch.as_tensor(yp[idx], device=a.device), torch.as_tensor(yc[idx], device=a.device)
+        if a.augment:                                   # as the bridge's Trainer._batch (bridge/train.py)
+            k, sc = random_augmentation(rng, True, 0.05)
+            gt = augment_graph(gt, k, sc)
+            xb, ypb, ycb = transform_positions(xb, k), transform_positions(ypb, k), transform_cov(ycb, k)
+        loss, info = lookahead_loss(model, gt, xb, ypb, ycb, lam_cov=a.lam_cov)
         opt.zero_grad(set_to_none=True)
         loss.backward()
         gn = torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
@@ -180,11 +188,12 @@ def report(run_dir: Path, out_md: Path, bar: float = 0.5) -> None:
          "## Setup", "",
          "Predictor: the bridge's encoder (initialized from %s) with a centroid-shift and a spread head, one forward pass "
          "from the committed macros with the clusters at their quadratic placement. Training designs %s; validation %s; "
-         "%s steps, batch %s, lr %s, spread weight %s. Labels: `scripts/make_cell_labels.py` on 234 (3,838 DREAMPlace "
+         "%s steps, batch %s, lr %s, spread weight %s, augmentation %s. Labels: `scripts/make_cell_labels.py` on 234 (3,838 DREAMPlace "
          "placements, 0 failures). Measure: per sample, the area-weighted RMS distance of the predicted cluster centroids "
          "to the placed ones, divided by the same distance for the quadratic placement; median per design. **Bar: <= %.1f "
          "on every validation design.**" % (cfg.get("init") or "scratch", cfg.get("train"), cfg.get("val"), cfg.get("steps"),
-                                               cfg.get("batch"), cfg.get("lr"), cfg.get("lam_cov"), bar), "",
+                                               cfg.get("batch"), cfg.get("lr"), cfg.get("lam_cov"),
+                                               "dihedral + aspect (as the bridge)" if cfg.get("augment") else "none", bar), "",
          "## Result", "",
          "| step | " + " | ".join("%s ratio" % d for d in vals) + " | mean | train ratio |", "|---|" + "---|" * (len(vals) + 2),
          "| 0 (initialization) | " + " | ".join("%.3f" % h["val0"][d]["ratio_median"] for d in vals) + " | %.3f | - |"

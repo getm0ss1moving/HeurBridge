@@ -33,6 +33,19 @@ def spread_targets(cov: torch.Tensor, floor: float = VAR_FLOOR) -> torch.Tensor:
     return torch.stack([torch.log(vx), torch.log(vy), torch.atanh(rho)], dim=-1)
 
 
+def transform_cov(c: torch.Tensor, k: int) -> torch.Tensor:
+    """(..., 3) second moments (var_x, var_y, cov_xy) under dihedral transform k (data.transform_positions: x' = M x,
+    so Sigma' = M Sigma M^T).  The bridge's aspect jitter scales sizes and offsets only, never positions, so it leaves
+    the moments unchanged."""
+    if k == 0:
+        return c
+    from ..core import orient as O
+    m = torch.as_tensor(O.MATS[k], dtype=c.dtype, device=c.device)
+    S = torch.stack([torch.stack([c[..., 0], c[..., 2]], -1), torch.stack([c[..., 2], c[..., 1]], -1)], -2)
+    S = m @ S @ m.T
+    return torch.stack([S[..., 0, 0], S[..., 1, 1], S[..., 0, 1]], -1)
+
+
 def spread_moments(s: torch.Tensor) -> torch.Tensor:
     """Inverse of ``spread_targets``: (log var_x, log var_y, atanh rho) -> (var_x, var_y, cov_xy)."""
     vx, vy = torch.exp(s[..., 0]), torch.exp(s[..., 1])

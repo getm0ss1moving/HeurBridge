@@ -72,3 +72,19 @@ def test_predictor_learns_one_layout():
     assert float(info["rms"][0]) < 0.25 * float(first["rms"][0])             # learns the placed centroids
     assert float(first["rms"][0]) == float(first["rms_quad"][0])            # starts at the quadratic placement
     assert int((gt["kind"] == KIND_CL).sum()) == g.n_clusters
+
+
+def test_moments_follow_the_dihedral_transform():
+    """transform_cov matches the second moments of transformed points (augmentation of S2's targets)."""
+    import torch
+    from heurbridge.bridge.data import transform_positions
+    from heurbridge.bridge.lookahead_net import transform_cov
+    g = torch.Generator().manual_seed(0)
+    p = torch.rand(500, 2, generator=g, dtype=torch.float64) * torch.tensor([0.3, 0.1], dtype=torch.float64) + 0.2
+    p[:, 1] += 0.5 * p[:, 0]                                       # correlated, anisotropic
+
+    def moments(q):
+        d = q - q.mean(0)
+        return torch.stack([(d[:, 0] ** 2).mean(), (d[:, 1] ** 2).mean(), (d[:, 0] * d[:, 1]).mean()])
+    for k in range(8):
+        assert torch.allclose(transform_cov(moments(p), k), moments(transform_positions(p, k)), atol=1e-12)
