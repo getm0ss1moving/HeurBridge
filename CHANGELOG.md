@@ -6,6 +6,12 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 
 ## [Unreleased]
 
+### Track B: ariane136 seeding complete (1 Oct 19:30)
+- `reports/T2_trackB_orfs_ariane136.md`, descriptive. At signoff, 10 of 20 layouts pass every gate. The best,
+  local search at J 0.9757, sits below the unmodified flow's same-path band (1.0000-1.0089).
+- Half the 80 heuristic runs fail in detailed placement (timeouts, DPL-0036) or global placement (GPL-0307); they
+  are counted +inf.
+
 ### Sketch redesign S2: labels and predictor (1 Oct 07:20): the predictor misses its bar
 - **Labels:** `scripts/make_cell_labels.py` on 234 produced 3,838 DREAMPlace placements on 15 IBM designs, with 0
   failures. They cover sources, bridge endpoints at alpha 0.25-1, and elites.

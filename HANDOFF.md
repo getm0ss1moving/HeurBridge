@@ -4,6 +4,21 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
+## 2026-10-01 — Session 4 (19:30): ariane136 Track-B campaign complete
+
+- **`seedB_orfs7_ariane136` done 19:13 (rc 0).** Report: `reports/T2_trackB_orfs_ariane136.md` (descriptive).
+  - 80 program evaluations: 40 completed, 40 failed (3_5_place_dp timeout 18, DPL-0036 17, GPL-0307 5); gates passed
+    on 5 of 40.
+  - Local search: 48 evaluations.
+  - **Signoff (f2), 20 layouts:** all completed, 10 pass every gate. Best admitted J 0.9757 (local search) against
+    the unmodified flow's 1.00. The tool's same-path band is 1.0000-1.0089, so 10 admitted layouts sit below it.
+  - f1-f2 Kendall 0.937.
+  - Candidate noise bands not measured yet (no `--phase band` run for ariane136).
+- **Track B status:** bp_fe_top, bp_be_top and ariane136 complete; swerv_wrapper running; ariane133 waiting for the
+  owner's decision.
+
+---
+
 ## 2026-10-01 — Session 4 (07:30): S2 predictor trained; misses its bar
 
 - **`s2_lookahead_225` (225 GPU 0, code 9366ae1):**
