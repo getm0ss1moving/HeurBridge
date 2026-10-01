@@ -85,3 +85,16 @@ def test_evolution_rejects_identity_dependent_programs():
     import run_evolution as RE
     assert RE.identity_reasons("def heuristic(design, upstream, rng):\n    k = design.misc['design_id']\n")
     assert not RE.identity_reasons("def heuristic(design, upstream, rng):\n    return design.init_pos\n")
+
+
+def test_perturb_control_children_differ(tmp_path):
+    """The no-LLM control (scripts/run_evolution.py MockLLM, --llm perturb): two calls with the same prompt (two
+    children of one parent) give different perturbations, deterministically across runs."""
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
+    import run_evolution as RE
+    msg = [{"role": "user", "content": "```python\n%s\nx = 0.5\ny = 2.0\n%s\n```" % (PR.START, PR.END)}]
+    a, b = RE.MockLLM(tmp_path / "l1.jsonl"), RE.MockLLM(tmp_path / "l2.jsonl")
+    a1, a2 = a.chat(msg).text, a.chat(msg).text
+    assert a1 != a2 and (a1, a2) == (b.chat(msg).text, b.chat(msg).text)

@@ -59,13 +59,14 @@ NUM = re.compile(r"(?<![\w.])(\d+\.\d+)(?![\w.])")
 
 
 class MockLLM:
-    """Offline stand-in for dry runs; same interface as LLMClient.chat.  Takes the first python block of the
-    latest user message that has one and rescales its decimal constants by a factor in [0.7, 1.3] drawn
-    from the prompt hash (deterministic)."""
+    """Offline stand-in for dry runs and the no-LLM control arm; same interface as LLMClient.chat.  Takes the first
+    python block of the latest user message that has one and rescales each decimal constant by its own factor in
+    [0.7, 1.3], drawn from the prompt hash and the call count (deterministic; two children of one parent differ)."""
 
     def __init__(self, ledger_path: Path):
         self.ledger = ledger_path
         self.ledger.parent.mkdir(parents=True, exist_ok=True)
+        self.calls = 0
 
     def chat(self, messages, model="mock", max_tokens=0, purpose="", program_id="", budget_scope=None, **_):
         user = [m["content"] for m in messages if m["role"] == "user"]
@@ -75,7 +76,8 @@ class MockLLM:
             if b:
                 block = b[0]
                 break
-        seed = int(hashlib.sha256("\n".join(user).encode()).hexdigest()[:8], 16)
+        self.calls += 1
+        seed = int(hashlib.sha256(("%d\n" % self.calls + "\n".join(user)).encode()).hexdigest()[:8], 16)
         rng = np.random.default_rng(seed)
         if block is None:
             text = "No program found in the prompt."
