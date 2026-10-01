@@ -13,7 +13,9 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
   - **Signoff (f2), 20 layouts:** all completed, 10 pass every gate. Best admitted J 0.9757 (local search) against
     the unmodified flow's 1.00. The tool's same-path band is 1.0000-1.0089, so 10 admitted layouts sit below it.
   - f1-f2 Kendall 0.937.
-  - Candidate noise bands not measured yet (no `--phase band` run for ariane136).
+  - Candidate noise bands not measured yet. **Launched 19:20: `seedB_band_ariane136`** (224, code 335863a,
+    `--resume-from seedB_orfs7_ariane136`, the documented Track-B recipe with `--phase band`): the top 3 admitted
+    layouts shifted by one site or row and re-run through f2.
 - **Track B status:** bp_fe_top, bp_be_top and ariane136 complete; swerv_wrapper running; ariane133 waiting for the
   owner's decision.
 
