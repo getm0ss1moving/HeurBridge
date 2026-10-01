@@ -60,3 +60,28 @@ def test_engine_generation(tmp_path):
     rej = [e for e in events if e["kind"] == "rejected_sandbox"]
     assert all(any("import os" in r for r in e["reasons"]) for e in rej)
     assert n >= 1 and len(pop.all) >= 3
+
+
+def test_engine_keeps_program_sources(tmp_path):
+    """Every evaluated program's source is kept under <out>/programs/<sha256>.py (population files hold the hash)."""
+    des, ref = synth.make_design(seed=81, n_macros=6, n_cells=40, n_io=6)
+    scope = des.is_macro & ~des.is_fixed
+    cfg = EN.EngineConfig(parents=1, children=2, budget_scope="M/test")
+    prop = EN.HeurBridgeProposer(MockLLM(), cfg, log=lambda s: None)
+    pop = Population(n_islands=1, q=2)
+    eng = EN.Engine(prop, pop, lambda src: {"B": [1.0], "A": [1.0], "runtime_s": 0.1},
+                    lambda src: SB.certify(src, des, ref, scope, check_mr1=False), cfg, tmp_path, log=lambda s: None)
+    eng.seed([p for p in all_programs() if p["id"] == "M6.v0"])
+    eng.generation(1)
+    for ind in pop.all.values():
+        assert (tmp_path / "programs" / (ind.sha256 + ".py")).read_text() == ind.source
+
+
+def test_evolution_rejects_identity_dependent_programs():
+    """scripts/run_evolution.py: a program that names the design's identity is rejected before it runs."""
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
+    import run_evolution as RE
+    assert RE.identity_reasons("def heuristic(design, upstream, rng):\n    k = design.misc['design_id']\n")
+    assert not RE.identity_reasons("def heuristic(design, upstream, rng):\n    return design.init_pos\n")

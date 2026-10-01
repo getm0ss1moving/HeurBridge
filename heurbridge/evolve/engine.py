@@ -170,7 +170,7 @@ class Engine:
         self.cfg, self.fitness, self.log = cfg, fitness, log
         self.context_fn = context_fn or (lambda parents: {})
         self.out = Path(out_dir)
-        self.out.mkdir(parents=True, exist_ok=True)
+        (self.out / "programs").mkdir(parents=True, exist_ok=True)
         self.events = open(self.out / "events.jsonl", "a")
         self.rng = np.random.default_rng(cfg.seed)
 
@@ -178,6 +178,12 @@ class Engine:
         kw["time"] = time.strftime("%Y-%m-%dT%H:%M:%S")
         self.events.write(json.dumps(kw, default=str) + "\n")
         self.events.flush()
+
+    def _keep_source(self, ind: Individual):
+        """Every evaluated program's source, content-addressed (the population files carry only the sha256)."""
+        p = self.out / "programs" / (ind.sha256 + ".py")
+        if not p.exists():
+            p.write_text(ind.source)
 
     def _score(self, ind: Individual):
         if self.fitness == "raw":
@@ -192,6 +198,7 @@ class Engine:
             ind = Individual(id=p["id"], source=src, sha256=hashlib.sha256(src.encode()).hexdigest(), family=p.get("family", "seed"),
                              decision=ev.get("decision", "none"), runtime_s=ev["runtime_s"], B=ev["B"], A=ev.get("A", []),
                              island=k % self.pop.n_islands, strategy=p.get("desc", ""))
+            self._keep_source(ind)
             self._score(ind)
             self.pop.add(ind)
             self._event(kind="seed", id=ind.id, F=ind.F)
@@ -222,6 +229,7 @@ class Engine:
                 ind = Individual(id=cid, source=src, sha256=cert.sha256, family=p.family, decision=ev.get("decision", "none"),
                                  runtime_s=ev["runtime_s"], B=ev["B"], A=ev.get("A", []), parent=p.id, generation=g,
                                  island=p.island, strategy=strategy)
+                self._keep_source(ind)
                 self._score(ind)
                 added = self.pop.add(ind)
                 n_ok += 1

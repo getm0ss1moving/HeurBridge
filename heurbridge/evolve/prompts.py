@@ -33,7 +33,7 @@ DESIGN_API = """DesignView (read-only numpy; coordinates normalized to the core 
   macro_size (M,2) effective sizes, macro_group (M,) interchangeable groups, macro_aff (M,M) affinity
   io_pull (M,2) mean position of connected fixed objects, io_w (M,) its weight
   obstacles (F,4) fixed-macro rectangles, cluster (N,) cell cluster ids, cluster_area
-  misc: {"row_h", "site_w", "halo", "aspect", "design_id"}"""
+  misc: {"row_h", "site_w", "halo", "aspect"} (the design's name is not available: never branch on its identity)"""
 
 INVARIANTS = """EDA invariants: macros must lie inside the core, must not overlap each other or fixed obstacles
 (minimum spacing = halo), fixed objects never move, orientation is chosen by your program (the bridge

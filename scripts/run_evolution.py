@@ -14,7 +14,13 @@ Context for the proposers: RLCE evidence packs (heurbridge; T5.4) and critical-o
 
 --llm mock is a deterministic offline stand-in (rescales numeric constants of the parent's EVOLVE block)
 for dry runs of the whole loop before any LLM budget is spent.  It never produces results: runs with it
-are labelled dry_run in meta.json and summary.json.
+are labelled dry_run in meta.json and summary.json.  --llm perturb is the same operator used as the no-LLM control
+arm of a comparison (labelled control_perturb, not dry_run): parameter perturbation at the same evaluation budget.
+--guard dp scores the guard (and so B) with the registered Track-A final cost: DREAMPlace f1 against the M1 baseline
+of the --runs seeding campaign, exactly as E0 (scripts/run_e0.py final_J); --guard f1 is the HB-GP stand-in.
+Programs never see the design's identity (misc["design_id"] is removed from their view and a program that names
+it is rejected), so a program cannot branch per design.  Every evaluated program's source is kept in
+<out>/programs/<sha256>.py (the population files carry the sha256).
 Not done here (server campaign): promotion of the top 20% per generation to f2 (T5.2 step 5) and fitness
 re-anchoring after a bridge promotion (population.reanchor), which need the f2 evaluator and Algorithm R.
 """
@@ -86,16 +92,37 @@ class MockLLM:
                      tokens_out=len(text) // 4, reasoning_tokens=0, latency_s=0.0)
 
 
-def guard_fn(b, kind):
-    """The guard's cost function for a bundle: f0 = the macro-stage surrogate; f1 = HB-GP J (Track-A dev)."""
+def guard_fn(b, kind, runs=None, work=None):
+    """The guard's cost function for a bundle: f0 = the macro-stage surrogate; f1 = HB-GP J (Track-A dev); dp = the
+    registered Track-A final cost (DREAMPlace f1, J against the --runs campaign's M1 baseline; cached by layout)."""
     if kind == "f0":
         return b.scorer
+    if kind == "dp":
+        from heurbridge.eval import cost
+        from heurbridge.pipeline.evaluators import DreamplaceEvaluator
+        ev = DreamplaceEvaluator(cluster_of=b.cluster_of)
+        base = cost.Baseline.from_records(b.design.id, json.loads((Path(runs) / b.design.id / "baseline.json")
+                                                                  .read_text())["records"])
+        mm = b.design.is_macro & ~b.design.is_fixed
+        cache = {}
+
+        def dp_J(lay):
+            h = hashlib.sha256(lay.pos[mm].tobytes() + lay.orient[mm].tobytes()).hexdigest()
+            if h not in cache:
+                cache[h] = ev.score(ev.evaluate(b.design, lay, "g%s" % h[:16], work), base).J_inf
+            return cache[h]
+        return dp_J
     from heurbridge.eval import cost
     from heurbridge.pipeline.evaluators import HBGPEvaluator
     ev = HBGPEvaluator(cluster_of=b.cluster_of)
     bench = project.legalize_macros(b.design, b.base)[0]
     base = cost.Baseline.from_records(b.design.id, [ev.evaluate(b.design, bench, "evo.base", None)])
     return lambda lay: ev.score(ev.evaluate(b.design, lay, "evo.guard", None), base).J_inf
+
+
+def identity_reasons(src: str) -> list:
+    """A program must not depend on which design it runs on (see the module docstring)."""
+    return ["names design_id: programs must not depend on the design's identity"] if "design_id" in src else []
 
 
 class EvoEvaluator:
@@ -171,14 +198,16 @@ def main():
     ap.add_argument("--runs", default=str(ROOT / "runs" / "seed_dev"))
     ap.add_argument("--archive", default=str(ROOT / "archive_dev_v2"))
     ap.add_argument("--bridge", default="")
-    ap.add_argument("--guard", default="f1", choices=["f0", "f1"])
+    ap.add_argument("--guard", default="f1", choices=["f0", "f1", "dp"],
+                    help="dp: DREAMPlace f1 (the registered Track-A cost); f1: HB-GP stand-in; f0: surrogate")
     ap.add_argument("--seeds", type=int, default=3)
     ap.add_argument("--programs", default="", help="seed programs (default: the whole T2.2 population)")
     ap.add_argument("--generations", type=int, default=10)
     ap.add_argument("--parents", type=int, default=8)
     ap.add_argument("--children", type=int, default=4)
     ap.add_argument("--islands", type=int, default=4)
-    ap.add_argument("--llm", default="deepseek", choices=["deepseek", "mock"])
+    ap.add_argument("--llm", default="deepseek", choices=["deepseek", "mock", "perturb"],
+                    help="mock: dry run; perturb: the no-LLM control arm (same operator, labelled control_perturb)")
     ap.add_argument("--model", default="deepseek-flash")
     ap.add_argument("--budget", type=int, default=2000, help="LLM calls per stage per family split (B.3)")
     ap.add_argument("--split", default="dev")
@@ -192,7 +221,9 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     dry = a.llm == "mock"
     bundles = [load_bundle(a.suite, n, a.runs) for n in a.evo.split(",")]
-    guards = [guard_fn(b, a.guard) for b in bundles]
+    for b in bundles:                                     # no per-design branching: the identity is not in the view
+        b.view.misc.pop("design_id", None)
+    guards = [guard_fn(b, a.guard, a.runs, out / "dp_work") for b in bundles]
     model = load_bridge(a.bridge) if a.bridge and a.fitness == "refinability" else None
     if a.fitness == "refinability" and model is None:
         sys.exit("refinability fitness needs --bridge")
@@ -202,6 +233,9 @@ def main():
     probe = synth.make_design(seed=0, n_macros=8, n_cells=60, n_io=8)
 
     def certify(src):
+        bad = identity_reasons(src)
+        if bad:
+            return SB.Certificate(ok=False, sha256=SB.program_hash(src), reasons=bad)
         return SB.certify(src, b0.design, b0.base, b0.design.is_macro & ~b0.design.is_fixed, seeds=(0,), probe=probe,
                           cpu_s=a.cpu_s, cluster=b0.cluster_of)
 
@@ -213,7 +247,7 @@ def main():
         nonlocal rho
         gen[0] += 1
         ctx = {}
-        if a.proposer == "heurbridge" and model is not None:
+        if a.proposer == "heurbridge" and model is not None and a.llm != "perturb":
             if rho is None:                           # reachability radius from the seed population's sources
                 trip = []
                 for q in list(pop.all.values())[:6]:
@@ -250,12 +284,13 @@ def main():
             {"parents": [p.id for p in parents], "rho": rho, **{k: v for k, v in ctx.items()}}, indent=1, default=str))
         return ctx
 
-    if not dry:
+    if a.llm == "deepseek":
         from heurbridge.evolve.llm import load_keys
         if not load_keys():
             sys.exit("no DeepSeek key in the environment (DEEPSEEK_LAB_API_KEY); use --llm mock for a dry run")
-    llm = MockLLM(out / "llm_mock_ledger.jsonl") if dry else LLMClient(
+    llm = MockLLM(out / "llm_mock_ledger.jsonl") if a.llm in ("mock", "perturb") else LLMClient(
         budgets={"M/%s" % a.split: a.budget}, ledger_path=logs_dir() / "llm_ledger.jsonl")
+    role = {"mock": "dry_run", "perturb": "control_perturb", "deepseek": "llm"}[a.llm]
     cfg = EngineConfig(parents=a.parents, children=a.children, generations=a.generations, model=a.model,
                        budget_scope="M/%s" % a.split, seed=a.seed)
     proposer = PROPOSERS[a.proposer](llm, cfg)
@@ -279,12 +314,13 @@ def main():
     kinds = {}
     for r in ev_rows:
         kinds[r["kind"]] = kinds.get(r["kind"], 0) + 1
-    summary = {"dry_run": dry, "proposer": a.proposer, "fitness": a.fitness, "guard": a.guard, "evo": a.evo,
+    summary = {"dry_run": dry, "role": role, "proposer": a.proposer, "fitness": a.fitness, "guard": a.guard, "evo": a.evo,
                "seeds": a.seeds, "history": hist, "events": kinds, "rho": rho}
     (out / "summary.json").write_text(json.dumps(summary, indent=1, default=str))
     write_meta(out, "evo_%s_%s" % (a.proposer, a.split), a.evo, config=vars(a), dry_run=dry,
                bridge_ckpt_hash=hashlib.sha256(Path(a.bridge).read_bytes()).hexdigest() if a.bridge else None,
-               llm_model="mock" if dry else a.model, skill_hash=hashlib.sha256(PR.load_skill("v0").encode()).hexdigest()[:16])
+               llm_model="mock" if a.llm != "deepseek" else a.model, role=role,
+               skill_hash=hashlib.sha256(PR.load_skill("v0").encode()).hexdigest()[:16])
     print(json.dumps({k: v for k, v in summary.items() if k != "history"}), flush=True)
 
 
