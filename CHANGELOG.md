@@ -6,6 +6,34 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 
 ## [Unreleased]
 
+### Next-phase preparation (2 Oct, owner's task brief)
+- **T5 readiness (prepare only; nothing ran with the real LLM).**
+  - `scripts/run_evolution.py`: `--guard dp` scores the guard with the registered Track-A cost (DREAMPlace f1 against
+    the seeding baseline, as E0's final_J); `--llm perturb` is the no-LLM control arm (the parameter-perturbation
+    operator, labelled control_perturb, seeded by prompt and call count so two children of a parent differ);
+    programs never see the design's identity and a program naming `design_id` is rejected.
+  - `heurbridge/evolve/engine.py` keeps every evaluated program's source (`<out>/programs/<sha256>.py`);
+    `heurbridge/evolve/prompts.py` no longer advertises `design_id`.
+  - New: `scripts/eval_t5_portfolio.py` (held-out endpoint), `scripts/t5_demo_decision.py` (the decision rule),
+    `scripts/server/t5_demo.sh` (job modes). Mock smoke test on 225 passed (`t5_smoke_mock`, rc 0).
+  - Draft: `reports/t5_demo_preregistration.md` (awaiting approval).
+- **Track B.** `scripts/diag_trackb_failures.py` (logs and macro gaps of a campaign); `run_seed_orfs.py --phase probe`
+  (given f1 layouts again under extra make variables, own ledger, threaded); `Ledger.add` takes a lock. Diagnosis:
+  `reports/trackB_ariane133_diagnosis.md`. Draft: `reports/trackB_preregistration.md`.
+- **S2.** `scripts/eval_lookahead_rank.py` (ranking check, report mode): `reports/sketch_predictor_s2_ranking.md`.
+  The look-ahead part of the S2 bar fails on ibm04 (Kendall tau 0.152) and holds on ibm06 (0.523): S2 misses its bar.
+  `train_lookahead.py --augment` (the bridge's dihedral and aspect augmentation; `lookahead_net.transform_cov`).
+- **Gap to the tool.** `scripts/audit_bridge_targets.py`, `reports/bridge_target_audit.md`: 38 % of the 1,608
+  training pairs target an elite at or below the tool's J; `reports/gap_to_tool_plan.md`.
+- **Other reports:** `reports/signoff_anchor_readiness.md`, `reports/l1b_handoff_design.md`,
+  `reports/next_phase_decisions.md`; the failure taxonomy in `reports/PROGRESS.md` Section 8.
+- **Label job:** `DreamplaceEvaluator.threads` reaches DREAMPlace's num_threads (default 8, unchanged for every
+  registered evaluation); `make_cell_labels.py --workers 8 --threads 4` by default.
+- **Correction:** PROGRESS Section 7 said the bridge's targets are "mostly M1-like layouts"; by cost they are not
+  (the audit above).
+- Tests: `tests/test_engine.py` (+3), `tests/test_t5_endpoint.py` (new, 2), `tests/test_dreamplace_retry.py` (+1),
+  `tests/test_lookahead_net.py` (+1).
+
 ### Track B: ariane136 seeding complete (1 Oct 19:30)
 - `reports/T2_trackB_orfs_ariane136.md`, descriptive. At signoff, 10 of 20 layouts pass every gate. The best,
   local search at J 0.9757, sits below the unmodified flow's same-path band (1.0000-1.0089).

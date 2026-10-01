@@ -1,11 +1,11 @@
 # HeurBridge-PR — progress against the task list (T0–T7)
 
-Status as of **2026-10-01 19:30 CST**, code: see `git log` (v0.14.0 + unreleased). Measured against
+Status as of **2026-10-02 03:00 CST**, code: see `git log` (v0.14.0 + unreleased). Measured against
 `HEURBRIDGE_TASKS.md` (Part C tasks, Part D gates). Session history: `HANDOFF.md`; every code change: `CHANGELOG.md`.
 
 ## 1. Summary
 
-- **Position on the critical path:** T0 ✅ → T1 ✅ → T2 (Track-B seeding: 2 of 5 designs complete) → T3 ✅ (exit
+- **Position on the critical path:** T0 ✅ → T1 ✅ → T2 (Track-B seeding: 3 of 5 designs complete) → T3 ✅ (exit
   gate passed) → **T4 = full E0: gate G0′ PASSED (30 Sep 23:18, all three pre-registered tests; `reports/E0_partner_ablation.md`)**
   → T5 (next, per the pre-registered decision) → T6.
 - **Roughly 44 % of the planned effort is done** (weighted by the task list's own duration estimates, §5). The done
@@ -22,6 +22,11 @@ Status as of **2026-10-01 19:30 CST**, code: see `git log` (v0.14.0 + unreleased
 | 231 GPU 4 | `ft_sketch_ibm2` | cell-sketch fine-tune (S1 of the sketch redesign) | **done 14:09: fails its pass rule** (`reports/sketch_finetune_s1.md`); the dedicated predictor (S2) is next | done |
 | 234 (CPU only) → 225 GPU 0 | `cell_labels_234`, `s2_lookahead_225` | sketch redesign S2: 3,838 DREAMPlace labels (0 failures), then the cell-stage predictor | **done 1 Oct 07:14: misses its bar** (DA0 ratio 0.747 / 0.642 vs ≤ 0.5; `reports/sketch_predictor_s2.md`) | done |
 | 224 (≤ 8 OpenROAD) | `seedB_orfs7_swerv_wrapper` | T2.7 Track-B seeding (bp_fe_top, bp_be_top, **ariane136 complete**; ariane133 finished without an evaluable heuristic layout, decision pending) | running | several days |
+| 224 | `seedB_band_ariane136` | ariane136 candidates' own noise bands (f2) | running since 1 Oct 19:20 | report refresh when done |
+| 224 | `probe133_pd35`, `probe133_virt` | ariane133 diagnosis: five failed layouts at f1 under PLACE_DENSITY 0.35 or virtual timing-driven resizing (`reports/trackB_ariane133_diagnosis.md`) | running since 2 Oct 01:58 | about 2-3 h |
+| 225 GPU 0 | `s2_aug_225` | S2 with the bridge's augmentation (one change, same bar), then its ranking check | running since 2 Oct 02:39 | about 2 h |
+| 225 GPU 1 | `s2rank_train2` | S2 ranking check on the 13 training designs (supplementary; the validation check is done: `reports/sketch_predictor_s2_ranking.md`) | running | about 2 h |
+| 225 GPU 2 | `t5_smoke_mock` | T5 mock smoke test (DREAMPlace guard, endpoint, decision script) | **done, rc 0** | done |
 | 224 | — | Track-B plan: noise bands and warm-start demos done for bp_fe_top and bp_be_top (reports regenerated) | done | done |
 
 **Overnight (my error):** the watcher stopped seeing 225 at 23:15 (a newline in its job list), so the last three bigblue4 slices started at 08:25 instead of ~01:00–05:00, 3–7 h later. Fixed, and the watcher now reports a failed check instead of going quiet.
@@ -122,7 +127,7 @@ Legend: ✅ done · 🔄 running · ⚠️ done with a limitation · ⏸ waiting
 | T5.1–T5.4 prompts, fitness, population, RLCE | ✅ | `heurbridge/evolve/`; end-to-end with a mock LLM (`scripts/run_evolution.py --llm mock`) |
 | T5.5 baseline engines | ✅ | five proposers implemented |
 | T5.6 knowledge loop | ⬜ | later (after H1) |
-| real evolution runs | ⬜ | G0′ passed and the LLM is chosen (deepseek-flash, §6); per the workflow a demo comes first, on your go |
+| real evolution runs | ⬜ | **prepared, awaiting your approval:** draft pre-registration `reports/t5_demo_preregistration.md`, runbook (HANDOFF, "T5 demo runbook"), mock smoke test passed on 225 (2 Oct); nothing ran with the real LLM |
 
 ### T6 — Online solving and main experiments ⬜ (mostly)
 
@@ -168,6 +173,8 @@ T7 runs alongside and is not weighted separately. The estimate assumes every gat
 planned path at T4 ("stop and report", with a repositioning decision for you).
 
 ## 6. Decisions
+
+Open decisions with options, evidence and recommendations (2 Oct): `reports/next_phase_decisions.md`.
 
 Received 2026-09-28: LLM = **deepseek-flash** for every LLM call; timing gates **reported at f1, enforced at f2/f3**
 (cost_v2); each experiment runs as a **demo on 225 first**, then at full capacity if the effect is good.
@@ -247,4 +254,28 @@ Open:
 - Track A has no f2 (bookshelf benchmarks have no timing): its final cost is f1 (DREAMPlace).
 - bigblue2 (23,084 macros) cannot run the heuristic programs: the dense macro affinity exceeds the sandbox's 4 GB.
 - On every Track-A design DREAMPlace's own mixed-size placement (M1) is the best layout found by seeding; the
-  heuristics beat it on 2 of 25 designs only. The bridge's targets are therefore mostly M1-like layouts.
+  heuristics beat it on 2 of 25 designs only. **Corrected 2 Oct:** the bridge's targets are M1-like in position,
+  not in cost: on the 13 training designs only 38 % of the 1,608 pairs target an elite at or below the tool's J
+  0.45 (30 % the tool's own layout); the rest target local-search or heuristic elites that cost more
+  (`reports/bridge_target_audit.md`:29). This caps what the bridge can reach (`reports/gap_to_tool_plan.md`).
+
+## 8. Failure taxonomy (2 Oct 2026)
+
+Every failure enters the statistics as +inf and is listed by name in its report. Counts are evaluations, per
+design; "disposition" is the existing mitigation or the proposed fix.
+
+| Class | Where (count) | Disposition | Sources |
+|---|---|---|---|
+| Routing congestion (GRT-0116) | bp_fe_top 8, bp_be_top 41 | a property of the layout: kept as a named failure (+inf); identical failing layouts are not re-run | `reports/T2_trackB_orfs_bp_fe_top.md`:88, `reports/T2_trackB_orfs_bp_be_top.md`:88 |
+| Global placement does not converge | named divergence GPL-0307: bp_fe_top 7, ariane136 5, ariane133 5; GPL-0305: bp_fe_top 1. Silent: every other failing ariane133 layout stops at the 5,000-iteration cap with overflow 0.28-0.43 instead of 0.10, after which the resizer adds about 110,000 buffers (utilization 39 % to 74 %) and detailed placement fails or times out; the failing ariane136 layouts show the same pattern (overflow 0.335, about 121,000 buffers) | diagnosis 2 Oct (`reports/trackB_ariane133_diagnosis.md`): on ariane133, PLACE_DENSITY 0.35 (as ariane136 sets) or timing-driven resizing kept virtual (`-keep_resize_below_overflow 0.01`) makes the tested layouts converge; adopting either is a flow deviation for the owner (it must also apply to the baseline) | `reports/T2_trackB_orfs_bp_fe_top.md`:89-92, `reports/T2_trackB_orfs_ariane136.md`:70, HANDOFF.md:168 |
+| Detailed placement failed (DPL-0036) | bp_fe_top 2, ariane136 17, ariane133 37 | on ariane133 and ariane136 a consequence of the class above (diagnosis); otherwise kept as named failures | `reports/T2_trackB_orfs_bp_fe_top.md`:91, `reports/T2_trackB_orfs_ariane136.md`:69, HANDOFF.md:168 |
+| Step timeout (7,200 s per step) | bp_fe_top 5_1_grt 7; ariane136 3_5_place_dp 18; ariane133 3_5_place_dp 25; swerv_wrapper mostly detailed placement | the red-line cap; on the ariane designs the timeouts follow non-converged placement (diagnosis) | `reports/T2_trackB_orfs_bp_fe_top.md`:89, `reports/T2_trackB_orfs_ariane136.md`:68, HANDOFF.md:168, :173-174 |
+| Unparsed ORFS failure | ariane133 14 | explained by the diagnosis (non-converged placement, then detailed placement); the parser found no [ERROR] line in the 4,000-character tail | HANDOFF.md:168, `heurbridge/eval/orfs.py`:307 |
+| Power-grid repair (PDN-0179) | ariane133 1 (the tool's layout shifted by one row) | named failure; not a heuristic's | HANDOFF.md:168, `runs/diag_trackb` (local) |
+| Program timeout (sandbox, 60 s CPU) | IBM 55 (ibm10 15, ibm12 15, ibm14 5, ibm16 5, ibm17 15); ISPD2005 80 | +inf; the limit is part of the program contract | `reports/T2_trackA_ibm_dreamplace.md`:35-42, :49, `reports/T2_trackA_ispd_dreamplace.md`:40 |
+| Sandbox memory (4 GB) | ISPD2005: 80 crashes + 40 errors; bigblue2 cannot run any program | +inf; bigblue2 stays out of E0 as a documented deviation (§7) | `reports/T2_trackA_ispd_dreamplace.md`:32, :41-43, §7 |
+| Too few legal sources | bigblue4: 30 of 80 program runs project legally | registered as is for E0 (§7) | §7 |
+| Host out-of-memory kill | 1 (bigblue3 E0 slice, 21 GB) | fixed: memory-lean RUDY (`HB_RUDY_IMPL=bmm`), per-host slot cap, a SIGKILLed placer run is re-run, the watcher reports OOM kills | §2 (28-29 Sep) |
+| GPU out of memory | 1 (S1 evaluation, all cached sources in one batch) | fixed: batches of `--chunk` sources | CHANGELOG.md:97-98 |
+| Label-job CPU oversubscription (not a failure) | 14 workers x 8 DREAMPlace threads on 64 cores | fixed 2 Oct: `make_cell_labels.py --workers 8 --threads 4` | HANDOFF.md:155-157 |
+

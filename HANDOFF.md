@@ -4,6 +4,62 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
+## 2026-10-02 — Session 4 (03:00): next-phase preparation (owner's task brief); English only from now on
+
+- **Owner's requests (2 Oct):** a plan that keeps the LLM step from doing harm; check ariane133; explain the S2
+  numbers and either show S2 improving placement or improve S2; then the next-phase brief (P0-P3, English only,
+  every number sourced, prepare-only where the owner has not decided).
+- **Done (details in each report; the open decisions in `reports/next_phase_decisions.md`):**
+  - T5 readiness: `--guard dp`, `--llm perturb` (control arm), identity-free programs, kept sources, held-out endpoint
+    and decision script; draft `reports/t5_demo_preregistration.md`; mock smoke test `t5_smoke_mock` on 225 GPU 2,
+    rc 0. Nothing ran with the real LLM.
+  - Track B: `reports/trackB_ariane133_diagnosis.md` (global placement stalls at overflow about 0.3; the tool's own
+    layout shifted by one site stalls too); probes `probe133_pd35`, `probe133_virt` on 224;
+    draft `reports/trackB_preregistration.md`.
+  - S2: ranking check `reports/sketch_predictor_s2_ranking.md` (fails on ibm04: tau 0.152; holds on ibm06: 0.523);
+    one change (augmentation) running as `s2_aug_225`.
+  - Gap to the tool: `reports/bridge_target_audit.md` (38 % of training pairs target an elite at or below the tool's
+    J), `reports/gap_to_tool_plan.md`.
+  - `reports/signoff_anchor_readiness.md` (no f3; ORFS's reference metrics as the external anchor),
+    `reports/l1b_handoff_design.md`, failure taxonomy (`reports/PROGRESS.md` Section 8), label-job thread fix.
+- **Running (fetch when the watcher reports DONE):**
+  - 224 `probe133_pd35`, `probe133_virt`: `python scripts/hbv.py fetch --port 224 --run probe133_pd35` (and `_virt`);
+    rows in `runs/remote/<job>/runs/seed_orfs/ariane133/evals_probe_<tag>.jsonl`; then finish the diagnosis report.
+  - 224 `seedB_band_ariane136`: fetch, then `python scripts/report_trackb_dev.py --design ariane136 --runs
+    runs/remote/seedB_band_ariane136/runs/seed_orfs --archive runs/remote/seedB_band_ariane136/archive_B0_orfs_ariane136
+    --label orfs`.
+  - 224 `seedB_orfs7_swerv_wrapper`: unchanged.
+  - 225 `s2_aug_225`: fetch, then `.venv/bin/python scripts/train_lookahead.py --report
+    runs/remote/s2_aug_225/checkpoints/lookahead_s2_aug --out reports/sketch_predictor_s2_aug.md`; its ranking check is
+    `runs/remote/s2_aug_225/runs/s2_rank_val_aug/summary.json` (`scripts/eval_lookahead_rank.py --report`).
+  - 225 `s2rank_train2` (supplementary ranking on the 13 training designs): fetch and add its summary to the ranking
+    report (`--report <val summary> <train summary>`).
+- **Housekeeping (owner):** staged folders 68 GB (224), 31 GB (225), 7.1 GB (231); `nvidia-smi` fails on 224 and 227
+  (one faulty GPU each); back up the vault key offline. Details: `reports/next_phase_decisions.md` D8.
+
+### T5 demo runbook (protocol: `reports/t5_demo_preregistration.md`; run only after the owner approves it)
+
+Prerequisites: `python scripts/hbv.py push-code --port 225` from the approved commit; GPUs 0-2 free on 225; the server
+path of the LLM key file in `$HB_LLM_KEYFILE` (set in `~/.config/heurbridge/servers.sh`, never in the repo).
+
+```bash
+# 1. mock smoke test (no LLM; done 2 Oct: rc 0)
+python scripts/hbv.py run --port 225 --run t5_smoke_mock --gpu 2 --after seedA_dp_s1 seedA_dp_s2 --data eda_harness:eda bridge_v1_e0_frozen:checkpoints/algR_trackA_final --exclude '(^\./eda/|/dp_work/|^\./checkpoints/)' -- "bash scripts/server/t5_demo.sh smoke"
+# 2. real-LLM preflight (at most 2 calls)
+python scripts/hbv.py run --port 225 --run t5_preflight --gpu 2 --api-key-file "$HB_LLM_KEYFILE" --after seedA_dp_s1 seedA_dp_s2 --data eda_harness:eda bridge_v1_e0_frozen:checkpoints/algR_trackA_final --exclude '(^\./eda/|/dp_work/|^\./checkpoints/)' -- "bash scripts/server/t5_demo.sh preflight"
+# 3. the two arms, in parallel
+python scripts/hbv.py run --port 225 --run t5demo_hb --gpu 0 --api-key-file "$HB_LLM_KEYFILE" --after seedA_dp_s1 seedA_dp_s2 --data eda_harness:eda bridge_v1_e0_frozen:checkpoints/algR_trackA_final --exclude '(^\./eda/|/dp_work/|^\./checkpoints/)' -- "bash scripts/server/t5_demo.sh hb"
+python scripts/hbv.py run --port 225 --run t5demo_ctrl --gpu 1 --after seedA_dp_s1 seedA_dp_s2 --data eda_harness:eda bridge_v1_e0_frozen:checkpoints/algR_trackA_final --exclude '(^\./eda/|/dp_work/|^\./checkpoints/)' -- "bash scripts/server/t5_demo.sh ctrl"
+# 4. after both arms: the endpoint on V (decides) and T (report only)
+python scripts/hbv.py run --port 225 --run t5demo_V --gpu 0 --after seedA_dp_s1 seedA_dp_s2 t5demo_hb t5demo_ctrl --data eda_harness:eda bridge_v1_e0_frozen:checkpoints/algR_trackA_final --exclude '(^\./eda/|/dp_work/|^\./checkpoints/)' -- "bash scripts/server/t5_demo.sh eval_V"
+python scripts/hbv.py run --port 225 --run t5demo_T --gpu 1 --after seedA_dp_s1 seedA_dp_s2 t5demo_hb t5demo_ctrl --data eda_harness:eda bridge_v1_e0_frozen:checkpoints/algR_trackA_final --exclude '(^\./eda/|/dp_work/|^\./checkpoints/)' -- "bash scripts/server/t5_demo.sh eval_T"
+# 5. fetch and apply the pre-registered decision rule
+for r in t5demo_hb t5demo_ctrl t5demo_V t5demo_T; do python scripts/hbv.py fetch --port 225 --run $r; done
+.venv/bin/python scripts/t5_demo_decision.py --hb runs/remote/t5demo_hb/runs/evo/t5demo_hb --ctrl runs/remote/t5demo_ctrl/runs/evo/t5demo_ctrl --val runs/remote/t5demo_V/runs/evo/t5demo_V --ledger runs/remote/t5demo_hb/logs/llm_ledger.jsonl --out runs/remote/t5demo_decision.json
+```
+
+---
+
 ## 2026-10-01 — Session 4 (19:30): ariane136 Track-B campaign complete
 
 - **`seedB_orfs7_ariane136` done 19:13 (rc 0).** Report: `reports/T2_trackB_orfs_ariane136.md` (descriptive).
