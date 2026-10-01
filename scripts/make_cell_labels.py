@@ -13,7 +13,8 @@ record (terms and J), and the placed cells (float16) for labels not thought of y
 Resumable: one file per placement under <out>/parts/<design>/; <out>/<design>.npz collects a finished design.
 
   python scripts/make_cell_labels.py --designs ibm01,... --runs runs/seed_trackA_dp --archive archive_A0_trackA \
-      --cache-dir <cache> --bridge checkpoints/algR_trackA_final/best.pt --workers 14 --cpu --out runs/cell_labels
+      --cache-dir <cache> --bridge checkpoints/algR_trackA_final/best.pt --workers 8 --threads 4 --cpu \
+      --out runs/cell_labels
 """
 
 import argparse
@@ -129,6 +130,9 @@ def main():
     ap.add_argument("--K", type=int, default=20)
     ap.add_argument("--elites", type=int, default=5)
     ap.add_argument("--workers", type=int, default=8)
+    ap.add_argument("--threads", type=int, default=4,
+                    help="DREAMPlace num_threads per placement: workers x threads should not exceed the cores "
+                         "(the first label run used 14 workers x DREAMPlace's default 8 on 64 cores)")
     ap.add_argument("--cpu", action="store_true", help="DREAMPlace on the CPU (servers without a usable GPU)")
     ap.add_argument("--limit", type=int, default=0, help="first N layouts per design (0 = all; for smoke runs)")
     ap.add_argument("--out", default="runs/cell_labels")
@@ -147,7 +151,7 @@ def main():
             print(json.dumps({"design": name, "skip": "done"}), flush=True)
             continue
         baseline = cost.Baseline.from_records(des.id, json.loads((Path(a.runs) / des.id / "baseline.json").read_text())["records"])
-        ev = DreamplaceEvaluator(cluster_of=b.cluster_of, gpu=not a.cpu)
+        ev = DreamplaceEvaluator(cluster_of=b.cluster_of, gpu=not a.cpu, threads=a.threads)
         todo = macro_layouts(b, arch, model, a)
         if a.limit:
             todo = todo[:a.limit]

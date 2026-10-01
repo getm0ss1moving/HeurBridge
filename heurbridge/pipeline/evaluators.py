@@ -75,6 +75,7 @@ class DreamplaceEvaluator(Evaluator):
     iters: int = 1000
     seed: int = 0
     timeout_s: int = 3600
+    threads: int = 8                    # DREAMPlace num_threads (8 = its default; CPU label jobs use fewer per worker)
 
     def evaluate(self, design, layout, run_id, workdir):
         return self.evaluate_placed(design, layout, run_id, workdir)[0]
@@ -84,7 +85,7 @@ class DreamplaceEvaluator(Evaluator):
         from ..eval.dreamplace import run_dreamplace_f1
         work = Path(workdir) / run_id
         out, placed = run_dreamplace_f1(design, layout, work, self.f0cfg, gpu=self.gpu, iters=self.iters,
-                                        seed=self.seed, timeout=self.timeout_s)
+                                        seed=self.seed, timeout=self.timeout_s, threads=self.threads)
         rec = {"run_id": run_id, "backend": "dreamplace", "returncode": out["returncode"], "failure": out.get("failure"),
                "runtime_s": out["wall_s"], "unchecked": out["unchecked"], "gp_overflow": out.get("gp_overflow"),
                "macro_max_shift": out.get("macro_max_shift")}

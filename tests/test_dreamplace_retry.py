@@ -57,3 +57,21 @@ def test_placer_reruns_after_sigkill(tmp_path, monkeypatch):
     monkeypatch.setattr(DP.tools, "run_group", timed_out)
     rc, _, _ = DP.run_placer({}, tmp_path)
     assert rc == "timeout" and len(calls) == 1
+
+
+def test_thread_count_reaches_the_placer(tmp_path, monkeypatch):
+    """DreamplaceEvaluator.threads reaches DREAMPlace's num_threads (default 8, DREAMPlace's own); the CPU label
+    job sets fewer per worker so that workers x threads stays within the cores."""
+    from heurbridge.eval import dreamplace as DP
+    from heurbridge.pipeline.evaluators import DreamplaceEvaluator
+    assert DP.params("a.aux", "out")["num_threads"] == 8 and DreamplaceEvaluator().threads == 8
+    seen = {}
+
+    def fake_run_placer(p, work, timeout):
+        seen.update(p)
+        return 1, "stopped by the test", 0.0
+    monkeypatch.setattr(DP, "run_placer", fake_run_placer)
+    monkeypatch.setattr(DP, "write_oriented_bookshelf", lambda d, l, w, name: tmp_path / "x.aux")
+    import types
+    DP._run_f1(types.SimpleNamespace(id="d"), None, tmp_path, None, False, 10, 0, 60, threads=4)
+    assert seen["num_threads"] == 4 and seen["gpu"] == 0

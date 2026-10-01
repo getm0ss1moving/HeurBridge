@@ -150,13 +150,15 @@ def run_placer(param: dict, work: Path, timeout: int = 3600) -> tuple:
 
 
 def run_dreamplace_f1(design: Design, layout: Layout, work: str | Path, f0cfg=None, gpu: bool = True,
-                      iters: int = 1000, seed: int = 0, timeout: int = 3600, keep_files: bool = False) -> tuple:
+                      iters: int = 1000, seed: int = 0, timeout: int = 3600, keep_files: bool = False,
+                      threads: int = 8) -> tuple:
     """Track-A f1: cells placed by DREAMPlace (GP + LG) around the FIXED macros of ``layout``; f0 metrics.
     Returns (record, placed layout or None).  Without ``keep_files`` the bookshelf copy and DREAMPlace's output
     are deleted once read (tens of MB per evaluation on the larger designs; the workspaces are in RAM); the
-    parameters and the log stay."""
+    parameters and the log stay.  ``threads`` is DREAMPlace's num_threads (its CPU parts; all of it with gpu=False):
+    parallel CPU callers keep workers x threads within the host's cores."""
     try:
-        return _run_f1(design, layout, Path(work), f0cfg, gpu, iters, seed, timeout)
+        return _run_f1(design, layout, Path(work), f0cfg, gpu, iters, seed, timeout, threads)
     finally:
         if not keep_files:
             import shutil
@@ -164,13 +166,13 @@ def run_dreamplace_f1(design: Design, layout: Layout, work: str | Path, f0cfg=No
                 shutil.rmtree(Path(work) / sub, ignore_errors=True)
 
 
-def _run_f1(design, layout, work, f0cfg, gpu, iters, seed, timeout):
+def _run_f1(design, layout, work, f0cfg, gpu, iters, seed, timeout, threads=8):
     from .f1 import KEYS, trackA_metrics
     work = Path(work)
     work.mkdir(parents=True, exist_ok=True)
     aux = write_oriented_bookshelf(design, layout, work / "in", name=design.id)
     rc, log, wall = run_placer(params(str(aux.resolve()), str((work / "out").resolve()), gpu=gpu, iters=iters,
-                                      seed=seed), work, timeout)
+                                      seed=seed, threads=threads), work, timeout)
     out = {k: None for k in KEYS}
     out.update({"backend": "dreamplace", "returncode": rc, "wall_s": wall,
                 "unchecked": ["gr_wl", "gr_overflow_max", "wns_place", "tns_place", "wns_gr", "tns_gr", "vias", "power"]})
