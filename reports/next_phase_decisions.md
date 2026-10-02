@@ -78,6 +78,36 @@ first alpha (0.025), recorded either way.
   (ii) on IBM, whether a second pass or the flip pass adds anything on top of density 0.6 (running); (iii) every later
   HeurBridge comparison uses the tool at 0.6 as its baseline; (iv) Track-B D6 stays unlaunched (D6: the hold gate).
 
+**Update 3 Oct 05:40 (exploratory; reports/beat_tool_track_a.md, Sections 7 and 9):**
+- **Density, wider check:** at 0.7 on 13 IBM designs a single run is lower than at 0.9 in 67 of 104 cases, with
+  gains on ibm02-04, ibm06, ibm07, ibm12 and losses on ibm01, ibm11, ibm13, ibm18 (one ibm09 case blows up under the
+  fresh seeds). The choice of 0.6 for RL#2 rests on four designs of the favourable kind; RL#2 was registered before
+  this check finished, so its prior is weaker than its draft suggests. It runs as registered.
+- **On top of the tool at 0.6, nothing helps:** a second pass (+0.1427, one design blows up), heuristic starts
+  (+0.0110), the flip pass (+0.0014) (Section 9).
+- **Two densities vs two seeds** (the seed-s run at 0.9 and at 0.7, the better by the selection seed, against seeds s
+  and s+1 at 0.9; same number of runs): lower in 66 of 104 cases, higher in 16. Registered as RL#3 on ISPD2005 with
+  0.6, computed from RL#1's and RL#2's runs, no run added (reports/portfolio_preregistration.md).
+- **Conclusion for Track A:** no HeurBridge method beats the tool at equal compute; the levers that move J are the
+  tool's own configuration and how its runs are spent. Direction: D9.
+
+## D9 Direction after the Track-A evidence (new, 3 Oct)
+
+- **Evidence:** none of the HeurBridge methods tried (the frozen bridge on the tool's layout, relinking, consensus,
+  the flip pass, local search, heuristic starts) beats the tool's best of k at equal compute on IBM; what beats the
+  baseline is the tool run at another target density, or two densities instead of two seeds (reports/beat_tool_track_a.md,
+  Sections 3-9). The heuristics' own layouts are 3-35 % worse than the tool's in wirelength (reports/T2_trackA_ibm_dreamplace.md:27-43).
+  Three confirmatory tests on ISPD2005 are running (RL#1-RL#3).
+- **Options:** (a) reframe Track A's contribution as automated tool orchestration: LLM-evolved programs that choose the
+  tool's configurations and how its runs are spent per design under a run budget, judged on held-out designs against
+  the best fixed configuration and against seeds at the same number of runs (T5's guard, control arm and held-out
+  endpoint carry over; risk: close to parameter tuning such as AutoDMP, so the novelty must come from the programs and
+  their transfer); (b) put the weight on Track B, the real OpenROAD flow, where our layouts beat the tool's own macro
+  placement at f2 on three designs (descriptive; D6 needs the hold-gate rule; no cost advantage yet); (c) continue the
+  original plan (T5 evolution of macro heuristics, the bridge) against the tool at its best configuration.
+- **Recommendation: (a) and (b).** (a) aims at the lever that moves J on Track A with a cost claim; (b) is the only
+  place where our own layouts beat a tool on real PPA. (c) stays laid aside: its gap to the tool is large.
+
 ## D1 Launch the T5 demo?
 
 - **Evidence:** G0' passed, which per the pre-registration leads to T5 (reports/E0_partner_ablation.md:44,
@@ -112,7 +142,7 @@ first alpha (0.025), recorded either way.
 ## D3 T3.9: the cell bridge's endpoint
 
 - **Evidence:** the task list ranks the cell bridge's targets by f2 J (HEURBRIDGE_TASKS.md:372), but Track A has no
-  f2; its final cost is DREAMPlace f1 (reports/PROGRESS.md:275). DREAMPlace ignores start positions
+  f2; its final cost is DREAMPlace f1 (reports/PROGRESS.md:274). DREAMPlace ignores start positions
   (reports/demo_sketch_start.md:34), so a cell bridge cannot hand its result to DREAMPlace; it must deliver a placement.
   The look-ahead predictor misses both parts of its bar (reports/sketch_predictor_s2.md:38,
   reports/sketch_predictor_s2_ranking.md). *Negative results.*
@@ -175,7 +205,7 @@ first alpha (0.025), recorded either way.
 
 ## D8 Housekeeping (owner's actions; nothing was deleted)
 
-- **Staged for deletion** (moved there on 29 Sep: HANDOFF.md:433-434; sizes measured 2 Oct):
+- **Staged for deletion** (moved there on 29 Sep: HANDOFF.md:446-447; sizes measured 2 Oct):
   `/data/dzy/heura_repr/_to_delete_20260929/` on 224, 68 GB (its /data at 93 % use); on 225, 31 GB (/data at 99 %);
   on 231, 7.1 GB (root at 99 %). The final `rm -rf` is yours.
 - **Faulty GPUs:** `nvidia-smi` fails on 224 ("Unable to determine the device handle for GPU 0000:02:00.0: Unknown

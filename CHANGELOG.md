@@ -6,6 +6,14 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 
 ## [Unreleased]
 
+### RL#3 and the density picture (3 Oct 05:45)
+- `scripts/density_confirm.py`: `reserve3` / `analyze3` (RL#3: two densities vs two seeds, from RL#1's and RL#2's runs);
+  units carry the selection values, the two-density pick and RL#1's best of 2.
+- `reports/portfolio_preregistration.md` and alpha-ledger entry RL#3 (alpha 0.00625).
+- `scripts/report_beat_tool.py`: section 7 states which designs the densities were tried on and compares two densities
+  with two seeds; section 9 (on top of density 0.6); a variable that shadowed the arguments renamed.
+- Tests: the density unit test covers the two-density pick. Full suite: 207 passed (148.4 s).
+
 ### Beat-the-tool exploration, second round (3 Oct 05:10, exploratory)
 - New: `scripts/consensus_eval.py` (consensus of k tool runs), `scripts/flip_eval.py` (macro orientation pass),
   `scripts/warm_tool_eval.py` (the tool started from given macro layouts; `--target-density`), `scripts/density_confirm.py`

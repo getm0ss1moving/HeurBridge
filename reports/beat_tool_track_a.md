@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Report | beat_tool_track_a |
-| Date | 2026-10-03 05:04 |
+| Date | 2026-10-03 05:34 |
 | Track | A (IBM; f1 = DREAMPlace GP + LG with macros fixed; J against the seeding M1 baseline, 0.45 by construction) |
 | Status of the claim | **exploratory demo (no claim)**; any claim needs the pre-registered test drafted from it |
 | Owner's aim (3 Oct) | macro layouts with mean J below 0.45 that beat the tool on output and on cost |
@@ -123,19 +123,33 @@ The tool's runs above use DREAMPlace's target density 0.9 (the seeding campaign'
 
 | design | density 0.9 | density 0.8 | density 0.7 | density 0.6 | density 0.5 |
 |---|---|---|---|---|---|
+| ibm01 | 0.4527 / 0.4501 / 17 s | - | 0.4724 / 0.4664 / 34 s | - | - |
+| ibm02 | 0.2098 / 0.1559 / 22 s | - | 0.1538 / 0.1523 / 26 s | - | - |
+| ibm03 | 0.4536 / 0.4504 / 23 s | - | 0.4346 / 0.4331 / 30 s | - | - |
 | ibm04 | 0.4411 / 0.4290 / 20 s | 0.4253 / 0.4224 / 27 s | 0.4166 / 0.4154 / 24 s | 0.4156 / 0.4140 / 32 s | 0.4156 / 0.4140 / 31 s |
 | ibm06 | 0.4519 / 0.4472 / 33 s | 0.4452 / 0.4406 / 52 s | 0.4221 / 0.4206 / 50 s | 0.4171 / 0.4154 / 35 s | 0.4171 / 0.4154 / 34 s |
+| ibm07 | 0.4603 / 0.4458 / 16 s | - | 0.4371 / 0.4348 / 23 s | - | - |
+| ibm09 | 0.4595 / 0.4402 / 15 s | - | 0.6812 / 0.4084 / 22 s | - | - |
 | ibm10 | 0.4729 / 0.4507 / 18 s | 0.4868 / 0.4606 / 22 s | 0.4596 / 0.4294 / 24 s | 0.4493 / 0.4449 / 20 s | 0.4622 / 0.4515 / 24 s |
+| ibm11 | 0.4491 / 0.4451 / 17 s | - | 0.4772 / 0.4723 / 21 s | - | - |
 | ibm12 | 0.4483 / 0.4462 / 17 s | 0.4249 / 0.4234 / 21 s | 0.4195 / 0.4190 / 23 s | 0.4172 / 0.4161 / 24 s | 0.4192 / 0.4179 / 23 s |
+| ibm13 | 0.4496 / 0.4469 / 15 s | - | 0.4610 / 0.4551 / 23 s | - | - |
+| ibm14 | 0.4495 / 0.4487 / 17 s | - | 0.4486 / 0.4482 / 23 s | - | - |
+| ibm18 | 0.4515 / 0.4489 / 23 s | - | 0.4555 / 0.4545 / 29 s | - | - |
 
 - Density 0.8, single run vs density 0.9 single run (paired by tool seed): -0.0080 on average, lower in 24 of 32, one-sided Wilcoxon p = 0.00972; vs density 0.9 best of 4 (four times the runs): +0.0023, lower in 21 of 32, p = 0.287.
-- Density 0.7, single run vs density 0.9 single run (paired by tool seed): -0.0241 on average, lower in 28 of 32, one-sided Wilcoxon p = 1.01e-05; vs density 0.9 best of 4 (four times the runs): -0.0138, lower in 28 of 32, p = 0.000453.
+- Density 0.7, single run vs density 0.9 single run (paired by tool seed): +0.0069 on average, lower in 67 of 104, one-sided Wilcoxon p = 0.000364; vs density 0.9 best of 4 (four times the runs): +0.0180, lower in 62 of 104, p = 0.0763.
 - Density 0.6, single run vs density 0.9 single run (paired by tool seed): -0.0288 on average, lower in 32 of 32, one-sided Wilcoxon p = 2.33e-10; vs density 0.9 best of 4 (four times the runs): -0.0185, lower in 29 of 32, p = 1e-08.
 - Density 0.5, single run vs density 0.9 single run (paired by tool seed): -0.0250 on average, lower in 28 of 32, one-sided Wilcoxon p = 1.77e-07; vs density 0.9 best of 4 (four times the runs): -0.0147, lower in 25 of 32, p = 5.52e-05.
+- The densities 0.8, 0.6 and 0.5 were tried on ibm04, ibm06, ibm10 and ibm12 only, designs where a lower density helps; at 0.7 on 13 designs the effect depends on the design (rows above).
+- Two densities {0.9, 0.8} (the seed-s run at each, the better by the selection seed) vs two seeds at 0.9 (s and s+1), same number of runs: lower in 22 of 32, higher in 4, median 0.4354 vs 0.4473, one-sided Wilcoxon p = 0.00293.
+- Two densities {0.9, 0.7} (the seed-s run at each, the better by the selection seed) vs two seeds at 0.9 (s and s+1), same number of runs: lower in 66 of 104, higher in 16, median 0.4365 vs 0.4485, one-sided Wilcoxon p = 3.33e-10.
+- Two densities {0.9, 0.6} (the seed-s run at each, the better by the selection seed) vs two seeds at 0.9 (s and s+1), same number of runs: lower in 30 of 32, higher in 2, median 0.4174 vs 0.4473, one-sided Wilcoxon p = 3.26e-09.
+- Two densities {0.9, 0.5} (the seed-s run at each, the better by the selection seed) vs two seeds at 0.9 (s and s+1), same number of runs: lower in 26 of 32, higher in 3, median 0.4184 vs 0.4473, one-sided Wilcoxon p = 5.4e-06.
 
-J components where recorded (medians over seeds of the fresh-seed medians): ibm04 at 0.6: HPWL 7.684e+06 um, RUDY overflow 0.013 %; ibm04 at 0.5: HPWL 7.684e+06 um, RUDY overflow 0.013 %; ibm06 at 0.6: HPWL 6.115e+06 um, RUDY overflow 0.021 %; ibm06 at 0.5: HPWL 6.115e+06 um, RUDY overflow 0.021 %; ibm10 at 0.6: HPWL 2.856e+07 um, RUDY overflow 17.384 %; ibm10 at 0.5: HPWL 2.972e+07 um, RUDY overflow 17.518 %; ibm12 at 0.6: HPWL 3.228e+07 um, RUDY overflow 14.807 %; ibm12 at 0.5: HPWL 3.203e+07 um, RUDY overflow 15.361 %.
+J components where recorded (medians over seeds of the fresh-seed medians): ibm01 at 0.7: HPWL 2.649e+06 um, RUDY overflow 0.000 %; ibm02 at 0.7: HPWL 5.248e+06 um, RUDY overflow 0.006 %; ibm03 at 0.7: HPWL 6.75e+06 um, RUDY overflow 0.005 %; ibm04 at 0.6: HPWL 7.684e+06 um, RUDY overflow 0.013 %; ibm04 at 0.5: HPWL 7.684e+06 um, RUDY overflow 0.013 %; ibm06 at 0.6: HPWL 6.115e+06 um, RUDY overflow 0.021 %; ibm06 at 0.5: HPWL 6.115e+06 um, RUDY overflow 0.021 %; ibm07 at 0.7: HPWL 9.984e+06 um, RUDY overflow 0.159 %; ibm09 at 0.7: HPWL 1.23e+07 um, RUDY overflow 0.106 %; ibm10 at 0.6: HPWL 2.856e+07 um, RUDY overflow 17.384 %; ibm10 at 0.5: HPWL 2.972e+07 um, RUDY overflow 17.518 %; ibm11 at 0.7: HPWL 1.847e+07 um, RUDY overflow 2.735 %; ibm12 at 0.6: HPWL 3.228e+07 um, RUDY overflow 14.807 %; ibm12 at 0.5: HPWL 3.203e+07 um, RUDY overflow 15.361 %; ibm13 at 0.7: HPWL 2.305e+07 um, RUDY overflow 3.965 %; ibm14 at 0.7: HPWL 3.508e+07 um, RUDY overflow 9.918 %; ibm18 at 0.7: HPWL 4.158e+07 um, RUDY overflow 11.897 %.
 
-Exploratory; a tool parameter, not a HeurBridge method. Sources: runs/remote/densB_ibm04/runs/tool_runs_td0.5/ibm04/rows.jsonl, runs/remote/densB_ibm04/runs/tool_runs_td0.6/ibm04/rows.jsonl, runs/remote/dens_ibm04/runs/tool_runs_td0.7/ibm04/rows.jsonl, runs/remote/dens_ibm04/runs/tool_runs_td0.8/ibm04/rows.jsonl, runs/remote/densB_ibm06/runs/tool_runs_td0.5/ibm06/rows.jsonl, runs/remote/densB_ibm06/runs/tool_runs_td0.6/ibm06/rows.jsonl, runs/remote/dens_ibm06/runs/tool_runs_td0.7/ibm06/rows.jsonl, runs/remote/dens_ibm06/runs/tool_runs_td0.8/ibm06/rows.jsonl, runs/remote/densB_ibm10/runs/tool_runs_td0.5/ibm10/rows.jsonl, runs/remote/densB_ibm10/runs/tool_runs_td0.6/ibm10/rows.jsonl, runs/remote/dens_ibm10/runs/tool_runs_td0.7/ibm10/rows.jsonl, runs/remote/dens_ibm10/runs/tool_runs_td0.8/ibm10/rows.jsonl, runs/remote/densB_ibm12/runs/tool_runs_td0.5/ibm12/rows.jsonl, runs/remote/densB_ibm12/runs/tool_runs_td0.6/ibm12/rows.jsonl, runs/remote/dens_ibm12/runs/tool_runs_td0.7/ibm12/rows.jsonl, runs/remote/dens_ibm12/runs/tool_runs_td0.8/ibm12/rows.jsonl.
+Exploratory; a tool parameter, not a HeurBridge method. Sources: runs/remote/dens7_a/runs/tool_runs_td0.7/ibm01/rows.jsonl, runs/remote/dens7_a/runs/tool_runs_td0.7/ibm02/rows.jsonl, runs/remote/dens7_a/runs/tool_runs_td0.7/ibm03/rows.jsonl, runs/remote/dens7_b/runs/tool_runs_td0.7/ibm07/rows.jsonl, runs/remote/dens7_b/runs/tool_runs_td0.7/ibm09/rows.jsonl, runs/remote/dens7_b/runs/tool_runs_td0.7/ibm11/rows.jsonl, runs/remote/dens7_c/runs/tool_runs_td0.7/ibm13/rows.jsonl, runs/remote/dens7_c/runs/tool_runs_td0.7/ibm14/rows.jsonl, runs/remote/dens7_c/runs/tool_runs_td0.7/ibm18/rows.jsonl, runs/remote/densB_ibm04/runs/tool_runs_td0.5/ibm04/rows.jsonl, runs/remote/densB_ibm04/runs/tool_runs_td0.6/ibm04/rows.jsonl, runs/remote/dens_ibm04/runs/tool_runs_td0.7/ibm04/rows.jsonl, runs/remote/dens_ibm04/runs/tool_runs_td0.8/ibm04/rows.jsonl, runs/remote/densB_ibm06/runs/tool_runs_td0.5/ibm06/rows.jsonl, runs/remote/densB_ibm06/runs/tool_runs_td0.6/ibm06/rows.jsonl, runs/remote/dens_ibm06/runs/tool_runs_td0.7/ibm06/rows.jsonl, runs/remote/dens_ibm06/runs/tool_runs_td0.8/ibm06/rows.jsonl, runs/remote/densB_ibm10/runs/tool_runs_td0.5/ibm10/rows.jsonl, runs/remote/densB_ibm10/runs/tool_runs_td0.6/ibm10/rows.jsonl, runs/remote/dens_ibm10/runs/tool_runs_td0.7/ibm10/rows.jsonl, runs/remote/dens_ibm10/runs/tool_runs_td0.8/ibm10/rows.jsonl, runs/remote/densB_ibm12/runs/tool_runs_td0.5/ibm12/rows.jsonl, runs/remote/densB_ibm12/runs/tool_runs_td0.6/ibm12/rows.jsonl, runs/remote/dens_ibm12/runs/tool_runs_td0.7/ibm12/rows.jsonl, runs/remote/dens_ibm12/runs/tool_runs_td0.8/ibm12/rows.jsonl.
 
 ## 8 The tool started from a given macro layout (endpoint: median J over fresh f1 seeds 1-3)
 
@@ -150,6 +164,23 @@ DREAMPlace's mixed-size run normally starts every object near the die centre (ra
 Second pass (self) minus the first pass, paired by tool seed: -0.0156 on average, lower in 20 of 24, one-sided Wilcoxon p = 0.000284 (exploratory). Cost: two tool runs, no f1 run to choose.
 
 Sources: runs/remote/warm_ibm04/runs/warm_tool/ibm04/rows.jsonl, runs/remote/warm_ibm06/runs/warm_tool/ibm06/rows.jsonl, runs/remote/warm_ibm07/runs/warm_tool/ibm07/rows.jsonl.
+
+## 9 On top of the tool at density 0.6 (endpoint: median J over fresh f1 seeds 1-3)
+
+Second pass: the tool at 0.6 started from its own first-pass layout (two tool runs). Heuristic start: the tool at 0.6 started from the seeding campaign's best heuristic or local-search layouts instead of its random start (one tool run each). Flip: the orientation pass on the first-pass layout. Per cell: mean J over 8 cases; the reference columns are the first pass at 0.6 (one run) and its best of 2 and 4 by the selection seed.
+
+| design | first pass | best of 2 | best of 4 | second pass | heuristic start | flip |
+|---|---|---|---|---|---|---|
+| ibm04 | 0.4156 | 0.4145 | 0.4140 | 0.4276 | 0.4252 | 0.4213 |
+| ibm06 | 0.4171 | 0.4163 | 0.4154 | 0.4257 | 0.4415 | 0.4167 |
+| ibm10 | 0.4493 | 0.4466 | 0.4449 | 0.4470 | 0.4442 | 0.4483 |
+| ibm12 | 0.4172 | 0.4163 | 0.4161 | 0.9696 | 0.4321 | - |
+
+- Second pass minus the first pass (paired by tool seed): +0.1427, lower in 11 of 32, one-sided Wilcoxon p = 1; minus the first pass's best of 2: +0.1440, p = 1.
+- Heuristic start against the first pass (unpaired): mean +0.0110, one-sided Mann-Whitney p = 1; against its best of 2: mean +0.0123, p = 1.
+- Flip minus the first pass (paired by tool seed): +0.0014, lower in 14 of 24, one-sided Wilcoxon p = 0.698; minus the first pass's best of 2: +0.0030, p = 0.999.
+
+Exploratory. Sources: runs/remote/pass2_a/runs/warm_tool_td0.6/ibm04/rows.jsonl, runs/remote/heur06_a/runs/warm_tool_td0.6_heur/ibm04/rows.jsonl, runs/remote/flip06/runs/flip_td0.6/ibm04/rows.jsonl, runs/remote/pass2_a/runs/warm_tool_td0.6/ibm06/rows.jsonl, runs/remote/heur06_a/runs/warm_tool_td0.6_heur/ibm06/rows.jsonl, runs/remote/flip06/runs/flip_td0.6/ibm06/rows.jsonl, runs/remote/pass2_b/runs/warm_tool_td0.6/ibm10/rows.jsonl, runs/remote/heur06_a/runs/warm_tool_td0.6_heur/ibm10/rows.jsonl, runs/remote/flip06/runs/flip_td0.6/ibm10/rows.jsonl, runs/remote/pass2_c/runs/warm_tool_td0.6/ibm12/rows.jsonl, runs/remote/heur06_b/runs/warm_tool_td0.6_heur/ibm12/rows.jsonl.
 
 ## Notes
 

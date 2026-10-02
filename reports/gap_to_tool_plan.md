@@ -12,10 +12,10 @@
 - Confirmed (pre-registered): the co-trained bridge beats the non-learning partners (G0'; reports/E0_partner_ablation.md:44).
 - Also measured: every partner's mean J, and every bridge-refined layout, stays above 0.45, the tool's own
   mixed-size macro placement; the bridge lowers mean J by 1.9-6.9 % per design against the raw heuristic
-  (HANDOFF.md:205-207). Mean J of the co-trained bridge: 0.5579 on ISPD2005 (reports/E0_partner_ablation.md:27),
+  (HANDOFF.md:218-220). Mean J of the co-trained bridge: 0.5579 on ISPD2005 (reports/E0_partner_ablation.md:27),
   0.6004 on the held-out IBM designs ibm08 and ibm12 (reports/E0_partner_ablation_ibm_heldout.md:27), against 0.45.
   *Pre-registered confirmatory result (E0) plus its descriptive context.*
-- Seeding: the heuristics beat the tool on 2 of 25 Track-A designs only (reports/PROGRESS.md:277-278); on ISPD2005
+- Seeding: the heuristics beat the tool on 2 of 25 Track-A designs only (reports/PROGRESS.md:276-277); on ISPD2005
   no layout is below the baseline (reports/T2_trackA_ispd_dreamplace.md:36). *Development / descriptive.*
 
 ## 2 Why the bridge cannot reach the tool today (evidence)
@@ -37,7 +37,7 @@
    reports/sketch_predictor_s2.md:38). *Negative results.*
 5. **Narrow data.** Round 0 has 1,608 pairs from 13 IBM designs, and later rounds added no new information
    (reports/T3_algorithmR_trackA.md:55-60). Known data defect: on 15 of 17 IBM designs the top elite's cluster target
-   was a quadratic placement (CHANGELOG.md:158-162). It affects clusters, not macro targets.
+   was a quadratic placement (CHANGELOG.md:166-170). It affects clusters, not macro targets.
 
 ## 3 Levers
 

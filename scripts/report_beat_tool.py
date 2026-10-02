@@ -288,6 +288,27 @@ def main():
                      "one-sided Wilcoxon p = %.3g; vs density 0.9 best of 4 (four times the runs): %+.4f, lower in %d of %d, "
                      "p = %.3g." % (t, (s - rs).mean(), int((s < rs).sum()), len(s), wilcoxon_less(s, rs)["p"],
                                      (s - rb).mean(), int((s < rb).sum()), len(s), wilcoxon_less(s, rb)["p"]))
+        L.append("- The densities 0.8, 0.6 and 0.5 were tried on ibm04, ibm06, ibm10 and ibm12 only, designs where a lower "
+                 "density helps; at 0.7 on 13 designs the effect depends on the design (rows above).")
+        selj = lambda r: r["J_select"]["tool"] if "J_select" in r else math.inf
+        frj = lambda r: r["J_eval"]["tool"] if "J_select" in r else math.inf
+        for t in [x for x in tds if x != "0.9"]:
+            pa, pb = [], []
+            for d in td_rows:
+                ref = tool_rows.get(d)
+                rows = (td_rows[d].get(t) or (None,))[0]
+                if not ref or not rows or len(ref) != len(rows):
+                    continue
+                S = len(ref)
+                for i in range(S):
+                    pa.append(frj(min([ref[i], rows[i]], key=selj)))
+                    pb.append(frj(min([ref[i], ref[(i + 1) % S]], key=selj)))
+            if pa:
+                x, y = np.array(pa), np.array(pb)
+                L.append("- Two densities {0.9, %s} (the seed-s run at each, the better by the selection seed) vs two seeds at "
+                         "0.9 (s and s+1), same number of runs: lower in %d of %d, higher in %d, median %.4f vs %.4f, one-sided "
+                         "Wilcoxon p = %.3g." % (t, int((x < y).sum()), len(x), int((x > y).sum()), np.median(x), np.median(y),
+                                                 wilcoxon_less(x, y)["p"]))
         comp = []
         for d in sorted(td_rows, key=lambda x: int(x[3:])):
             for t, (rows, _) in sorted(td_rows[d].items(), reverse=True):

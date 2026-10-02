@@ -11,7 +11,7 @@
 
 The first port, initial positions, is disproven for DREAMPlace. In demo 1 the sketch start was better in 28 cases
 and worse in 36 (p = 0.972, reports/demo_sketch_start.md:34). In demo 2, holding the sketch start made J worse by
-+1.4 % (2 better, 21 worse) and cell widening +0.6 % (reports/PROGRESS.md:252-254). DREAMPlace reaches nearly the
++1.4 % (2 better, 21 worse) and cell widening +0.6 % (reports/PROGRESS.md:251-253). DREAMPlace reaches nearly the
 same placement from any start (reports/demo_sketch_start.md:41). *Negative results.* A sketch that only predicts the
 tool's own result cannot improve it; a hint must prescribe something the tool lacks
 (HEURBRIDGE_PLAN_downstream_aware.md:73-86).

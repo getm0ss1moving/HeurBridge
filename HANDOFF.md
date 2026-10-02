@@ -4,6 +4,19 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
+## 2026-10-03 — Session 4 (05:45): density effect is design-dependent; nothing helps on top of 0.6; RL#3 registered
+
+- **Density 0.7 on 13 IBM designs** (`dens7_*`, fetched): lower than 0.9 in 67 of 104 cases, losses on ibm01, ibm11,
+  ibm13, ibm18. RL#2 (0.6) rests on four favourable designs; it runs as registered.
+- **On top of 0.6** (`pass2_*`, `flip06`, `heur06_*`, fetched): second pass, heuristic starts, flip: none helps.
+- **RL#3 registered 05:35** (`reports/portfolio_preregistration.md`, alpha 0.00625): two densities {0.9, 0.6} vs two
+  seeds at 0.9, computed from RL#1's and RL#2's runs: after all `rlc_*` and `rtd_*` jobs are fetched, run
+  `python scripts/relink_confirm.py analyze`, then `python scripts/density_confirm.py analyze` and `... analyze3`, each
+  once.
+- **Owner's decision needed:** D9 (direction after the Track-A evidence), D6 (hold-gate rule), D8 (staged deletions).
+
+---
+
 ## 2026-10-03 — Session 4 (05:10): relinking does not generalize; the tool's target density; RL#2 registered
 
 - **IBM relinking complete** (`relinkall_a`-`_d` fetched): on all 17 designs relinking ties the tool's best of four
