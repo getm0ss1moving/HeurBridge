@@ -171,8 +171,9 @@ def test_density_confirm_units_pair_the_seed_with_rl1s_best_of_four(tmp_path):
         p.mkdir(parents=True)
     mrows = [{"tool_seed": s, "J_select": {"tool": 0.4}, "J_eval": {"tool": 0.40 + s / 1000}, "cost_s": {"tool": 30.0, "f1": 20.0}}
              for s in range(7)]                                     # seed 7 missing
-    rrows = [{"tool_seed": s, "J_eval": {"tool": 0.45, "best4": 0.44}} for s in range(8)]
-    trows = [{"tool_seed": s, "J_select": {"tool": 0.45}, "cost_s": {"tool": 20.0, "f1": 20.0}} for s in range(8)]
+    rrows = [{"tool_seed": s, "J_eval": {"tool": 0.45, "best2": 0.445, "best4": 0.44}} for s in range(8)]
+    trows = [{"tool_seed": s, "J_select": {"tool": 0.45 if s else 0.3}, "J_eval": {"tool": 0.45},
+              "cost_s": {"tool": 20.0, "f1": 20.0}} for s in range(8)]
     for p, rows in ((m, mrows), (r, rrows), (t, trows)):
         (p / "rows.jsonl").write_text("".join(json.dumps(x) + "\n" for x in rows))
     U, fails, srcs = C.units(tmp_path, "rtd_", "rlc_")
@@ -180,3 +181,5 @@ def test_density_confirm_units_pair_the_seed_with_rl1s_best_of_four(tmp_path):
     assert len(U) == 64 and [u["method"] for u in a1[:2]] == [0.40, 0.401] and a1[0]["best4_09"] == 0.44
     assert math.isinf(a1[7]["method"]) and any("adaptec1 seed 7" in f for f in fails)
     assert a1[0]["cost_method"] == 50.0 and a1[0]["cost_best4"] == 160.0
+    assert a1[0]["portfolio"] == 0.45 and a1[1]["portfolio"] == 0.401   # picked by the selection seed (seed 0: 0.9 run)
+    assert a1[7]["portfolio"] == 0.45 and a1[0]["best2_09"] == 0.445     # a failed density run falls back to 0.9
