@@ -8,8 +8,10 @@ Per design and tool seed s:
                {0, 0.25, 0.5, 1}, picked by f1 with the SELECTION seed (a = 0 is tool_s itself)
   best2_s      the tool's best of two seeds (s and s + offset), picked by f1 with the selection seed; about the same
                wall-clock as tool_s + three extra f1 runs
-Every picked layout is then scored with fresh EVALUATION seeds the selection never saw; the endpoint is the mean J
-over those seeds, so a pick cannot profit from the selection seed's noise.  Wall-clock of every tool run, f1 run and
+Every picked layout is then scored with fresh EVALUATION seeds the selection never saw; the endpoint is the median J
+over those seeds (as the tool's own baseline is a median over three seeds: a single DREAMPlace run can blow the
+overflow term up, e.g. J 0.44 under one seed and 1.8 under another on ibm08), so a pick cannot profit from the
+selection seed's noise.  Picked layouts are saved (layouts_<design>.npz).  Wall-clock of every tool run, f1 run and
 refiner call is recorded.
 
   python scripts/tool_refine_eval.py --designs ibm04 --tool-seeds 0,1,2,3 --pair-offset 100 \
@@ -64,7 +66,7 @@ def main():
     ap.add_argument("--tool-seeds", default="0,1,2,3")
     ap.add_argument("--pair-offset", type=int, default=100, help="best-of-2 pairs seed s with seed s + offset")
     ap.add_argument("--select-seed", type=int, default=0, help="f1 seed used to pick (guard and best-of-2)")
-    ap.add_argument("--eval-seeds", default="1,2", help="fresh f1 seeds for the endpoint")
+    ap.add_argument("--eval-seeds", default="1,2,3", help="fresh f1 seeds for the endpoint (median)")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
     out = Path(a.out)
@@ -90,6 +92,7 @@ def main():
 
         def fresh(lay, tag):
             return {s: f1(e, lay, "%s.e%d" % (tag, s))[0] for s, e in evs.items()}
+        saved = {}
         for s in (int(x) for x in a.tool_seeds.split(",")):
             row = {"design": des.id, "tool_seed": s}
             T, why, t_tool = tool_layout(d, l, b, s, work)
@@ -127,13 +130,20 @@ def main():
             ft, fr = fresh(T, "s%d.tool" % s), (fresh(R, "s%d.ref" % s) if al_best else None)
             fb = fresh(B2, "s%d.best2" % s) if B2 is not T else ft
             fr = fr if fr is not None else ft
-            row["J_eval"] = {"tool": float(np.mean(list(ft.values()))), "refine": float(np.mean(list(fr.values()))),
-                             "best2": float(np.mean(list(fb.values())))}
+            row["J_eval"] = {"tool": float(np.median(list(ft.values()))), "refine": float(np.median(list(fr.values()))),
+                             "best2": float(np.median(list(fb.values())))}
+            row["J_eval_mean"] = {"tool": float(np.mean(list(ft.values()))), "refine": float(np.mean(list(fr.values()))),
+                                  "best2": float(np.mean(list(fb.values())))}
+            mm = des.is_macro & ~des.is_fixed
+            for k, lay_k in (("tool", T), ("refine", R), ("best2", B2)):
+                saved.setdefault(k, []).append(np.c_[lay_k.pos[mm], lay_k.orient[mm]])
             row["J_eval_seeds"] = {"tool": ft, "refine": fr, "best2": fb}
             rows_f.write(json.dumps(row) + "\n")
             rows_f.flush()
             print(json.dumps({k: row[k] for k in ("design", "tool_seed", "J_select", "J_eval", "cost_s", "refine_alpha")
                               if k in row}), flush=True)
+        if saved:
+            np.savez(out / ("layouts_%s.npz" % des.id), **{k: np.stack(v) for k, v in saved.items()})
 
 
 if __name__ == "__main__":
