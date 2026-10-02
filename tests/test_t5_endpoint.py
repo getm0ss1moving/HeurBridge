@@ -56,6 +56,6 @@ def test_rank_stats_and_regret():
     import eval_lookahead_rank as R
     actual = np.arange(10, dtype=float)
     s = R.rank_stats(actual[::-1].copy(), actual)                  # the worst possible ordering
-    assert s["kendall_tau"] == -1.0 and s["top5_recall"] == 0.0 and s["regret@1"] == 9.0
+    assert abs(s["kendall_tau"] + 1.0) < 1e-12 and s["top5_recall"] == 0.0 and s["regret@1"] == 9.0
     s = R.rank_stats(actual.copy(), actual)                        # the perfect ordering
-    assert s["kendall_tau"] == 1.0 and s["regret@1"] == 0.0 and abs(s["random_regret@1"] - 4.5) < 1e-12
+    assert abs(s["kendall_tau"] - 1.0) < 1e-12 and s["regret@1"] == 0.0 and abs(s["random_regret@1"] - 4.5) < 1e-12
