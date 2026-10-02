@@ -423,6 +423,33 @@ def main():
                              k[0].upper() + k[1:], (x - y).mean(), int((x < y).sum()), len(x), wilcoxon_less(x, y)["p"],
                              (c - e).mean(), wilcoxon_less(c, e)["p"]))
         L += ["", "Exploratory. Sources: %s." % ", ".join(src for v in extra.values() for _, src in v.values()), ""]
+    # 10 local search from the tool's layout (refiner pairs)
+    ls_rows = []
+    for f in sorted(glob.glob(str(R / "lspairs_[a-z]" / "runs" / "tool_ls" / "*" / "rows.jsonl"))):
+        ls_rows += [dict(r, _src=str(Path(f).relative_to(ROOT))) for r in jl(f)]
+    ls_ok = [r for r in ls_rows if r.get("median_fresh")]
+    if ls_ok:
+        L += ["## 10 Local search from the tool's layout (endpoint: median J over fresh f1 seeds 1-3)", "",
+              "Shift-only local search from the tool's layout at density 0.9 (scripts/tool_ls_pairs.py; 4 tool seeds per "
+              "design), each step scored by f1 with the selection seed; the result is kept as a refiner pair only if its "
+              "fresh-seed median is lower than the tool layout's. Per design: runs kept, mean change of the fresh-seed "
+              "median [min, max].", "", "| design | runs | kept | change |", "|---|---|---|---|"]
+        by = {}
+        for r in ls_ok:
+            by.setdefault(r["design"], []).append(r)
+        for d in sorted(by, key=lambda x: int(x[3:])):
+            g = np.array([r["median_fresh"]["ls"] - r["median_fresh"]["tool"] for r in by[d]])
+            L.append("| %s | %d | %d | %+.4f [%+.4f, %+.4f] |" % (d, len(g), sum(bool(r.get("kept")) for r in by[d]), g.mean(),
+                                                                g.min(), g.max()))
+        g = np.array([r["median_fresh"]["ls"] - r["median_fresh"]["tool"] for r in ls_ok])
+        L += ["", "All %d runs: kept %d; change %+.4f on average, median %+.4f; lower in %d, higher in %d. Cost: median %d f1 "
+                  "runs and %.0f s per search against %.0f s for a tool run. Failures: %s. Sources: %s." % (
+                      len(g), sum(bool(r.get("kept")) for r in ls_ok), g.mean(), np.median(g), int((g < 0).sum()),
+                      int((g > 0).sum()), int(np.median([r["ls_evals"] for r in ls_ok])),
+                      np.median([r["ls_s"] for r in ls_ok]), np.median([r["tool_s"] for r in ls_ok]),
+                      ", ".join("%s seed %s: %s" % (r["design"], r.get("tool_seed"), r.get("failure")) for r in ls_rows
+                                if r.get("failure")) or "none",
+                      ", ".join(sorted({r["_src"] for r in ls_rows}))), ""]
     L += ["## Notes", "",
           "- f1 is noisy: the same macro layout scored with another DREAMPlace seed changes J, and on some designs a run blows "
           "the overflow term up (ibm08: J 0.44 under one seed, 1.5-4.6 under another). Every comparison above therefore "

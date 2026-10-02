@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Report | beat_tool_track_a |
-| Date | 2026-10-03 05:34 |
+| Date | 2026-10-03 07:32 |
 | Track | A (IBM; f1 = DREAMPlace GP + LG with macros fixed; J against the seeding M1 baseline, 0.45 by construction) |
 | Status of the claim | **exploratory demo (no claim)**; any claim needs the pre-registered test drafted from it |
 | Owner's aim (3 Oct) | macro layouts with mean J below 0.45 that beat the tool on output and on cost |
@@ -181,6 +181,26 @@ Second pass: the tool at 0.6 started from its own first-pass layout (two tool ru
 - Flip minus the first pass (paired by tool seed): +0.0014, lower in 14 of 24, one-sided Wilcoxon p = 0.698; minus the first pass's best of 2: +0.0030, p = 0.999.
 
 Exploratory. Sources: runs/remote/pass2_a/runs/warm_tool_td0.6/ibm04/rows.jsonl, runs/remote/heur06_a/runs/warm_tool_td0.6_heur/ibm04/rows.jsonl, runs/remote/flip06/runs/flip_td0.6/ibm04/rows.jsonl, runs/remote/pass2_a/runs/warm_tool_td0.6/ibm06/rows.jsonl, runs/remote/heur06_a/runs/warm_tool_td0.6_heur/ibm06/rows.jsonl, runs/remote/flip06/runs/flip_td0.6/ibm06/rows.jsonl, runs/remote/pass2_b/runs/warm_tool_td0.6/ibm10/rows.jsonl, runs/remote/heur06_a/runs/warm_tool_td0.6_heur/ibm10/rows.jsonl, runs/remote/flip06/runs/flip_td0.6/ibm10/rows.jsonl, runs/remote/pass2_c/runs/warm_tool_td0.6/ibm12/rows.jsonl, runs/remote/heur06_b/runs/warm_tool_td0.6_heur/ibm12/rows.jsonl.
+
+## 10 Local search from the tool's layout (endpoint: median J over fresh f1 seeds 1-3)
+
+Shift-only local search from the tool's layout at density 0.9 (scripts/tool_ls_pairs.py; 4 tool seeds per design), each step scored by f1 with the selection seed; the result is kept as a refiner pair only if its fresh-seed median is lower than the tool layout's. Per design: runs kept, mean change of the fresh-seed median [min, max].
+
+| design | runs | kept | change |
+|---|---|---|---|
+| ibm01 | 4 | 3 | -0.0007 [-0.0015, +0.0002] |
+| ibm02 | 4 | 4 | -0.0007 [-0.0015, -0.0002] |
+| ibm03 | 4 | 2 | -0.0027 [-0.0091, +0.0009] |
+| ibm07 | 4 | 2 | -0.0010 [-0.0046, +0.0013] |
+| ibm09 | 4 | 3 | -0.0118 [-0.0371, +0.0019] |
+| ibm10 | 4 | 4 | -0.0004 [-0.0008, -0.0000] |
+| ibm11 | 4 | 4 | -0.0031 [-0.0070, -0.0013] |
+| ibm13 | 4 | 3 | -0.0010 [-0.0030, +0.0006] |
+| ibm14 | 4 | 1 | +0.0001 [-0.0002, +0.0003] |
+| ibm15 | 4 | 3 | -0.0004 [-0.0013, +0.0006] |
+| ibm18 | 4 | 2 | -0.0000 [-0.0006, +0.0007] |
+
+All 44 runs: kept 31; change -0.0020 on average, median -0.0005; lower in 31, higher in 13. Cost: median 81 f1 runs and 843 s per search against 28 s for a tool run. Failures: none. Sources: runs/remote/lspairs_a/runs/tool_ls/a/rows.jsonl, runs/remote/lspairs_b/runs/tool_ls/b/rows.jsonl, runs/remote/lspairs_c/runs/tool_ls/c/rows.jsonl, runs/remote/lspairs_d/runs/tool_ls/d/rows.jsonl.
 
 ## Notes
 

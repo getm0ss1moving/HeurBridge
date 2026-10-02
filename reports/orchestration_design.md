@@ -58,5 +58,10 @@ children per arm about 4-5 hours, two arms (LLM, control) on two GPUs in paralle
 - **f1's heavy tail:** some layouts blow up under other f1 seeds (ibm08; ibm09 at 0.7; ibm12 after a second pass at
   0.6), which a one-seed selection cannot see; the endpoint's fresh seeds expose it, and the evaluator could add a
   second selection seed at extra cost.
+- **Simple features do not predict where a lower density helps:** across the 13 IBM designs at 0.7, the per-design
+  change of the median J correlates with none of base RUDY overflow, macro area share, macro count or net count
+  (Spearman |rho| <= 0.31, p >= 0.30; computed from the run files under runs/remote/dens*_* and the benchmark files,
+  3 Oct). A policy would then have to try configurations and keep the best (as RL#3 does), not predict one; the
+  evolved programs would have to find features that do predict, or the budget split between trying and refining.
 - **The density effect may not transfer:** RL#2 and RL#3 on ISPD2005 answer this first; if both fail, this design
   should be revisited before any run.
