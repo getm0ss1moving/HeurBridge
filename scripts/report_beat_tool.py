@@ -341,6 +341,67 @@ def main():
                       "Wilcoxon p = %.3g (exploratory). Cost: two tool runs, no f1 run to choose." % (
                           (S - Rr).mean(), int((S < Rr).sum()), len(S), wilcoxon_less(S, Rr)["p"])]
         L += ["", "Sources: %s." % ", ".join(src for v in wm.values() for _, src in v), ""]
+    # 9 on top of the tool at density 0.6
+    first06 = {d: v["0.6"][0] for d, v in td_rows.items() if "0.6" in v} if td_rows else {}
+    extra = {}
+    for kind, pat in (("second pass", "warm_tool_td0.6"), ("heuristic start", "warm_tool_td0.6_heur")):
+        for f in sorted(glob.glob(str(R / "*" / "runs" / pat / "*" / "rows.jsonl"))):
+            rows = jl(f)
+            if rows:
+                extra.setdefault(rows[0]["design"], {})[kind] = (np.array([r["J_eval"] for r in rows], float),
+                                                                 str(Path(f).relative_to(ROOT)))
+    for f in sorted(glob.glob(str(R / "*" / "runs" / "flip_td0.6" / "*" / "rows.jsonl"))):
+        rows = jl(f)
+        if rows:
+            extra.setdefault(rows[0]["design"], {})["flip"] = (np.array([r["J_eval"]["flip"] for r in rows], float),
+                                                              str(Path(f).relative_to(ROOT)))
+    if extra and first06:
+        from heurbridge.stats.paired import wilcoxon_less
+        kinds = ("second pass", "heuristic start", "flip")
+        L += ["## 9 On top of the tool at density 0.6 (endpoint: median J over fresh f1 seeds 1-3)", "",
+              "Second pass: the tool at 0.6 started from its own first-pass layout (two tool runs). Heuristic start: the "
+              "tool at 0.6 started from the seeding campaign's best heuristic or local-search layouts instead of its "
+              "random start (one tool run each). Flip: the orientation pass on the first-pass layout. Per cell: mean J over "
+              "8 cases; the reference columns are the first pass at 0.6 (one run) and its best of 2 and 4 by the selection "
+              "seed.", "",
+              "| design | first pass | best of 2 | best of 4 | " + " | ".join(kinds) + " |", "|---|---|---|---|" + "---|" * len(kinds)]
+        P = {k: ([], []) for k in kinds}
+        P2 = {k: ([], []) for k in kinds}
+        for d in sorted(extra, key=lambda x: int(x[3:])):
+            rows0 = first06.get(d)
+            if not rows0:
+                continue
+            J0 = np.array([r["J_eval"]["tool"] if "J_select" in r else math.inf for r in rows0])
+            b2 = bk(rows0, 2)
+            cells = []
+            for k in kinds:
+                if k in extra[d]:
+                    J = extra[d][k][0]
+                    cells.append("%.4f" % J.mean())
+                    n = min(len(J), len(J0))
+                    P[k][0].extend(J[:n]); P[k][1].extend(J0[:n])
+                    P2[k][0].extend(J[:n]); P2[k][1].extend(b2[:n])
+                else:
+                    cells.append("-")
+            L.append("| %s | %.4f | %.4f | %.4f | %s |" % (d, J0.mean(), b2.mean(), bk(rows0, 4).mean(), " | ".join(cells)))
+        L.append("")
+        from scipy.stats import mannwhitneyu
+        for k in kinds:
+            x, y = np.array(P[k][0]), np.array(P[k][1])
+            if not len(x):
+                continue
+            c, e = np.array(P2[k][0]), np.array(P2[k][1])
+            if k == "heuristic start":                      # its starts are not tied to the tool's seeds: unpaired
+                L.append("- Heuristic start against the first pass (unpaired): mean %+.4f, one-sided Mann-Whitney p = %.3g; "
+                         "against its best of 2: mean %+.4f, p = %.3g." % (
+                             x.mean() - y.mean(), mannwhitneyu(x, y, alternative="less").pvalue,
+                             c.mean() - e.mean(), mannwhitneyu(c, e, alternative="less").pvalue))
+            else:
+                L.append("- %s minus the first pass (paired by tool seed): %+.4f, lower in %d of %d, one-sided Wilcoxon p = %.3g; "
+                         "minus the first pass's best of 2: %+.4f, p = %.3g." % (
+                             k[0].upper() + k[1:], (x - y).mean(), int((x < y).sum()), len(x), wilcoxon_less(x, y)["p"],
+                             (c - e).mean(), wilcoxon_less(c, e)["p"]))
+        L += ["", "Exploratory. Sources: %s." % ", ".join(src for v in extra.values() for _, src in v.values()), ""]
     L += ["## Notes", "",
           "- f1 is noisy: the same macro layout scored with another DREAMPlace seed changes J, and on some designs a run blows "
           "the overflow term up (ibm08: J 0.44 under one seed, 1.5-4.6 under another). Every comparison above therefore "
