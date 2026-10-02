@@ -61,11 +61,15 @@ def main():
                     fh.write(json.dumps(row) + "\n")
                     continue
                 t0 = time.time()
-                js = float(ev_sel.score(ev_sel.evaluate(des, T, "s%d.sel" % s, work), base).J_inf)
+                rec = ev_sel.evaluate(des, T, "s%d.sel" % s, work)
+                js = float(ev_sel.score(rec, base).J_inf)
                 t_f1 = time.time() - t0
-                fresh = {e.seed: float(e.score(e.evaluate(des, T, "s%d.e%d" % (s, e.seed), work), base).J_inf) for e in evs}
+                recs = {e.seed: e.evaluate(des, T, "s%d.e%d" % (s, e.seed), work) for e in evs}
+                fresh = {k: float(evs[0].score(r, base).J_inf) for k, r in recs.items()}
+                comp = lambda r: {"hpwl_um": r.get("hpwl_um"), "rudy_of_pct": r.get("rudy_of_pct")}
                 row.update({"J_select": {"tool": js}, "J_eval": {"tool": float(np.median(list(fresh.values())))},
-                            "J_eval_seeds": {"tool": fresh}, "cost_s": {"tool": round(t_tool, 1), "f1": round(t_f1, 1)}})
+                            "J_eval_seeds": {"tool": fresh}, "cost_s": {"tool": round(t_tool, 1), "f1": round(t_f1, 1)},
+                            "components": {"select": comp(rec), "eval": {k: comp(r) for k, r in recs.items()}}})
                 saved.append(np.c_[T.pos[mm], T.orient[mm]])
                 fh.write(json.dumps(row) + "\n")
                 fh.flush()
