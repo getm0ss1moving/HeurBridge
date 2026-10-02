@@ -6,6 +6,19 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 
 ## [Unreleased]
 
+### Owner's aim: beat the tool on Track A (3 Oct 03:30, exploratory)
+- New scripts: `beat_tool_demo.py` (the tool, the tool with more seeds, the frozen bridge on the tool's layout, local
+  search from it), `beat_tool_band.py` (f1-seed bands), `tool_refine_eval.py` (tool + refiner vs best of two at equal
+  compute; picks by one f1 seed, judged by the median of three fresh seeds), `relink_eval.py` (relinking two tool runs
+  vs best of k), `tool_runs.py`, `tool_ls_pairs.py` (refiner pairs), `report_beat_tool.py`; server wrappers
+  `scripts/server/beat_tool_demo.sh`, `scripts/server/trackA_gpu.sh`. Tests: `tests/test_beat_tool.py`.
+- Results so far in `reports/beat_tool_track_a.md`: relinking beats the tool's best of three in 14 of 24 cases on three
+  held-out designs; the frozen bridge on the tool's layout ties with best of two; local search gains are small.
+- Finding: DREAMPlace's f1 is heavy-tailed on some designs (ibm08: J 0.44 under one seed, 1.5-4.6 under another), so
+  comparisons use fresh-seed medians. DREAMPlace's routability mode cannot run on the IBM Bookshelf benchmarks (no
+  routing capacities).
+- 227 set up for Track-A GPU jobs (copied environment, encrypted inputs with matching sha256).
+
 ### Results of the next-phase jobs (3 Oct 01:00)
 - **ariane133 diagnosis** (`reports/trackB_ariane133_diagnosis.md`): probes at f1 on five failed layouts. PLACE_DENSITY
   0.35 makes 4 of 5 evaluable (the fifth: GPL-0307); virtual timing-driven resizing makes 5 of 5 complete but leaves

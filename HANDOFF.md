@@ -4,6 +4,25 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
+## 2026-10-03 — Session 4 (03:30): owner's aim "mean J below 0.45, better than the tool on output and cost"
+
+- **Owner (3 Oct):** the first aim is a macro placer with mean J below 0.45, proven better than the tool on output and
+  on cost; I decide priorities (recorded in `reports/next_phase_decisions.md`, "Re-prioritization"). Also: use free GPUs
+  on other ports.
+- **GPU survey:** 227 has 3 idle RTX 3090s (set up from 225's environment, no downloads; encrypted inputs copied with
+  matching sha256; smoke test identical to 231's); 231 GPU 4 used (GPUs 0-3 are other users' per the earlier rule);
+  224 and 234 have no usable GPU; other ports refuse connections.
+- **Results (exploratory):** `reports/beat_tool_track_a.md` (`scripts/report_beat_tool.py` regenerates it from
+  `runs/remote/`). Relinking two tool runs is the lead; the frozen bridge on the tool's layout ties with the tool's best
+  of two; local-search gains are small but robust on 7 of 12 designs.
+- **Running:** `relinkall_a`-`_c` (227 GPUs 0-2), `relinkall_d` (231 GPU 4): tool runs and relinking on 14 designs;
+  `lspairs_a`-`_d` (225): refiner pairs. Fetch with `python scripts/hbv.py fetch --port <port> --run <job>`, then
+  regenerate the report.
+- **Not to forget:** a confirmatory test must use a family untouched by this exploration (ISPD2005), with the f1
+  noise handled by fresh-seed medians, and pre-registered before its run.
+
+---
+
 ## 2026-10-03 — Session 4 (01:00): ariane133 diagnosed, ariane136 bands, S2 augmentation; progress report updated
 
 - **Owner (3 Oct):** "keep on with the task and update your progress report".
