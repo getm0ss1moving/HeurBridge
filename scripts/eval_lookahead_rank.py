@@ -166,7 +166,7 @@ def run_design(name: str, a, model, s2_step: int, out: Path) -> dict:
             mus["coarse"] = (c_mu, fp)
             da["coarse"].append(da0(c_mu, quad, placed_mu, w))
         rec = {"k": int(k), "id": r["id"], "kind": r["kind"], "J": r["J"], "rwl_raw": (r.get("terms") or {}).get("rwl"),
-               "of_raw": (r.get("terms") or {}).get("of"), "coarse": info}
+               "of_raw": (r.get("terms") or {}).get("of"), "coarse_info": info}
         for p, (mu, cv) in mus.items():
             lp = lay.copy()
             lp.pos[cell_idx] = cells_from_clusters(cid, mu, cv, zdraw)
@@ -194,7 +194,7 @@ def run_design(name: str, a, model, s2_step: int, out: Path) -> dict:
            "s2_checkpoint_step": s2_step, "sanity_rel_err_max": max(sanity) if sanity else None,
            "da0_median": {p: float(np.median(v)) for p, v in da.items() if v}, "rank": {}}
     for p in PREDICTORS:
-        if p not in per[0]:
+        if not isinstance(per[0].get(p), dict) or "J" not in per[0][p]:
             continue
         pred = np.array([q[p]["J"] for q in per])
         res["rank"][p] = {"all": rank_stats(pred, actual)}

@@ -49,3 +49,13 @@ def test_decision_rule(tmp_path):
     assert r["R1"]["share"] == 0.75 and r["R1"]["pass"]           # 3 of 4 attempts evaluated with finite costs
     assert r["R2"]["pass"] and r["R3"]["units_lower"] == 5 and r["R3"]["pass"] and r["R4"]["pass"] and r["R5"]["pass"]
     assert r["propose_full_campaign"]
+
+
+def test_rank_stats_and_regret():
+    """scripts/eval_lookahead_rank.py: Kendall tau, top-5 recall and regret@k against random selection."""
+    import eval_lookahead_rank as R
+    actual = np.arange(10, dtype=float)
+    s = R.rank_stats(actual[::-1].copy(), actual)                  # the worst possible ordering
+    assert s["kendall_tau"] == -1.0 and s["top5_recall"] == 0.0 and s["regret@1"] == 9.0
+    s = R.rank_stats(actual.copy(), actual)                        # the perfect ordering
+    assert s["kendall_tau"] == 1.0 and s["regret@1"] == 0.0 and abs(s["random_regret@1"] - 4.5) < 1e-12
