@@ -15,12 +15,14 @@ import argparse
 import glob
 import json
 import math
+import sys
 import time
 from pathlib import Path
 
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 
 
 def jl(path):
@@ -152,6 +154,47 @@ def main():
                   (A["relink"][ok4] - A["best4"][ok4]).mean() if ok4.any() else float("nan"),
                   wil(A["relink"][ok4] - A["best4"][ok4]) if ok4.any() else float("nan"), int(ok4.sum()),
                   ", ".join(src for _, src in sorted(rl.values(), key=lambda v: v[1]))), ""]
+    # 5 consensus of k tool runs
+    cs = {}
+    for f in sorted(glob.glob(str(R / "cons*" / "runs" / "consensus" / "*" / "rows.jsonl"))):
+        rows = jl(f)
+        if rows:
+            cs[rows[0]["design"]] = (rows, str(Path(f).relative_to(ROOT)))
+    if cs:
+        L += ["## 5 Consensus of k tool runs vs the tool's best of k (endpoint: median J over fresh f1 seeds 1-3)", "",
+              "Consensus: the average of k tool layouts with their interchangeable macros matched (a free-support "
+              "barycenter), legalized by P_M; no f1 run picks it (cost: k tool runs). Best of k: k tool runs and k f1 "
+              "runs. Guard: the best of the consensus and the k runs by the selection seed (k tool runs, k + 1 f1 runs).", "",
+              "| design | k | windows | tool | best of k | consensus | guard | consensus below best of k (cases) | failures |",
+              "|---|---|---|---|---|---|---|---|---|"]
+        allv = {}
+        for d, (rows, src) in sorted(cs.items(), key=lambda kv: int(kv[0][3:])):
+            for k in sorted({r["k"] for r in rows}):
+                rk = [r for r in rows if r["k"] == k]
+                E = {c: np.array([r["J_eval"][c] for r in rk]) for c in ("tool", "best", "consensus", "guard")}
+                for c in E:
+                    allv.setdefault(k, {}).setdefault(c, []).extend(E[c])
+                nf = sum(len(r["failures"]) for r in rk)
+                fm = lambda v: "%.4f" % v.mean() if np.isfinite(v).all() else "+inf (%d)" % (~np.isfinite(v)).sum()
+                L.append("| %s | %d | %d | %s | %s | %s | %s | %d of %d (%d above) | %d |" % (
+                    d, k, len(rk), fm(E["tool"]), fm(E["best"]), fm(E["consensus"]), fm(E["guard"]),
+                    int((E["consensus"] < E["best"]).sum()), len(rk), int((E["consensus"] > E["best"]).sum()), nf))
+        from heurbridge.stats.paired import wilcoxon_less
+        fm = lambda v: "%.4f" % v.mean() if np.isfinite(v).all() else "+inf (%d)" % (~np.isfinite(v)).sum()
+        notes = []
+        for k, A in sorted(allv.items()):
+            A = {c: np.array(v, float) for c, v in A.items()}
+            L.append("| **all** | %d | %d | %s | %s | %s | %s | %d of %d (%d above) | |" % (
+                k, len(A["tool"]), fm(A["tool"]), fm(A["best"]), fm(A["consensus"]), fm(A["guard"]),
+                int((A["consensus"] < A["best"]).sum()), len(A["tool"]), int((A["consensus"] > A["best"]).sum())))
+            ok = np.isfinite(A["consensus"]) & np.isfinite(A["best"])
+            notes.append("k = %d: consensus minus best of k %+.4f on average over the %d finite cases, one-sided Wilcoxon "
+                         "p = %.3g (+inf kept); guard minus best of k %+.4f, p = %.3g. Windows overlap, so the cases are "
+                         "not independent (exploratory)." % (
+                             k, (A["consensus"][ok] - A["best"][ok]).mean() if ok.any() else float("nan"), int(ok.sum()),
+                             wilcoxon_less(A["consensus"], A["best"])["p"], (A["guard"] - A["best"]).mean(),
+                             wilcoxon_less(A["guard"], A["best"])["p"]))
+        L += [""] + notes + ["", "Sources: %s." % ", ".join(src for _, src in sorted(cs.values(), key=lambda v: v[1])), ""]
     L += ["## Notes", "",
           "- f1 is noisy: the same macro layout scored with another DREAMPlace seed changes J, and on some designs a run blows "
           "the overflow term up (ibm08: J 0.44 under one seed, 1.5-4.6 under another). Every comparison above therefore "
