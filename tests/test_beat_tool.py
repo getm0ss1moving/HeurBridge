@@ -145,3 +145,14 @@ def test_flip_pass_lowers_hpwl_and_keeps_positions():
         new.orient = o
         assert hpwl(des, new) <= hpwl(des, lay) + 1e-9
         assert st["macros_changed"] == int((o != lay.orient).sum())
+
+
+def test_trackb_test_shifts_fall_back_in_order_for_both_arms(monkeypatch):
+    """scripts/run_seed_orfs.tb_pairs: the six pre-registered shifts; a shift illegal for either arm is replaced by the
+    next fallback for both arms; a slot with no legal shift left is reported, never silently filled."""
+    import run_seed_orfs as R
+    bad = {("c", (2, 0)), ("r", (3, 0)), ("c", (0, 2)), ("r", (-3, 0)), ("c", (0, -2))}
+    monkeypatch.setattr(R, "shift_exact", lambda des, lay, dx, dy: None if (lay, (dx, dy)) in bad else (lay, (dx, dy)))
+    out = R.tb_pairs(None, "c", "r")
+    assert [o[1] for o in out] == [None, (-2, 0), (0, -1), None, (1, 1), (-1, -1)]
+    assert all(o[2] == ("c", o[1]) and o[3] == ("r", o[1]) for o in out if o[1] is not None)

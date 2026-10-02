@@ -133,6 +133,41 @@ def shifted_m1(des, m1, dx_sites: int, dy_rows: int):
     return None
 
 
+# reports/trackB_preregistration.md, Section 3: six fresh whole-layout shifts (sites, rows), the same for both arms;
+# a shift that leaves the core (for either arm) is replaced by the next fallback, in order, for both arms.
+TB_SHIFTS = ((2, 0), (-2, 0), (0, -1), (0, 2), (1, 1), (-1, -1))
+TB_FALLBACK = ((3, 0), (-3, 0), (0, -2))
+
+
+def shift_exact(des, lay0, dx_sites: int, dy_rows: int):
+    """The layout's macros shifted as a whole by exactly (dx, dy) sites / rows (no change of direction, never
+    re-legalized); None if that leaves the core or hits a fixed object (checked at zero halo, as shifted_m1)."""
+    from heurbridge.core import project
+    mm = des.is_macro & ~des.is_fixed
+    w, h = des.core_wh
+    sw, sh = des.site if des.site else (w / 1000.0, h / 1000.0)
+    lay = lay0.copy()
+    lay.pos[mm] = lay.pos[mm] + np.array([dx_sites * sw / w, dy_rows * sh / h])
+    return lay if project.check_macros(des, lay, 0.0)["ok"] else None
+
+
+def tb_pairs(des, cand, ref):
+    """[(slot, (dx, dy), candidate layout, reference layout)]: the pre-registered shifts with their fallbacks; a slot
+    without a legal common shift has (None, None, None, None) after its index."""
+    out, fb = [], list(TB_FALLBACK)
+    for k, sh in enumerate(TB_SHIFTS, 1):
+        while True:
+            c, r = shift_exact(des, cand, *sh), shift_exact(des, ref, *sh)
+            if c is not None and r is not None:
+                out.append((k, sh, c, r))
+                break
+            if not fb:
+                out.append((k, None, None, None))
+                break
+            sh = fb.pop(0)
+    return out
+
+
 def select(rows, top, spread):
     """--top best distinct f1 layouts (by J before the gates) and --spread more evenly across the rest."""
     fin = distinct(sorted([r for r in rows if r.get("status") == "ok" and r.get("J_raw") is not None
@@ -159,7 +194,7 @@ def main():
     ap.add_argument("--work-home", default=str(ROOT / "runs" / "orfs_work"))
     ap.add_argument("--yosys", default=None, help="Yosys for ORFS (default HB_YOSYS)")
     ap.add_argument("--phase", default="all",
-                    choices=["base", "f1", "f2", "all", "band", "warmstart", "timingprobe", "probe"])
+                    choices=["base", "f1", "f2", "all", "band", "warmstart", "timingprobe", "probe", "tbtest"])
     ap.add_argument("--base-timeout", type=int, default=4 * 7200, help="whole unmodified flow (each step < 7,200 s)")
     ap.add_argument("--timeout", type=int, default=7200, help="one candidate evaluation")
     ap.add_argument("--noise-replays", type=int, default=3, help="shifted M1 replays for the noise band (0-3)")
@@ -179,6 +214,8 @@ def main():
     ap.add_argument("--probe-var", action="append", default=[],
                     help="--phase probe: KEY=VALUE make variable for the probe runs only (after --make-var)")
     ap.add_argument("--probe-workers", type=int, default=3, help="--phase probe: ORFS runs at a time")
+    ap.add_argument("--tb-candidate", default="", help="--phase tbtest: the pre-registered candidate's f2 run id")
+    ap.add_argument("--tb-workers", type=int, default=4, help="--phase tbtest: f2 runs at a time (<= 8 OpenROAD)")
     a = ap.parse_args()
     a.flow = str(Path(a.flow).resolve())
     a.work_home_abs = str(Path(a.work_home).resolve())
@@ -376,6 +413,32 @@ def main():
                              "band_of_program": r.get("program")})
                 print(json.dumps({"band_of": r["run_id"], "run_id": row["run_id"], "status": row.get("status"),
                                   "J": row.get("J"), "J_raw": row.get("J_raw")}), flush=True)
+    if a.phase == "tbtest":                             # 9. Track-B confirmatory test (reports/trackB_preregistration.md)
+        from concurrent.futures import ThreadPoolExecutor
+        p2 = rdir / "evals_f2.jsonl"
+        rows2 = {r["run_id"]: r for r in (json.loads(l) for l in (p2.read_text().splitlines() if p2.exists() else [])
+                                          if l.strip())}
+        r = rows2.get(a.tb_candidate)
+        if r is None or r.get("pos_macros") is None:
+            sys.exit("--phase tbtest: no f2 row with a layout for --tb-candidate %r" % a.tb_candidate)
+        ledger = Ledger(rdir / "evals_tb.jsonl")
+        jobs = []
+        for k, sh, c, m in tb_pairs(des, _layout_from_row(des, lay, r), m1):
+            if sh is None:
+                print(json.dumps({"tb_slot": k, "skipped": "no legal common shift left"}), flush=True)
+                continue
+            jobs += [("cand", k, sh, c), ("ref", k, sh, m)]
+
+        def tb_one(job):
+            arm, k, sh, lay_x = job
+            return job, _eval(ev2, des, lay_x, base2, "%s.tb.%s.s%d.f2" % (name, arm, k), rdir / "work_tb", ledger,
+                              {"program": "TB_" + arm.upper(), "tb_slot": k, "tb_shift": list(sh), "stage": "M",
+                               "tb_candidate": a.tb_candidate})
+        with ThreadPoolExecutor(max_workers=max(1, min(8, a.tb_workers))) as pool:
+            for (arm, k, sh, _), row in pool.map(tb_one, jobs):
+                print(json.dumps({"tb": arm, "slot": k, "shift": sh, "run_id": row["run_id"], "status": row.get("status"),
+                                  "J": row.get("J"), "J_raw": row.get("J_raw"), "wall_s": row.get("wall_s")}), flush=True)
+        return
     if a.phase in ("f2", "all"):                        # 4. f2 verification
         ev_path = cdir / "evals.jsonl"
         rows = [json.loads(l) for l in ev_path.read_text().splitlines()] if ev_path.exists() else []
