@@ -4,6 +4,27 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
+## 2026-10-03 — Session 4 (01:00): ariane133 diagnosed, ariane136 bands, S2 augmentation; progress report updated
+
+- **Owner (3 Oct):** "keep on with the task and update your progress report".
+- **ariane133** (`probe133_pd35`, `probe133_virt`, both rc 0; fetched): `reports/trackB_ariane133_diagnosis.md`,
+  Sections 3-4. PLACE_DENSITY 0.35 makes 4 of 5 failed layouts evaluable at f1 (the fifth fails with GPL-0307);
+  virtual resizing completes all 5 but leaves setup TNS down to -50.7 ns. Recommendation: PLACE_DENSITY 0.35 for every
+  ariane133 run including the baseline, then re-run the campaign (decision D2).
+- **ariane136 bands** (`seedB_band_ariane136`, rc 0; fetched): report regenerated with `report_trackb_dev.py`; the top
+  three candidates' bands, 0.9753-0.9766, lie below the tool's same-path band (from 1.0011). Descriptive.
+- **S2:** `s2_aug_225` (augmentation, one change) misses the distance bar (0.777 / 0.611) and the ranking bar (tau
+  0.114 / 0.401) (`reports/sketch_predictor_s2_aug.md`); the ranking step first crashed on a bug of mine (the coarse
+  placement's info stored under a predictor's key) and was re-run as `s2rank_aug_225`. `s2rank_train2`
+  (supplementary, training designs) is in `reports/sketch_predictor_s2_ranking.md`.
+- **swerv_wrapper:** still running on 224; its partial snapshot (fetched with `--partial`) shows 101 f1 rows, 32
+  completed, and 36 failures that stall like ariane133's.
+- **Running now:** only `seedB_orfs7_swerv_wrapper` (224). Every other job of this session is done and fetched.
+- **Next:** the owner's decisions D1-D8 in `reports/next_phase_decisions.md` (T5 demo, ariane133, T3.9 endpoint,
+  S2, gap experiment, Track-B test, f3 tools, housekeeping).
+
+---
+
 ## 2026-10-02 — Session 4 (03:00): next-phase preparation (owner's task brief); English only from now on
 
 - **Owner's requests (2 Oct):** a plan that keeps the LLM step from doing harm; check ariane133; explain the S2

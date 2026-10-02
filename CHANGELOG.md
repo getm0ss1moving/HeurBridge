@@ -6,6 +6,22 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 
 ## [Unreleased]
 
+### Results of the next-phase jobs (3 Oct 01:00)
+- **ariane133 diagnosis** (`reports/trackB_ariane133_diagnosis.md`): probes at f1 on five failed layouts. PLACE_DENSITY
+  0.35 makes 4 of 5 evaluable (the fifth: GPL-0307); virtual timing-driven resizing makes 5 of 5 complete but leaves
+  setup TNS down to -50.7 ns. Recommendation: PLACE_DENSITY 0.35 for every ariane133 run, baseline included (owner's
+  decision D2). Development evidence, no claim.
+- **ariane136 candidate bands** (`reports/T2_trackB_orfs_ariane136.md`, regenerated from `seedB_band_ariane136`): the
+  top three candidates' bands (0.9753-0.9766) lie below the tool's same-path band (from 1.0011). Descriptive.
+- **S2 with augmentation** (`reports/sketch_predictor_s2_aug.md`): DA0 0.777 / 0.611 at the best step (8,000) and
+  Kendall tau 0.114 / 0.401: misses both parts of the bar. Training ratio levels off at 0.67 (less overfitting).
+- **S2 ranking on the 13 training designs** (supplementary, in-sample for S2) added to
+  `reports/sketch_predictor_s2_ranking.md`.
+- `scripts/eval_lookahead_rank.py`: the coarse placement's info is stored apart from the predictor rows (the run with
+  `--coarse 0` crashed on it); `scripts/train_lookahead.py --report`: the outcome sentence is computed from the run
+  (the old fixed sentence described only the first run). Test: `tests/test_t5_endpoint.py::test_rank_stats_and_regret`.
+- `scripts/diag_trackb_failures.py` on swerv_wrapper's partial snapshot: 36 failures stall the same way.
+
 ### Next-phase preparation (2 Oct, owner's task brief)
 - **T5 readiness (prepare only; nothing ran with the real LLM).**
   - `scripts/run_evolution.py`: `--guard dp` scores the guard with the registered Track-A cost (DREAMPlace f1 against

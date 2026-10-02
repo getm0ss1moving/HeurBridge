@@ -21,7 +21,7 @@ more than the flow's sensitivity to a one-site or one-row shift of the layout?
 - bp_be_top: only the best candidate's band (0.9306-1.0002) lies below the tool band's lower edge 1.0241; the next
   two overlap it (reports/T2_trackB_orfs_bp_be_top.md:78-82).
 - ariane136: best admitted J 0.9757, below the tool band 1.0000-1.0089; the candidates' own bands are being measured
-  (reports/T2_trackB_orfs_ariane136.md:47, :51; HANDOFF.md:72-74).
+  (reports/T2_trackB_orfs_ariane136.md:47, :51; HANDOFF.md:93-95).
 
 **Why these cannot serve as the confirmatory test:** the candidates were selected on the same f2 values their bands
 were measured around, with the same three shifts as the tool's band (scripts/run_seed_orfs.py:369). Selection on
@@ -59,8 +59,8 @@ pre-selected candidates on **fresh shifts**.
 ## 5 alpha-ledger reservation and decision
 
 - Campaign `TB`, alpha = 0.05, alpha_j = alpha x 2^-j (HEURBRIDGE_TASKS.md:541; heurbridge/stats/alpha_ledger.py:3-7):
-  TB#1 0.025, TB#2 0.0125, TB#3 0.00625, TB#4 0.003125. The smallest attainable p, 0.0011, is below every alpha_j, so
-  each design can pass on its own.
+  TB#1 0.025, TB#2 0.0125, TB#3 0.00625, TB#4 0.003125, and TB#5 0.0015625 for ariane133 if it is re-run under an
+  adopted deviation. The smallest attainable p, 0.0011, is below every alpha_j, so each design can pass on its own.
 - Reservations are written with `AlphaLedger.reserve` before the first test run; results with `record` afterwards.
 - **Track-B claim** (confirmatory): "heuristic layouts beat the tool's macro placement at signoff on k of n designs",
   k = the designs whose test passes at their alpha_j. No design passing: a negative Track-B result, reported as such.

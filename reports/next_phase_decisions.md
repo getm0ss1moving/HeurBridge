@@ -25,14 +25,17 @@
 - **Evidence:** reports/trackB_ariane133_diagnosis.md. Every failing layout's global placement stops at the
   5,000-iteration cap with overflow near 0.3 instead of 0.10; the resizer then adds about 110,000 buffers and
   detailed placement fails. The tool's own layout shifted by one site fails the same way, so the flow configuration
-  is fragile, not only the heuristics. *Development / descriptive.* The probes' outcome is in the diagnosis report.
+  is fragile, not only the heuristics. *Development / descriptive.* Probes (five layouts, f1): with PLACE_DENSITY 0.35, 4 of 5 complete with
+  setup TNS no worse than -0.15 ns and the fifth fails with a named divergence (GPL-0307); with virtual resizing all
+  5 complete but two carry large setup violations (TNS -50.7 ns and -1.02 ns) (reports/trackB_ariane133_diagnosis.md,
+  Section 3).
 - **Options:** (a) adopt PLACE_DENSITY 0.35, the value ariane136 sets, for every ariane133 run including the
   baseline, and re-run its campaign (about one to two days on 224, estimate); (b) adopt virtual timing-driven
   resizing (`-keep_resize_below_overflow 0.01`) the same way; (c) drop ariane133 from Track B as a documented
   deviation.
-- **Recommendation:** see the diagnosis report's conclusion (Section 4 there). Either deviation applies to the
-  baseline as well, so J stays normalized to the same flow; a deviation chosen after seeing probes is recorded as
-  such.
+- **Recommendation: (a)**, PLACE_DENSITY 0.35 for every ariane133 run including the baseline, then re-run the
+  campaign; (c) if the re-run baseline itself fails. The deviation is chosen after seeing the probes and is recorded
+  as such; it applies to the baseline and every candidate alike, so J stays normalized to the same flow.
 
 ## D3 T3.9: the cell bridge's endpoint
 
@@ -52,12 +55,12 @@
 ## D4 S2 predictor follow-up
 
 - **Evidence:** distance bar missed (DA0 0.747 / 0.642 against <= 0.5: reports/sketch_predictor_s2.md:38); ranking
-  bar missed on ibm04 (Kendall tau 0.152) and met on ibm06 (0.523) (reports/sketch_predictor_s2_ranking.md). The
-  placed clusters themselves reach only tau 0.441 on ibm04 under the same scoring, so the ranking bar cannot be met
-  there by any cluster-level prediction. One allowed change, the bridge's augmentation, is running on 225 under the
-  same bar and validation set (job `s2_aug_225`).
-- **Options:** (a) record S2 as a negative result after the augmentation run, unless that run passes both parts on
-  both designs; (b) keep iterating on S2 (regularization, a smaller model), one change at a time; (c) replace the
+  bar missed on ibm04 (Kendall tau 0.152) and met on ibm06 (0.523) (reports/sketch_predictor_s2_ranking.md). Under the
+  same scoring the placed clusters themselves reach only tau 0.441 on ibm04: the bar there is above what the true
+  cluster positions achieve, so a cluster-level predictor is very unlikely to meet it. The one allowed change, the bridge's augmentation, also misses the distance bar:
+  best step 8,000, DA0 0.777 (ibm04) and 0.611 (ibm06), mean criterion 0.694 against 0.695 without it
+  (reports/sketch_predictor_s2_aug.md); it overfits less but trades ibm04 for ibm06, and it ranks worse on both designs (Kendall tau 0.114 and 0.401).
+- **Options:** (a) record S2 as a negative result now (both runs miss the distance part, so neither can pass the bar); (b) keep iterating on S2 (regularization, a smaller model), one change at a time; (c) replace the
   cluster-level scoring by a cell-level one before any further S2 work.
 - **Recommendation: (a).** Keep the bar as fixed. S2 is not on the critical path: T5 and the gap experiment do not
   need it.
@@ -91,7 +94,7 @@
 
 ## D8 Housekeeping (owner's actions; nothing was deleted)
 
-- **Staged for deletion** (moved there on 29 Sep: HANDOFF.md:354-355; sizes measured 2 Oct):
+- **Staged for deletion** (moved there on 29 Sep: HANDOFF.md:375-376; sizes measured 2 Oct):
   `/data/dzy/heura_repr/_to_delete_20260929/` on 224, 68 GB (its /data at 93 % use); on 225, 31 GB (/data at 99 %);
   on 231, 7.1 GB (root at 99 %). The final `rm -rf` is yours.
 - **Faulty GPUs:** `nvidia-smi` fails on 224 ("Unable to determine the device handle for GPU 0000:02:00.0: Unknown

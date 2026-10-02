@@ -206,8 +206,11 @@ def report(run_dir: Path, out_md: Path, bar: float = 0.5) -> None:
         % (d, v["rms_median"], v["quad_median"], v["ratio_median"], v["closer"], v["n"],
            ", ".join("%s %.3f" % (k, x["ratio_median"]) for k, x in v["by_kind"].items())) for d, v in best["val"].items()) + ".",
           "", "**Outcome:** %s" % ("passes the bar on every validation design." if all(v["ratio_median"] <= bar for v in best["val"].values())
-                                   else "does not reach the bar of %.1f; the training ratio keeps falling while validation "
-                                        "rises after the best step (fitting the training designs, not generalizing)." % bar),
+                                   else "does not reach the bar of %.1f. After the best step the training ratio goes from "
+                                        "%.3f to %.3f and the validation ratios end at %s." % (
+                                            bar, best["train"]["rms"] / best["train"]["rms_quad"],
+                                            h["hist"][-1]["train"]["rms"] / h["hist"][-1]["train"]["rms_quad"],
+                                            ", ".join("%s %.3f" % (d, h["hist"][-1]["val"][d]["ratio_median"]) for d in vals))),
           "", "## Reproduce", "", "`python scripts/train_lookahead.py %s`; `python scripts/train_lookahead.py --report %s --out %s`." % (
               " ".join("--%s %s" % (k.replace("_", "-"), v) for k, v in cfg.items() if v not in ("", None)), run_dir, out_md), ""]
     Path(out_md).write_text("\n".join(L))

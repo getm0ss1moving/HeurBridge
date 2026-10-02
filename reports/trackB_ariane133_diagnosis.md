@@ -12,8 +12,8 @@
 ## 1 The record
 
 0 of 80 heuristic layouts evaluable at f1. Failures by name: DPL-0036 37, timeout in 3_5_place_dp 25, no parsed
-reason 14, GPL-0307 5, PDN-0179 1 (HANDOFF.md:168). The tool's own layout through the candidates' path (the M1
-replay) completes f1 with J 0.948, but its f2 fails a gate and its one-site-shift replays fail (HANDOFF.md:168-170).
+reason 14, GPL-0307 5, PDN-0179 1 (HANDOFF.md:189). The tool's own layout through the candidates' path (the M1
+replay) completes f1 with J 0.948, but its f2 fails a gate and its one-site-shift replays fail (HANDOFF.md:189-191).
 
 ## 2 What the logs show (scripts/diag_trackb_failures.py, all f1 variants of both campaigns)
 
@@ -58,4 +58,40 @@ M3.v0.s0, M6.v0.s0). Settings, one at a time, applied to the candidate runs only
 (timing-driven global placement stays on, but its resizing stays virtual: the timing-divergence lead). Command:
 `scripts/run_seed_orfs.py --phase probe` (scripts/run_seed_orfs.py, phase 8).
 
-PROBE_RESULTS_PENDING
+Results (jobs `probe133_pd35`, `probe133_virt`, 2 Oct; ledgers `evals_probe_pd35.jsonl` and `evals_probe_virt.jsonl`
+in `runs/remote/probe133_<tag>/runs/seed_orfs/ariane133/`, local). J is before the gates and still normalized to the
+original baseline run at density 0.30, so it is indicative only; global placement shows the last logged iteration
+and overflow:
+
+| layout | original campaign (no setting) | PLACE_DENSITY 0.35: global placement | outcome | virtual resizing: global placement | outcome |
+|---|---|---|---|---|---|
+| tool's layout +1 site (M1replay.p1) | stall, overflow 0.298; DPL-0036 | 780 iterations, 0.099 | **completes**, J 0.9348 | 720, 0.102 | **completes**, J 0.9421 |
+| tool's layout -1 site (M1replay.p2) | stall, 0.281; DPL-0036 | 690, 0.106 | **completes**, J 0.9339 | 720, 0.102 | **completes**, J 0.9409 |
+| M2.v0.s0 | stall, 0.304; detailed placement, unparsed | 940, 0.130 | **completes**, J 0.9900 (setup TNS -0.15 ns) | 640, 0.103 | completes, **J 16.04** (setup TNS -50.7 ns) |
+| M3.v0.s0 | stall, 0.346; DPL-0036 | 1,850, 0.161 | fails: GPL-0307 divergence (named) | 1,440, 0.111 | completes, J 1.3043 (setup TNS -1.02 ns) |
+| M6.v0.s0 | stall, 0.298; DPL-0036 | 880, 0.105 | **completes**, J 0.9256 | 1,450, 0.100 | **completes**, J 0.9377 |
+
+Utilization after resizing is 38-39 % in every completed probe (74 % in the stalled runs). Wall time per probe
+2,240-6,002 s.
+
+## 4 Conclusion and recommendation
+
+- **Cause (development evidence, not a claim):** on ariane133 the flow's default target density 0.30, at about 25 %
+  utilization, together with timing-driven global placement keeping the resizer's buffers from overflow 0.3 on,
+  makes global placement stall; it is not specific to the heuristics, since the tool's own layout shifted by one
+  site stalls too. The stall then explains the detailed-placement failures, the timeouts and the unparsed failures.
+- **Both settings remove the stall.** PLACE_DENSITY 0.35 makes 4 of 5 layouts evaluable with timing close to the
+  reference (setup TNS no worse than -0.15 ns); the fifth fails with a named divergence (GPL-0307), a failure mode
+  also seen on other designs. Virtual resizing makes all 5 complete but leaves large setup violations (TNS -50.7 ns on
+  M2, -1.02 ns on M3), because the resizer's work during global placement is discarded.
+- **Recommendation:** keep ariane133 in Track B with **PLACE_DENSITY 0.35** (the value its sibling ariane136 sets:
+  third_party/ORFS-2024-12/flow/designs/nangate45/ariane136/config.mk:31) for every ariane133 run, the baseline
+  included, and re-run its campaign (estimate one to two days on 224). This is a documented flow deviation chosen
+  after this diagnosis, recorded as such; it applies to the baseline and to every candidate alike, so J stays
+  normalized to the same flow. Fallback, if the re-run baseline itself fails or changes character: drop ariane133 as
+  a documented deviation. The owner decides (reports/next_phase_decisions.md, D2).
+- **Same pattern elsewhere:** 36 of swerv_wrapper's failures so far stall the same way (final overflow 0.416, about
+  114,000 buffers; partial snapshot of `seedB_orfs7_swerv_wrapper`, 2 Oct), with `PLACE_DENSITY_LB_ADDON` 0.10 in its
+  config (third_party/ORFS-2024-12/flow/designs/nangate45/swerv_wrapper/config.mk:31). Not probed (time box).
+- **Time box used:** five layouts, two settings, about 2 h of wall time on 224; no layout re-run under unchanged
+  settings.

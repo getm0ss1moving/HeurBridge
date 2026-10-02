@@ -12,7 +12,7 @@
 - Confirmed (pre-registered): the co-trained bridge beats the non-learning partners (G0'; reports/E0_partner_ablation.md:44).
 - Also measured: every partner's mean J, and every bridge-refined layout, stays above 0.45, the tool's own
   mixed-size macro placement; the bridge lowers mean J by 1.9-6.9 % per design against the raw heuristic
-  (HANDOFF.md:126-128). Mean J of the co-trained bridge: 0.5579 on ISPD2005 (reports/E0_partner_ablation.md:27),
+  (HANDOFF.md:147-149). Mean J of the co-trained bridge: 0.5579 on ISPD2005 (reports/E0_partner_ablation.md:27),
   0.6004 on the held-out IBM designs ibm08 and ibm12 (reports/E0_partner_ablation_ibm_heldout.md:27), against 0.45.
   *Pre-registered confirmatory result (E0) plus its descriptive context.*
 - Seeding: the heuristics beat the tool on 2 of 25 Track-A designs only (reports/PROGRESS.md:256-257); on ISPD2005
@@ -37,7 +37,7 @@
    reports/sketch_predictor_s2.md:38). *Negative results.*
 5. **Narrow data.** Round 0 has 1,608 pairs from 13 IBM designs, and later rounds added no new information
    (reports/T3_algorithmR_trackA.md:55-60). Known data defect: on 15 of 17 IBM designs the top elite's cluster target
-   was a quadratic placement (CHANGELOG.md:103-107). It affects clusters, not macro targets.
+   was a quadratic placement (CHANGELOG.md:119-123). It affects clusters, not macro targets.
 
 ## 3 Levers
 
@@ -47,7 +47,7 @@
 | B. Better-than-tool elites | local search starting from the tool's layout under f1 on the training designs, admitting layouts below 0.45 | creates targets that beat the tool (reason 2) | 100-200 f1 runs per design x 13 designs at 9-18 s each (reports/T2_trackA_ibm_dreamplace.md:27-43): about 4-13 GPU-h | the tool's layout may be locally optimal under f1: few or tiny gains |
 | C. More than one training family | add ISPD2005 pairs to the IBM pairs | broader generalization; does not lift the cap (ISPD targets are also at or above the tool: reports/T2_trackA_ispd_dreamplace.md:36) | pair generation plus retraining: about 1 GPU-day (estimate) | ISPD2005 stops being a held-out family; a future confirmatory test needs another held-out family |
 | D. Cluster loss weight or a dedicated cluster head (today 0.1 x area: heurbridge/bridge/graph.py:13) | weight 10 was tried in S1 (ft_both) | low: S1 missed its bar on ibm04 for every model (reports/sketch_finetune_s1.md:36-45); clusters do not set Track-A J directly | one fine-tune | none new |
-| E. Condition on the committed macros (the look-ahead) | feed a cell-stage prediction to the macro bridge | unknown: depends on whether predictions rank layouts like f1 (the S2 ranking check, reports/sketch_predictor_s2.md) | medium | the predictor misses its distance bar |
+| E. Condition on the committed macros (the look-ahead) | feed a cell-stage prediction to the macro bridge | low so far: the S2 predictor ranks layouts poorly on ibm04 (Kendall tau 0.152) and no better than the quadratic placement on ibm06 (0.523) (reports/sketch_predictor_s2_ranking.md) | medium | the predictor misses both parts of its bar |
 | F. Richer sketch format (centroid, footprint, density, RUDY) | the hand-off to the cell stage | low on Track-A J: DREAMPlace ignores start positions (reports/demo_sketch_start.md:34) | medium | as before |
 | G. Reframe the claim | "a learned scoring device for heuristics", the claim G0' supports | closes nothing; states the result honestly | none | weaker paper claim |
 
