@@ -61,7 +61,8 @@ def main():
             band.append(float(ev.score(ev.evaluate(des, lay, "band.s%d" % seed, demo / "work_band" / des.id), base).J_inf))
         r = {"design": des.id, "tool_band": tool_band, "ls_band": sorted(band), "ls_seed0": band[0],
              "ls_band_below_tool_band": max(band) < min(tool_band), "ls_mean": float(np.mean(band)),
-             "tool_mean": float(np.mean(tool_band))}
+             "ls_median": float(np.median(band)), "tool_mean": float(np.mean(tool_band)),
+             "tool_median": float(np.median(tool_band))}
         al = (s.get("bridge_tool") or {}).get("alpha")
         if a.bridge and al:                              # alpha 0 is the tool's layout itself: its band is the tool's
             from heurbridge.bridge.sample import bridge_endpoints, source_nodes
@@ -81,7 +82,8 @@ def main():
                                          base).J_inf))
             r.update({"bridge_alpha": al, "bridge_band": sorted(bb), "bridge_seed0": bb[0],
                       "bridge_seed0_in_demo": s["bridge_tool"]["J"],
-                      "bridge_band_below_tool_band": max(bb) < min(tool_band), "bridge_mean": float(np.mean(bb))})
+                      "bridge_band_below_tool_band": max(bb) < min(tool_band), "bridge_mean": float(np.mean(bb)),
+                      "bridge_median": float(np.median(bb))})
         r["wall_s"] = round(time.time() - t0, 1)
         res.append(r)
         print(json.dumps(r), flush=True)
