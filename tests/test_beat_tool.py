@@ -128,3 +128,20 @@ def test_barycenter_undoes_permutations_of_interchangeable_macros():
     assert np.allclose(C.barycenter(g, [x, x[p], x]), x)
     y = x + 0.01
     assert np.allclose(C.barycenter(g, [x, y[p]]), x + 0.005)         # matched first, then averaged
+
+
+def test_flip_pass_lowers_hpwl_and_keeps_positions():
+    """scripts/flip_eval.flip_pass: footprint-preserving orientations only, positions untouched, HPWL not worse."""
+    from heurbridge.core import synth
+    from heurbridge.core.design import hpwl
+    import flip_eval as F
+    for seed in (0, 1, 2):
+        des, lay = synth.make_design(seed=seed, n_macros=10, n_cells=60, n_io=8)
+        o, st = F.flip_pass(des, lay, passes=5, max_deg=10 ** 6)
+        mm = des.is_macro & ~des.is_fixed
+        assert np.array_equal(o[~mm], lay.orient[~mm])                      # only movable macros
+        assert set(np.unique(o[mm])) <= set(F.FLIPS) | set(np.unique(lay.orient[mm]))
+        new = lay.copy()
+        new.orient = o
+        assert hpwl(des, new) <= hpwl(des, lay) + 1e-9
+        assert st["macros_changed"] == int((o != lay.orient).sum())
