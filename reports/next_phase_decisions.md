@@ -107,6 +107,7 @@ first alpha (0.025), recorded either way.
   original plan (T5 evolution of macro heuristics, the bridge) against the tool at its best configuration.
 - **Recommendation: (a) and (b).** (a) aims at the lever that moves J on Track A with a cost claim; (b) is the only
   place where our own layouts beat a tool on real PPA. (c) stays laid aside: its gap to the tool is large.
+- **Prepared (nothing runs):** a design note for (a), reports/orchestration_design.md.
 
 ## D1 Launch the T5 demo?
 
