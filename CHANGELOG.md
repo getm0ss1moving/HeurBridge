@@ -6,6 +6,20 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 
 ## [Unreleased]
 
+### Beat-the-tool exploration, second round (3 Oct 05:10, exploratory)
+- New: `scripts/consensus_eval.py` (consensus of k tool runs), `scripts/flip_eval.py` (macro orientation pass),
+  `scripts/warm_tool_eval.py` (the tool started from given macro layouts; `--target-density`), `scripts/density_confirm.py`
+  (RL#2: `reserve`, `analyze` once).
+- `heurbridge/eval/dreamplace.run_dreamplace_m1` and `scripts/tool_refine_eval.tool_layout`: optional target density
+  (default 0.9 unchanged); `scripts/tool_runs.py`: `--target-density`, rows keep J's components (HPWL, RUDY overflow).
+- `scripts/run_seed_orfs.py --phase tbtest`: the Track-B test's six fixed shifts with fallbacks for both arms (not
+  launched; D6 blocked by the hold-gate rule).
+- `scripts/report_beat_tool.py`: sections 5-8 (consensus, flip, target density, warm start), robust relinking summary.
+- `reports/density_preregistration.md` and alpha-ledger entry RL#2 (alpha 0.0125), fixed before any ISPD2005 run at
+  density 0.6.
+- Tests: `tests/test_beat_tool.py` +5 (barycenter, flip pass, Track-B shifts, density units, best of k). Full suite:
+  207 passed (147.9 s).
+
 ### Confirmatory relinking test registered and launched (3 Oct 03:40)
 - `reports/relink_preregistration.md` and alpha-ledger entry `RL#1` (alpha_1 = 0.025), fixed before any ISPD2005 run.
 - `scripts/relink_eval.py`: one row per tool seed; a failed tool run, P_M or f1 is a +inf candidate, named in the

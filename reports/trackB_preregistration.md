@@ -21,7 +21,7 @@ more than the flow's sensitivity to a one-site or one-row shift of the layout?
 - bp_be_top: only the best candidate's band (0.9306-1.0002) lies below the tool band's lower edge 1.0241; the next
   two overlap it (reports/T2_trackB_orfs_bp_be_top.md:78-82).
 - ariane136: best admitted J 0.9757, below the tool band 1.0000-1.0089; the candidates' own bands are being measured
-  (reports/T2_trackB_orfs_ariane136.md:47, :51; HANDOFF.md:131-133).
+  (reports/T2_trackB_orfs_ariane136.md:47, :51; HANDOFF.md:151-153).
 
 **Why these cannot serve as the confirmatory test:** the candidates were selected on the same f2 values their bands
 were measured around, with the same three shifts as the tool's band (scripts/run_seed_orfs.py:369). Selection on

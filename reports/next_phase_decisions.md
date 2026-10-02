@@ -57,6 +57,27 @@ passing against best of four shows a lower J at lower cost. And it runs in paral
 procedure is fixed and cannot depend on the IBM results, the GPUs were free, and the price of a failure is campaign RL's
 first alpha (0.025), recorded either way.
 
+**Update 3 Oct 05:10 (exploratory; reports/beat_tool_track_a.md):**
+- **Relinking does not generalize:** on all 17 IBM designs (136 cases) it is lower than the tool's best of four in
+  29 cases and higher in 44, median difference 0 (Section 4). The three-design lead came from ibm08, whose tool
+  layouts blow up under some f1 seeds. RL#1 runs to completion as registered and is reported either way; a failure is
+  the likely outcome.
+- **Consensus of tool runs: no** (Section 5). **Macro flipping:** J -0.0017 against one tool run (17 of 24 lower),
+  nothing on top of best of two (Section 6).
+- **Two levers move J a lot, both about how the tool is run:** (a) its target density: one run at 0.6 instead of 0.9
+  lowers J by 0.0288 (32 of 32 lower) and beats the best of four at 0.9 in 29 of 32, with HPWL and congestion both
+  lower (Section 7); (b) a second tool pass started from the first's layout: -0.0156 at 0.9 (20 of 24 lower;
+  Section 8).
+- **What this means for the owner's aim:** J = 0.45 is the tool at target density 0.9, which is neither DREAMPlace's
+  parameter default (0.8: third_party/DREAMPlace/dreamplace/params.json:39-42) nor its benchmark setting (1.0:
+  third_party/DREAMPlace/test/mms/adaptec1.json). Mean J below 0.45 is within reach of the tool's configuration
+  alone, so "better than the tool" must from now on mean better than the tool at its best configuration; otherwise
+  it is this effect, not a HeurBridge method.
+- **Decisions (agent, under the delegation):** (i) RL#2 registered and launched at 05:02: one run at density 0.6
+  against the best of four at 0.9 on ISPD2005, labelled a configuration claim (reports/density_preregistration.md);
+  (ii) on IBM, whether a second pass or the flip pass adds anything on top of density 0.6 (running); (iii) every later
+  HeurBridge comparison uses the tool at 0.6 as its baseline; (iv) Track-B D6 stays unlaunched (D6: the hold gate).
+
 ## D1 Launch the T5 demo?
 
 - **Evidence:** G0' passed, which per the pre-registration leads to T5 (reports/E0_partner_ablation.md:44,
@@ -91,7 +112,7 @@ first alpha (0.025), recorded either way.
 ## D3 T3.9: the cell bridge's endpoint
 
 - **Evidence:** the task list ranks the cell bridge's targets by f2 J (HEURBRIDGE_TASKS.md:372), but Track A has no
-  f2; its final cost is DREAMPlace f1 (reports/PROGRESS.md:268). DREAMPlace ignores start positions
+  f2; its final cost is DREAMPlace f1 (reports/PROGRESS.md:275). DREAMPlace ignores start positions
   (reports/demo_sketch_start.md:34), so a cell bridge cannot hand its result to DREAMPlace; it must deliver a placement.
   The look-ahead predictor misses both parts of its bar (reports/sketch_predictor_s2.md:38,
   reports/sketch_predictor_s2_ranking.md). *Negative results.*
@@ -133,6 +154,15 @@ first alpha (0.025), recorded either way.
 - **Options:** (a) approve and run on bp_fe_top, bp_be_top and ariane136 (36 f2 runs on 224); (b) wait for
   swerv_wrapper and the ariane133 decision (D2) to test all designs at once.
 - **Recommendation: (a)** for the three complete designs; the other two join only through their own TB entries.
+- **Found 3 Oct (blocks the draft):** under cost_v3 the timing gates compare with the same-path replay band's median,
+  and a candidate with negative slack fails whenever that median is non-negative (heurbridge/eval/cost.py:129-132).
+  Hold slack on these designs is noise-level, -0.05 to +0.06 ns in the stored f2 rows (local run files
+  `runs/remote/seedB_orfs7_*/runs/seed_orfs/*/evals_f2.jsonl`), so replicates would pass or fail at random:
+  ariane136's pre-selected candidate has hold -0.03 ns against a replay median of +0.015 ns. The draft also gates
+  the tool's own replicates against their own band, which would hand the candidate wins. **Needed from you:** the
+  hold-gate rule for this test (for example the 0.02-ns guard without the sign rule); then the draft is revised
+  (gates on the candidate only, the tool's replicates scored before the gates) and registered. The run phase exists
+  (`scripts/run_seed_orfs.py --phase tbtest`) and is not launched.
 
 ## D7 Signoff tools (f3)
 
@@ -145,7 +175,7 @@ first alpha (0.025), recorded either way.
 
 ## D8 Housekeeping (owner's actions; nothing was deleted)
 
-- **Staged for deletion** (moved there on 29 Sep: HANDOFF.md:413-414; sizes measured 2 Oct):
+- **Staged for deletion** (moved there on 29 Sep: HANDOFF.md:433-434; sizes measured 2 Oct):
   `/data/dzy/heura_repr/_to_delete_20260929/` on 224, 68 GB (its /data at 93 % use); on 225, 31 GB (/data at 99 %);
   on 231, 7.1 GB (root at 99 %). The final `rm -rf` is yours.
 - **Faulty GPUs:** `nvidia-smi` fails on 224 ("Unable to determine the device handle for GPU 0000:02:00.0: Unknown

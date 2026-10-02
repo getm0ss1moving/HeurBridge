@@ -4,6 +4,26 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
+## 2026-10-03 — Session 4 (05:10): relinking does not generalize; the tool's target density; RL#2 registered
+
+- **IBM relinking complete** (`relinkall_a`-`_d` fetched): on all 17 designs relinking ties the tool's best of four
+  (29 lower, 44 higher of 136). `reports/beat_tool_track_a.md` regenerated (Sections 4-8).
+- **New exploratory scripts:** `consensus_eval.py` (matched barycenter of k tool runs: no), `flip_eval.py` (macro
+  orientation pass: -0.0017), `warm_tool_eval.py` (the tool started from a layout: a second pass -0.0156),
+  `tool_runs.py --target-density` (0.6: -0.0288 against 0.9, beats 0.9's best of four in 29 of 32).
+- **RL#2 registered and launched 05:02** (code 7c316f9): `reports/density_preregistration.md`, alpha 0.0125, jobs
+  `rtd_bb4` (231 GPU 4), `rtd_bb3`, `rtd_bb2`, `rtd_a34b1` (227 GPUs 0-2), `rtd_a12` (225 GPU 1). Its comparator is
+  RL#1's best of four, so `density_confirm.py analyze` runs after both RL#1 and RL#2 jobs are fetched.
+- **Running (exploratory):** `pass2_a`-`_c`, `flip06` (second pass and flip on top of density 0.6), `dens7_a`-`_c`
+  (density 0.7 on nine more IBM designs). Fetch with `python scripts/hbv.py fetch --port <port> --run <job>`, then
+  regenerate the report (`scripts/report_beat_tool.py`).
+- **Track B:** `--phase tbtest` added (not launched); D6 is blocked by the hold-gate rule (owner's decision, recorded
+  in `reports/next_phase_decisions.md`, D6).
+- **Pitfall:** in this zsh, an unquoted variable holding several words is not split: pass multi-job `--after` lists
+  and loop specs as separate arguments (two launches printed nothing this session; relaunched).
+
+---
+
 ## 2026-10-03 — Session 4 (03:45): confirmatory relinking test registered (RL#1) and launched on ISPD2005
 
 - **Registered before any ISPD2005 run:** `reports/relink_preregistration.md` (commit 5dded6e, pushed); alpha-ledger

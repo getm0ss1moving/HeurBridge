@@ -46,7 +46,9 @@ def main():
          "| Field | Value |", "|---|---|", "| Report | beat_tool_track_a |", "| Date | %s |" % time.strftime("%Y-%m-%d %H:%M"),
          "| Track | A (IBM; f1 = DREAMPlace GP + LG with macros fixed; J against the seeding M1 baseline, 0.45 by construction) |",
          "| Status of the claim | **exploratory demo (no claim)**; any claim needs the pre-registered test drafted from it |",
-         "| Owner's aim (3 Oct) | macro layouts with mean J below 0.45 that beat the tool on output and on cost |", ""]
+         "| Owner's aim (3 Oct) | macro layouts with mean J below 0.45 that beat the tool on output and on cost |",
+         "| Confirmatory tests drafted from it | RL#1 relinking vs best of 4 (reports/relink_preregistration.md); RL#2 the tool "
+         "at target density 0.6 vs best of 4 at 0.9 (reports/density_preregistration.md); both on ISPD2005 |", ""]
     # 1 demo
     demo = []
     for f in sorted(glob.glob(str(R / "beat_tool_*" / "runs" / "beat_tool" / "*" / "summary.json"))):
