@@ -236,6 +236,109 @@ def main():
                   (A["b2f"] - A["best2"]).mean(), wilcoxon_less(A["b2f"], A["best2"])["p"],
                   (A["b2f"] - A["best3"]).mean(), wilcoxon_less(A["b2f"], A["best3"])["p"],
                   ", ".join(src for _, src in sorted(fl.values(), key=lambda v: v[1]))), ""]
+    # 7 the tool's target density
+    td_rows = {}
+    for f in sorted(glob.glob(str(R / "dens*" / "runs" / "tool_runs_td*" / "*" / "rows.jsonl"))):
+        rows = jl(f)
+        if rows:
+            td = Path(f).parts[-3].replace("tool_runs_td", "")
+            td_rows.setdefault(rows[0]["design"], {})[td] = (rows, str(Path(f).relative_to(ROOT)))
+    if td_rows:
+        from heurbridge.stats.paired import wilcoxon_less
+
+        def bk(rows, k):
+            S = len(rows)
+            sel = [r["J_select"]["tool"] if "J_select" in r else math.inf for r in rows]
+            fr = [r["J_eval"]["tool"] if "J_select" in r else math.inf for r in rows]
+            return np.array([fr[min([(i + j) % S for j in range(k)], key=lambda q: sel[q])] for i in range(S)])
+        tds = sorted({t for v in td_rows.values() for t in v} | {"0.9"}, reverse=True)
+        L += ["## 7 The tool's target density (endpoint: median J over fresh f1 seeds 1-3)", "",
+              "The tool's runs above use DREAMPlace's target density 0.9 (the seeding campaign's M1, which defines J = 0.45); "
+              "DREAMPlace's own parameter default is 0.8 and its ISPD2005 and mixed-size benchmark configurations use 1.0 "
+              "(third_party/DREAMPlace/dreamplace/params.json:39-42; third_party/DREAMPlace/test/mms/adaptec1.json). Here the "
+              "same 8 tool seeds per design at lower densities (scripts/tool_runs.py --target-density); f1 is unchanged (0.9). "
+              "Per cell: mean J of a single run / of the best of 4 by the selection seed; median tool run time.", "",
+              "| design | " + " | ".join("density %s" % t for t in tds) + " |", "|---|" + "---|" * len(tds)]
+        pairs = {t: {"single": [], "b4": [], "ref_single": [], "ref_b4": []} for t in tds if t != "0.9"}
+        for d in sorted(td_rows, key=lambda x: int(x[3:])):
+            ref = tool_rows.get(d)
+            cells = []
+            for t in tds:
+                rows = ref if t == "0.9" else (td_rows[d].get(t) or (None,))[0]
+                if not rows:
+                    cells.append("-")
+                    continue
+                J = np.array([r["J_eval"]["tool"] if "J_select" in r else math.inf for r in rows])
+                tt = np.median([r.get("cost_s", {}).get("tool", r.get("tool_s", math.nan)) for r in rows])
+                cells.append("%.4f / %.4f / %.0f s" % (J.mean(), bk(rows, 4).mean(), tt))
+                if t != "0.9" and ref and len(ref) == len(rows):
+                    pairs[t]["single"] += list(J)
+                    pairs[t]["b4"] += list(bk(rows, 4))
+                    pairs[t]["ref_single"] += [r["J_eval"]["tool"] for r in ref]
+                    pairs[t]["ref_b4"] += list(bk(ref, 4))
+            L.append("| %s | %s |" % (d, " | ".join(cells)))
+        L += [""]
+        for t, P in sorted(pairs.items(), reverse=True):
+            if not P["single"]:
+                continue
+            s, rs, rb = np.array(P["single"]), np.array(P["ref_single"]), np.array(P["ref_b4"])
+            L.append("- Density %s, single run vs density 0.9 single run (paired by tool seed): %+.4f on average, lower in %d of %d, "
+                     "one-sided Wilcoxon p = %.3g; vs density 0.9 best of 4 (four times the runs): %+.4f, lower in %d of %d, "
+                     "p = %.3g." % (t, (s - rs).mean(), int((s < rs).sum()), len(s), wilcoxon_less(s, rs)["p"],
+                                     (s - rb).mean(), int((s < rb).sum()), len(s), wilcoxon_less(s, rb)["p"]))
+        comp = []
+        for d in sorted(td_rows, key=lambda x: int(x[3:])):
+            for t, (rows, _) in sorted(td_rows[d].items(), reverse=True):
+                c = [r["components"]["eval"] for r in rows if "components" in r]
+                if c:
+                    h = np.median([np.median([v["hpwl_um"] for v in x.values()]) for x in c])
+                    o = np.median([np.median([v["rudy_of_pct"] for v in x.values()]) for x in c])
+                    comp.append("%s at %s: HPWL %.4g um, RUDY overflow %.3f %%" % (d, t, h, o))
+        if comp:
+            L += ["", "J components where recorded (medians over seeds of the fresh-seed medians): " + "; ".join(comp) + "."]
+        L += ["", "Exploratory; a tool parameter, not a HeurBridge method. Sources: %s." % ", ".join(
+            src for v in td_rows.values() for _, src in v.values()), ""]
+    # 8 warm-started tool runs
+    wm = {}
+    for f in sorted(glob.glob(str(R / "warm*" / "runs" / "warm_tool*" / "*" / "rows.jsonl"))):
+        rows = jl(f)
+        if rows:
+            wm.setdefault(rows[0]["design"], []).append((rows, str(Path(f).relative_to(ROOT))))
+    if wm:
+        from heurbridge.stats.paired import wilcoxon_less
+        L += ["## 8 The tool started from a given macro layout (endpoint: median J over fresh f1 seeds 1-3)", "",
+              "DREAMPlace's mixed-size run normally starts every object near the die centre (random_center_init_flag = 1). "
+              "Here it starts from a macro layout with the standard cells at their cluster's quadratic position "
+              "(random_center_init_flag = 0; scripts/warm_tool_eval.py): heur = the seeding campaign's best layouts "
+              "(heuristic programs and their local search), self = the tool's own layout T_s (a second pass), cons = the "
+              "consensus of T_s and T_(s+1). Density as in the first pass unless stated. Per cell: mean J [min, max] over "
+              "8 starts; macro move = mean macro displacement from the start (normalized core units).", "",
+              "| design | random start (density 0.9) | heur | self | cons |", "|---|---|---|---|---|"]
+        pair_s, pair_r = [], []
+        for d in sorted(wm, key=lambda x: int(x[3:])):
+            ref = tool_rows.get(d)
+            rnd = np.array([r["J_eval"]["tool"] for r in ref]) if ref else None
+            cells = {}
+            for rows, _ in wm[d]:
+                if rows[0].get("target_density", 0.9) != 0.9:
+                    continue                                    # passes at another density: section 9
+                for k in ("heur", "self", "cons"):
+                    rr = [r for r in rows if r["start"] == k]
+                    if rr:
+                        J = np.array([r["J_eval"] for r in rr])
+                        cells[k] = "%.4f [%.4f, %.4f], move %.2f" % (J.mean(), J.min(), J.max(),
+                                                                   np.nanmean([r.get("mean_macro_move", np.nan) for r in rr]))
+                        if k == "self" and rnd is not None and len(rr) <= len(rnd):
+                            pair_s += list(J)
+                            pair_r += list(rnd[:len(rr)])
+            L.append("| %s | %s | %s |" % (d, "%.4f [%.4f, %.4f]" % (rnd.mean(), rnd.min(), rnd.max()) if rnd is not None else "-",
+                                          " | ".join(cells.get(k, "-") for k in ("heur", "self", "cons"))))
+        if pair_s:
+            S, Rr = np.array(pair_s), np.array(pair_r)
+            L += ["", "Second pass (self) minus the first pass, paired by tool seed: %+.4f on average, lower in %d of %d, one-sided "
+                      "Wilcoxon p = %.3g (exploratory). Cost: two tool runs, no f1 run to choose." % (
+                          (S - Rr).mean(), int((S < Rr).sum()), len(S), wilcoxon_less(S, Rr)["p"])]
+        L += ["", "Sources: %s." % ", ".join(src for v in wm.values() for _, src in v), ""]
     L += ["## Notes", "",
           "- f1 is noisy: the same macro layout scored with another DREAMPlace seed changes J, and on some designs a run blows "
           "the overflow term up (ibm08: J 0.44 under one seed, 1.5-4.6 under another). Every comparison above therefore "

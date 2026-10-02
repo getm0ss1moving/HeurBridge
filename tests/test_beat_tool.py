@@ -156,3 +156,27 @@ def test_trackb_test_shifts_fall_back_in_order_for_both_arms(monkeypatch):
     out = R.tb_pairs(None, "c", "r")
     assert [o[1] for o in out] == [None, (-2, 0), (0, -1), None, (1, 1), (-1, -1)]
     assert all(o[2] == ("c", o[1]) and o[3] == ("r", o[1]) for o in out if o[1] is not None)
+
+
+def test_density_confirm_units_pair_the_seed_with_rl1s_best_of_four(tmp_path):
+    """scripts/density_confirm.units: unit (design, s) = the density-d* run of seed s vs RL#1's best of 4 from seed s;
+    a missing density row is +inf by name."""
+    import json
+    import math
+    import density_confirm as C
+    m = tmp_path / "rtd_a" / "runs" / ("tool_runs_td%g" % C.TD) / "adaptec1"
+    r = tmp_path / "rlc_a" / "runs" / "relink" / "adaptec1"
+    t = tmp_path / "rlc_a" / "runs" / "tool_runs" / "adaptec1"
+    for p in (m, r, t):
+        p.mkdir(parents=True)
+    mrows = [{"tool_seed": s, "J_select": {"tool": 0.4}, "J_eval": {"tool": 0.40 + s / 1000}, "cost_s": {"tool": 30.0, "f1": 20.0}}
+             for s in range(7)]                                     # seed 7 missing
+    rrows = [{"tool_seed": s, "J_eval": {"tool": 0.45, "best4": 0.44}} for s in range(8)]
+    trows = [{"tool_seed": s, "J_select": {"tool": 0.45}, "cost_s": {"tool": 20.0, "f1": 20.0}} for s in range(8)]
+    for p, rows in ((m, mrows), (r, rrows), (t, trows)):
+        (p / "rows.jsonl").write_text("".join(json.dumps(x) + "\n" for x in rows))
+    U, fails, srcs = C.units(tmp_path, "rtd_", "rlc_")
+    a1 = [u for u in U if u["design"] == "adaptec1"]
+    assert len(U) == 64 and [u["method"] for u in a1[:2]] == [0.40, 0.401] and a1[0]["best4_09"] == 0.44
+    assert math.isinf(a1[7]["method"]) and any("adaptec1 seed 7" in f for f in fails)
+    assert a1[0]["cost_method"] == 50.0 and a1[0]["cost_best4"] == 160.0

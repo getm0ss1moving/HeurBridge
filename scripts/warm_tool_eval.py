@@ -53,6 +53,7 @@ def main():
     ap.add_argument("--eval-seeds", default="1,2,3")
     ap.add_argument("--out", required=True)
     ap.add_argument("--dry", action="store_true", help="build and describe the starts, run nothing")
+    ap.add_argument("--target-density", type=float, default=0.9, help="the warm tool run's DREAMPlace target density")
     a = ap.parse_args()
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
@@ -100,7 +101,8 @@ def main():
     work = out / "work"
     with open(out / "rows.jsonl", "w") as fh:
         for n, (kind, src, lay0, J0) in enumerate(starts):
-            row = {"design": des.id, "start": kind, "source": src, "start_J": J0, "failures": []}
+            row = {"design": des.id, "start": kind, "source": src, "start_J": J0, "failures": [],
+                   "target_density": a.target_density}
             if lay0 is None:
                 row["failures"].append("P_M failed on the start")
                 row.update({"J_select": INF, "J_eval": INF})
@@ -113,13 +115,17 @@ def main():
                 l0.pos[cells] = init.pos[cells]
                 t0 = time.time()
                 with start_from_pl():
-                    T, why, t_tool = tool_layout(d_raw, l0, b, n, work / ("w%d" % n))
+                    T, why, t_tool = tool_layout(d_raw, l0, b, n, work / ("w%d" % n), a.target_density)
                 if T is None:
                     row["failures"].append(why or "tool run failed")
                     row.update({"J_select": INF, "J_eval": INF, "tool_s": round(t_tool, 1)})
                 else:
-                    js = float(ev_sel.score(ev_sel.evaluate(des, T, "w%d.sel" % n, work), base).J_inf)
-                    fresh = {e.seed: float(e.score(e.evaluate(des, T, "w%d.e%d" % (n, e.seed), work), base).J_inf) for e in evs}
+                    rec = ev_sel.evaluate(des, T, "w%d.sel" % n, work)
+                    js = float(ev_sel.score(rec, base).J_inf)
+                    recs = {e.seed: e.evaluate(des, T, "w%d.e%d" % (n, e.seed), work) for e in evs}
+                    fresh = {k: float(ev_sel.score(r, base).J_inf) for k, r in recs.items()}
+                    comp = lambda r: {"hpwl_um": r.get("hpwl_um"), "rudy_of_pct": r.get("rudy_of_pct")}
+                    row["components"] = {"select": comp(rec), "eval": {k: comp(r) for k, r in recs.items()}}
                     disp = float(np.sqrt(((T.pos[mm] - lay0.pos[mm]) ** 2).sum(1)).mean())
                     row.update({"J_select": js, "J_eval": float(np.median(list(fresh.values()))), "J_eval_seeds": fresh,
                                 "tool_s": round(t_tool, 1), "mean_macro_move": disp, "wall_s": round(time.time() - t0, 1)})
