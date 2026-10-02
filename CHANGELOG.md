@@ -6,6 +6,18 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 
 ## [Unreleased]
 
+### Confirmatory relinking test registered and launched (3 Oct 03:40)
+- `reports/relink_preregistration.md` and alpha-ledger entry `RL#1` (alpha_1 = 0.025), fixed before any ISPD2005 run.
+- `scripts/relink_eval.py`: one row per tool seed; a failed tool run, P_M or f1 is a +inf candidate, named in the
+  row; best of 2, 3 and 4; the method's extra cost and the endpoint's cost are timed separately; `--match-block`.
+- `scripts/relink_confirm.py` (new): `reserve` (RL#1) and `analyze` (records the result once, writes
+  `reports/relink_confirmatory.md`; refuses two sources for a design).
+- `heurbridge/bridge/data.match_symmetric`: optional `block` (exact assignment inside recursive median-split blocks
+  for very large interchangeable groups); default unchanged (exact).
+- `scripts/report_beat_tool.py`: takes best of 4 from the relink rows when present.
+- Tests: `tests/test_beat_tool.py` +3 (best of k with failures, the confirmatory unit builder, blockwise matching).
+  Full suite: 203 passed (147.9 s).
+
 ### Owner's aim: beat the tool on Track A (3 Oct 03:30, exploratory)
 - New scripts: `beat_tool_demo.py` (the tool, the tool with more seeds, the frozen bridge on the tool's layout, local
   search from it), `beat_tool_band.py` (f1-seed bands), `tool_refine_eval.py` (tool + refiner vs best of two at equal

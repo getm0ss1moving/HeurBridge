@@ -52,6 +52,6 @@ the tool's best of four runs? The owner's aim is a macro placer that beats the t
 
 ## 4 Compute
 
-Tool run 15.3-97.9 s and f1 run 15.3-103.3 s per ISPD2005 design (reports/T2_trackA_ispd_dreamplace.md:26-33). Per
+Tool run 15.3-97.9 s and f1 run 15.3-103.3 s per ISPD2005 design (reports/T2_trackA_ispd_dreamplace.md:27-34). Per
 design: 8 tool runs, 32 f1 runs for the tool layouts (selection and fresh seeds), and up to 48 f1 runs for the relink
 candidates and their picks.

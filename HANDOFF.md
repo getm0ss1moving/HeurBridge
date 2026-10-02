@@ -4,6 +4,25 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
+## 2026-10-03 — Session 4 (03:45): confirmatory relinking test registered (RL#1) and launched on ISPD2005
+
+- **Registered before any ISPD2005 run:** `reports/relink_preregistration.md` (commit 5dded6e, pushed); alpha-ledger
+  `RL#1` (alpha_1 = 0.025) reserved 03:37 by `python scripts/relink_confirm.py reserve`. Relinking two tool runs
+  against the tool's best of four (more compute: four tool runs and four f1 runs against two and five), 8 designs x
+  tool seeds 0-7 = 64 units, pick by f1 seed 0, judge by the median of fresh seeds 1-3, one-sided Wilcoxon.
+- **Code:** `scripts/relink_eval.py` keeps failed tool runs by seed (+inf candidates, named per row) and writes best
+  of 2/3/4 and the method's extra cost; `bridge.data.match_symmetric(block=...)` matches very large interchangeable
+  groups blockwise (bigblue2: 14,321 identical macros; bigblue4: 6,150); the default stays exact, and every IBM group
+  (at most 362) and every other ISPD2005 group (at most 731) is matched exactly as before.
+- **Launched 03:40** (code 5dded6e): `rlc_bb4` (231 GPU 4), `rlc_bb3`, `rlc_bb2`, `rlc_a34` (adaptec3-4) on 227 GPUs
+  0-2 next to `relinkall_a`-`_c`, `rlc_a12b1` (adaptec1-2, bigblue1) on 225 GPU 0 next to `lspairs_a`. About 1.5-3.5 h.
+- **When every `rlc_*` job is done:** `python scripts/hbv.py fetch --port <port> --run rlc_<tag>` for all five, then
+  `python scripts/relink_confirm.py analyze` **once** (it records RL#1's result and refuses a second one) ->
+  `reports/relink_confirmatory.md`. Wall-clock is measured while jobs share GPUs; the run counts carry the cost claim.
+- **Note:** 227's clock runs about 55 minutes ahead of this Mac's; times in these notes are the Mac's (CST).
+
+---
+
 ## 2026-10-03 — Session 4 (03:30): owner's aim "mean J below 0.45, better than the tool on output and cost"
 
 - **Owner (3 Oct):** the first aim is a macro placer with mean J below 0.45, proven better than the tool on output and

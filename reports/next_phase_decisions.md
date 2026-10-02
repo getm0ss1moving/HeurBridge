@@ -44,10 +44,18 @@ reproduces 231's result exactly (HPWL 2,568,479.75 on ibm01; reports/env/dp_smok
 - f1 itself is noisy and heavy-tailed on some designs, so every comparison picks with one f1 seed and judges with
   three fresh seeds (median).
 
-**Next, in order:** (1) relinking on all 17 IBM designs (running); (2) if it holds, a pre-registered confirmatory
-test of relinking against the tool's best of three at equal compute on the held-out ISPD2005 family, untouched by any
-of this exploration; (3) a refiner that learns the relinking move from a single tool run, to cut the second tool run
-from the cost; (4) the refiner pairs from local search (running on 225) are kept as a second data source.
+**Next, in order:** (1) relinking on all 17 IBM designs (running); (2) the confirmatory test on the held-out
+ISPD2005 family, untouched by any of this exploration: **registered and launched on 3 Oct 03:40**
+(reports/relink_preregistration.md, alpha-ledger RL#1); (3) a refiner that learns the relinking move from a single tool
+run, to cut the second tool run from the cost; (4) the refiner pairs from local search (running on 225) are kept as a
+second data source.
+
+Two choices in (2), made under the owner's delegation: the comparator is the tool's best of **four** runs, not three,
+because a tool run and an f1 run take about the same time on ISPD2005 (reports/T2_trackA_ispd_dreamplace.md:27-34),
+so relinking (two tool runs, five f1 runs) costs about 7 run-units against 8 for best of four and 6 for best of three:
+passing against best of four shows a lower J at lower cost. And it runs in parallel with (1) instead of after it: its
+procedure is fixed and cannot depend on the IBM results, the GPUs were free, and the price of a failure is campaign RL's
+first alpha (0.025), recorded either way.
 
 ## D1 Launch the T5 demo?
 
@@ -83,7 +91,7 @@ from the cost; (4) the refiner pairs from local search (running on 225) are kept
 ## D3 T3.9: the cell bridge's endpoint
 
 - **Evidence:** the task list ranks the cell bridge's targets by f2 J (HEURBRIDGE_TASKS.md:372), but Track A has no
-  f2; its final cost is DREAMPlace f1 (reports/PROGRESS.md:265). DREAMPlace ignores start positions
+  f2; its final cost is DREAMPlace f1 (reports/PROGRESS.md:268). DREAMPlace ignores start positions
   (reports/demo_sketch_start.md:34), so a cell bridge cannot hand its result to DREAMPlace; it must deliver a placement.
   The look-ahead predictor misses both parts of its bar (reports/sketch_predictor_s2.md:38,
   reports/sketch_predictor_s2_ranking.md). *Negative results.*
@@ -137,7 +145,7 @@ from the cost; (4) the refiner pairs from local search (running on 225) are kept
 
 ## D8 Housekeeping (owner's actions; nothing was deleted)
 
-- **Staged for deletion** (moved there on 29 Sep: HANDOFF.md:394-395; sizes measured 2 Oct):
+- **Staged for deletion** (moved there on 29 Sep: HANDOFF.md:413-414; sizes measured 2 Oct):
   `/data/dzy/heura_repr/_to_delete_20260929/` on 224, 68 GB (its /data at 93 % use); on 225, 31 GB (/data at 99 %);
   on 231, 7.1 GB (root at 99 %). The final `rm -rf` is yours.
 - **Faulty GPUs:** `nvidia-smi` fails on 224 ("Unable to determine the device handle for GPU 0000:02:00.0: Unknown
