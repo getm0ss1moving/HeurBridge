@@ -112,3 +112,19 @@ def test_blockwise_symmetric_matching_is_a_permutation_within_the_group():
     assert cost(ex) <= cost(bx) + 1e-12 < cost(el)                          # exact is optimal; blocks still help
     _, pfull = BD.match_symmetric(g, xh, el, block=n)
     assert np.array_equal(pfull, pe)                                        # block >= group size: exact
+
+
+def test_barycenter_undoes_permutations_of_interchangeable_macros():
+    """scripts/consensus_eval.barycenter: the average of matched layouts; relabelled copies of one layout give it back."""
+    import types
+    import consensus_eval as C
+    from heurbridge.bridge.graph import KIND_MOV
+    rng = np.random.default_rng(1)
+    n = 12
+    g = types.SimpleNamespace(n=n, area_w=np.ones(n), group=np.r_[np.zeros(6, int), np.ones(6, int)],
+                              kind=np.full(n, KIND_MOV))
+    x = rng.random((n, 2))
+    p = np.r_[rng.permutation(6), 6 + rng.permutation(6)]           # relabel inside each group
+    assert np.allclose(C.barycenter(g, [x, x[p], x]), x)
+    y = x + 0.01
+    assert np.allclose(C.barycenter(g, [x, y[p]]), x + 0.005)         # matched first, then averaged
