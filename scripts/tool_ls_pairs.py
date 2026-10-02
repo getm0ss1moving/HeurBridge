@@ -54,9 +54,8 @@ def shift_moves(design, layout, rng, n: int) -> list:
 def main():
     from heurbridge.bridge.data import PairSet, match_symmetric
     from heurbridge.bridge.sample import source_nodes
-    from heurbridge.core import bookshelf
-    from tool_refine_eval import tool_layout
-    from train_bridge import SUITES, load_bundle
+    from tool_refine_eval import load_raw, tool_layout
+    from train_bridge import load_bundle
     ap = argparse.ArgumentParser()
     ap.add_argument("--suite", default="ibm")
     ap.add_argument("--designs", required=True)
@@ -78,7 +77,7 @@ def main():
         b = load_bundle(a.suite, name, a.runs)
         des, g = b.design, b.graph
         base = cost.Baseline.from_records(des.id, json.loads((Path(a.runs) / des.id / "baseline.json").read_text())["records"])
-        d, l = bookshelf.load_bookshelf(SUITES[a.suite] / name / (name + ".aux"), family=a.suite)
+        d, l = load_raw(a.suite, name)
         work = out / "work" / des.id
         work.mkdir(parents=True, exist_ok=True)
         ev_sel = DreamplaceEvaluator(cluster_of=b.cluster_of, seed=a.select_seed)

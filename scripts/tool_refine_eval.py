@@ -39,6 +39,18 @@ from heurbridge.pipeline.evaluators import DreamplaceEvaluator  # noqa: E402
 ALPHAS = (0.25, 0.5, 1.0)
 
 
+def load_raw(suite: str, name: str):
+    """The benchmark design and placement exactly as the seeding campaign loads them (scripts/run_seed_archive.py): on
+    ISPD2005 the mixed-size (MMS) convention makes every macro movable, so the tool places them."""
+    from heurbridge.core import bookshelf
+    from train_bridge import SUITES
+    d, l = bookshelf.load_bookshelf(SUITES[suite] / name / (name + ".aux"), family=suite)
+    if suite == "ispd2005":
+        d.is_fixed = d.is_fixed & ~d.is_macro
+        l.schema = d.schema_hash()
+    return d, l
+
+
 def tool_layout(d, l, b, seed, work):
     """The tool's macro layout for one seed (mixed-size, P_M) and its wall-clock; None on failure."""
     from heurbridge.eval.dreamplace import run_dreamplace_m1
@@ -55,8 +67,7 @@ def tool_layout(d, l, b, seed, work):
 def main():
     from heurbridge.bridge.sample import bridge_endpoints, source_nodes
     from heurbridge.bridge.train import load_bridge
-    from heurbridge.core import bookshelf
-    from train_bridge import SUITES, load_bundle
+    from train_bridge import load_bundle
     ap = argparse.ArgumentParser()
     ap.add_argument("--suite", default="ibm")
     ap.add_argument("--designs", required=True)
@@ -79,7 +90,7 @@ def main():
         b = load_bundle(a.suite, name, a.runs)
         des = b.design
         base = cost.Baseline.from_records(des.id, json.loads((Path(a.runs) / des.id / "baseline.json").read_text())["records"])
-        d, l = bookshelf.load_bookshelf(SUITES[a.suite] / name / (name + ".aux"), family=a.suite)
+        d, l = load_raw(a.suite, name)
         work = out / "work" / des.id
         work.mkdir(parents=True, exist_ok=True)
         ev_sel = DreamplaceEvaluator(cluster_of=b.cluster_of, seed=a.select_seed)

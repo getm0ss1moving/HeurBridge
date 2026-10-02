@@ -30,3 +30,23 @@ def test_refiner_pair_moves_are_shifts_only():
     for new in P.shift_moves(des, lay, np.random.default_rng(1), 30):
         changed = np.flatnonzero((np.abs(new.pos - lay.pos) > 1e-12).any(1))
         assert len(changed) <= 1 and np.array_equal(new.orient, lay.orient)
+
+
+def test_raw_loader_applies_the_ispd_convention(monkeypatch):
+    """scripts/tool_refine_eval.load_raw: ISPD2005 macros become movable (the seeding campaign's MMS convention)."""
+    import types
+    import tool_refine_eval as T
+    from heurbridge.core import bookshelf
+
+    class FakeDesign:
+        def __init__(self):
+            self.is_fixed = np.array([True, True, False])
+            self.is_macro = np.array([True, False, False])
+
+        def schema_hash(self):
+            return "h"
+    monkeypatch.setattr(bookshelf, "load_bookshelf", lambda path, family: (FakeDesign(), types.SimpleNamespace(schema="")))
+    d, l = T.load_raw("ispd2005", "adaptec1")
+    assert list(d.is_fixed) == [False, True, False] and l.schema == "h"
+    d, l = T.load_raw("ibm", "ibm01")
+    assert list(d.is_fixed) == [True, True, False]                 # IBM: unchanged

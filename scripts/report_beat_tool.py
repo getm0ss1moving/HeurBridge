@@ -106,28 +106,50 @@ def main():
         rows = jl(f)
         if rows:
             rl[rows[0]["design"]] = (rows, str(Path(f).relative_to(ROOT)))
+    # best of 4 seeds (more compute than relinking: four tool runs and four f1 runs), from the saved per-seed scores
+    tool_rows = {}
+    for f in sorted(glob.glob(str(R / "*" / "runs" / "tool_runs" / "*" / "rows.jsonl"))) + \
+            sorted(glob.glob(str(R / "toolref3_*" / "runs" / "tool_refine3" / "*" / "rows.jsonl"))):
+        rows = [r for r in jl(f) if "J_eval" in r]
+        if rows:
+            tool_rows[rows[0]["design"]] = rows
+    for d, (rows, src) in rl.items():
+        tr_ = tool_rows.get(d)
+        if not tr_:
+            continue
+        S = len(tr_)
+        sel = [r["J_select"]["tool"] for r in tr_]
+        fr = [r["J_eval"]["tool"] for r in tr_]
+        for r in rows:
+            s = r["seed_index"]
+            k4 = min([(s + i) % S for i in range(4)], key=lambda k: sel[k])
+            r["J_eval"]["best4"] = fr[k4]
     if rl:
         L += ["## 4 Relinking two tool runs vs the tool's best of k (endpoint: median J over fresh f1 seeds 1-3)", "",
               "Relink: the candidates P_M(T_s + a (T_p - T_s)), a in {0.25, 0.5, 0.75}, T_p another tool run with its "
               "interchangeable macros matched to T_s; the best of {T_s, T_p, candidates} by the selection seed (cost: two "
               "tool runs and five f1 runs, about the cost of best of 3: three tool runs and three f1 runs).", "",
-              "| design | tool seeds | tool | best of 2 | best of 3 | relink | relink below best of 3 (cases) |",
-              "|---|---|---|---|---|---|---|"]
-        allv = {"tool": [], "best2": [], "best3": [], "relink": []}
+              "| design | tool seeds | tool | best of 2 | best of 3 | best of 4 | relink | relink below best of 3 (cases) |",
+              "|---|---|---|---|---|---|---|---|"]
+        allv = {"tool": [], "best2": [], "best3": [], "best4": [], "relink": []}
         for d, (rows, src) in sorted(rl.items(), key=lambda kv: int(kv[0][3:])):
-            E = {k: np.array([r["J_eval"][k] for r in rows]) for k in allv}
+            E = {k: np.array([r["J_eval"].get(k, np.nan) for r in rows]) for k in allv}
             for k in allv:
                 allv[k] += list(E[k])
-            L.append("| %s | %d | %.4f | %.4f | %.4f | %.4f | %d of %d (%d above) |" % (
-                d, len(rows), E["tool"].mean(), E["best2"].mean(), E["best3"].mean(), E["relink"].mean(),
+            L.append("| %s | %d | %.4f | %.4f | %.4f | %.4f | %.4f | %d of %d (%d above) |" % (
+                d, len(rows), E["tool"].mean(), E["best2"].mean(), E["best3"].mean(), E["best4"].mean(), E["relink"].mean(),
                 int((E["relink"] < E["best3"]).sum()), len(rows), int((E["relink"] > E["best3"]).sum())))
         A = {k: np.array(v) for k, v in allv.items()}
-        L += ["| **all** | %d | %.4f | %.4f | %.4f | %.4f | %d of %d (%d above) |" % (
-            len(A["tool"]), A["tool"].mean(), A["best2"].mean(), A["best3"].mean(), A["relink"].mean(),
+        ok4 = np.isfinite(A["best4"])
+        L += ["| **all** | %d | %.4f | %.4f | %.4f | %.4f | %.4f | %d of %d (%d above) |" % (
+            len(A["tool"]), A["tool"].mean(), A["best2"].mean(), A["best3"].mean(), np.nanmean(A["best4"]), A["relink"].mean(),
             int((A["relink"] < A["best3"]).sum()), len(A["tool"]), int((A["relink"] > A["best3"]).sum())), "",
-              "Relink minus best of 3: %+.4f on average, one-sided Wilcoxon p = %.3g (exploratory, not a registered test). "
-              "Sources: %s." % ((A["relink"] - A["best3"]).mean(), wil(A["relink"] - A["best3"]),
-                                ", ".join(src for _, src in sorted(rl.values(), key=lambda v: v[1]))), ""]
+              "Relink minus best of 3: %+.4f on average, one-sided Wilcoxon p = %.3g; relink minus best of 4 (more compute "
+              "than relinking): %+.4f, p = %.3g over %d cases (exploratory, not registered tests). Sources: %s." % (
+                  (A["relink"] - A["best3"]).mean(), wil(A["relink"] - A["best3"]),
+                  (A["relink"][ok4] - A["best4"][ok4]).mean() if ok4.any() else float("nan"),
+                  wil(A["relink"][ok4] - A["best4"][ok4]) if ok4.any() else float("nan"), int(ok4.sum()),
+                  ", ".join(src for _, src in sorted(rl.values(), key=lambda v: v[1]))), ""]
     L += ["## Notes", "",
           "- f1 is noisy: the same macro layout scored with another DREAMPlace seed changes J, and on some designs a run blows "
           "the overflow term up (ibm08: J 0.44 under one seed, 1.5-4.6 under another). Every comparison above therefore "

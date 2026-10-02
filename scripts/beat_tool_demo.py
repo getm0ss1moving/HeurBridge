@@ -117,8 +117,8 @@ def moves(design, layout, rng, n: int) -> list:
 def run_design(name: str, a, model, out: Path, log) -> dict:
     from heurbridge.bridge.sample import refine
     from heurbridge.eval.dreamplace import run_dreamplace_m1
-    from heurbridge.core import bookshelf
-    from train_bridge import SUITES, load_bundle
+    from tool_refine_eval import load_raw
+    from train_bridge import load_bundle
     t_design = time.time()
     b = load_bundle(a.suite, name, a.runs)
     des = b.design
@@ -146,7 +146,7 @@ def run_design(name: str, a, model, out: Path, log) -> dict:
     res["tool_J"] = t0["J"]
 
     # the tool with more compute: other seeds, and its routability mode
-    d, l = bookshelf.load_bookshelf(SUITES[a.suite] / name / (name + ".aux"), family=a.suite)
+    d, l = load_raw(a.suite, name)
     tool_runs = []
     for arm, seed, over in [("tool_seed%d" % s, s, {}) for s in range(1, a.tool_seeds + 1)] + \
                            ([("tool_rout", 0, {"routability_opt_flag": 1})] if a.tool_rout else []):

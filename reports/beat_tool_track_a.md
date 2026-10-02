@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Report | beat_tool_track_a |
-| Date | 2026-10-03 03:18 |
+| Date | 2026-10-03 03:23 |
 | Track | A (IBM; f1 = DREAMPlace GP + LG with macros fixed; J against the seeding M1 baseline, 0.45 by construction) |
 | Status of the claim | **exploratory demo (no claim)**; any claim needs the pre-registered test drafted from it |
 | Owner's aim (3 Oct) | macro layouts with mean J below 0.45 that beat the tool on output and on cost |
@@ -60,14 +60,14 @@ All 24 cases: tool + bridge minus best of 2 = +0.0011 on average, one-sided Wilc
 
 Relink: the candidates P_M(T_s + a (T_p - T_s)), a in {0.25, 0.5, 0.75}, T_p another tool run with its interchangeable macros matched to T_s; the best of {T_s, T_p, candidates} by the selection seed (cost: two tool runs and five f1 runs, about the cost of best of 3: three tool runs and three f1 runs).
 
-| design | tool seeds | tool | best of 2 | best of 3 | relink | relink below best of 3 (cases) |
-|---|---|---|---|---|---|---|
-| ibm04 | 8 | 0.4411 | 0.4345 | 0.4307 | 0.4286 | 4 of 8 (1 above) |
-| ibm06 | 8 | 0.4519 | 0.4484 | 0.4476 | 0.4468 | 4 of 8 (2 above) |
-| ibm08 | 8 | 0.6108 | 0.7753 | 0.9416 | 0.4370 | 6 of 8 (1 above) |
-| **all** | 24 | 0.5013 | 0.5527 | 0.6067 | 0.4375 | 14 of 24 (4 above) |
+| design | tool seeds | tool | best of 2 | best of 3 | best of 4 | relink | relink below best of 3 (cases) |
+|---|---|---|---|---|---|---|---|
+| ibm04 | 8 | 0.4411 | 0.4345 | 0.4307 | 0.4290 | 0.4286 | 4 of 8 (1 above) |
+| ibm06 | 8 | 0.4519 | 0.4484 | 0.4476 | 0.4472 | 0.4468 | 4 of 8 (2 above) |
+| ibm08 | 8 | 0.6108 | 0.7753 | 0.9416 | 1.1066 | 0.4370 | 6 of 8 (1 above) |
+| **all** | 24 | 0.5013 | 0.5527 | 0.6067 | 0.6609 | 0.4375 | 14 of 24 (4 above) |
 
-Relink minus best of 3: -0.1692 on average, one-sided Wilcoxon p = 0.00448 (exploratory, not a registered test). Sources: runs/remote/relink_ibm04/runs/relink/ibm04/rows.jsonl, runs/remote/relink_ibm06/runs/relink/ibm06/rows.jsonl, runs/remote/relink_ibm08/runs/relink/ibm08/rows.jsonl.
+Relink minus best of 3: -0.1692 on average, one-sided Wilcoxon p = 0.00448; relink minus best of 4 (more compute than relinking): -0.2235, p = 0.0102 over 24 cases (exploratory, not registered tests). Sources: runs/remote/relink_ibm04/runs/relink/ibm04/rows.jsonl, runs/remote/relink_ibm06/runs/relink/ibm06/rows.jsonl, runs/remote/relink_ibm08/runs/relink/ibm08/rows.jsonl.
 
 ## Notes
 
