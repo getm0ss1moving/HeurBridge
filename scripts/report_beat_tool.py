@@ -148,11 +148,15 @@ def main():
         L += ["| **all** | %d | %.4f | %.4f | %.4f | %.4f | %.4f | %d of %d (%d above) |" % (
             len(A["tool"]), A["tool"].mean(), A["best2"].mean(), A["best3"].mean(), np.nanmean(A["best4"]), A["relink"].mean(),
             int((A["relink"] < A["best3"]).sum()), len(A["tool"]), int((A["relink"] > A["best3"]).sum())), "",
-              "Relink minus best of 3: %+.4f on average, one-sided Wilcoxon p = %.3g; relink minus best of 4 (more compute "
-              "than relinking): %+.4f, p = %.3g over %d cases (exploratory, not registered tests). Sources: %s." % (
-                  (A["relink"] - A["best3"]).mean(), wil(A["relink"] - A["best3"]),
+              "Relink minus best of 3: %+.4f on average (median %+.4f), one-sided Wilcoxon p = %.3g; relink minus best of 4 "
+              "(more compute than relinking): %+.4f on average (median %+.4f), p = %.3g over %d cases, relink lower in %d and "
+              "higher in %d. The means are dominated by ibm08, whose tool layouts blow up under some f1 seeds; the medians "
+              "and the tests are not (exploratory, not registered tests). Sources: %s." % (
+                  (A["relink"] - A["best3"]).mean(), np.median(A["relink"] - A["best3"]), wil(A["relink"] - A["best3"]),
                   (A["relink"][ok4] - A["best4"][ok4]).mean() if ok4.any() else float("nan"),
+                  np.median(A["relink"][ok4] - A["best4"][ok4]) if ok4.any() else float("nan"),
                   wil(A["relink"][ok4] - A["best4"][ok4]) if ok4.any() else float("nan"), int(ok4.sum()),
+                  int((A["relink"][ok4] < A["best4"][ok4]).sum()), int((A["relink"][ok4] > A["best4"][ok4]).sum()),
                   ", ".join(src for _, src in sorted(rl.values(), key=lambda v: v[1]))), ""]
     # 5 consensus of k tool runs
     cs = {}
@@ -195,6 +199,43 @@ def main():
                              wilcoxon_less(A["consensus"], A["best"])["p"], (A["guard"] - A["best"]).mean(),
                              wilcoxon_less(A["guard"], A["best"])["p"]))
         L += [""] + notes + ["", "Sources: %s." % ", ".join(src for _, src in sorted(cs.values(), key=lambda v: v[1])), ""]
+    # 6 macro orientation pass
+    fl = {}
+    for f in sorted(glob.glob(str(R / "flip_*" / "runs" / "flip" / "*" / "rows.jsonl"))):
+        rows = jl(f)
+        if rows:
+            fl[rows[0]["design"]] = (rows, str(Path(f).relative_to(ROOT)))
+    if fl:
+        from heurbridge.stats.paired import wilcoxon_less
+        L += ["## 6 Macro orientation pass on the tool's layout (endpoint: median J over fresh f1 seeds 1-3)", "",
+              "The tool never flips a macro. The pass gives each movable macro the footprint-preserving orientation (N, S, "
+              "FS, FN) that minimizes its nets' weighted HPWL with every other pin where f1 placed it (positions and "
+              "legality unchanged; scripts/flip_eval.py). Flip: the pass alone (one more f1 run when computed on f1's "
+              "placement). Guarded: the better of the two by the selection seed. Best of 2 + flip: the guarded pass on "
+              "the best-of-2 pick (two tool runs, three f1 runs).", "",
+              "| design | cases | tool | flip | guarded | best of 2 | best of 2 + flip | best of 3 | best of 4 | flip below tool | "
+              "HPWL change with the cells fixed |", "|---|---|---|---|---|---|---|---|---|---|---|"]
+        allv = {k: [] for k in ("tool", "flip", "flip_guard", "best2", "b2f", "best3", "best4")}
+        for d, (rows, src) in sorted(fl.items(), key=lambda kv: int(kv[0][3:])):
+            byi = {r["seed_index"]: r for r in rows}
+            E = {k: np.array([r["J_eval"][k] for r in rows]) for k in ("tool", "flip", "flip_guard", "best2", "best3", "best4")}
+            E["b2f"] = np.array([byi[r["best2_pick"]]["J_eval"]["flip_guard"] for r in rows])
+            for k in allv:
+                allv[k] += list(E[k])
+            hp = [r["hpwl_placed"]["after_cells_fixed"] / r["hpwl_placed"]["before"] - 1 for r in rows if "hpwl_placed" in r]
+            L.append("| %s | %d | %s | %d of %d | %+.2f %% |" % (
+                d, len(rows), " | ".join("%.4f" % E[k].mean() for k in ("tool", "flip", "flip_guard", "best2", "b2f", "best3",
+                                                                          "best4")),
+                int((E["flip"] < E["tool"]).sum()), len(rows), 100 * np.mean(hp) if hp else float("nan")))
+        A = {k: np.array(v, float) for k, v in allv.items()}
+        L += ["| **all** | %d | %s | %d of %d | |" % (len(A["tool"]), " | ".join("%.4f" % A[k].mean() for k in (
+            "tool", "flip", "flip_guard", "best2", "b2f", "best3", "best4")), int((A["flip"] < A["tool"]).sum()), len(A["tool"])), "",
+              "Flip minus tool %+.4f (one-sided Wilcoxon p = %.3g); best of 2 + flip minus best of 2 %+.4f (p = %.3g), minus "
+              "best of 3 %+.4f (p = %.3g). Exploratory. Sources: %s." % (
+                  (A["flip"] - A["tool"]).mean(), wilcoxon_less(A["flip"], A["tool"])["p"],
+                  (A["b2f"] - A["best2"]).mean(), wilcoxon_less(A["b2f"], A["best2"])["p"],
+                  (A["b2f"] - A["best3"]).mean(), wilcoxon_less(A["b2f"], A["best3"])["p"],
+                  ", ".join(src for _, src in sorted(fl.values(), key=lambda v: v[1]))), ""]
     L += ["## Notes", "",
           "- f1 is noisy: the same macro layout scored with another DREAMPlace seed changes J, and on some designs a run blows "
           "the overflow term up (ibm08: J 0.44 under one seed, 1.5-4.6 under another). Every comparison above therefore "

@@ -51,11 +51,12 @@ def load_raw(suite: str, name: str):
     return d, l
 
 
-def tool_layout(d, l, b, seed, work):
-    """The tool's macro layout for one seed (mixed-size, P_M) and its wall-clock; None on failure."""
+def tool_layout(d, l, b, seed, work, target_density: float = 0.9):
+    """The tool's macro layout for one seed (mixed-size, P_M) and its wall-clock; None on failure.  target_density:
+    DREAMPlace's (0.9, the tool's default here and in every earlier run)."""
     from heurbridge.eval.dreamplace import run_dreamplace_m1
     t0 = time.time()
-    rec, lay = run_dreamplace_m1(d, l, work / ("tool_s%d" % seed), seed=seed)
+    rec, lay = run_dreamplace_m1(d, l, work / ("tool_s%d" % seed), seed=seed, target_density=target_density)
     if lay is None:
         return None, rec.get("failure"), time.time() - t0
     out = b.base.copy()

@@ -196,7 +196,7 @@ def _run_f1(design, layout, work, f0cfg, gpu, iters, seed, timeout, threads=8):
 
 
 def run_dreamplace_m1(design: Design, layout: Layout, work: str | Path, gpu: bool = True, iters: int = 1000,
-                      seed: int = 0, timeout: int = 3600) -> tuple:
+                      seed: int = 0, timeout: int = 3600, target_density: float = 0.9) -> tuple:
     """Track-A M1 (tool-native macro placement, spec T2.1): DREAMPlace's mixed-size placement of the design with
     the macros movable (its macro placement and macro legalization switch on by themselves), started from
     ``layout`` (the benchmark placement).  Returns (record, macro-stage layout or None): macros at DREAMPlace's
@@ -205,8 +205,8 @@ def run_dreamplace_m1(design: Design, layout: Layout, work: str | Path, gpu: boo
     work.mkdir(parents=True, exist_ok=True)
     aux = write_oriented_bookshelf(design, layout, work / "in", name=design.id, fix_macros=False)
     rc, log, wall = run_placer(params(str(aux.resolve()), str((work / "out").resolve()), gpu=gpu, iters=iters,
-                                      seed=seed), work, timeout)
-    rec = {"backend": "dreamplace_m1", "returncode": rc, "wall_s": wall, "seed": seed,
+                                      seed=seed, target_density=target_density), work, timeout)
+    rec = {"backend": "dreamplace_m1", "returncode": rc, "wall_s": wall, "seed": seed, "target_density": target_density,
            "macro_place_enabled": "automatically enabling macro_place_flag" in log}
     pl = work / "out" / design.id / ("%s.gp.pl" % design.id)
     if rc != 0 or not pl.exists():

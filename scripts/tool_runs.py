@@ -36,6 +36,7 @@ def main():
     ap.add_argument("--tool-seeds", default="0,1,2,3,4,5,6,7")
     ap.add_argument("--select-seed", type=int, default=0)
     ap.add_argument("--eval-seeds", default="1,2,3")
+    ap.add_argument("--target-density", type=float, default=0.9, help="the tool's DREAMPlace target density (default 0.9)")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
     out = Path(a.out)
@@ -53,8 +54,9 @@ def main():
         saved = []
         with open(out / "rows.jsonl", "a") as fh:
             for s in (int(x) for x in a.tool_seeds.split(",")):
-                T, why, t_tool = tool_layout(d, l, b, s, work)
-                row = {"design": des.id, "tool_seed": s, "tool_s": round(t_tool, 1), "failure": why}
+                T, why, t_tool = tool_layout(d, l, b, s, work, a.target_density)
+                row = {"design": des.id, "tool_seed": s, "tool_s": round(t_tool, 1), "failure": why,
+                       "target_density": a.target_density}
                 if T is None:                           # a failed tool run is recorded by name (no layout, no J_eval row)
                     fh.write(json.dumps(row) + "\n")
                     continue
