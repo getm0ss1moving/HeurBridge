@@ -121,6 +121,8 @@ def main():
         sel = [r["J_select"]["tool"] for r in tr_]
         fr = [r["J_eval"]["tool"] for r in tr_]
         for r in rows:
+            if "best4" in r["J_eval"]:                          # relink_eval.py computes it since the ISPD2005 protocol
+                continue
             s = r["seed_index"]
             k4 = min([(s + i) % S for i in range(4)], key=lambda k: sel[k])
             r["J_eval"]["best4"] = fr[k4]

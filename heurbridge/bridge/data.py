@@ -40,8 +40,24 @@ def dist2(a: np.ndarray, x: np.ndarray, y: np.ndarray) -> float:
     return float((a * ((x - y) ** 2).sum(-1)).sum())
 
 
-def match_symmetric(graph: BridgeGraph, xh: np.ndarray, elite: np.ndarray, a: np.ndarray | None = None):
-    """Permute elite macros within interchangeable groups to best match xh.  Returns (elite', perm)."""
+def _blocks(P: np.ndarray, Q: np.ndarray, ia: np.ndarray, ib: np.ndarray, block: int):
+    """Recursive median splits of two equal-size point sets (same counts on both sides) into blocks of <= block."""
+    if len(ia) <= block:
+        yield ia, ib
+        return
+    ax = int(np.ptp(np.r_[P[ia], Q[ib]], axis=0).argmax())
+    h = len(ia) // 2
+    sa, sb = ia[np.argsort(P[ia, ax], kind="stable")], ib[np.argsort(Q[ib, ax], kind="stable")]
+    yield from _blocks(P, Q, sa[:h], sb[:h], block)
+    yield from _blocks(P, Q, sa[h:], sb[h:], block)
+
+
+def match_symmetric(graph: BridgeGraph, xh: np.ndarray, elite: np.ndarray, a: np.ndarray | None = None,
+                    block: int | None = None):
+    """Permute elite macros within interchangeable groups to best match xh.  Returns (elite', perm).
+
+    ``block``: a group larger than this is matched exactly within the blocks of recursive median splits (the dense
+    assignment of a group of n macros needs O(n^2) memory and up to O(n^3) time; bigblue2 has a group of 14,321)."""
     a = graph.area_w if a is None else a
     perm = np.arange(graph.n)
     grp = graph.group
@@ -49,9 +65,11 @@ def match_symmetric(graph: BridgeGraph, xh: np.ndarray, elite: np.ndarray, a: np
         idx = np.flatnonzero((grp == gid) & (graph.kind == KIND_MOV))
         if len(idx) < 2:
             continue
-        C = a[idx][:, None] * ((xh[idx][:, None, :] - elite[idx][None, :, :]) ** 2).sum(-1)
-        r, c = linear_sum_assignment(C)
-        perm[idx[r]] = idx[c]
+        k = np.arange(len(idx))
+        for ia, ib in (_blocks(xh[idx], elite[idx], k, k, block) if block and len(idx) > block else [(k, k)]):
+            C = a[idx[ia]][:, None] * ((xh[idx[ia]][:, None, :] - elite[idx[ib]][None, :, :]) ** 2).sum(-1)
+            r, c = linear_sum_assignment(C)
+            perm[idx[ia[r]]] = idx[ib[c]]
     return elite[perm], perm
 
 

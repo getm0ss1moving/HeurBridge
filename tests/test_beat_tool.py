@@ -50,3 +50,65 @@ def test_raw_loader_applies_the_ispd_convention(monkeypatch):
     assert list(d.is_fixed) == [False, True, False] and l.schema == "h"
     d, l = T.load_raw("ibm", "ibm01")
     assert list(d.is_fixed) == [True, True, False]                 # IBM: unchanged
+
+
+def test_best_of_k_picks_by_the_selection_seed_and_keeps_failures():
+    """scripts/relink_eval.best_of: cyclic window, pick by the selection seed, judge by the fresh seeds; failed = +inf."""
+    import relink_eval as R
+    inf = float("inf")
+    J_sel, J_fresh = [0.50, inf, 0.40, 0.60], [0.45, inf, 0.47, 0.44]
+    assert R.best_of(0, 2, J_sel, J_fresh) == 0.45                 # the failed run is never picked over a finite one
+    assert R.best_of(1, 2, J_sel, J_fresh) == 0.47
+    assert R.best_of(3, 2, J_sel, J_fresh) == 0.45                 # cyclic: positions 3, 0
+    assert R.best_of(1, 1, J_sel, J_fresh) == inf                  # every candidate failed
+    assert R.best_of(0, 4, J_sel, J_fresh) == 0.47
+
+
+def test_relink_confirm_units_name_missing_jobs_and_refuse_two_sources(tmp_path):
+    """scripts/relink_confirm.units: 64 units; a missing design is +inf by name; two sources for a design stop it."""
+    import json
+    import math
+    import pytest
+    import relink_confirm as C
+    d = tmp_path / "rlc_a" / "runs"
+    (d / "relink" / "adaptec1").mkdir(parents=True)
+    (d / "tool_runs" / "adaptec1").mkdir(parents=True)
+    rel, tool = [], []
+    for s in range(8):
+        tool.append({"tool_seed": s, "J_select": {"tool": 0.4}, "cost_s": {"tool": 10.0, "f1": 5.0}})
+        rel.append({"tool_seed": s, "partner_seed": (s + 1) % 8, "failures": [], "cost_s": {"relink_extra": 7.0},
+                    "J_eval": {"tool": 0.45, "best2": 0.44, "best3": 0.43, "best4": 0.42, "relink": 0.41}})
+    (d / "relink" / "adaptec1" / "rows.jsonl").write_text("\n".join(json.dumps(r) for r in rel) + "\n")
+    (d / "tool_runs" / "adaptec1" / "rows.jsonl").write_text("\n".join(json.dumps(r) for r in tool) + "\n")
+    U, fails, srcs = C.units(tmp_path, "rlc_")
+    assert len(U) == 64 and len(srcs) == 2
+    a1 = [u for u in U if u["design"] == "adaptec1"]
+    assert all(u["relink"] == 0.41 and u["best4"] == 0.42 for u in a1)
+    assert a1[0]["cost_relink"] == 2 * 15.0 + 7.0 and a1[0]["cost_best4"] == 4 * 15.0
+    assert all(math.isinf(u["relink"]) for u in U if u["design"] != "adaptec1")
+    assert sum("no relink row" in f for f in fails) == 56
+    dup = tmp_path / "rlc_b" / "runs" / "relink" / "adaptec1"
+    dup.mkdir(parents=True)
+    (dup / "rows.jsonl").write_text("")
+    with pytest.raises(SystemExit):
+        C.units(tmp_path, "rlc_")
+
+
+def test_blockwise_symmetric_matching_is_a_permutation_within_the_group():
+    """bridge.data.match_symmetric(block=...): large groups are matched within median-split blocks; exact otherwise."""
+    import types
+    from heurbridge.bridge import data as BD
+    from heurbridge.bridge.graph import KIND_MOV
+    rng = np.random.default_rng(0)
+    n = 60
+    g = types.SimpleNamespace(n=n + 2, area_w=np.ones(n + 2), group=np.r_[np.zeros(n, int), -1, -1],
+                              kind=np.full(n + 2, KIND_MOV))
+    xh = rng.random((n + 2, 2))
+    el = rng.random((n + 2, 2))
+    ex, pe = BD.match_symmetric(g, xh, el)
+    bx, pb = BD.match_symmetric(g, xh, el, block=8)
+    assert sorted(pb[:n]) == list(range(n)) and list(pb[n:]) == [n, n + 1]   # a permutation inside the group only
+    cost = lambda x: ((xh[:n] - x[:n]) ** 2).sum()
+    assert cost(ex) <= cost(bx) + 1e-12 < cost(el)                          # exact is optimal; blocks still help
+    _, pfull = BD.match_symmetric(g, xh, el, block=n)
+    assert np.array_equal(pfull, pe)                                        # block >= group size: exact
