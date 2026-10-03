@@ -31,7 +31,8 @@ from heurbridge.eval import cost  # noqa: E402
 from heurbridge.stats.alpha_ledger import AlphaLedger  # noqa: E402
 
 ORDER = ("bp_fe_top", "bp_be_top", "ariane136", "swerv_wrapper", "ariane133")      # TB#1, TB#2, ... in this order
-CANDIDATES = {"bp_fe_top": "bp_fe_top.ls0.n4.f2", "bp_be_top": "bp_be_top.ls7.n1.f2", "ariane136": "ariane136.ls7.n3.f2"}
+CANDIDATES = {"bp_fe_top": "bp_fe_top.ls0.n4.f2", "bp_be_top": "bp_be_top.ls7.n1.f2", "ariane136": "ariane136.ls7.n3.f2",
+              "swerv_wrapper": "swerv_wrapper.ls5.n4.f2"}       # fixed 4 Oct by `candidate` (pre-registration addendum)
 
 
 def jl(p):

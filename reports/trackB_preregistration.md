@@ -64,3 +64,13 @@ pre-selected candidates on **fresh shifts**.
 - The candidates come from heuristic programs and local search; no Track-B bridge exists yet.
 - The comparison with DREAMPlace's macro placement through this flow (the owner's request of 3 Oct) is a separate
   step after Track B's seeding finishes.
+
+## Addendum (4 Oct 00:20): swerv_wrapper's candidate, fixed before its test
+
+As Section 3 provides, after swerv_wrapper's campaign completed (job `seedB_orfs7_swerv_wrapper`, 4 Oct 00:15) and
+before its test ran: **swerv_wrapper.ls5.n4** (f2 J 0.8674 under Section 4's rule; 9 of 20 f2 layouts admitted),
+computed by `scripts/trackb_confirm.py candidate --design swerv_wrapper` from the local run file
+`runs/remote/seedB_orfs7_swerv_wrapper/runs/seed_orfs/swerv_wrapper/evals_f2.jsonl:5`. TB#4 is reserved with it
+(alpha_4 = 0.003125). Descriptive, not part of the test: unlike on the other three designs, this candidate's f2 J lies
+above all four same-path replays of the tool's layout (J 0.8407-0.8611, the same file's lines 1-4). The test runs as
+registered.
