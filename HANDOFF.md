@@ -19,6 +19,10 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 - **Running on 224:** `tw_a` (bp_be_top's six shifts), `tw_b` (ariane136 f1), `tw_swerv` (since 04:55, 4 at a time).
   Watch: Monitor with the scratchpad's `monitor_jobs.sh 224 /data/dzy/heura_repr/hb tw_a tw_b tw_swerv`.
 - **Next:** for each finished `tw_*` job: fetch, `python scripts/threeway_confirm.py analyze --design <d>` once.
+- **05:23 TW#2 bp_be_top** (`tw_a` done 05:20, fetched; TW#1's final rows identical to the snapshot it used): passed
+  under the registered rule (p = 0.0011), but before the gates DREAMPlace's layout is the best of the three; its
+  replicates fail only the relative hold gate with positive hold slack (notes at the end of `reports/trackB_threeway.md`;
+  new D11 evidence). Still running: `tw_b`, `tw_swerv`.
 
 ---
 

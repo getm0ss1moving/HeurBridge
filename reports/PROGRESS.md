@@ -1,6 +1,6 @@
 # HeurBridge-PR — progress against the task list (T0–T7)
 
-Status as of **2026-10-04 05:00 CST**, code: see `git log` (v0.14.0 + unreleased). Measured against
+Status as of **2026-10-04 05:35 CST**, code: see `git log` (v0.14.0 + unreleased). Measured against
 `HEURBRIDGE_TASKS.md` (Part C tasks, Part D gates). Session history: `HANDOFF.md`; every code change: `CHANGELOG.md`.
 
 ## 1. Summary
@@ -44,8 +44,11 @@ Status as of **2026-10-04 05:00 CST**, code: see `git log` (v0.14.0 + unreleased
   (`reports/trackB_confirmatory.md`). Finding the candidates took 47-133 times the tool's one flow run.
 - **TB#4 failed (4 Oct 04:51):** on swerv_wrapper the candidate is not better than the tool's layout even before the
   gates (median J 0.9266 against 0.9165), as its campaign data had shown. Track B: 2 of 4 designs pass.
-- **Three-way comparison, first result: TW#1 bp_fe_top passed** (p = 0.0022): HeurBridge 0.905, the tool 1.001,
-  DREAMPlace 1.073 (median J before the gates; `reports/trackB_threeway.md`).
+- **Three-way comparison (`reports/trackB_threeway.md`): TW#1 bp_fe_top passed** (p = 0.0022; median J before the
+  gates HeurBridge 0.905, the tool 1.001, DREAMPlace 1.073; DREAMPlace also worse on setup timing). **TW#2 bp_be_top
+  passed under the registered rule** (p = 0.0011), but before the gates DREAMPlace's layout is the best of the three
+  (0.961 against 1.017 and 1.108) and fails only the relative hold gate with positive hold slack: not evidence that
+  HeurBridge's layout is better there (notes in the report; D11).
 - **Next:** the three-way comparison on Track B (running) (HeurBridge, DREAMPlace, the tool's
   own placement through the same flow; `reports/trackB_threeway_preregistration.md`, registered 3 Oct 23:24, TW#1-TW#3),
   with the asymmetry stated: HeurBridge's candidates were searched with the flow as the score, DREAMPlace never sees it.
@@ -59,7 +62,7 @@ Status as of **2026-10-04 05:00 CST**, code: see `git log` (v0.14.0 + unreleased
 | 225 GPUs 0–3 | — | **full E0 done** (bigblue4 whole on 225: 30 legal sources of 80, budgets 2259 / 2231 s, memory-lean RUDY `HB_RUDY_IMPL=bmm`) | all components complete 30 Sep 23:18 (task list 405 + equal guard 405 + IBM 145 cases) | done: G0′ passed |
 | 231 GPU 4 | `ft_sketch_ibm2` | cell-sketch fine-tune (S1 of the sketch redesign) | **done 14:09: fails its pass rule** (`reports/sketch_finetune_s1.md`); the dedicated predictor (S2) is next | done |
 | 234 (CPU only) → 225 GPU 0 | `cell_labels_234`, `s2_lookahead_225` | sketch redesign S2: 3,838 DREAMPlace labels (0 failures), then the cell-stage predictor | **done 1 Oct 07:14: misses its bar** (DA0 ratio 0.747 / 0.642 vs ≤ 0.5; `reports/sketch_predictor_s2.md`) | done |
-| 224 (2 + 2 + 4 OpenROAD runs) | `tw_a`, `tw_b`, `tw_swerv` | **three-way comparison** (`reports/trackB_threeway_preregistration.md`): DREAMPlace's layouts through the flow; TW#1 bp_fe_top analysed (passed); bp_be_top (`tw_a`, its six shifts), ariane136 (`tw_b`: DREAMPlace's layouts fail the flow's detailed placement so far, 4 of 4 f1 runs), swerv_wrapper (`tw_swerv`, since 4 Oct 04:55) | running | `tw_a` about 06:00; `tw_b` and `tw_swerv` several hours |
+| 224 (2 + 2 + 4 OpenROAD runs) | `tw_a`, `tw_b`, `tw_swerv` | **three-way comparison** (`reports/trackB_threeway_preregistration.md`): DREAMPlace's layouts through the flow; TW#1 bp_fe_top and TW#2 bp_be_top analysed (`tw_a` done 05:20); ariane136 (`tw_b`: DREAMPlace's layouts fail the flow's detailed placement so far, 4 of 4 f1 runs), swerv_wrapper (`tw_swerv`, since 4 Oct 04:55) | running | `tw_b` and `tw_swerv` several hours |
 | 224 (4 OpenROAD runs) | `tb_swerv_wrapper` | **Track-B test TB#4** (12 f2 runs) | **done; analysed 4 Oct 04:51: failed** (p = 0.98; `reports/trackB_confirmatory.md`) | done |
 | 224 | `seedB_orfs7_swerv_wrapper` | T2.7 Track-B seeding of the last design | **done 4 Oct 00:15** (Track B's seeding complete) | done |
 | 224 (6 OpenROAD runs) | `tb_bp_fe_top`, `tb_bp_be_top`, `tb_ariane136` | **Track-B confirmatory test TB#1-TB#3**: 12 f2 runs per design | **done; analysed 3 Oct 22:36** (`reports/trackB_confirmatory.md`): TB#1, TB#2 passed, TB#3 failed | done |
@@ -311,16 +314,16 @@ design; "disposition" is the existing mitigation or the proposed fix.
 | Class | Where (count) | Disposition | Sources |
 |---|---|---|---|
 | Routing congestion (GRT-0116) | bp_fe_top 8, bp_be_top 41 | a property of the layout: kept as a named failure (+inf); identical failing layouts are not re-run | `reports/T2_trackB_orfs_bp_fe_top.md`:88, `reports/T2_trackB_orfs_bp_be_top.md`:88 |
-| Global placement does not converge | named divergence GPL-0307: bp_fe_top 7, ariane136 5, ariane133 5; GPL-0305: bp_fe_top 1. Silent: every other failing ariane133 layout stops at the 5,000-iteration cap with overflow 0.28-0.43 instead of 0.10, after which the resizer adds about 110,000 buffers (utilization 39 % to 74 %) and detailed placement fails or times out; the failing ariane136 layouts show the same pattern (overflow 0.335, about 121,000 buffers), and so do 36 of swerv_wrapper's failures so far (overflow 0.416, about 114,000 buffers; partial snapshot 2 Oct) | diagnosis 2 Oct (`reports/trackB_ariane133_diagnosis.md`, five probed layouts): PLACE_DENSITY 0.35 (as ariane136 sets) makes 4 of 5 evaluable with setup TNS no worse than -0.15 ns (the fifth: GPL-0307); virtual timing-driven resizing (`-keep_resize_below_overflow 0.01`) makes 5 of 5 complete but leaves setup TNS down to -50.7 ns. Proposed fix: PLACE_DENSITY 0.35 for every ariane133 run, baseline included (a flow deviation for the owner, decision D2) | `reports/T2_trackB_orfs_bp_fe_top.md`:89-92, `reports/T2_trackB_orfs_ariane136.md`:78, HANDOFF.md:361 |
-| Detailed placement failed (DPL-0036) | bp_fe_top 2, ariane136 17, ariane133 37 | on ariane133 and ariane136 a consequence of the class above (diagnosis); otherwise kept as named failures | `reports/T2_trackB_orfs_bp_fe_top.md`:91, `reports/T2_trackB_orfs_ariane136.md`:77, HANDOFF.md:361 |
-| Step timeout (7,200 s per step) | bp_fe_top 5_1_grt 7; ariane136 3_5_place_dp 18; ariane133 3_5_place_dp 25; swerv_wrapper 3_5_place_dp 52 and 5_1_grt 1 of 101 f1 rows so far | the red-line cap; on the ariane designs the timeouts follow non-converged placement (diagnosis) | `reports/T2_trackB_orfs_bp_fe_top.md`:89, `reports/T2_trackB_orfs_ariane136.md`:76, HANDOFF.md:361, :213-214 |
-| Unparsed ORFS failure | ariane133 14 | explained by the diagnosis (non-converged placement, then detailed placement); the parser found no [ERROR] line in the 4,000-character tail | HANDOFF.md:361, `heurbridge/eval/orfs.py`:307 |
-| Power-grid repair (PDN-0179) | ariane133 1 (the tool's layout shifted by one row) | named failure; not a heuristic's | HANDOFF.md:361, `runs/diag_trackb` (local) |
+| Global placement does not converge | named divergence GPL-0307: bp_fe_top 7, ariane136 5, ariane133 5; GPL-0305: bp_fe_top 1. Silent: every other failing ariane133 layout stops at the 5,000-iteration cap with overflow 0.28-0.43 instead of 0.10, after which the resizer adds about 110,000 buffers (utilization 39 % to 74 %) and detailed placement fails or times out; the failing ariane136 layouts show the same pattern (overflow 0.335, about 121,000 buffers), and so do 36 of swerv_wrapper's failures so far (overflow 0.416, about 114,000 buffers; partial snapshot 2 Oct) | diagnosis 2 Oct (`reports/trackB_ariane133_diagnosis.md`, five probed layouts): PLACE_DENSITY 0.35 (as ariane136 sets) makes 4 of 5 evaluable with setup TNS no worse than -0.15 ns (the fifth: GPL-0307); virtual timing-driven resizing (`-keep_resize_below_overflow 0.01`) makes 5 of 5 complete but leaves setup TNS down to -50.7 ns. Proposed fix: PLACE_DENSITY 0.35 for every ariane133 run, baseline included (a flow deviation for the owner, decision D2) | `reports/T2_trackB_orfs_bp_fe_top.md`:89-92, `reports/T2_trackB_orfs_ariane136.md`:78, HANDOFF.md:365 |
+| Detailed placement failed (DPL-0036) | bp_fe_top 2, ariane136 17, ariane133 37 | on ariane133 and ariane136 a consequence of the class above (diagnosis); otherwise kept as named failures | `reports/T2_trackB_orfs_bp_fe_top.md`:91, `reports/T2_trackB_orfs_ariane136.md`:77, HANDOFF.md:365 |
+| Step timeout (7,200 s per step) | bp_fe_top 5_1_grt 7; ariane136 3_5_place_dp 18; ariane133 3_5_place_dp 25; swerv_wrapper 3_5_place_dp 52 and 5_1_grt 1 of 101 f1 rows so far | the red-line cap; on the ariane designs the timeouts follow non-converged placement (diagnosis) | `reports/T2_trackB_orfs_bp_fe_top.md`:89, `reports/T2_trackB_orfs_ariane136.md`:76, HANDOFF.md:365, :213-214 |
+| Unparsed ORFS failure | ariane133 14 | explained by the diagnosis (non-converged placement, then detailed placement); the parser found no [ERROR] line in the 4,000-character tail | HANDOFF.md:365, `heurbridge/eval/orfs.py`:307 |
+| Power-grid repair (PDN-0179) | ariane133 1 (the tool's layout shifted by one row) | named failure; not a heuristic's | HANDOFF.md:365, `runs/diag_trackb` (local) |
 | Program timeout (sandbox, 60 s CPU) | IBM 55 (ibm10 15, ibm12 15, ibm14 5, ibm16 5, ibm17 15); ISPD2005 80 | +inf; the limit is part of the program contract | `reports/T2_trackA_ibm_dreamplace.md`:35-42, :49, `reports/T2_trackA_ispd_dreamplace.md`:42 |
 | Sandbox memory (4 GB) | ISPD2005: 80 crashes + 40 errors; bigblue2 cannot run any program | +inf; bigblue2 stays out of E0 as a documented deviation (§7) | `reports/T2_trackA_ispd_dreamplace.md`:34, :41-43, §7 |
 | Too few legal sources | bigblue4: 30 of 80 program runs project legally | registered as is for E0 (§7) | §7 |
 | Host out-of-memory kill | 1 (bigblue3 E0 slice, 21 GB) | fixed: memory-lean RUDY (`HB_RUDY_IMPL=bmm`), per-host slot cap, a SIGKILLed placer run is re-run, the watcher reports OOM kills | §2 (28-29 Sep) |
 | GPU out of memory | 1 (S1 evaluation, all cached sources in one batch) | fixed: batches of `--chunk` sources | CHANGELOG.md:200-201 |
-| Label-job CPU oversubscription (not a failure) | 14 workers x 8 DREAMPlace threads on 64 cores | fixed 2 Oct: `make_cell_labels.py --workers 8 --threads 4` | HANDOFF.md:348-350 |
+| Label-job CPU oversubscription (not a failure) | 14 workers x 8 DREAMPlace threads on 64 cores | fixed 2 Oct: `make_cell_labels.py --workers 8 --threads 4` | HANDOFF.md:352-354 |
 | Pipeline defect: the tool's input froze ISPD2005's macros (source terminals) | every ISPD2005 tool run since 28 Sep (seeding M1, RL#1-RL#3) | fixed 3 Oct (commit 157bf21); RL#1-RL#3 not evidence for their claims; re-test: D10 | `reports/defect_ispd_tool_runs.md` |
 
