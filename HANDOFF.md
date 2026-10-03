@@ -4,6 +4,21 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
+## 2026-10-04 — Session 4 (00:20): Track B's seeding finished; TB#4 and the three-way comparison running
+
+- **swerv_wrapper's campaign finished** (4 Oct 00:15; 132 f1 and 24 f2 runs, fetched). TB#4's candidate fixed by the
+  registered rule (`trackb_confirm.py candidate`): swerv_wrapper.ls5.n4 (f2 J 0.8674); addendum in
+  `reports/trackB_preregistration.md`. Unlike the other designs it lies above the tool's same-path replays (0.8407-0.8611):
+  TB#4 is likely to fail and runs as registered. TB#4 and TW#4 reserved (0.003125 each).
+- **Running on 224 (8 OpenROAD runs):** `tb_swerv_wrapper` (TB#4, 12 f2 runs, 4 at a time, about 3.5 h);
+  `tw_a` (DREAMPlace through the flow: bp_fe_top then bp_be_top, 2 at a time, about 5 h); `tw_b` (ariane136, 2 at a
+  time, about 8 h). Launch commands: the scratchpad's `launch_after_swerv.sh` (tb, tw_a, tw_b, tw_swerv).
+- **Next:** when `tb_swerv_wrapper` finishes: fetch, `python scripts/trackb_confirm.py analyze --design swerv_wrapper`
+  then `describe`; launch `tw_swerv` (4 at a time). When each `tw_*` job finishes: fetch, then
+  `python scripts/threeway_confirm.py analyze --design <d>` once per design (TW#1-TW#4).
+
+---
+
 ## 2026-10-03 — Session 4 (23:15): Track-B test results; RL#4 passed; DREAMPlace for Track B; three-way comparison prepared
 
 - **Results (each analysed once):** TB#1 bp_fe_top passed (p = 0.0022), TB#2 bp_be_top passed (p = 0.0011), TB#3
