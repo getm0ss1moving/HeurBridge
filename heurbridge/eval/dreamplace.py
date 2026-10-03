@@ -98,6 +98,69 @@ def write_oriented_bookshelf(design: Design, layout: Layout, out_dir: str | Path
     return aux
 
 
+def write_bookshelf_from_design(design: Design, layout: Layout, out_dir: str | Path, name: str = "hb",
+                                scale: float = 1000.0) -> Path:
+    """Bookshelf copy of any Design (no source bookshelf needed: Track-B designs come from DEF) for DREAMPlace's
+    mixed-size run: macros and standard cells movable, IO pins fixed (terminal_NI), other fixed objects terminals.
+    Coordinates in source units x ``scale`` rounded to integers (microns -> nm for DEF designs), orientations baked
+    in as in write_oriented_bookshelf.  Unplaced nodes start at the core centre.  Returns the .aux path."""
+    out = Path(out_dir)
+    out.mkdir(parents=True, exist_ok=True)
+    n = design.n_objects
+    eff = O.effective_size(design.size, layout.orient)
+    sz = np.maximum(np.rint(eff * scale), 1).astype(np.int64)
+    io = np.asarray(design.is_io, bool)
+    term = (np.asarray(design.is_fixed, bool) | io) & ~(np.asarray(design.is_macro, bool) & ~np.asarray(design.is_fixed, bool))
+    names = ["o%d" % i for i in range(n)]                    # source names can hold characters bookshelf rejects
+    with open(out / (name + ".nodes"), "w") as fh:
+        fh.write("UCLA nodes 1.0\n\nNumNodes : %d\nNumTerminals : %d\n" % (n, int(term.sum())))
+        for i in range(n):
+            kind = " terminal_NI" if io[i] else (" terminal" if term[i] else "")
+            fh.write("%s %d %d%s\n" % (names[i], sz[i, 0], sz[i, 1], kind))
+    off = O.apply(design.pin_off, layout.orient[design.pin_obj]) * scale
+    with open(out / (name + ".nets"), "w") as fh:
+        fh.write("UCLA nets 1.0\n\nNumNets : %d\nNumPins : %d\n" % (design.n_nets, len(design.pin_idx)))
+        for k in range(design.n_nets):
+            pins = design.pin_idx[design.net_ptr[k]:design.net_ptr[k + 1]]
+            fh.write("NetDegree : %d n%d\n" % (len(pins), k))
+            for p in pins:
+                fh.write("  %s B : %.3f %.3f\n" % (names[design.pin_obj[p]], off[p, 0], off[p, 1]))
+    centre = design.to_abs(layout.pos)
+    miss = ~np.isfinite(centre).all(1)
+    centre[miss] = [(design.core[0] + design.core[2]) / 2, (design.core[1] + design.core[3]) / 2]
+    ll = np.rint(centre * scale - sz / 2.0).astype(np.int64)
+    with open(out / (name + ".pl"), "w") as fh:
+        fh.write("UCLA pl 1.0\n\n")
+        for i in range(n):
+            flag = " /FIXED_NI" if io[i] else (" /FIXED" if term[i] else "")
+            fh.write("%s %d %d : N%s\n" % (names[i], ll[i, 0], ll[i, 1], flag))
+    sw = (design.site[0] if design.site else 1.0) * scale
+    with open(out / (name + ".scl"), "w") as fh:
+        rows = np.asarray(design.rows if design.rows is not None else [], float).reshape(-1, 4)
+        fh.write("UCLA scl 1.0\n\nNumRows : %d\n\n" % len(rows))
+        for x, y, w, h in rows:
+            fh.write("CoreRow Horizontal\n  Coordinate : %d\n  Height : %d\n  Sitewidth : %d\n  Sitespacing : %d\n"
+                     "  Siteorient : 1\n  Sitesymmetry : 1\n  SubrowOrigin : %d NumSites : %d\nEnd\n" % (
+                         round(y * scale), round(h * scale), round(sw), round(sw), round(x * scale), int(round(w * scale / sw))))
+    aux = out / (name + ".aux")
+    aux.write_text("RowBasedPlacement : %s.nodes %s.nets %s.pl %s.scl\n" % (name, name, name, name))
+    return aux
+
+
+def read_bookshelf_layout(design: Design, layout: Layout, pl: str | Path, scale: float = 1000.0) -> Layout:
+    """Layout from DREAMPlace's .pl of a write_bookshelf_from_design copy (node names o<i>; lower-left corners in source
+    units x scale); orientations kept."""
+    out = layout.copy()
+    eff = O.effective_size(design.size, layout.orient)
+    for line in Path(pl).read_text().splitlines():
+        p = line.split()
+        if len(p) >= 3 and p[0].startswith("o") and p[0][1:].isdigit():
+            i = int(p[0][1:])
+            ll = np.array([float(p[1]), float(p[2])]) / scale
+            out.pos[i] = design.to_norm(ll + eff[i] / 2.0)
+    return out
+
+
 def read_placed(design: Design, layout: Layout, pl: str | Path) -> Layout:
     """Layout from a .pl of an oriented copy: centres from the baked footprints, orientations kept."""
     index = {n: i for i, n in enumerate(design.names)}

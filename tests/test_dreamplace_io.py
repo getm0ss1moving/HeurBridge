@@ -61,3 +61,22 @@ def test_tool_input_frees_the_macros_the_design_keeps_movable(tmp_path):
     assert nodes["m0"] == [] and "/FIXED" not in pl["m0"] and "NumTerminals : 1" in text
     nodes, pl, text = got[True]                                                # f1's input: unchanged, fixed
     assert nodes["m0"] == ["terminal"] and "/FIXED" in pl["m0"] and "NumTerminals : 2" in text
+
+
+def test_bookshelf_from_any_design_round_trips(tmp_path):
+    """write_bookshelf_from_design (Track-B designs come from DEF): pins and positions survive the round trip through
+    the bookshelf reader; macros and cells movable, IOs fixed; read_bookshelf_layout reads DREAMPlace's .pl back."""
+    from heurbridge.core import synth
+    from heurbridge.eval.dreamplace import read_bookshelf_layout, write_bookshelf_from_design
+    des, lay = synth.make_design(seed=4, n_macros=5, n_cells=40, n_io=6)
+    lay.pos[~des.is_io] = np.random.default_rng(0).uniform(0.2, 0.8, (int((~des.is_io).sum()), 2))
+    aux = write_bookshelf_from_design(des, lay, tmp_path, name="t", scale=1000.0)
+    d2, l2 = load_bookshelf(aux, family="ibm")
+    assert not d2.is_fixed[des.is_macro].any() and not d2.is_fixed[~des.is_macro & ~des.is_io].any()
+    assert d2.is_fixed[des.is_io].all()
+    back = read_bookshelf_layout(des, lay, aux.with_suffix(".pl"), scale=1000.0)
+    keep = ~des.is_io | np.isfinite(lay.pos).all(1)
+    assert np.abs(des.to_abs(back.pos[keep]) - des.to_abs(lay.pos[keep])).max() < 2e-3   # rounding to 1/1000
+    a = pin_positions(des, lay)
+    b = pin_positions(d2, l2) / 1000.0
+    assert np.abs(a - b).max() < 2e-3
