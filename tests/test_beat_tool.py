@@ -158,6 +158,20 @@ def test_trackb_test_shifts_fall_back_in_order_for_both_arms(monkeypatch):
     assert all(o[2] == ("c", o[1]) and o[3] == ("r", o[1]) for o in out if o[1] is not None)
 
 
+def test_external_arm_pick_prefers_admitted_then_before_gates_then_f1():
+    """scripts/run_seed_orfs.ext_pick: DREAMPlace's layout for the three-way comparison is picked as HeurBridge's
+    candidate was (the best f2 layout admitted under D6); without an admitted one, the best J before the gates; with
+    every f2 run failed, the best by f1; each named."""
+    import math
+    import run_seed_orfs as R
+    inf = math.inf
+    assert R.ext_pick([(0.95, 0.95, 3), (inf, 0.90, 5), (0.97, 0.97, 1)], 7) == (3, "the best f2 layout admitted under D6")
+    k, why = R.ext_pick([(inf, 0.99, 3), (inf, 0.98, 5)], 7)
+    assert k == 5 and why.startswith("no f2 layout admitted")
+    k, why = R.ext_pick([(inf, inf, 3), (inf, inf, 5)], 7)
+    assert k == 7 and why.startswith("every f2 run failed")
+
+
 def test_density_confirm_units_pair_the_seed_with_rl1s_best_of_four(tmp_path):
     """scripts/density_confirm.units: unit (design, s) = the density-d* run of seed s vs RL#1's best of 4 from seed s;
     a missing density row is +inf by name."""

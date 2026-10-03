@@ -41,3 +41,25 @@ def test_endpoint_gates_the_candidate_only_without_the_sign_rule(tmp_path):
     cand, ref, out, srcs = T.endpoint("d", tmp_path, "tb_", "seedB_orfs7_")
     assert math.isfinite(cand[0]) and cand[0] < 1.0 and math.isinf(cand[1])
     assert ref[0] == pytest.approx(1.0) and math.isinf(ref[1])
+
+
+@pytest.mark.skipif(eda_dir() is None, reason="needs eda/harness/metrics_schema.py")
+def test_candidate_is_the_best_admitted_f2_layout(tmp_path):
+    import trackb_confirm as T
+    base = {"detailed_wirelength_um": 1000.0, "vias": 500, "gr_overflow_total": 0, "setup_tns_ns": 0.0,
+            "total_power_w": 0.01, "setup_wns_ns": 0.005, "hold_wns_ns": 0.015, "drc_violations": 0, "returncode": 0}
+    camp = tmp_path / "seedB_orfs7_x" / "runs" / "seed_orfs" / "d"
+    camp.mkdir(parents=True)
+    (camp / "baseline_f2.json").write_text(json.dumps({"records": [base, base]}))
+    rows = [{"run_id": "d.rep%d.f2" % k, "program": "M1_replay", "status": "ok", "record": base, "pos_macros": [[0, 0]]}
+            for k in range(4)]                                                  # the tool's replays: never a candidate
+    rows += [{"run_id": "d.a.f2", "program": "LS", "status": "ok", "pos_macros": [[0, 0]],
+              "record": dict(base, detailed_wirelength_um=700.0, hold_wns_ns=-0.006)},   # lowest J, fails hold
+             {"run_id": "d.b.f2", "program": "LS", "status": "ok", "pos_macros": [[0, 0]],
+              "record": dict(base, detailed_wirelength_um=800.0, setup_wns_ns=-0.01)},   # within the guard, no sign rule: admitted
+             {"run_id": "d.c.f2", "program": "M2.v0", "status": "ok", "pos_macros": [[0, 0]],
+              "record": dict(base, detailed_wirelength_um=900.0)},
+             {"run_id": "d.d.f2", "program": "M3.v0", "status": "eval_failed", "record": {"returncode": 2}}]
+    (camp / "evals_f2.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows))
+    rid, j, k, n, src = T.candidate("d", tmp_path, "seedB_orfs7_")
+    assert rid == "d.b.f2" and k == 2 and n == 4 and math.isfinite(j)

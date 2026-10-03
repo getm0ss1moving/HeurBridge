@@ -151,6 +151,18 @@ def shift_exact(des, lay0, dx_sites: int, dy_rows: int):
     return lay if project.check_macros(des, lay, 0.0)["ok"] else None
 
 
+def ext_pick(sel, f1_best):
+    """The external arm's layout from its f2 runs, sel = [(J under D6, J before the gates, index)]: the best admitted;
+    if none is admitted, the best J before the gates; if every f2 run failed, the best by f1.  Returns (index, rule)."""
+    adm = [(j, k) for j, _, k in sel if math.isfinite(j)]
+    fin = [(j, k) for _, j, k in sel if math.isfinite(j)]
+    if adm:
+        return min(adm)[1], "the best f2 layout admitted under D6"
+    if fin:
+        return min(fin)[1], "no f2 layout admitted under D6: the best f2 J before the gates"
+    return f1_best, "every f2 run failed: the best by f1"
+
+
 def tb_pairs(des, cand, ref):
     """[(slot, (dx, dy), candidate layout, reference layout)]: the pre-registered shifts with their fallbacks; a slot
     without a legal common shift has (None, None, None, None) after its index."""
@@ -219,6 +231,8 @@ def main():
     ap.add_argument("--ext-dir", default="", help="--phase extlayouts: an output dir of dreamplace_trackb.py place")
     ap.add_argument("--ext-tag", default="dp", help="--phase extlayouts: names the ledger and the rows")
     ap.add_argument("--ext-tb", action="store_true", help="--phase extlayouts: also the best layout's f2 shifts")
+    ap.add_argument("--ext-f2-top", type=int, default=0, help="--phase extlayouts: f2 for the best K by f1, and the "
+                    "shifts for the best f2 layout admitted under the Track-B test's rule (0: the best by f1)")
     a = ap.parse_args()
     a.flow = str(Path(a.flow).resolve())
     a.work_home_abs = str(Path(a.work_home).resolve())
@@ -478,6 +492,28 @@ def main():
             sys.exit("--phase extlayouts: no external layout completed f1")
         best = min(ok)[1]                                           # by f1 J before the gates, as the campaign's f2 pick
         print(json.dumps({"ext_best": best, "f1_J_raw": min(ok)[0], "meta": meta.get(best)}), flush=True)
+        if a.ext_f2_top > 0:                                        # the campaign's second stage: f2 for the best few by
+            top = [k for _, k in sorted(ok)[:a.ext_f2_top]]          # f1, then the best f2 layout admitted under the
+                                                                    # Track-B test's rule (D6: no timing sign rule)
+            def f2_one(k):
+                r = meta.get(k, {})
+                return k, _eval(ev2, des, lays[k][1], base2, "%s.ext_%s.td%g.s%s.f2" % (name, a.ext_tag, r.get("target_density", -1), r.get("seed", k)),
+                                rdir / "work_ext", ledger, {"program": tagp + "_F2", "ext_index": k, "target_density": r.get("target_density"),
+                                                             "seed": r.get("seed"), "stage": "M"})
+            with ThreadPoolExecutor(max_workers=max(1, min(8, a.tb_workers))) as pool:
+                res2 = list(pool.map(f2_one, top))
+            sel = []
+            for k, row in res2:
+                rec = row.get("record") if isinstance(row.get("record"), dict) else {}
+                c = cost.evaluate(rec, base2, fidelity=2, timing_sign_rule=False) \
+                    if row.get("status") == "ok" and rec.get("returncode") in (0, None) and rec else None
+                jd6 = c.J_inf if c is not None else math.inf
+                jb = c.J if c is not None and math.isfinite(c.J) else math.inf
+                sel.append((jd6, jb, k))
+                print(json.dumps({"ext_f2": k, "run_id": row["run_id"], "status": row.get("status"), "J_d6": jd6,
+                                  "J_before_gates": jb}), flush=True)
+            best, why = ext_pick(sel, best)
+            print(json.dumps({"ext_pick": best, "rule": why, "meta": meta.get(best)}), flush=True)
         if a.ext_tb:
             jobs = []
             for k, sh, c, m in tb_pairs(des, lays[best][1], m1):

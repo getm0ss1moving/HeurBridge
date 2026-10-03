@@ -3,6 +3,8 @@
 
   python scripts/trackb_confirm.py reserve --design bp_fe_top     # before the design's test runs (TB#1, #2, ... in order)
   python scripts/trackb_confirm.py analyze --design bp_fe_top     # once, after the design's tbtest job is fetched
+  python scripts/trackb_confirm.py describe --design bp_fe_top    # Section 5's reported-not-tested items (no ledger)
+  python scripts/trackb_confirm.py candidate --design swerv_wrapper  # Section 3's candidate from the campaign's f2 rows
 
 Per design: the tbtest rows (scripts/run_seed_orfs.py --phase tbtest: runs/seed_orfs/<d>/evals_tb.jsonl) and, for the
 gate reference, the campaign's f2 baseline and same-path replays (runs/seed_orfs/<d>/baseline_f2.json, evals_f2.jsonl).
@@ -92,9 +94,92 @@ def endpoint(design: str, remote: Path, tb_prefix: str, camp_prefix: str) -> tup
     return cand, refv, out, [str(p.relative_to(ROOT)) if p.is_relative_to(ROOT) else str(p) for p in (tb, camp)]
 
 
+def candidate(design: str, remote: Path, camp_prefix: str) -> tuple:
+    """Section 3's candidate: the campaign's best f2 layout admitted under Section 4's rule (every gate, the timing gates
+    against the same-path replay band's median with the 0.02-ns guard and no sign rule).  Returns (run_id, J, n_admitted,
+    n_rows, source)."""
+    camp = one(str(remote / (camp_prefix + "*") / "runs" / "seed_orfs" / design / "evals_f2.jsonl"))
+    recs2 = [r for r in json.loads((camp.parent / "baseline_f2.json").read_text())["records"] if r.get("returncode") == 0]
+    rows = jl(camp)
+    rep = [r["record"] for r in rows if r.get("program") == "M1_replay" and r.get("status") == "ok"
+           and isinstance(r.get("record"), dict)]
+    ref_base = cost.with_gate_reference(cost.Baseline.from_records(design, recs2), rep)
+    scored = []
+    for r in rows:
+        rec = r.get("record") if isinstance(r.get("record"), dict) else {}
+        if r.get("program") in ("M1_replay", "CAND_BAND") or r.get("status") != "ok" or rec.get("returncode") not in (0, None) \
+                or not rec or r.get("pos_macros") is None:
+            continue
+        j = cost.evaluate(rec, ref_base, fidelity=2, timing_sign_rule=False).J_inf
+        if math.isfinite(j):
+            scored.append((j, r["run_id"]))
+    n = sum(r.get("program") not in ("M1_replay", "CAND_BAND") for r in rows)
+    if not scored:
+        return None, math.inf, 0, n, str(camp)
+    j, rid = min(scored)
+    return rid, j, len(scored), n, str(camp)
+
+
+def describe(design: str, remote: Path, tb_prefix: str, camp_prefix: str) -> list:
+    """Section 5's "reported, not tested" items for one design (no ledger access): every replicate's J before the
+    gates, slacks against the gate reference and wall-clock; the cost of finding the candidate against the tool's run."""
+    tb = one(str(remote / (tb_prefix + "*") / "runs" / "seed_orfs" / design / "evals_tb.jsonl"))
+    camp = one(str(remote / (camp_prefix + "*") / "runs" / "seed_orfs" / design / "evals_f2.jsonl"))
+    recs2 = [r for r in json.loads((camp.parent / "baseline_f2.json").read_text())["records"] if r.get("returncode") == 0]
+    base2 = cost.Baseline.from_records(design, recs2)
+    rep = [r["record"] for r in jl(camp) if r.get("program") == "M1_replay" and r.get("status") == "ok"
+           and isinstance(r.get("record"), dict)]
+    ref_base = cost.with_gate_reference(base2, rep)
+    fm = lambda v, f="%.4f": "-" if v is None else (f % v if math.isfinite(v) else "+inf")
+    L = ["## %s: reported, not tested (pre-registration Section 5)" % design, "",
+         "Gate reference: the campaign's %d same-path replays at f2, median setup WNS %s ns and hold WNS %s ns; a "
+         "candidate replicate fails a timing gate below the reference minus 0.02 ns (hold WNS is reported in steps of "
+         "0.01 ns). Gates failed: under the candidate's rule (D6) for both arms; for the reference arm they are shown for "
+         "information only, its endpoint being J before the gates."
+         % (len(rep), fm(ref_base.timing.get("setup_wns_ns"), "%.3f"), fm(ref_base.timing.get("hold_wns_ns"), "%.3f")), "",
+         "| replicate | arm | shift | J before gates | setup WNS (ns) | hold WNS (ns) | hold violations | gates failed | flow wall (s) |",
+         "|---|---|---|---|---|---|---|---|---|"]
+    before = {"TB_CAND": [], "TB_REF": []}
+    walls = {"TB_CAND": [], "TB_REF": []}
+    for r in sorted(jl(tb), key=lambda r: (r.get("program", ""), r["run_id"])):
+        if r.get("program") not in before:
+            continue
+        rec = r.get("record") if isinstance(r.get("record"), dict) else {}
+        ok = r.get("status") == "ok" and rec.get("returncode") in (0, None) and rec
+        c = cost.evaluate(rec, ref_base, fidelity=2, timing_sign_rule=False) if ok else None
+        jb = c.J if c is not None and math.isfinite(c.J) else math.inf
+        before[r["program"]].append(jb)
+        if r.get("wall_s") is not None:
+            walls[r["program"]].append(float(r["wall_s"]))
+        failed = [k for k, g in c.gates.items() if g.get("status") == "fail" and g.get("enforced")] if c else []
+        wns = {k: (c.gates[k].get("candidate") if c else cost._num(rec.get("%s_wns_ns" % k))) for k in ("setup", "hold")}
+        why = "" if ok else " (flow failed: %s)" % str(r.get("error") or rec.get("failure") or r.get("status"))[:90]
+        L.append("| %s | %s | %s | %s%s | %s | %s | %s | %s | %s |" % (
+            r["run_id"], r["program"], r.get("tb_shift"), fm(jb), why, fm(wns["setup"], "%.3f"),
+            fm(wns["hold"], "%.3f"), rec.get("hold_violation_count", "-"), ", ".join(failed) or "-",
+            fm(r.get("wall_s"), "%.0f")))
+    mc, mr = (float(np.median(before[k])) for k in ("TB_CAND", "TB_REF"))
+    L += ["", "Median J before the gates: candidate %s, reference %s (difference %s)." % (fm(mc), fm(mr), fm(mc - mr)), ""]
+    f1 = jl(camp.parent / "evals.jsonl")
+    f2 = jl(camp)
+    hrs = lambda rows: sum(float(r.get("wall_s") or 0.0) for r in rows) / 3600.0
+    tool_s = float(np.median([float(r["duration_s"]) for r in recs2]))
+    n_ok = sum(r.get("status") == "ok" for r in f1)
+    L += ["Cost of finding the candidate: the campaign's %d flow runs to f1 (%d completed) and %d to f2, %.1f flow-run "
+          "hours in all (the sum of the runs' wall-clock; the campaign ran up to 8 at a time; the four same-path replays "
+          "are included), against one run of the unmodified flow with the tool's macro placement, %.2f h (the median of "
+          "the campaign's %d f2 baseline runs): %.0fx. This test's replicates took a median of %.0f s (candidate) and "
+          "%.0f s (reference) per run." % (len(f1), n_ok, len(f2), hrs(f1) + hrs(f2), tool_s / 3600.0, len(recs2),
+                                           (hrs(f1) + hrs(f2)) * 3600.0 / tool_s, float(np.median(walls["TB_CAND"])),
+                                           float(np.median(walls["TB_REF"]))), "",
+          "Sources: %s, %s, %s, %s." % tuple(str(p.relative_to(ROOT)) if p.is_relative_to(ROOT) else str(p)
+                                              for p in (tb, camp.parent / "evals.jsonl", camp, camp.parent / "baseline_f2.json")), ""]
+    return L
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["reserve", "analyze"])
+    ap.add_argument("cmd", choices=["reserve", "analyze", "describe", "candidate"])
     ap.add_argument("--design", required=True, choices=ORDER)
     ap.add_argument("--ledger", default=str(ROOT / "stats" / "alpha_ledger.jsonl"))
     ap.add_argument("--remote", default=str(ROOT / "runs" / "remote"))
@@ -102,6 +187,20 @@ def main():
     ap.add_argument("--campaign-prefix", default="seedB_orfs7_", help="job-name prefix of the seeding campaign")
     ap.add_argument("--out", default=str(ROOT / "reports" / "trackB_confirmatory.md"))
     a = ap.parse_args()
+    if a.cmd == "candidate":                   # Section 3's rule applied to the campaign's stored f2 rows (no ledger)
+        rid, j, k, n, src = candidate(a.design, Path(a.remote), a.campaign_prefix)
+        print(json.dumps({"design": a.design, "candidate": rid, "f2_J": j, "admitted": k, "f2_rows": n, "source": src,
+                          "registered": CANDIDATES.get(a.design)}))
+        return
+    if a.cmd == "describe":                    # descriptive only: no ledger access, may be rerun
+        L = describe(a.design, Path(a.remote), a.tb_prefix, a.campaign_prefix)
+        out = Path(a.out)
+        text = out.read_text() if out.exists() else ""
+        if ("## %s: reported, not tested" % a.design) in text:
+            sys.exit("%s already has its descriptive section in %s" % (a.design, out))
+        out.write_text(text + "\n".join(L) + "\n")
+        print("\n".join(L))
+        return
     led = AlphaLedger(a.ledger, campaign="TB")
     es = led._entries()
     want = "TB#%d" % (ORDER.index(a.design) + 1)
