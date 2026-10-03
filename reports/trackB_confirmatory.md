@@ -4,7 +4,7 @@
 |---|---|
 | Report | trackB_confirmatory |
 | Pre-registration | reports/trackB_preregistration.md |
-| Status of the claim | **pre-registered confirmatory**: TB#1 passed, TB#2 passed, TB#3 failed (negative result); TB#4 pending |
+| Status of the claim | **pre-registered confirmatory**: TB#1 passed, TB#2 passed, TB#3 and TB#4 failed (negative results); TB#4's summary at the end |
 
 ## Summary (pre-registered confirmatory; written 2026-10-03 22:47, after the three recorded results)
 
@@ -14,9 +14,9 @@
 | bp_be_top | TB#2 | 0.0125 | 0.0011 (stats/alpha_ledger.jsonl:39) | **passed** | 1.0167 / 1.1077 (reports/trackB_confirmatory.md:148) |
 | ariane136 | TB#3 | 0.00625 | 0.530 (stats/alpha_ledger.jsonl:40) | **failed** (negative result) | 0.9761 / 1.0050 (reports/trackB_confirmatory.md:173) |
 
-Track-B claim so far: the HeurBridge layout beats the tool's macro placement at signoff, beyond the flow's shift
-sensitivity, on 2 of 3 designs (bp_fe_top, bp_be_top). TB#4 (swerv_wrapper) runs when its campaign completes; TB#5
-(ariane133) only under decision D2.
+Track-B claim: the HeurBridge layout beats the tool's macro placement at signoff, beyond the flow's shift
+sensitivity, on 2 of 4 designs (bp_fe_top, bp_be_top); TB#3 and TB#4 failed (TB#4: see the summary update at the end
+of this report). TB#5 (ariane133) only under decision D2.
 
 Notes (descriptive, not part of the test):
 
@@ -176,3 +176,65 @@ Cost of finding the candidate: the campaign's 132 flow runs to f1 (92 completed)
 
 Sources: runs/remote/tb_ariane136/runs/seed_orfs/ariane136/evals_tb.jsonl, runs/remote/seedB_orfs7_ariane136/runs/seed_orfs/ariane136/evals.jsonl, runs/remote/seedB_orfs7_ariane136/runs/seed_orfs/ariane136/evals_f2.jsonl, runs/remote/seedB_orfs7_ariane136/runs/seed_orfs/ariane136/baseline_f2.json.
 
+## swerv_wrapper (TB#4)
+
+Candidate swerv_wrapper.ls5.n4.f2; recorded 2026-10-04T04:51:27. **FAILED**: exact one-sided rank-sum permutation p = 0.9784 against alpha_j = 0.003125; whole candidate band below the reference band: no.
+
+| replicate | arm | shift | J (candidate: gated; reference: before gates) | gates failed |
+|---|---|---|---|---|
+| swerv_wrapper.tb.cand.s1.f2 | TB_CAND | [2, 0] | +inf | setup |
+| swerv_wrapper.tb.cand.s2.f2 | TB_CAND | [-2, 0] | +inf | setup |
+| swerv_wrapper.tb.cand.s3.f2 | TB_CAND | [0, -1] | 0.8883 | - |
+| swerv_wrapper.tb.cand.s4.f2 | TB_CAND | [0, 2] | +inf | - |
+| swerv_wrapper.tb.cand.s5.f2 | TB_CAND | [1, 1] | +inf | setup |
+| swerv_wrapper.tb.cand.s6.f2 | TB_CAND | [-1, -1] | 0.9314 | - |
+| swerv_wrapper.tb.ref.s1.f2 | TB_REF | [2, 0] | 0.9813 | setup |
+| swerv_wrapper.tb.ref.s2.f2 | TB_REF | [-2, 0] | 0.8503 | - |
+| swerv_wrapper.tb.ref.s3.f2 | TB_REF | [0, -1] | 0.8733 | hold |
+| swerv_wrapper.tb.ref.s4.f2 | TB_REF | [0, 2] | 0.9658 | setup |
+| swerv_wrapper.tb.ref.s5.f2 | TB_REF | [1, 1] | 0.9140 | setup, hold |
+| swerv_wrapper.tb.ref.s6.f2 | TB_REF | [-1, -1] | 0.9190 | setup |
+
+Sources: runs/remote/tb_swerv_wrapper/runs/seed_orfs/swerv_wrapper/evals_tb.jsonl, runs/remote/seedB_orfs7_swerv_wrapper/runs/seed_orfs/swerv_wrapper/evals_f2.jsonl.
+
+## swerv_wrapper: reported, not tested (pre-registration Section 5)
+
+Gate reference: the campaign's 4 same-path replays at f2, median setup WNS -0.534 ns and hold WNS -0.025 ns; a candidate replicate fails a timing gate below the reference minus 0.02 ns (hold WNS is reported in steps of 0.01 ns). Gates failed: under the candidate's rule (D6) for both arms; for the reference arm they are shown for information only, its endpoint being J before the gates.
+
+| replicate | arm | shift | J before gates | setup WNS (ns) | hold WNS (ns) | hold violations | gates failed | flow wall (s) |
+|---|---|---|---|---|---|---|---|---|
+| swerv_wrapper.tb.cand.s1.f2 | TB_CAND | [2, 0] | 0.9143 | -0.557 | 0.000 | 471 | setup | 4006 |
+| swerv_wrapper.tb.cand.s2.f2 | TB_CAND | [-2, 0] | 0.9258 | -0.583 | 0.000 | 89 | setup | 5302 |
+| swerv_wrapper.tb.cand.s3.f2 | TB_CAND | [0, -1] | 0.8883 | -0.503 | -0.020 | 475 | - | 4983 |
+| swerv_wrapper.tb.cand.s4.f2 | TB_CAND | [0, 2] | +inf (flow failed: RuntimeError: tool returncode timeout (timeout in 3_5_place_dp)) | - | - | - | - | 7201 |
+| swerv_wrapper.tb.cand.s5.f2 | TB_CAND | [1, 1] | 0.9273 | -0.594 | -0.020 | 363 | setup | 4641 |
+| swerv_wrapper.tb.cand.s6.f2 | TB_CAND | [-1, -1] | 0.9314 | -0.536 | 0.000 | 448 | - | 4418 |
+| swerv_wrapper.tb.ref.s1.f2 | TB_REF | [2, 0] | 0.9813 | -0.684 | -0.010 | 256 | setup | 3711 |
+| swerv_wrapper.tb.ref.s2.f2 | TB_REF | [-2, 0] | 0.8503 | -0.502 | -0.020 | 454 | - | 4788 |
+| swerv_wrapper.tb.ref.s3.f2 | TB_REF | [0, -1] | 0.8733 | -0.510 | -0.060 | 712 | hold | 4897 |
+| swerv_wrapper.tb.ref.s4.f2 | TB_REF | [0, 2] | 0.9658 | -0.644 | -0.030 | 429 | setup | 3673 |
+| swerv_wrapper.tb.ref.s5.f2 | TB_REF | [1, 1] | 0.9140 | -0.629 | -0.070 | 650 | setup, hold | 4859 |
+| swerv_wrapper.tb.ref.s6.f2 | TB_REF | [-1, -1] | 0.9190 | -0.573 | 0.000 | 186 | setup | 4377 |
+
+Median J before the gates: candidate 0.9266, reference 0.9165 (difference 0.0100).
+
+Cost of finding the candidate: the campaign's 132 flow runs to f1 (55 completed) and 24 to f2, 138.3 flow-run hours in all (the sum of the runs' wall-clock; the campaign ran up to 8 at a time; the four same-path replays are included), against one run of the unmodified flow with the tool's macro placement, 1.51 h (the median of the campaign's 2 f2 baseline runs): 91x. This test's replicates took a median of 4812 s (candidate) and 4582 s (reference) per run.
+
+Sources: runs/remote/tb_swerv_wrapper/runs/seed_orfs/swerv_wrapper/evals_tb.jsonl, runs/remote/seedB_orfs7_swerv_wrapper/runs/seed_orfs/swerv_wrapper/evals.jsonl, runs/remote/seedB_orfs7_swerv_wrapper/runs/seed_orfs/swerv_wrapper/evals_f2.jsonl, runs/remote/seedB_orfs7_swerv_wrapper/runs/seed_orfs/swerv_wrapper/baseline_f2.json.
+
+
+## Summary update: TB#4 (pre-registered confirmatory; written 2026-10-04 05:00, after its recorded result)
+
+| design | ledger | alpha_j | p | result | median J before the gates, candidate / reference |
+|---|---|---|---|---|---|
+| swerv_wrapper | TB#4 | 0.003125 | 0.978 (stats/alpha_ledger.jsonl:48) | **failed** (negative result) | 0.9266 / 0.9165 (reports/trackB_confirmatory.md:219) |
+
+- **Expected before the run:** the candidate (fixed by the registered rule) already lay above the tool's four same-path
+  replays at f2 (reports/trackB_preregistration.md, Addendum); the test ran as registered.
+- **What failed:** before the gates the candidate is not better than the tool's layout (median 0.9266 against 0.9165);
+  with the gates, three replicates fail the setup gate (setup WNS -0.557 to -0.594 ns against a threshold of -0.554 ns:
+  the replay median -0.534 ns minus 0.02 ns) and one timed out in detailed placement (7,200 s)
+  (reports/trackB_confirmatory.md:202, reports/trackB_confirmatory.md:206-211).
+- **Cost:** the campaign's 156 flow runs, 138.3 flow-run hours, 91x one run of the unmodified flow (reports/trackB_confirmatory.md:221).
+- **Track B overall (TB#1-TB#4):** 2 of 4 designs pass. Before the gates the candidate's median is below the tool's on
+  bp_fe_top, bp_be_top and ariane136 and above it on swerv_wrapper (reports/trackB_confirmatory.md:123, :148, :173, :219).
