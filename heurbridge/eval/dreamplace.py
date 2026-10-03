@@ -225,6 +225,14 @@ def run_dreamplace_m1(design: Design, layout: Layout, work: str | Path, gpu: boo
         shutil.rmtree(work / sub, ignore_errors=True)
     m1 = layout.copy()
     mac = design.is_macro & ~design.is_fixed
+    # The tool must move every macro the design keeps movable: a run that leaves one exactly where it started was
+    # given a fixed macro (3 Oct: ISPD2005's terminals were frozen in every tool run for days, unnoticed).
+    if mac.any():
+        shift = np.abs(design.to_abs(placed.pos[mac]) - design.to_abs(layout.pos[mac])).max(axis=1)
+        rec["macros_unmoved"] = int((shift <= 1e-9 * max(design.core[2] - design.core[0], 1.0)).sum())
+        if rec["macros_unmoved"]:
+            rec["failure"] = "tool_left_%d_macros_unmoved" % rec["macros_unmoved"]
+            return rec, None
     m1.pos[mac] = placed.pos[mac]
     cells = ~design.is_macro & ~design.is_io & ~design.is_fixed
     m1.pos[cells] = np.nan

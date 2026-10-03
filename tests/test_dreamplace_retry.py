@@ -75,3 +75,33 @@ def test_thread_count_reaches_the_placer(tmp_path, monkeypatch):
     import types
     DP._run_f1(types.SimpleNamespace(id="d"), None, tmp_path, None, False, 10, 0, 60, threads=4)
     assert seen["num_threads"] == 4 and seen["gpu"] == 0
+
+
+def test_tool_run_that_leaves_macros_in_place_is_a_named_failure(tmp_path, monkeypatch):
+    """run_dreamplace_m1: if DREAMPlace returns a movable macro exactly where it started, the run is a failure by
+    name (the ISPD2005 defect of 3 Oct went unnoticed because nothing checked this)."""
+    from pathlib import Path
+    from heurbridge.eval import dreamplace as DP
+    from heurbridge.core import synth
+    des, lay = synth.make_design(seed=0, n_macros=4, n_cells=10, n_io=4)
+
+    def fake_run_placer(p, work, timeout):
+        out = Path(work) / "out" / des.id
+        out.mkdir(parents=True, exist_ok=True)
+        (out / ("%s.gp.pl" % des.id)).write_text("")
+        return 0, "", 1.0
+    monkeypatch.setattr(DP, "run_placer", fake_run_placer)
+    monkeypatch.setattr(DP, "write_oriented_bookshelf", lambda d, l, w, name, fix_macros=True: tmp_path / "x.aux")
+    for moved, want in ((False, "tool_left_"), (True, None)):
+        shift = 0.01 if moved else 0.0
+
+        def fake_read(d, l, pl, shift=shift):
+            q = l.copy()
+            q.pos[d.is_macro & ~d.is_fixed] += shift
+            return q
+        monkeypatch.setattr(DP, "read_placed", fake_read)
+        rec, m1 = DP.run_dreamplace_m1(des, lay, tmp_path / ("w%d" % moved))
+        if want:
+            assert rec["failure"].startswith(want) and m1 is None and rec["macros_unmoved"] == int((des.is_macro & ~des.is_fixed).sum())
+        else:
+            assert rec["failure"] is None and m1 is not None and rec["macros_unmoved"] == 0
