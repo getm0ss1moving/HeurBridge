@@ -21,6 +21,8 @@
 ## Results
 
 > **Caveat.** Pre-registered primary test E0#1, the G0' test (bridge sha256 f95bdde8...). Final cost = DREAMPlace f1 with the macros fixed: Track A has no f2 (bookshelf, no timing), as registered. J = 0.45 is DREAMPlace's own mixed-size macro placement (M1) by construction; on these designs every partner's mean J, and every bridge-refined layout, is above it. The gate record's note that the protocol 'is pre-registered only after the user's decision' is a stale string in scripts/run_e0.py, not a statement about this run: the protocol was registered on 2026-09-28 16:06 before any confirmatory data (reports/E0_preregistration.md). Deviations, none changing the registered protocol (reports/PROGRESS.md s.7): bigblue4 has 30 legal sources of 80 and uses the memory-lean RUDY (HB_RUDY_IMPL=bmm, equal to the reference to ~1e-6); this protocol's bigblue3 slice 2 was OOM-killed and re-run from its 11 finished rows as two sub-slices; bigblue4's slices ran two code versions (9b3c8e8 and 5e1c009, CHANGELOG 30 Sep).
+>
+> **Correction (3 Oct 2026):** on ISPD2005 the tool's runs could not move the macros (they were written to DREAMPlace as fixed terminals), so M1 and J = 0.45 here are the benchmark's own macro placement after P_M, not DREAMPlace's (bigblue3's movable macros excepted). See reports/defect_ispd_tool_runs.md. The comparisons among HeurBridge's partners (G0') do not involve the tool and are unaffected.
 
 | partner | mean J | portfolio J | Kendall tau vs raw | co-trained better: frac | one-sided p | Holm p_adj |
 |---|---|---|---|---|---|---|

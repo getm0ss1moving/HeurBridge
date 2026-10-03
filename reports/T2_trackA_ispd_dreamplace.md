@@ -14,6 +14,8 @@
 | alpha-ledger entry | - |
 | Status of the claim | no claim (development / descriptive run) |
 
+> **Correction (3 Oct 2026):** on ISPD2005 the tool's runs could not move the macros (they were written to DREAMPlace as fixed terminals), so M1 and J = 0.45 here are the benchmark's own macro placement after P_M, not DREAMPlace's (bigblue3's movable macros excepted). See reports/defect_ispd_tool_runs.md.
+
 ## Sample sizes
 
 8 designs; 640 program evaluations; 336 local-search evaluations; baseline 3 seeds per design

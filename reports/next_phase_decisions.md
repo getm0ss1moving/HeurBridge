@@ -51,7 +51,7 @@ run, to cut the second tool run from the cost; (4) the refiner pairs from local 
 second data source.
 
 Two choices in (2), made under the owner's delegation: the comparator is the tool's best of **four** runs, not three,
-because a tool run and an f1 run take about the same time on ISPD2005 (reports/T2_trackA_ispd_dreamplace.md:27-34),
+because a tool run and an f1 run take about the same time on ISPD2005 (reports/T2_trackA_ispd_dreamplace.md:29-36),
 so relinking (two tool runs, five f1 runs) costs about 7 run-units against 8 for best of four and 6 for best of three:
 passing against best of four shows a lower J at lower cost. And it runs in parallel with (1) instead of after it: its
 procedure is fixed and cannot depend on the IBM results, the GPUs were free, and the price of a failure is campaign RL's
@@ -117,7 +117,7 @@ higher in 20 (p = 3e-10), as RL#3 assumes. Both tests run as registered.
 
 ## D1 Launch the T5 demo?
 
-- **Evidence:** G0' passed, which per the pre-registration leads to T5 (reports/E0_partner_ablation.md:44,
+- **Evidence:** G0' passed, which per the pre-registration leads to T5 (reports/E0_partner_ablation.md:46,
   reports/E0_preregistration.md:40). The T5 code is ready: a DREAMPlace-f1 guard as in E0, a no-LLM control arm,
   programs blind to the design's identity, kept sources, and a held-out endpoint. The mock smoke test passed on 225
   (reports/t5_demo_preregistration.md, Section 9). *Infrastructure.* The draft fixes the designs, arms, endpoint,

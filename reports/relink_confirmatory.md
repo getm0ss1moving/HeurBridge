@@ -6,7 +6,7 @@
 | Date | 2026-10-03 09:46 |
 | Pre-registration | reports/relink_preregistration.md |
 | alpha-ledger | RL#1, alpha_1 = 0.025, reserved 2026-10-03T03:37:52, result recorded 2026-10-03T09:46:37 |
-| Status of the claim | **pre-registered confirmatory test: FAILED** |
+| Status of the claim | **pre-registered confirmatory test: FAILED; also degenerate (defect: see the last section)** |
 
 ## Primary test
 
@@ -32,3 +32,6 @@ Failures (+inf candidates, by name): none.
 
 Sources: runs/remote/rlc_a12b1/runs/relink/adaptec1/rows.jsonl, runs/remote/rlc_a12b1/runs/tool_runs/adaptec1/rows.jsonl, runs/remote/rlc_a12b1/runs/relink/adaptec2/rows.jsonl, runs/remote/rlc_a12b1/runs/tool_runs/adaptec2/rows.jsonl, runs/remote/rlc_a34/runs/relink/adaptec3/rows.jsonl, runs/remote/rlc_a34/runs/tool_runs/adaptec3/rows.jsonl, runs/remote/rlc_a34/runs/relink/adaptec4/rows.jsonl, runs/remote/rlc_a34/runs/tool_runs/adaptec4/rows.jsonl, runs/remote/rlc_a12b1/runs/relink/bigblue1/rows.jsonl, runs/remote/rlc_a12b1/runs/tool_runs/bigblue1/rows.jsonl, runs/remote/rlc_bb2/runs/relink/bigblue2/rows.jsonl, runs/remote/rlc_bb2/runs/tool_runs/bigblue2/rows.jsonl, runs/remote/rlc_bb3/runs/relink/bigblue3/rows.jsonl, runs/remote/rlc_bb3/runs/tool_runs/bigblue3/rows.jsonl, runs/remote/rlc_bb4/runs/relink/bigblue4/rows.jsonl, runs/remote/rlc_bb4/runs/tool_runs/bigblue4/rows.jsonl.
 
+## Defect found after the analysis (3 Oct 2026)
+
+The procedure assumed that the tool places every ISPD2005 macro. It did not: the tool's input marked the macros as fixed terminals, so on adaptec1-4, bigblue1, bigblue2 and bigblue4 every tool run, at either density and with any seed, returned the benchmark's own macro placement, and every arm of this test is the same layout there (the ties above). The result above is as recorded under the registered code, but it rests on bigblue3's 8 units alone and **is not evidence for the registered claim**. Details, evidence and the fix: reports/defect_ispd_tool_runs.md.
