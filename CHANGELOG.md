@@ -6,6 +6,25 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 
 ## [Unreleased]
 
+### Track-B results, DREAMPlace for Track B, the three-way comparison (3 Oct 23:15)
+- `heurbridge/eval/dreamplace.py`: `write_bookshelf_from_design` and `read_bookshelf_layout` (DREAMPlace's mixed-size
+  run on any Design, e.g. Track-B designs from DEF; IO pins fixed, every macro movable). Test:
+  `tests/test_dreamplace_io.py` (round trip).
+- `scripts/dreamplace_trackb.py` (new): `export` (the campaign's pre-macro floorplan and P_M spacing, pickled) and
+  `place` (densities x seeds on a GPU, macros read back and legalized by P_M; unmoved macros or a failed P_M are named
+  failures). `--inflate` gives DREAMPlace each macro as P_M's grid footprint (size rounded up to P_M's cells plus the
+  halo cells); DREAMPlace's standard-cell Abacus pass is off unless `--abacus` (it aborted 15 of 36 runs); rows record
+  P_M's mean and maximum displacement.
+- `scripts/run_seed_orfs.py --phase extlayouts`: external macro layouts through the flow like candidates (f1 for
+  every layout; `--ext-f2-top K`: f2 for the best K by f1 and the pick by `ext_pick`, the best f2 layout admitted under
+  D6, else the best before the gates, else the best by f1; `--ext-tb`: the Track-B test's six shifts). Test:
+  `tests/test_beat_tool.py` (`ext_pick`).
+- `scripts/trackb_confirm.py`: `describe` (the reported-not-tested items; no ledger access) and `candidate` (Section 3's
+  rule from the campaign's f2 rows; reproduces the three registered candidates). Tests: `tests/test_trackb_confirm.py`.
+- `scripts/e0_seed_bias.py`: reproduction tolerance 1e-6; `--only PROGRAM:SEED` re-scores units of the fixed sample.
+- Reports: `reports/trackB_confirmatory.md` (TB#1-TB#3), `reports/portfolio_retest_confirmatory.md` (RL#4); decision
+  sheet D6/D10 results and a correction to D9. Full suite: 217 passed (148.1 s).
+
 ### Track-B test, RL#4, guards (3 Oct 12:00)
 - `heurbridge/eval/cost.evaluate(..., timing_sign_rule=True)`: `False` drops the sign rule of the timing gates (the
   Track-B test, decision D6); default unchanged. Test: `tests/test_cost.py`.

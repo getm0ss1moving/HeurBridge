@@ -4,6 +4,36 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
+## 2026-10-03 — Session 4 (23:15): Track-B test results; RL#4 passed; DREAMPlace for Track B; three-way comparison prepared
+
+- **Results (each analysed once):** TB#1 bp_fe_top passed (p = 0.0022), TB#2 bp_be_top passed (p = 0.0011), TB#3
+  ariane136 failed (p = 0.53, hold gate on 3 of 6 shifts; before the gates every candidate replicate is below every
+  reference replicate); `reports/trackB_confirmatory.md` (summary, then the recorded tables, then the reported-not-tested
+  sections from `trackb_confirm.py describe`). TB#1 rests on one replicate exactly at its hold threshold. RL#4 passed
+  (p = 0.00014; `reports/portfolio_retest_confirmatory.md`, notes at the end).
+- **Local housekeeping:** the Sep-27 development runs `runs/remote/tb_*` (same job names as the test's) were renamed
+  `runs/remote/sep27_tb_*` before fetching (nothing cited them).
+- **DREAMPlace for Track B:** its standard-cell Abacus pass aborted 15 of 36 runs (an assertion after greedy
+  legalization); off by default now (only the macros are used). P_M's grid made the effective spacing 22.8-25.2 um
+  instead of 20 um and moved DREAMPlace's packed macros by 2-6 % of the die on ariane136; `--inflate` now gives
+  DREAMPlace each macro as P_M's footprint (displacement now <= 0.001 on bp_fe_top). Jobs: `dptb_place2` (old
+  inflation, all 48 runs complete), `dptb_place3` (footprints, 227 GPU 0, running).
+- **Three-way comparison (owner's D9):** `reports/trackB_threeway_preregistration.md` and `scripts/threeway_confirm.py`
+  drafted, not yet committed: HeurBridge's TB candidate vs DREAMPlace's pick (twelve runs, f1 for all, f2 for the best
+  four, the best admitted under D6, then the six shifts), the tool reported; campaign TW. Register (commit + `reserve`
+  TW#1-TW#3) once `dptb_place3` is checked; the flow runs (`tw_<design>`, `--phase extlayouts --ext-f2-top 4
+  --ext-tb`, resume from the campaign) start when swerv_wrapper's campaign has finished. Correction recorded in D9:
+  HeurBridge's candidates come from local search scored by the flow itself; only DREAMPlace never sees the flow.
+- **E0 audit:** `e0bias_a` scored 30 of 46 sampled units (median optimism +0.00001 J, mean +0.00031); 16 were excluded
+  only by the 1e-9 reproduction tolerance (all within 6e-8) and are re-scored by `e0bias_b0`-`b3` (`--only`; b0, b1,
+  b3 fetched, b2 running). Then `reports/test_audit.md`.
+- **Running:** 224 `seedB_orfs7_swerv_wrapper` (22 of 24 f2 rows at 22:38); 227 `dptb_place3`; 225 `e0bias_b2`.
+- **Next:** swerv done → `python scripts/trackb_confirm.py candidate --design swerv_wrapper`, add it to
+  `CANDIDATES`, `reserve`, launch `tb_swerv_wrapper` (tbtest); register the three-way comparison and launch the
+  `tw_*` jobs (at most 8 OpenROAD runs at a time on 224 in all).
+
+---
+
 ## 2026-10-03 — Session 4 (12:00): owner's decisions; Track-B test and RL#4 running; audit of earlier tests
 
 - **Owner (3 Oct):** more effort on Track B; after Track B's seeding, compare DREAMPlace and HeurBridge through the

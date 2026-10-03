@@ -20,7 +20,7 @@ Does LLM-driven evolution of macro heuristics, scored by refinability (the post-
 post-bridge portfolio on designs the evolution never saw than (a) the seed programs and (b) the same loop without
 an LLM at the same evaluation budget? And does the real LLM produce valid programs at a usable rate and cost?
 
-The demo comes first by the project's workflow: each experiment runs as a demo on 225 first, then at full capacity if the effect is good (owner's decision of 28 Sep, reports/PROGRESS.md:204-205).
+The demo comes first by the project's workflow: each experiment runs as a demo on 225 first, then at full capacity if the effect is good (owner's decision of 28 Sep, reports/PROGRESS.md:217-218).
 
 ## 2 Fixed elements
 
@@ -30,7 +30,7 @@ The demo comes first by the project's workflow: each experiment runs as a demo o
 | Evaluator | DREAMPlace f1 (GP + LG, macros fixed), J against the M1 baseline of the seeding campaign `runs/seed_trackA_dp`, exactly as E0 | scripts/run_evolution.py:97 (`--guard dp`), scripts/run_e0.py:114-129 |
 | Bridge | the frozen E0 checkpoint, sha256 f95bdde8...a5, 9,087,346 bytes; not retrained during the demo | checkpoints/bridge_v1_e0_frozen/MANIFEST.json:4-5 |
 | Guard | alpha in {0, 0.25, 0.5, 1}, each candidate projected by P_M and scored; alpha = 0 is the raw layout; K = 20 Euler steps | heurbridge/bridge/sample.py:24, heurbridge/bridge/sample.py:85, reports/E0_preregistration.md:19 |
-| Seed programs | the 16 program versions M2-M7 (M1 is the tool itself) | reports/PROGRESS.md:120, heurbridge/heuristics/macro/registry.py:62 |
+| Seed programs | the 16 program versions M2-M7 (M1 is the tool itself) | reports/PROGRESS.md:133, heurbridge/heuristics/macro/registry.py:62 |
 | LLM | deepseek-flash, through the budget ledger with a hard stop at 110 % of the scope's budget | heurbridge/evolve/llm.py:33, heurbridge/evolve/llm.py:94, heurbridge/evolve/llm.py:126 |
 | Proposer (LLM arm) | `heurbridge`: parent code + RLCE evidence + skill document v0 | heurbridge/evolve/engine.py:81, heurbridge/evolve/prompts/skill_v0.md |
 | Fitness | refinability F = portfolio marginal gain - lambda_B x standalone post-bridge cost - lambda_t x max(0, runtime - 30 s); lambda_B = 0.2, lambda_t = 0.01 | heurbridge/evolve/fitness.py:3-7, heurbridge/evolve/fitness.py:24-26, HEURBRIDGE_TASKS.md:445 |
@@ -116,7 +116,7 @@ show exactly this); or any confirmatory claim (6 units, Section 4).
   alpha_j = 0.025, 0.0125, 0.00625 (alpha = 0.05 per campaign: HEURBRIDGE_TASKS.md:541).
 - **Blockers (owner decisions):** the bridge is trained on IBM only (reports/T3_algorithmR_trackA.md:19), so the
   fold that tests on IBM needs a bridge trained without IBM; the fold that tests on orfs_cpu needs a Track-B bridge,
-  and Track B has heuristics only so far (reports/PROGRESS.md:125). Until these are settled, at most one of the three
+  and Track B has heuristics only so far (reports/PROGRESS.md:138). Until these are settled, at most one of the three
   folds (test ispd05) can run as specified.
 
 ## 8 Compute and cost estimate

@@ -125,7 +125,7 @@ Re-testing: D10.
 - **Decided 3 Oct (owner):** (b), more effort on Track B; when Track B's seeding has finished, compare DREAMPlace's and
   HeurBridge's macro placements through the OpenROAD flow, next to the tool's own macro placement (a fair three-way
   comparison: neither DREAMPlace nor HeurBridge optimizes the flow's score). Track A stays the cheap testbed.
-- **Correction (3 Oct, 23:10):** the parenthesis above is wrong for HeurBridge. Its Track-B candidates come from local
+- **Correction (3 Oct, 23:00):** the parenthesis above is wrong for HeurBridge. Its Track-B candidates come from local
   search that scores every move with the flow itself at f1 and verifies the improving ones at f2
   (heurbridge/pipeline/seed_archive.py:269-296); all three registered candidates are local-search layouts. Only
   DREAMPlace never sees the flow's score. The comparison is registered with this asymmetry stated
@@ -187,7 +187,7 @@ Re-testing: D10.
 ## D3 T3.9: the cell bridge's endpoint
 
 - **Evidence:** the task list ranks the cell bridge's targets by f2 J (HEURBRIDGE_TASKS.md:372), but Track A has no
-  f2; its final cost is DREAMPlace f1 (reports/PROGRESS.md:279). DREAMPlace ignores start positions
+  f2; its final cost is DREAMPlace f1 (reports/PROGRESS.md:292). DREAMPlace ignores start positions
   (reports/demo_sketch_start.md:34), so a cell bridge cannot hand its result to DREAMPlace; it must deliver a placement.
   The look-ahead predictor misses both parts of its bar (reports/sketch_predictor_s2.md:38,
   reports/sketch_predictor_s2_ranking.md). *Negative results.*
@@ -260,7 +260,7 @@ Re-testing: D10.
 
 ## D8 Housekeeping (owner's actions; nothing was deleted)
 
-- **Staged for deletion** (moved there on 29 Sep: HANDOFF.md:481-482; sizes measured 2 Oct):
+- **Staged for deletion** (moved there on 29 Sep: HANDOFF.md:511-512; sizes measured 2 Oct):
   `/data/dzy/heura_repr/_to_delete_20260929/` on 224, 68 GB (its /data at 93 % use); on 225, 31 GB (/data at 99 %);
   on 231, 7.1 GB (root at 99 %). The final `rm -rf` is yours.
 - **Faulty GPUs:** `nvidia-smi` fails on 224 ("Unable to determine the device handle for GPU 0000:02:00.0: Unknown
