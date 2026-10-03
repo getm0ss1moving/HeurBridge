@@ -4,6 +4,24 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
+## 2026-10-03 — Session 4 (10:00): ISPD2005 results; the tool never placed ISPD2005's macros (defect, fixed)
+
+- **Analyses (each once, 09:46-09:47):** RL#1 failed (p = 0.88); RL#2 and RL#3 passed their alpha
+  (`reports/relink_confirmatory.md`, `density_confirmatory.md`, `portfolio_confirmatory.md`).
+- **Defect:** `write_oriented_bookshelf` wrote source terminals as terminal and /FIXED, so DREAMPlace's mixed-size runs
+  never moved ISPD2005's macros: on 7 of 8 designs the tool's layout is identical for every seed and density (the
+  benchmark's own macro placement after P_M); only bigblue3's source-movable macros were placed. The three tests'
+  passes rest on bigblue3 alone and are not evidence. Report: `reports/defect_ispd_tool_runs.md`; fix: commit 157bf21
+  (tool inputs free the macros the design keeps movable; f1 unchanged); notes in the ledger and in the ISPD2005
+  seeding and E0 reports (J = 0.45 on ISPD2005 is the benchmark's placement).
+- **Also done:** density 0.6 on all 13 IBM designs (`dens6_*`): one run at 0.6 vs best of four at 0.9 is borderline
+  (61 of 104 lower, p = 0.033); two densities vs two seeds hold (65 lower, 20 higher). Refiner pairs finished
+  (`lspairs_*`): local search from the tool's layout, kept 31 of 44, median change -0.0005 (report Section 10).
+- **Owner's decisions needed:** D9 (direction), D10 (a corrected ISPD2005 test; recommendation: RL#4, two densities vs
+  two seeds on the 7 designs not seen, alpha 0.003125), D6 (hold gate), D8 (staged deletions).
+
+---
+
 ## 2026-10-03 — Session 4 (05:45): density effect is design-dependent; nothing helps on top of 0.6; RL#3 registered
 
 - **Density 0.7 on 13 IBM designs** (`dens7_*`, fetched): lower than 0.9 in 67 of 104 cases, losses on ibm01, ibm11,

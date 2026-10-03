@@ -6,6 +6,16 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 
 ## [Unreleased]
 
+### Fix: the tool's input froze ISPD2005's macros (3 Oct 10:00)
+- `heurbridge/eval/dreamplace.write_oriented_bookshelf`: in the tool's input (`fix_macros=False`), a macro the design
+  keeps movable is written as a movable node even where the source lists it as a terminal (ISPD2005, MMS convention);
+  f1's input (`fix_macros=True`) is unchanged. Before this, every ISPD2005 tool run left those macros where the
+  benchmark puts them. Test: `tests/test_dreamplace_io.py` (a hand-written benchmark). Full suite: 208 passed (147.1 s).
+- `reports/defect_ispd_tool_runs.md`; correction notes in the ISPD2005 seeding and E0 reports and in RL#1-RL#3's
+  reports; alpha-ledger notes for RL#1-RL#3 (results unchanged, not evidence for their claims).
+- `scripts/report_beat_tool.py`: section 10 (local search from the tool's layout); the density coverage is listed per
+  density.
+
 ### RL#3 and the density picture (3 Oct 05:45)
 - `scripts/density_confirm.py`: `reserve3` / `analyze3` (RL#3: two densities vs two seeds, from RL#1's and RL#2's runs);
   units carry the selection values, the two-density pick and RL#1's best of 2.

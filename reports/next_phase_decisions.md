@@ -97,6 +97,14 @@ than the best of four at 0.9 in only 61 (one-sided Wilcoxon p = 0.033): on IBM, 
 alpha (0.0125); 0.6 is worse than 0.9 on ibm01, ibm11, ibm13 and ibm18. Two densities against two seeds: lower in 65,
 higher in 20 (p = 3e-10), as RL#3 assumes. Both tests run as registered.
 
+**Update 3 Oct 10:00: the ISPD2005 results and a defect** (reports/defect_ispd_tool_runs.md). The three analyses ran
+once each at 09:46-09:47: RL#1 FAILED (p = 0.88); RL#2 and RL#3 passed their alpha. Then a pipeline defect showed: the
+tool's input marked ISPD2005's macros as fixed terminals, so on 7 of 8 designs every tool run returned the benchmark's
+own macro placement and every arm of the three tests is the same layout there (56-57 of 64 units tie). The passes rest
+on bigblue3's 8 units alone; **none of the three tests is evidence for its claim.** Fixed in code (commit 157bf21);
+the reports and the ledger carry notes. Also: on ISPD2005, J = 0.45 is the benchmark's macro placement, not the tool's.
+Re-testing: D10.
+
 ## D9 Direction after the Track-A evidence (new, 3 Oct)
 
 - **Evidence:** none of the HeurBridge methods tried (the frozen bridge on the tool's layout, relinking, consensus,
@@ -114,6 +122,22 @@ higher in 20 (p = 3e-10), as RL#3 assumes. Both tests run as registered.
 - **Recommendation: (a) and (b).** (a) aims at the lever that moves J on Track A with a cost claim; (b) is the only
   place where our own layouts beat a tool on real PPA. (c) stays laid aside: its gap to the tool is large.
 - **Prepared (nothing runs):** a design note for (a), reports/orchestration_design.md.
+
+## D10 Re-testing on ISPD2005 after the defect (new, 3 Oct)
+
+- **Evidence:** reports/defect_ispd_tool_runs.md. RL#1-RL#3 are not evidence for their claims; the code is fixed.
+  A corrected test needs new ISPD2005 tool runs that place the macros, registered before they run (8 designs x 8 seeds
+  at 0.9 and 0.6: about the compute of RL#1's and RL#2's tool runs, 3-4 h on 3-4 GPUs).
+- **Options:** (a) register a corrected test in campaign RL: RL#4, two densities {0.9, 0.6} against two seeds at 0.9,
+  the effect that held on IBM (65 lower, 20 higher of 104 cases), at alpha_4 = 0.003125, on the 7 designs whose tool
+  runs were never seen placing macros (bigblue3 excluded: its runs were seen), 56 units; (b) the same in a new campaign
+  for corrected re-tests (alpha 0.05): more power, but a fresh budget after an invalid round must be declared and
+  justified; (c) no confirmatory test now: use ISPD2005 as a second development family (for example, how the corrected
+  tool's own placement compares with the benchmark's, J against 0.45) and find a fresh held-out family (downloads need
+  your approval).
+- **Recommendation: (a).** The IBM effect is strong (one-sided Wilcoxon p = 3e-10 on 104 cases); a similar effect on
+  56 cases would pass alpha_4. The other two questions are not worth re-testing: relinking fails on IBM, and one run at
+  0.6 against best of four at 0.9 is borderline there (p = 0.033).
 
 ## D1 Launch the T5 demo?
 
@@ -149,7 +173,7 @@ higher in 20 (p = 3e-10), as RL#3 assumes. Both tests run as registered.
 ## D3 T3.9: the cell bridge's endpoint
 
 - **Evidence:** the task list ranks the cell bridge's targets by f2 J (HEURBRIDGE_TASKS.md:372), but Track A has no
-  f2; its final cost is DREAMPlace f1 (reports/PROGRESS.md:274). DREAMPlace ignores start positions
+  f2; its final cost is DREAMPlace f1 (reports/PROGRESS.md:272). DREAMPlace ignores start positions
   (reports/demo_sketch_start.md:34), so a cell bridge cannot hand its result to DREAMPlace; it must deliver a placement.
   The look-ahead predictor misses both parts of its bar (reports/sketch_predictor_s2.md:38,
   reports/sketch_predictor_s2_ranking.md). *Negative results.*
@@ -212,7 +236,7 @@ higher in 20 (p = 3e-10), as RL#3 assumes. Both tests run as registered.
 
 ## D8 Housekeeping (owner's actions; nothing was deleted)
 
-- **Staged for deletion** (moved there on 29 Sep: HANDOFF.md:446-447; sizes measured 2 Oct):
+- **Staged for deletion** (moved there on 29 Sep: HANDOFF.md:464-465; sizes measured 2 Oct):
   `/data/dzy/heura_repr/_to_delete_20260929/` on 224, 68 GB (its /data at 93 % use); on 225, 31 GB (/data at 99 %);
   on 231, 7.1 GB (root at 99 %). The final `rm -rf` is yours.
 - **Faulty GPUs:** `nvidia-smi` fails on 224 ("Unable to determine the device handle for GPU 0000:02:00.0: Unknown
