@@ -288,8 +288,11 @@ def main():
                      "one-sided Wilcoxon p = %.3g; vs density 0.9 best of 4 (four times the runs): %+.4f, lower in %d of %d, "
                      "p = %.3g." % (t, (s - rs).mean(), int((s < rs).sum()), len(s), wilcoxon_less(s, rs)["p"],
                                      (s - rb).mean(), int((s < rb).sum()), len(s), wilcoxon_less(s, rb)["p"]))
-        L.append("- The densities 0.8, 0.6 and 0.5 were tried on ibm04, ibm06, ibm10 and ibm12 only, designs where a lower "
-                 "density helps; at 0.7 on 13 designs the effect depends on the design (rows above).")
+        for t in [x for x in tds if x != "0.9"]:
+            ds = sorted([d for d in td_rows if t in td_rows[d]], key=lambda x: int(x[3:]))
+            L.append("- Density %s was run on %d designs: %s." % (t, len(ds), ", ".join(ds)))
+        L.append("- The effect depends on the design (rows above); on the designs where 0.6 is worse than 0.9 (ibm01, ibm11, "
+                 "ibm13, ibm18), 0.7 is worse too.")
         selj = lambda r: r["J_select"]["tool"] if "J_select" in r else math.inf
         frj = lambda r: r["J_eval"]["tool"] if "J_select" in r else math.inf
         for t in [x for x in tds if x != "0.9"]:

@@ -91,6 +91,12 @@ first alpha (0.025), recorded either way.
 - **Conclusion for Track A:** no HeurBridge method beats the tool at equal compute; the levers that move J are the
   tool's own configuration and how its runs are spent. Direction: D9.
 
+**Update 3 Oct 08:25 (exploratory, after RL#2 and RL#3 were registered):** density 0.6 on all 13 IBM designs
+(reports/beat_tool_track_a.md, Section 7): one run at 0.6 is lower than one run at 0.9 in 68 of 104 cases, but lower
+than the best of four at 0.9 in only 61 (one-sided Wilcoxon p = 0.033): on IBM, RL#2's comparison would not pass its
+alpha (0.0125); 0.6 is worse than 0.9 on ibm01, ibm11, ibm13 and ibm18. Two densities against two seeds: lower in 65,
+higher in 20 (p = 3e-10), as RL#3 assumes. Both tests run as registered.
+
 ## D9 Direction after the Track-A evidence (new, 3 Oct)
 
 - **Evidence:** none of the HeurBridge methods tried (the frozen bridge on the tool's layout, relinking, consensus,
