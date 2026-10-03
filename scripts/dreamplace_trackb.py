@@ -52,6 +52,13 @@ def place(a):
         z = pickle.load(fh)
     des, lay, halo = z["design"], z["layout"], z["halo"]
     name = des.id
+    placer_des = des
+    if a.inflate:                              # DREAMPlace sees every macro grown by its halo on each side (halo / 2:
+        import copy                            # P_M's spacing is twice the per-side halo), so it leaves the spacing
+        placer_des = copy.copy(des)            # itself; centres and pin offsets are unchanged
+        placer_des.size = des.size.copy()
+        mmi = des.is_macro & ~des.is_fixed
+        placer_des.size[mmi] = des.size[mmi] + halo
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
     mm = des.is_macro & ~des.is_fixed
@@ -60,16 +67,17 @@ def place(a):
         for td in (float(x) for x in a.densities.split(",")):
             for seed in (int(x) for x in a.seeds.split(",")):
                 work = out / "work" / ("td%g_s%d" % (td, seed))
-                aux = write_bookshelf_from_design(des, lay, work / "in", name=name, scale=a.scale)
+                aux = write_bookshelf_from_design(placer_des, lay, work / "in", name=name, scale=a.scale)
                 t0 = time.time()
                 rc, log, wall = run_placer(params(str(aux.resolve()), str((work / "out").resolve()), gpu=not a.cpu,
                                                   iters=a.iters, seed=seed, target_density=td), work, a.timeout)
-                row = {"design": name, "target_density": td, "seed": seed, "dreamplace_rc": rc, "dreamplace_s": round(wall, 1)}
+                row = {"design": name, "target_density": td, "seed": seed, "inflated_by_halo": bool(a.inflate),
+                       "dreamplace_rc": rc, "dreamplace_s": round(wall, 1)}
                 pl = work / "out" / name / ("%s.gp.pl" % name)
                 if rc != 0 or not pl.exists():
                     row["failure"] = "dreamplace_rc_%s" % rc if rc != 0 else "dreamplace_no_output"
                 else:
-                    placed = read_bookshelf_layout(des, lay, pl, scale=a.scale)
+                    placed = read_bookshelf_layout(placer_des, lay, pl, scale=a.scale)
                     shift = np.abs(des.to_abs(placed.pos[mm]) - des.to_abs(lay.pos[mm]))
                     unmoved = int((np.nan_to_num(shift, nan=1.0).max(axis=1) <= 1e-9).sum())
                     m1 = lay.copy()
@@ -111,6 +119,7 @@ def main():
     p.add_argument("--timeout", type=int, default=3600)
     p.add_argument("--cpu", action="store_true")
     p.add_argument("--keep-work", action="store_true")
+    p.add_argument("--inflate", action="store_true", help="grow the macros by the halo in DREAMPlace's input")
     p.add_argument("--out", required=True)
     a = ap.parse_args()
     export(a) if a.cmd == "export" else place(a)
