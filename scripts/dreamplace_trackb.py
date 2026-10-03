@@ -99,7 +99,8 @@ def place(a):
                     import shutil
                     shutil.rmtree(work, ignore_errors=True)
     if saved:
-        np.savez(out / "layouts.npz", macros=np.stack(saved))
+        names = np.array([des.names[i] for i in np.flatnonzero(mm)])
+        np.savez(out / "layouts.npz", macros=np.stack(saved), names=names)
 
 
 def main():

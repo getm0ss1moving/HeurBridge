@@ -194,7 +194,7 @@ def main():
     ap.add_argument("--work-home", default=str(ROOT / "runs" / "orfs_work"))
     ap.add_argument("--yosys", default=None, help="Yosys for ORFS (default HB_YOSYS)")
     ap.add_argument("--phase", default="all",
-                    choices=["base", "f1", "f2", "all", "band", "warmstart", "timingprobe", "probe", "tbtest"])
+                    choices=["base", "f1", "f2", "all", "band", "warmstart", "timingprobe", "probe", "tbtest", "extlayouts"])
     ap.add_argument("--base-timeout", type=int, default=4 * 7200, help="whole unmodified flow (each step < 7,200 s)")
     ap.add_argument("--timeout", type=int, default=7200, help="one candidate evaluation")
     ap.add_argument("--noise-replays", type=int, default=3, help="shifted M1 replays for the noise band (0-3)")
@@ -216,6 +216,9 @@ def main():
     ap.add_argument("--probe-workers", type=int, default=3, help="--phase probe: ORFS runs at a time")
     ap.add_argument("--tb-candidate", default="", help="--phase tbtest: the pre-registered candidate's f2 run id")
     ap.add_argument("--tb-workers", type=int, default=4, help="--phase tbtest: f2 runs at a time (<= 8 OpenROAD)")
+    ap.add_argument("--ext-dir", default="", help="--phase extlayouts: an output dir of dreamplace_trackb.py place")
+    ap.add_argument("--ext-tag", default="dp", help="--phase extlayouts: names the ledger and the rows")
+    ap.add_argument("--ext-tb", action="store_true", help="--phase extlayouts: also the best layout's f2 shifts")
     a = ap.parse_args()
     a.flow = str(Path(a.flow).resolve())
     a.work_home_abs = str(Path(a.work_home).resolve())
@@ -438,6 +441,59 @@ def main():
             for (arm, k, sh, _), row in pool.map(tb_one, jobs):
                 print(json.dumps({"tb": arm, "slot": k, "shift": sh, "run_id": row["run_id"], "status": row.get("status"),
                                   "J": row.get("J"), "J_raw": row.get("J_raw"), "wall_s": row.get("wall_s")}), flush=True)
+        return
+    if a.phase == "extlayouts":                         # 10. external macro layouts (e.g. DREAMPlace's) through the flow
+        from concurrent.futures import ThreadPoolExecutor
+        ed = Path(a.ext_dir)
+        z = np.load(ed / "layouts.npz")
+        meta = {r["index"]: r for r in (json.loads(l) for l in (ed / "rows.jsonl").read_text().splitlines() if l.strip())
+                if "index" in r}
+        idx = {n: i for i, n in enumerate(des.names)}
+        mm = des.is_macro & ~des.is_fixed
+        order = np.array([idx[str(n)] for n in z["names"]])          # macros by name: the export's order need not match
+        if set(order) != set(np.flatnonzero(mm)):
+            sys.exit("--phase extlayouts: the layouts' macros differ from the design's movable macros")
+        lays = []
+        for k in range(len(z["macros"])):
+            lx = lay.copy()
+            lx.pos[order] = z["macros"][k][:, :2]
+            lx.orient[order] = z["macros"][k][:, 2].astype(np.int8)
+            lays.append((k, lx))
+        ledger = Ledger(rdir / ("evals_ext_%s.jsonl" % a.ext_tag))
+        tagp = "EXT_" + a.ext_tag.upper()
+
+        def f1_one(job):
+            k, lx = job
+            r = meta.get(k, {})
+            return k, _eval(ev1, des, lx, base1, "%s.ext_%s.td%g.s%s.f1" % (name, a.ext_tag, r.get("target_density", -1), r.get("seed", k)),
+                            rdir / "work_ext", ledger, {"program": tagp, "ext_index": k, "target_density": r.get("target_density"),
+                                                         "seed": r.get("seed"), "stage": "M"})
+        with ThreadPoolExecutor(max_workers=max(1, min(8, a.tb_workers))) as pool:
+            res = list(pool.map(f1_one, lays))
+        for k, row in res:
+            print(json.dumps({"ext": k, "run_id": row["run_id"], "status": row.get("status"), "J_raw": row.get("J_raw")}), flush=True)
+        ok = [(row.get("J_raw"), k) for k, row in res if row.get("status") == "ok" and row.get("J_raw") is not None
+              and math.isfinite(row["J_raw"])]
+        if not ok:
+            sys.exit("--phase extlayouts: no external layout completed f1")
+        best = min(ok)[1]                                           # by f1 J before the gates, as the campaign's f2 pick
+        print(json.dumps({"ext_best": best, "f1_J_raw": min(ok)[0], "meta": meta.get(best)}), flush=True)
+        if a.ext_tb:
+            jobs = []
+            for k, sh, c, m in tb_pairs(des, lays[best][1], m1):
+                if sh is None:
+                    print(json.dumps({"tb_slot": k, "skipped": "no legal common shift left"}), flush=True)
+                    continue
+                jobs.append((k, sh, c))
+
+            def tb_one(job):
+                k, sh, lx = job
+                return job, _eval(ev2, des, lx, base2, "%s.ext_%s.tb.s%d.f2" % (name, a.ext_tag, k), rdir / "work_ext", ledger,
+                                  {"program": tagp + "_TB", "tb_slot": k, "tb_shift": list(sh), "ext_index": best, "stage": "M"})
+            with ThreadPoolExecutor(max_workers=max(1, min(8, a.tb_workers))) as pool:
+                for (k, sh, _), row in pool.map(tb_one, jobs):
+                    print(json.dumps({"ext_tb": k, "shift": sh, "run_id": row["run_id"], "status": row.get("status"),
+                                      "J": row.get("J"), "J_raw": row.get("J_raw")}), flush=True)
         return
     if a.phase in ("f2", "all"):                        # 4. f2 verification
         ev_path = cdir / "evals.jsonl"
