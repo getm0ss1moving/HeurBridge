@@ -269,3 +269,30 @@ Re-testing: D10.
 - **Vault key:** `~/.config/heurbridge/vault.key` on the Mac (scripts/hbv.py:8, :47). Without it every encrypted
   run archive is unreadable. Whether an offline backup exists is not documented in the repo. Keep a copy in a
   password manager or on offline media; it must never be committed or copied to the servers.
+
+## D11 The timing-gate reference for future Track-B tests (new, 3 Oct; nothing registered changes)
+
+- **Evidence:** TB#3 failed on the hold gate although before the gates all six candidate replicates are below all six
+  reference replicates: its reference is the median of four unshifted replays (+0.015 ns), while the tool's own
+  shifted replicates have hold WNS -0.06 to 0.00 ns and fail the same check on 5 of 6 shifts; TB#1 passed with one
+  replicate exactly at its threshold (reports/trackB_confirmatory.md, Summary).
+- **Options for tests registered from now on:** (a) keep D6 as it is; (b) gate each candidate replicate against the
+  tool's replicate at the same shift (paired), with the 0.02-ns guard and no sign rule: it compares like with like and
+  needs no extra runs, since every test already runs the tool's replicates; (c) widen the guard to the tool's own spread
+  across shifts.
+- **Recommendation: (b) for future tests.** TB#4 and the three-way comparison (TW) keep D6 as registered.
+
+## D12 An equal-budget comparison with DREAMPlace (new, 3 Oct; optional)
+
+- **Evidence:** HeurBridge's Track-B candidates come from local search scored by the flow itself (45-48 f1 moves and
+  f2 checks per design, heurbridge/pipeline/seed_archive.py:269-296); DREAMPlace's pick in the registered comparison
+  sees the flow only in its selection (twelve f1 and four f2 runs; reports/trackB_threeway_preregistration.md,
+  Section 6). The registered comparison therefore compares layouts, not the two methods at equal flow budget.
+- **Options:** (a) the registered comparison only; (b) give DREAMPlace's pick the same local search (the campaign's
+  eight steps of six neighbours at f1, the improving moves at f2) and test the result on the same six shifts: does
+  HeurBridge's search do better from its own programs' starts than from DREAMPlace's? About 50 f1 and 8 f2 runs per
+  design; (c) HeurBridge without its local search: the campaign's best admitted program layout (no local-search move)
+  against DREAMPlace's pick on the same six shifts: 6 f2 runs per design, isolates the heuristic programs from the
+  flow-scored search.
+- **Recommendation:** decide after the TW results; (c) is cheap and answers the narrower question of whether the
+  programs alone beat DREAMPlace through the flow.
