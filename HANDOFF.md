@@ -4,6 +4,24 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
+## 2026-10-04 — Session 4 (05:00): TB#4 failed; TW#1 passed; DREAMPlace on ariane136 fails the flow so far
+
+- **TB#4 swerv_wrapper failed** (analysed once, 04:51; p = 0.98): before the gates the candidate is not better than the
+  tool's layout (median 0.9266 vs 0.9165); setup gate failed on 3 of 6 shifts, one detailed-placement timeout. Track B:
+  2 of 4 designs pass. Summary update at the end of `reports/trackB_confirmatory.md`.
+- **TW#1 bp_fe_top passed** (analysed once, 02:18, from `tw_a`'s snapshot holding all 22 of bp_fe_top's rows):
+  HeurBridge lower than DREAMPlace (p = 0.0022); DREAMPlace's f2 layouts all failed the setup gate, so its pick is the
+  best before the gates (density 1.0, seed 2); DREAMPlace vs the tool, reported: p = 0.98.
+- **ariane136 (`tw_b`):** DREAMPlace's first four layouts failed the flow's detailed placement at f1 (DPL-0036, 4,540
+  instances not placed; one 7,200-s timeout). If no layout completes f1, there is no DREAMPlace replicate and the
+  registered analysis records p = 1 for TW#3 (`threeway_confirm.py`: an empty arm gives p = 1); report it as such and
+  say why.
+- **Running on 224:** `tw_a` (bp_be_top's six shifts), `tw_b` (ariane136 f1), `tw_swerv` (since 04:55, 4 at a time).
+  Watch: Monitor with the scratchpad's `monitor_jobs.sh 224 /data/dzy/heura_repr/hb tw_a tw_b tw_swerv`.
+- **Next:** for each finished `tw_*` job: fetch, `python scripts/threeway_confirm.py analyze --design <d>` once.
+
+---
+
 ## 2026-10-04 — Session 4 (00:20): Track B's seeding finished; TB#4 and the three-way comparison running
 
 - **swerv_wrapper's campaign finished** (4 Oct 00:15; 132 f1 and 24 f2 runs, fetched). TB#4's candidate fixed by the
