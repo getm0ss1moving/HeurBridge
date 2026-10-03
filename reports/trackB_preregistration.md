@@ -65,7 +65,7 @@ pre-selected candidates on **fresh shifts**.
 - The comparison with DREAMPlace's macro placement through this flow (the owner's request of 3 Oct) is a separate
   step after Track B's seeding finishes.
 
-## Addendum (4 Oct 00:20): swerv_wrapper's candidate, fixed before its test
+## Addendum (4 Oct 00:16): swerv_wrapper's candidate, fixed before its test
 
 As Section 3 provides, after swerv_wrapper's campaign completed (job `seedB_orfs7_swerv_wrapper`, 4 Oct 00:15) and
 before its test ran: **swerv_wrapper.ls5.n4** (f2 J 0.8674 under Section 4's rule; 9 of 20 f2 layouts admitted),
