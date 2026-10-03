@@ -183,3 +183,26 @@ def test_density_confirm_units_pair_the_seed_with_rl1s_best_of_four(tmp_path):
     assert a1[0]["cost_method"] == 50.0 and a1[0]["cost_best4"] == 160.0
     assert a1[0]["portfolio"] == 0.45 and a1[1]["portfolio"] == 0.401   # picked by the selection seed (seed 0: 0.9 run)
     assert a1[7]["portfolio"] == 0.45 and a1[0]["best2_09"] == 0.445     # a failed density run falls back to 0.9
+
+
+def test_portfolio_retest_units(tmp_path):
+    """scripts/portfolio_retest_confirm.units: method = better of T_s at 0.9 and 0.6, comparator = better of T_s and
+    T_(s+1) at 0.9, by the selection seed; a failed run is +inf and never picked; a missing design is named."""
+    import json
+    import math
+    import portfolio_retest_confirm as C
+    for t, rows in ((0.9, [{"tool_seed": s, "J_select": {"tool": 0.45 - s / 1000}, "J_eval": {"tool": 0.45 - s / 1000}}
+                           for s in range(8)]),
+                    (0.6, [{"tool_seed": 0, "failure": "dreamplace_rc_1"}] +
+                          [{"tool_seed": s, "J_select": {"tool": 0.40}, "J_eval": {"tool": 0.41}} for s in range(1, 8)])):
+        p = tmp_path / "rc4_x" / "runs" / ("tool_runs_td%g" % t) / "adaptec1"
+        p.mkdir(parents=True)
+        (p / "rows.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows))
+    U, fails, srcs = C.units(tmp_path, "rc4_")
+    a1 = [u for u in U if u["design"] == "adaptec1"]
+    assert len(U) == 56 and len(srcs) == 2
+    assert a1[0]["method"] == 0.45 and a1[0]["comparator"] == 0.449         # the failed 0.6 run is never picked
+    assert a1[1]["method"] == 0.41 and a1[1]["picked_06"]
+    assert a1[7]["comparator"] == 0.443                                     # cyclic partner: seed 0 (0.45) vs seed 7
+    assert any("adaptec1 seed 0 at 0.6: dreamplace_rc_1" in f for f in fails)
+    assert all(math.isinf(u["method"]) for u in U if u["design"] == "bigblue4")
