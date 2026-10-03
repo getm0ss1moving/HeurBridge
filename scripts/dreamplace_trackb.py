@@ -54,12 +54,18 @@ def place(a):
     des, lay, halo = z["design"], z["layout"], z["halo"]
     name = des.id
     placer_des = des
-    if a.inflate:                              # DREAMPlace sees every macro grown by its halo on each side (halo / 2:
-        import copy                            # P_M's spacing is twice the per-side halo), so it leaves the spacing
-        placer_des = copy.copy(des)            # itself; centres and pin offsets are unchanged
+    if a.inflate:                              # DREAMPlace sees every macro as P_M's footprint: its size rounded up to
+        import copy                            # P_M's grid cells plus the halo cells on each side (halo / 2 per side in
+        import math                            # whole cells: heurbridge/core/project.py _legalize), so its legal layout
+        placer_des = copy.copy(des)            # needs little legalization; centres and pin offsets are unchanged
         placer_des.size = des.size.copy()
         mmi = des.is_macro & ~des.is_fixed
-        placer_des.size[mmi] = des.size[mmi] + halo
+        if np.isin(lay.orient[mmi], (1, 3, 6, 7)).any():           # R90, R270, MX90, MY90: footprint axes swap
+            sys.exit("--inflate assumes unrotated macros in the starting layout")
+        px, py = project._pitch(des, 512)
+        hx, hy = math.ceil(halo / 2 / px - 1e-9), math.ceil(halo / 2 / py - 1e-9)
+        cells = np.ceil(des.size[mmi] / np.array([px, py]) - 1e-9)
+        placer_des.size[mmi] = (cells + 2 * np.array([hx, hy])) * np.array([px, py])
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
     mm = des.is_macro & ~des.is_fixed
@@ -75,7 +81,8 @@ def place(a):
                 pj["abacus_legalize_flag"] = int(a.abacus)     # off by default: only the macros are used, and the
                 rc, log, wall = run_placer(pj, work, a.timeout)  # standard-cell Abacus pass aborts on these designs
                 row = {"design": name, "target_density": td, "seed": seed, "inflated_by_halo": bool(a.inflate),
-                       "abacus_legalize": bool(a.abacus), "dreamplace_rc": rc, "dreamplace_s": round(wall, 1)}
+                       "inflation": "pm_footprint" if a.inflate else None, "abacus_legalize": bool(a.abacus),
+                       "dreamplace_rc": rc, "dreamplace_s": round(wall, 1)}
                 pl = work / "out" / name / ("%s.gp.pl" % name)
                 if rc != 0 or not pl.exists():
                     row["failure"] = "dreamplace_rc_%s" % rc if rc != 0 else "dreamplace_no_output"
@@ -86,7 +93,8 @@ def place(a):
                     m1 = lay.copy()
                     m1.pos[mm] = placed.pos[mm]
                     lp, rep = project.legalize_macros(des, m1, halo=halo)
-                    row.update({"macros_unmoved": unmoved, "pm_ok": bool(rep.ok), "pm_mean_disp": float(rep.mean_disp)})
+                    row.update({"macros_unmoved": unmoved, "pm_ok": bool(rep.ok), "pm_mean_disp": float(rep.mean_disp),
+                                "pm_max_disp": float(rep.max_disp)})
                     if unmoved:
                         row["failure"] = "tool_left_%d_macros_unmoved" % unmoved
                     elif not rep.ok:
@@ -123,7 +131,8 @@ def main():
     p.add_argument("--timeout", type=int, default=3600)
     p.add_argument("--cpu", action="store_true")
     p.add_argument("--keep-work", action="store_true")
-    p.add_argument("--inflate", action="store_true", help="grow the macros by the halo in DREAMPlace's input")
+    p.add_argument("--inflate", action="store_true", help="give DREAMPlace each macro as P_M's footprint (size rounded "
+                   "up to P_M's grid plus the halo cells)")
     p.add_argument("--abacus", action="store_true", help="keep DREAMPlace's standard-cell Abacus legalization (it "
                    "asserts on cell overlaps after greedy legalization on the Track-B designs; the macro legalization "
                    "before it is kept either way)")
