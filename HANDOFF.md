@@ -18,19 +18,22 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
   instead of 20 um and moved DREAMPlace's packed macros by 2-6 % of the die on ariane136; `--inflate` now gives
   DREAMPlace each macro as P_M's footprint (displacement now <= 0.001 on bp_fe_top). Jobs: `dptb_place2` (old
   inflation, all 48 runs complete), `dptb_place3` (footprints, 227 GPU 0, running).
-- **Three-way comparison (owner's D9):** `reports/trackB_threeway_preregistration.md` and `scripts/threeway_confirm.py`
-  drafted, not yet committed: HeurBridge's TB candidate vs DREAMPlace's pick (twelve runs, f1 for all, f2 for the best
-  four, the best admitted under D6, then the six shifts), the tool reported; campaign TW. Register (commit + `reserve`
-  TW#1-TW#3) once `dptb_place3` is checked; the flow runs (`tw_<design>`, `--phase extlayouts --ext-f2-top 4
-  --ext-tb`, resume from the campaign) start when swerv_wrapper's campaign has finished. Correction recorded in D9:
-  HeurBridge's candidates come from local search scored by the flow itself; only DREAMPlace never sees the flow.
-- **E0 audit:** `e0bias_a` scored 30 of 46 sampled units (median optimism +0.00001 J, mean +0.00031); 16 were excluded
-  only by the 1e-9 reproduction tolerance (all within 6e-8) and are re-scored by `e0bias_b0`-`b3` (`--only`; b0, b1,
-  b3 fetched, b2 running). Then `reports/test_audit.md`.
-- **Running:** 224 `seedB_orfs7_swerv_wrapper` (22 of 24 f2 rows at 22:38); 227 `dptb_place3`; 225 `e0bias_b2`.
-- **Next:** swerv done → `python scripts/trackb_confirm.py candidate --design swerv_wrapper`, add it to
-  `CANDIDATES`, `reserve`, launch `tb_swerv_wrapper` (tbtest); register the three-way comparison and launch the
-  `tw_*` jobs (at most 8 OpenROAD runs at a time on 224 in all).
+- **Three-way comparison (owner's D9) registered 23:24** (commit a2c4de7; TW#1-TW#3 reserved, commit 1b6e918):
+  `reports/trackB_threeway_preregistration.md`, `scripts/threeway_confirm.py`. HeurBridge's TB candidate vs
+  DREAMPlace's pick (`dptb_place3`'s twelve layouts per design; f1 for all, f2 for the best four, the best admitted under
+  D6, then the six shifts), the tool reported. The external-layout path was checked first on two campaign layouts
+  (`extsmoke_bp_fe_top`: f1 and f2 reproduced exactly). DREAMPlace's layouts are in 224's vault (`dptb3_layouts`).
+  Correction recorded in D9: HeurBridge's candidates come from local search scored by the flow itself.
+- **Audit done:** `reports/test_audit.md` (`scripts/audit_tests.py --report`): all 46 E0 units scored (median optimism
+  +0.00000 J, mean +0.00017); the problems found are listed first. Proposals D11 (same-shift gate reference for future
+  Track-B tests) and D12 (equal-budget DREAMPlace comparison) added to the decision sheet.
+- **Running:** 224 `seedB_orfs7_swerv_wrapper` (its last f2 run).
+- **Next, when swerv's campaign has finished:** fetch it; `python scripts/trackb_confirm.py candidate --design
+  swerv_wrapper`, add the result to `CANDIDATES` and to the pre-registration, `reserve` (TB#4), launch
+  `tb_swerv_wrapper` (tbtest, 4 workers); `python scripts/threeway_confirm.py reserve --design swerv_wrapper` (TW#4);
+  launch `tw_a` (bp_fe_top then bp_be_top, `--after` both campaigns, 2 workers) and `tw_b` (ariane136, 2 workers):
+  `--phase extlayouts --ext-dir ext/<d> --ext-tag dp --ext-f2-top 4 --ext-tb`, data `dptb3_layouts:ext`; `tw_swerv`
+  (4 workers) when TB#4 has finished. At most 8 OpenROAD runs at a time on 224.
 
 ---
 
