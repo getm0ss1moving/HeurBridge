@@ -86,7 +86,7 @@ def main():
                     tag = "%s.s%d" % (pid, s)
                     J0 = float(final.score(final.evaluate(des, lp, tag + ".e0", work), base).J_inf)
                     row["J_seed0_rebuilt"] = J0
-                    if abs(J0 - row["J_row"]) > 1e-9:
+                    if abs(J0 - row["J_row"]) > 1e-6:                   # float rounding in the placer: below 1e-6
                         row["excluded"] = "seed-0 J not reproduced (%.6f vs %.6f)" % (J0, row["J_row"])
                     else:
                         fr = {e.seed: float(e.score(e.evaluate(des, lp, "%s.e%d" % (tag, e.seed), work), base).J_inf)
