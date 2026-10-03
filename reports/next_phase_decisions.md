@@ -122,6 +122,9 @@ Re-testing: D10.
 - **Recommendation: (a) and (b).** (a) aims at the lever that moves J on Track A with a cost claim; (b) is the only
   place where our own layouts beat a tool on real PPA. (c) stays laid aside: its gap to the tool is large.
 - **Prepared (nothing runs):** a design note for (a), reports/orchestration_design.md.
+- **Decided 3 Oct (owner):** (b), more effort on Track B; when Track B's seeding has finished, compare DREAMPlace's and
+  HeurBridge's macro placements through the OpenROAD flow, next to the tool's own macro placement (a fair three-way
+  comparison: neither DREAMPlace nor HeurBridge optimizes the flow's score). Track A stays the cheap testbed.
 
 ## D10 Re-testing on ISPD2005 after the defect (new, 3 Oct)
 
@@ -138,6 +141,8 @@ Re-testing: D10.
 - **Recommendation: (a).** The IBM effect is strong (one-sided Wilcoxon p = 3e-10 on 104 cases); a similar effect on
   56 cases would pass alpha_4. The other two questions are not worth re-testing: relinking fails on IBM, and one run at
   0.6 against best of four at 0.9 is borderline there (p = 0.033).
+- **Decided 3 Oct (owner): (a).** RL#4 registered (reports/portfolio_retest_preregistration.md, alpha 0.003125) after
+  a check on bigblue3 showed the corrected tool moving every macro; seven jobs `rc4_*` running since 11:30.
 
 ## D1 Launch the T5 demo?
 
@@ -173,7 +178,7 @@ Re-testing: D10.
 ## D3 T3.9: the cell bridge's endpoint
 
 - **Evidence:** the task list ranks the cell bridge's targets by f2 J (HEURBRIDGE_TASKS.md:372), but Track A has no
-  f2; its final cost is DREAMPlace f1 (reports/PROGRESS.md:272). DREAMPlace ignores start positions
+  f2; its final cost is DREAMPlace f1 (reports/PROGRESS.md:279). DREAMPlace ignores start positions
   (reports/demo_sketch_start.md:34), so a cell bridge cannot hand its result to DREAMPlace; it must deliver a placement.
   The look-ahead predictor misses both parts of its bar (reports/sketch_predictor_s2.md:38,
   reports/sketch_predictor_s2_ranking.md). *Negative results.*
@@ -224,6 +229,11 @@ Re-testing: D10.
   hold-gate rule for this test (for example the 0.02-ns guard without the sign rule); then the draft is revised
   (gates on the candidate only, the tool's replicates scored before the gates) and registered. The run phase exists
   (`scripts/run_seed_orfs.py --phase tbtest`) and is not launched.
+- **Decided 3 Oct (owner):** the timing gates keep the 0.02-ns guard without the sign rule, for the Track-B tests
+  (heurbridge/eval/cost.py `timing_sign_rule=False`; cost_v3's default unchanged). The protocol is registered
+  (reports/trackB_preregistration.md: gates on the candidate only, the tool's replicates scored before the gates; exact
+  rank-sum permutation test): TB#1 bp_fe_top, TB#2 bp_be_top, TB#3 ariane136, jobs `tb_*` on 224 since 11:52; TB#4
+  swerv_wrapper when its campaign completes.
 
 ## D7 Signoff tools (f3)
 
@@ -236,7 +246,7 @@ Re-testing: D10.
 
 ## D8 Housekeeping (owner's actions; nothing was deleted)
 
-- **Staged for deletion** (moved there on 29 Sep: HANDOFF.md:464-465; sizes measured 2 Oct):
+- **Staged for deletion** (moved there on 29 Sep: HANDOFF.md:481-482; sizes measured 2 Oct):
   `/data/dzy/heura_repr/_to_delete_20260929/` on 224, 68 GB (its /data at 93 % use); on 225, 31 GB (/data at 99 %);
   on 231, 7.1 GB (root at 99 %). The final `rm -rf` is yours.
 - **Faulty GPUs:** `nvidia-smi` fails on 224 ("Unable to determine the device handle for GPU 0000:02:00.0: Unknown

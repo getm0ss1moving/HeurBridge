@@ -4,6 +4,23 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
+## 2026-10-03 — Session 4 (12:00): owner's decisions; Track-B test and RL#4 running; audit of earlier tests
+
+- **Owner (3 Oct):** more effort on Track B; after Track B's seeding, compare DREAMPlace and HeurBridge through the
+  OpenROAD flow; D6 (0.02-ns guard, no sign rule); D10 (corrected ISPD2005 re-test).
+- **Track-B test (TB#1-TB#3)** registered (commit 2ab085a) and launched 11:52 on 224: `tb_bp_fe_top`,
+  `tb_bp_be_top`, `tb_ariane136` (`--resume-from seedB_orfs7_<d> --phase tbtest`, 2 OpenROAD runs each; with
+  swerv_wrapper's one, 7 at a time). After each job is fetched: `python scripts/trackb_confirm.py analyze --design <d>`
+  once. TB#4 (swerv_wrapper): fix its candidate from its f2 rows under the D6 rule, `reserve`, then run.
+- **RL#4** registered (commit 4e2b673); bigblue3 check passed (every macro moves; J about 0.38 there); seven `rc4_*`
+  jobs since 11:30. After all are fetched: `python scripts/portfolio_retest_confirm.py analyze` once.
+- **Audit of earlier tests** (to be written up in `reports/test_audit.md`): f1 always kept the macros fixed (2,965
+  records); IBM tool runs genuine; Track-B imports honoured (52,974 macro placements, y within 0.105 um); E0 not
+  degenerate, but its guard and final cost share one f1 run: `e0bias_a` (225 GPU 3) measures the optimism on 48
+  rebuilt co-trained layouts. New guard: a tool run that leaves a macro unmoved is a named failure (commit c9f0008).
+
+---
+
 ## 2026-10-03 — Session 4 (10:00): ISPD2005 results; the tool never placed ISPD2005's macros (defect, fixed)
 
 - **Analyses (each once, 09:46-09:47):** RL#1 failed (p = 0.88); RL#2 and RL#3 passed their alpha

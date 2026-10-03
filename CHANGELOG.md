@@ -6,6 +6,17 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 
 ## [Unreleased]
 
+### Track-B test, RL#4, guards (3 Oct 12:00)
+- `heurbridge/eval/cost.evaluate(..., timing_sign_rule=True)`: `False` drops the sign rule of the timing gates (the
+  Track-B test, decision D6); default unchanged. Test: `tests/test_cost.py`.
+- `scripts/trackb_confirm.py` (new): TB `reserve` / `analyze` (candidate gated under D6, the tool's replicates before
+  the gates, exact rank-sum permutation test). Tests: `tests/test_trackb_confirm.py`.
+- `reports/trackB_preregistration.md` registered (TB#1-TB#3); `reports/portfolio_retest_preregistration.md` and
+  `scripts/portfolio_retest_confirm.py` (RL#4).
+- `heurbridge/eval/dreamplace.run_dreamplace_m1`: a tool run that leaves a movable macro exactly where it started is
+  a named failure (`tool_left_N_macros_unmoved`). Test: `tests/test_dreamplace_retry.py`.
+- `scripts/e0_seed_bias.py` (new, audit). Full suite: 213 passed (150.2 s).
+
 ### Fix: the tool's input froze ISPD2005's macros (3 Oct 10:00)
 - `heurbridge/eval/dreamplace.write_oriented_bookshelf`: in the tool's input (`fix_macros=False`), a macro the design
   keeps movable is written as a movable node even where the source lists it as a terminal (ISPD2005, MMS convention);
