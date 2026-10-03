@@ -110,3 +110,17 @@ def test_gate_reference_same_path_replay():
     r_old, r_new = cost.evaluate(ok, b), cost.evaluate(ok, g)
     assert r_new.gates["setup"]["status"] == "pass" and r_new.J == pytest.approx(r_old.J)   # same J, new gate
     assert cost.with_gate_reference(b, []) is b                                  # nothing to refer to: unchanged
+
+
+def test_timing_gate_without_the_sign_rule():
+    """Decision D6 (3 Oct): the Track-B test keeps the 0.02-ns guard but drops the sign rule; cost_v3 is unchanged."""
+    ok = {"detailed_wirelength_um": 1000.0, "vias": 500, "gr_overflow_total": 2, "setup_tns_ns": -10.0,
+          "total_power_w": 0.010, "setup_wns_ns": -0.52, "hold_wns_ns": 0.08, "drc_violations": 0}
+    b = cost.Baseline("d", base().values, {"setup_wns_ns": -0.50, "hold_wns_ns": 0.015}, 3)
+    small_neg = dict(ok, hold_wns_ns=-0.003)                                   # within 0.02 of +0.015, but negative
+    assert math.isinf(cost.evaluate(small_neg, b).J_inf)                       # cost_v3: the sign rule fails it
+    r = cost.evaluate(small_neg, b, timing_sign_rule=False)
+    assert r.gates["hold"]["status"] == "pass" and math.isfinite(r.J_inf)
+    worse = dict(ok, hold_wns_ns=-0.006)                                       # more than 0.02 below the reference
+    r = cost.evaluate(worse, b, timing_sign_rule=False)
+    assert r.gates["hold"]["reason"] == "degrades_more_than_guard" and math.isinf(r.J_inf)

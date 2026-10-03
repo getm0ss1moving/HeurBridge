@@ -1,79 +1,66 @@
-# Track B: pre-registration (DRAFT, awaiting the owner's approval)
+# Track B: pre-registration (confirmatory: a HeurBridge macro layout against the tool's at signoff)
 
 | Field | Value |
 |---|---|
 | Report | trackB_preregistration |
-| Date | 2026-10-02 |
-| Status | **Draft, awaiting approval.** No data of this test exist; nothing has run. |
+| Date | 2026-10-03 |
+| Status | **registered 3 Oct** under the owner's decisions of 3 Oct: put the effort on Track B, and D6 (the timing gates keep the 0.02-ns guard without the sign rule); fixed before any run of this test |
 | Track | B (ORFS 2024-12-13 8ae3ae36, OpenROAD 676f8451, Nangate45; ENV_REPORT.md:138-139) |
-| Cost | cost_v3: J normalized to the unmodified flow; timing gates referenced to the same-path replay; every gate enforced at f2; failure = +inf (configs/cost.yaml:3, :12-25) |
-| alpha-ledger | new campaign `TB` (alpha = 0.05), entries TB#1-#4 reserved before any test run (Section 5) |
+| Cost | cost_v3's J normalized to the unmodified flow (configs/cost.yaml:3, :12-25), with this test's timing-gate rule (Section 4) |
+| alpha-ledger | campaign `TB` (alpha = 0.05): TB#1 bp_fe_top 0.025, TB#2 bp_be_top 0.0125, TB#3 ariane136 0.00625 reserved now; TB#4 swerv_wrapper 0.003125 reserved when its campaign completes, before its test runs; TB#5 ariane133 only under an adopted flow deviation (decision D2) |
+| Code | scripts/run_seed_orfs.py `--phase tbtest`, scripts/trackb_confirm.py, heurbridge/eval/cost.py (`timing_sign_rule`), as committed together with this document |
 
 ## 1 Question
 
-Does a heuristic macro layout found by the Track-B seeding beat the tool's own macro placement at signoff (f2), by
-more than the flow's sensitivity to a one-site or one-row shift of the layout?
+Does a macro layout found by HeurBridge's Track-B seeding (heuristic programs and their local search) beat the tool's
+own macro placement (ORFS's rtl_macro_placer, Hier-RTLMP) at signoff (f2), by more than the flow's sensitivity to a
+whole-layout shift of a few sites or rows?
 
-## 2 What exists now (descriptive, not usable as the test)
+## 2 What exists (descriptive, not the test)
 
-- bp_fe_top: the top three admitted candidates' four-point bands lie wholly below the tool's same-path band, whose
-  lower edge is 1.0330 (reports/T2_trackB_orfs_bp_fe_top.md:78-82).
-- bp_be_top: only the best candidate's band (0.9306-1.0002) lies below the tool band's lower edge 1.0241; the next
-  two overlap it (reports/T2_trackB_orfs_bp_be_top.md:78-82).
-- ariane136: best admitted J 0.9757, below the tool band 1.0000-1.0089; the candidates' own bands are being measured
-  (reports/T2_trackB_orfs_ariane136.md:47, :51; HANDOFF.md:182-184).
-
-**Why these cannot serve as the confirmatory test:** the candidates were selected on the same f2 values their bands
-were measured around, with the same three shifts as the tool's band (scripts/run_seed_orfs.py:369). Selection on
-noisy values favours candidates whose noise was favourable (winner's curse). The test therefore re-measures
+The campaigns' best admitted layouts lie below the tool's same-path band on bp_fe_top, bp_be_top and ariane136
+(reports/T2_trackB_orfs_bp_fe_top.md, reports/T2_trackB_orfs_bp_be_top.md, reports/T2_trackB_orfs_ariane136.md).
+They were selected on the same f2 values their bands were measured around (winner's curse), so the test re-measures
 pre-selected candidates on **fresh shifts**.
 
 ## 3 Design
 
-- **Designs and order (fixed):** TB#1 bp_fe_top, TB#2 bp_be_top, TB#3 ariane136, TB#4 swerv_wrapper (only if its
-  campaign completes with an f2-admitted layout; otherwise TB#4 stays unused). ariane133 enters only if the owner
-  adopts a flow deviation for it and its campaign is re-run under it, baseline included; otherwise it is dropped as a
-  documented deviation (reports/trackB_ariane133_diagnosis.md).
-- **Candidate per design (one, fixed before the test):** the campaign's best f2-admitted layout:
-  bp_fe_top.ls0.n4 (reports/T2_trackB_orfs_bp_fe_top.md:80), bp_be_top.ls7.n1 (reports/T2_trackB_orfs_bp_be_top.md:80),
-  and ariane136's best admitted layout (reports/T2_trackB_orfs_ariane136.md:51).
-- **Reference:** the tool's macro layout run through the candidates' path (the same-path replay, cost_v3's gate
-  reference: configs/cost.yaml:17-19).
+- **Candidate per design (fixed now):** the campaign's best f2 layout admitted under Section 4's rule, computed from
+  the stored f2 rows (local run files `runs/remote/seedB_orfs7_<design>/runs/seed_orfs/<design>/evals_f2.jsonl`):
+  bp_fe_top.ls0.n4 (f2 J 0.8809), bp_be_top.ls7.n1 (0.9306), ariane136.ls7.n3 (0.9757). swerv_wrapper's is fixed the
+  same way when its campaign completes, before its test runs.
+- **Reference:** the tool's macro layout run through the candidates' path (the same-path replay).
 - **Replicates (fresh, not used before):** the whole layout shifted by (+2, 0), (-2, 0), (0, -1), (0, +2), (+1, +1),
-  (-1, -1) sites and rows, the same six for candidate and reference. A shift that leaves the core is replaced by the
-  next of (+3, 0), (-3, 0), (0, -2), in that order, for both arms (this document).
-- **Endpoint:** f2 J (6_report) of each replicate, every gate enforced; a failure is +inf.
-- **Signoff layouts:** 6 candidate + 6 reference replicates per design = 12 f2 runs; 36-48 in all.
+  (-1, -1) sites and rows, the same for candidate and reference; a shift that leaves the core for either arm is replaced
+  by the next of (+3, 0), (-3, 0), (0, -2), in that order, for both arms; a slot with no legal shift left is dropped for
+  both arms and named (scripts/run_seed_orfs.py, `tb_pairs`).
+- **Runs:** each replicate at f2 (6_report), 12 per design, at most 8 OpenROAD runs at a time on 224, 7,200 s per step.
 
-## 4 Test and what counts as beating the tool
+## 4 Endpoint (decision D6)
 
-- **Per design (exact permutation test):** "the candidate beats the tool's macro placement" iff all six candidate
-  replicates have a lower J than all six reference replicates, i.e. its whole band lies below the tool's band. Under
-  the null hypothesis (candidate and reference replicates exchangeable) this happens with probability
-  1 / C(12, 6) = 1/924 = 0.0011 (this document), the test's p-value when it occurs; otherwise p is the one-sided
-  Mann-Whitney p of the twelve values.
-- **Stronger wording, "beats the unmodified tool flow":** additionally every candidate replicate below the
-  unmodified flow's J of 1.00 at f2 (by construction: reports/T2_trackB_orfs_bp_fe_top.md:47). Reported per design.
-- **Anything else** (bands overlap) is "indistinguishable from noise", never an improvement.
+- **Candidate replicates:** f2 J with every gate enforced; the setup and hold gates compare with the same-path replay
+  band's median at f2 (the campaign's four replays, cost_v3's gate reference) with the 0.02-ns guard and **without the
+  sign rule** (heurbridge/eval/cost.py, `timing_sign_rule=False`); a failed gate or flow is +inf.
+- **Reference replicates:** f2 J before the gates (the gates are defined relative to the tool itself); a failed flow is
+  +inf.
 
-## 5 alpha-ledger reservation and decision
+## 5 Test and decision
 
-- Campaign `TB`, alpha = 0.05, alpha_j = alpha x 2^-j (HEURBRIDGE_TASKS.md:541; heurbridge/stats/alpha_ledger.py:3-7):
-  TB#1 0.025, TB#2 0.0125, TB#3 0.00625, TB#4 0.003125, and TB#5 0.0015625 for ariane133 if it is re-run under an
-  adopted deviation. The smallest attainable p, 0.0011, is below every alpha_j, so each design can pass on its own.
-- Reservations are written with `AlphaLedger.reserve` before the first test run; results with `record` afterwards.
-- **Track-B claim** (confirmatory): "heuristic layouts beat the tool's macro placement at signoff on k of n designs",
-  k = the designs whose test passes at their alpha_j. No design passing: a negative Track-B result, reported as such.
+- **Per design:** exact one-sided permutation test of the rank sum over the C(12, 6) = 924 splits (candidate lower).
+  When all six candidate replicates are below all six reference replicates, p = 1/924 = 0.0011, below every alpha_j
+  of TB#1-TB#4.
+- **Pass:** p <= alpha_j of the design's entry. Claim per passing design: "the HeurBridge layout beats the tool's
+  macro placement at signoff, beyond the flow's shift sensitivity". Overall Track-B claim: k of n designs pass.
+- **Fail:** reported as a negative result for that design.
+- **Reported, not tested:** every replicate's J, gates and wall-clock; the replicates' J before the gates for both arms;
+  the cost of finding each candidate (the campaign's flow runs) against the tool's one run.
+- **Once:** `trackb_confirm.py analyze --design <d>` records the design's result and refuses a second one.
 
 ## 6 Limits stated in advance
 
-- f3 (DRC by KLayout or Magic, LVS) is not available (reports/signoff_anchor_readiness.md): passing f2 gates is not
+- f3 (DRC by KLayout or Magic, LVS) is not available (reports/signoff_anchor_readiness.md): passing f2's gates is not
   production signoff.
-- Six shifts measure the flow's sensitivity to one kind of perturbation (whole-layout shifts), not every source of
-  variation (e.g. other tool versions).
-- These are heuristic or local-search layouts; no Track-B bridge exists yet.
-
-## 7 Compute
-
-At most 8 OpenROAD runs at a time and 7,200 s per step on 224 (red line). Twelve f2 runs per design; the f2 wall time
-per run is not documented in the repo.
+- Six shifts measure one kind of perturbation (whole-layout shifts), not every source of variation.
+- The candidates come from heuristic programs and local search; no Track-B bridge exists yet.
+- The comparison with DREAMPlace's macro placement through this flow (the owner's request of 3 Oct) is a separate
+  step after Track B's seeding finishes.

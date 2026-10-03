@@ -126,18 +126,23 @@ def with_gate_reference(base: Baseline, records: list, what: str = "same-path re
                     dict(base.sources, gate_reference="%s, median of %d runs" % (what, len(records))))
 
 
-def _timing_gate(cand, base, guard=GUARD_NS):
+def _timing_gate(cand, base, guard=GUARD_NS, sign_rule: bool = True):
+    """cand >= base - guard; with ``sign_rule`` (cost_v3) also no negative slack when the reference has none.  The
+    Track-B confirmatory test drops the sign rule (owner's decision D6, 3 Oct): slack near 0 is noise there."""
     if cand is None or base is None:
         return {"status": "unchecked", "candidate": cand, "base": base}
-    ok = cand >= base - guard and not (base >= 0.0 and cand < 0.0)
-    reason = "ok" if ok else ("new_violation_from_met_baseline" if base >= 0 and cand < 0 else "degrades_more_than_guard")
-    return {"status": "pass" if ok else "fail", "candidate": cand, "base": base, "guard_ns": guard, "reason": reason}
+    sign_fail = sign_rule and base >= 0.0 and cand < 0.0
+    ok = cand >= base - guard and not sign_fail
+    reason = "ok" if ok else ("new_violation_from_met_baseline" if sign_fail else "degrades_more_than_guard")
+    return {"status": "pass" if ok else "fail", "candidate": cand, "base": base, "guard_ns": guard, "reason": reason,
+            "sign_rule": sign_rule}
 
 
 def evaluate(record: dict, base: Baseline, fidelity: int = 2, weights: dict | None = None,
-             required_gates: tuple | None = None) -> CostResult:
+             required_gates: tuple | None = None, timing_sign_rule: bool = True) -> CostResult:
     """weights: subset of WEIGHTS (e.g. Track A: rwl + of); required_gates overrides REQUIRED_GATES[fidelity]
-    (Track A has no timing: pass ()).  Gates that are not required but missing stay 'unchecked'."""
+    (Track A has no timing: pass ()).  Gates that are not required but missing stay 'unchecked'.
+    timing_sign_rule=False: the timing gates without the sign rule (the Track-B test, decision D6)."""
     w = weights or WEIGHTS
     r = canonical(record)
     terms, unchecked, total, wsum = {}, [], 0.0, 0.0
@@ -155,8 +160,8 @@ def evaluate(record: dict, base: Baseline, fidelity: int = 2, weights: dict | No
         wsum += wt
     J = total if wsum > 0 else math.nan
     gates = {
-        "setup": _timing_gate(_num(r.get("setup_wns_ns")), base.timing.get("setup_wns_ns")),
-        "hold": _timing_gate(_num(r.get("hold_wns_ns")), base.timing.get("hold_wns_ns")),
+        "setup": _timing_gate(_num(r.get("setup_wns_ns")), base.timing.get("setup_wns_ns"), sign_rule=timing_sign_rule),
+        "hold": _timing_gate(_num(r.get("hold_wns_ns")), base.timing.get("hold_wns_ns"), sign_rule=timing_sign_rule),
     }
     drc = _num(r.get("drc_violations"))
     gates["drc"] = {"status": "unchecked"} if drc is None else {"status": "pass" if drc == 0 else "fail", "value": drc}
