@@ -44,6 +44,8 @@ def main():
     ap.add_argument("--K", type=int, default=20)
     ap.add_argument("--n", type=int, default=6, help="units sampled (uniformly, fixed seed)")
     ap.add_argument("--eval-seeds", default="1,2,3")
+    ap.add_argument("--only", default="", help="PROGRAM:SEED,... : of the sampled units, score only these (re-scoring "
+                                               "units an earlier run left out)")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
     out = Path(a.out)
@@ -56,6 +58,11 @@ def main():
             by.setdefault((r["program"], r["seed"]), {})[r["partner"]] = r
     units = sorted(k for k, v in by.items() if "cotrained" in v and np.isfinite(v["cotrained"]["J"]))
     pick = np.random.default_rng(0).choice(len(units), size=min(a.n, len(units)), replace=False)
+    if a.only:
+        want = {(u.rsplit(":", 1)[0], int(u.rsplit(":", 1)[1])) for u in a.only.split(",")}
+        if not want <= {units[k] for k in pick}:
+            sys.exit("--only names units outside the sample: %s" % sorted(want - {units[k] for k in pick}))
+        pick = [k for k in pick if units[k] in want]
     b = load_bundle(a.suite, a.design, a.runs)
     des, g = b.design, b.graph
     base = cost.Baseline.from_records(des.id, json.loads((Path(a.runs) / des.id / "baseline.json").read_text())["records"])
