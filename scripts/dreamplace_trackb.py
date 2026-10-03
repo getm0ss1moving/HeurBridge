@@ -6,7 +6,8 @@ macro placement).
   export (local, parsing only): the design as run_seed_orfs.load_design builds it (the campaign's pre-macro floorplan
           fp.hb.def + the platform and macro LEFs) and the P_M spacing the campaign uses (2 x MACRO_PLACE_HALO), pickled
   place  (GPU server): per target density and seed, DREAMPlace's mixed-size run with every macro movable
-          (write_bookshelf_from_design), the macros read back and legalized by P_M with the campaign's spacing;
+          (write_bookshelf_from_design; global placement, its macro legalization and greedy cell legalization, without
+          the Abacus pass unless --abacus), the macros read back and legalized by P_M with the campaign's spacing;
           a run that leaves a macro unmoved or fails P_M is a named failure.  Writes rows.jsonl and layouts.npz
           (key "macros": (runs, M, 3) x, y, orientation of the movable macros, normalized as the Design's layouts)
 
@@ -69,10 +70,12 @@ def place(a):
                 work = out / "work" / ("td%g_s%d" % (td, seed))
                 aux = write_bookshelf_from_design(placer_des, lay, work / "in", name=name, scale=a.scale)
                 t0 = time.time()
-                rc, log, wall = run_placer(params(str(aux.resolve()), str((work / "out").resolve()), gpu=not a.cpu,
-                                                  iters=a.iters, seed=seed, target_density=td), work, a.timeout)
+                pj = params(str(aux.resolve()), str((work / "out").resolve()), gpu=not a.cpu, iters=a.iters, seed=seed,
+                            target_density=td)
+                pj["abacus_legalize_flag"] = int(a.abacus)     # off by default: only the macros are used, and the
+                rc, log, wall = run_placer(pj, work, a.timeout)  # standard-cell Abacus pass aborts on these designs
                 row = {"design": name, "target_density": td, "seed": seed, "inflated_by_halo": bool(a.inflate),
-                       "dreamplace_rc": rc, "dreamplace_s": round(wall, 1)}
+                       "abacus_legalize": bool(a.abacus), "dreamplace_rc": rc, "dreamplace_s": round(wall, 1)}
                 pl = work / "out" / name / ("%s.gp.pl" % name)
                 if rc != 0 or not pl.exists():
                     row["failure"] = "dreamplace_rc_%s" % rc if rc != 0 else "dreamplace_no_output"
@@ -121,6 +124,9 @@ def main():
     p.add_argument("--cpu", action="store_true")
     p.add_argument("--keep-work", action="store_true")
     p.add_argument("--inflate", action="store_true", help="grow the macros by the halo in DREAMPlace's input")
+    p.add_argument("--abacus", action="store_true", help="keep DREAMPlace's standard-cell Abacus legalization (it "
+                   "asserts on cell overlaps after greedy legalization on the Track-B designs; the macro legalization "
+                   "before it is kept either way)")
     p.add_argument("--out", required=True)
     a = ap.parse_args()
     export(a) if a.cmd == "export" else place(a)
