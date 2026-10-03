@@ -43,10 +43,10 @@ Sources: runs/remote/rc4_a1/runs/tool_runs_td0.9/adaptec1/rows.jsonl, runs/remot
 - **The tool against the benchmark's macro placement (J 0.45):** one tool run at 0.9 gives a lower J on six designs
   (0.385-0.443) and a higher one on bigblue4 (0.542) (reports/portfolio_retest_confirmatory.md:19-25).
 - **Tool input:** the seven jobs ran code with the input fix (commit 157bf21, 09:53) and started at 11:30
-  (reports/next_phase_decisions.md:145), before the movement guard was committed (c9f0008, 11:40), so their rows carry no
+  (reports/next_phase_decisions.md:150), before the movement guard was committed (c9f0008, 11:40), so their rows carry no
   count of unmoved macros. Every design's J differs from the frozen-macro values of the defective runs (0.4499-0.4503,
   reports/density_confirmatory.md:19-24, reports/density_confirmatory.md:26) and changes with the seed (the source rows
-  below); a direct check of movement was made on bigblue3 only (reports/next_phase_decisions.md:145).
+  below); a direct check of movement was made on bigblue3 only (reports/next_phase_decisions.md:150).
 - **Wall-clock (mean seconds per run, measured while jobs shared GPUs; source rows below):**
 
 | design | tool run at 0.9 | tool run at 0.6 | f1 run | method / comparator (two tool runs + two f1 runs) |

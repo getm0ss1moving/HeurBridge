@@ -125,6 +125,11 @@ Re-testing: D10.
 - **Decided 3 Oct (owner):** (b), more effort on Track B; when Track B's seeding has finished, compare DREAMPlace's and
   HeurBridge's macro placements through the OpenROAD flow, next to the tool's own macro placement (a fair three-way
   comparison: neither DREAMPlace nor HeurBridge optimizes the flow's score). Track A stays the cheap testbed.
+- **Correction (3 Oct, 23:10):** the parenthesis above is wrong for HeurBridge. Its Track-B candidates come from local
+  search that scores every move with the flow itself at f1 and verifies the improving ones at f2
+  (heurbridge/pipeline/seed_archive.py:269-296); all three registered candidates are local-search layouts. Only
+  DREAMPlace never sees the flow's score. The comparison is registered with this asymmetry stated
+  (reports/trackB_threeway_preregistration.md, Section 6): it compares layouts, not the two methods at equal flow budget.
 
 ## D10 Re-testing on ISPD2005 after the defect (new, 3 Oct)
 
@@ -143,6 +148,10 @@ Re-testing: D10.
   0.6 against best of four at 0.9 is borderline there (p = 0.033).
 - **Decided 3 Oct (owner): (a).** RL#4 registered (reports/portfolio_retest_preregistration.md, alpha 0.003125) after
   a check on bigblue3 showed the corrected tool moving every macro; seven jobs `rc4_*` running since 11:30.
+- **Result (3 Oct, 22:37, analysed once):** RL#4 passed, p = 0.00014 against alpha_4 = 0.003125; median difference
+  -0.0060 J, lower in 33 of 56 units, higher in 11 (reports/portfolio_retest_confirmatory.md). Confirmed: two tool runs
+  at densities 0.9 and 0.6 beat two seeds at 0.9 on the held-out ISPD2005 designs; a claim about running the tool, not
+  about a HeurBridge method.
 
 ## D1 Launch the T5 demo?
 
@@ -234,6 +243,11 @@ Re-testing: D10.
   (reports/trackB_preregistration.md: gates on the candidate only, the tool's replicates scored before the gates; exact
   rank-sum permutation test): TB#1 bp_fe_top, TB#2 bp_be_top, TB#3 ariane136, jobs `tb_*` on 224 since 11:52; TB#4
   swerv_wrapper when its campaign completes.
+- **Results (3 Oct, 22:36, each analysed once; reports/trackB_confirmatory.md):** TB#1 bp_fe_top passed (p = 0.0022,
+  alpha 0.025), TB#2 bp_be_top passed (p = 0.0011, alpha 0.0125), TB#3 ariane136 failed (p = 0.53): the hold gate
+  failed on 3 of 6 shifts against a reference of +0.015 ns (four unshifted replays), although all six candidate
+  replicates are below all six reference replicates before the gates. TB#1's pass rests on one replicate exactly at its
+  hold threshold (p would be 0.047 one 0.01-ns step lower).
 
 ## D7 Signoff tools (f3)
 
