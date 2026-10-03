@@ -281,6 +281,11 @@ Re-testing: D10.
   needs no extra runs, since every test already runs the tool's replicates; (c) widen the guard to the tool's own spread
   across shifts.
 - **Recommendation: (b) for future tests.** TB#4 and the three-way comparison (TW) keep D6 as registered.
+- **New evidence (4 Oct):** TW#2 (bp_be_top) passed only because DREAMPlace's hold slack, still positive on four of
+  its five completed replicates (+0.00 to +0.02 ns, 0-2 violations), is below the tool's replay median minus the guard
+  (+0.035 ns); before the gates DREAMPlace's layout was the best of the three on J and on setup timing
+  (reports/trackB_threeway.md, notes). A gate that also accepts non-negative slack, or the same-shift reference of (b)
+  with an absolute floor, would avoid rejecting layouts that do not violate hold.
 
 ## D12 An equal-budget comparison with DREAMPlace (new, 3 Oct; optional)
 

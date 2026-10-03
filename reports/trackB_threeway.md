@@ -37,3 +37,55 @@ DREAMPlace's selection: 12 layouts to f1 (12 completed), 4 to f2, 2.3 flow-run h
 
 Sources: runs/remote/tb_bp_fe_top/runs/seed_orfs/bp_fe_top/evals_tb.jsonl, runs/remote/tw_a/runs/seed_orfs/bp_fe_top/evals_ext_dp.jsonl, runs/remote/seedB_orfs7_bp_fe_top/runs/seed_orfs/bp_fe_top/evals_f2.jsonl.
 
+## bp_be_top (TW#2)
+
+Recorded 2026-10-04T05:22:57. **PASSED**: HeurBridge lower than DREAMPlace, exact one-sided rank-sum permutation p = 0.001082 against alpha_j = 0.0125.
+
+Reported, not tested: DREAMPlace lower than the tool (DREAMPlace gated, the tool before the gates): p = 1. Median J before the gates: HeurBridge 1.0167, DREAMPlace 0.9605, tool 1.1077.
+
+| replicate | arm | shift | J (HeurBridge, DREAMPlace: gated; tool: before gates) | J before gates | gates failed |
+|---|---|---|---|---|---|
+| bp_be_top.tb.cand.s1.f2 | HeurBridge | [2, 0] | 1.0401 | 1.0401 | - |
+| bp_be_top.tb.cand.s2.f2 | HeurBridge | [-2, 0] | 0.9810 | 0.9810 | - |
+| bp_be_top.tb.cand.s3.f2 | HeurBridge | [0, -1] | 0.9713 | 0.9713 | - |
+| bp_be_top.tb.cand.s4.f2 | HeurBridge | [0, 2] | 1.0163 | 1.0163 | - |
+| bp_be_top.tb.cand.s5.f2 | HeurBridge | [1, 1] | 1.0171 | 1.0171 | - |
+| bp_be_top.tb.cand.s6.f2 | HeurBridge | [-1, -1] | 1.0192 | 1.0192 | - |
+| bp_be_top.ext_dp.tb.s1.f2 | DREAMPlace | [2, 0] | +inf | 0.9721 | hold |
+| bp_be_top.ext_dp.tb.s2.f2 | DREAMPlace | [-2, 0] | +inf | +inf | flow |
+| bp_be_top.ext_dp.tb.s3.f2 | DREAMPlace | [0, -1] | +inf | 1.0080 | hold |
+| bp_be_top.ext_dp.tb.s4.f2 | DREAMPlace | [0, 2] | +inf | 0.9417 | hold |
+| bp_be_top.ext_dp.tb.s5.f2 | DREAMPlace | [1, 1] | +inf | 0.9466 | hold |
+| bp_be_top.ext_dp.tb.s6.f2 | DREAMPlace | [-1, -1] | +inf | 0.9490 | hold |
+| bp_be_top.tb.ref.s1.f2 | tool | [2, 0] | 1.0547 | 1.0547 | - |
+| bp_be_top.tb.ref.s2.f2 | tool | [-2, 0] | 1.0647 | 1.0647 | - |
+| bp_be_top.tb.ref.s3.f2 | tool | [0, -1] | 1.1207 | 1.1207 | - |
+| bp_be_top.tb.ref.s4.f2 | tool | [0, 2] | +inf | +inf | flow |
+| bp_be_top.tb.ref.s5.f2 | tool | [1, 1] | 1.0946 | 1.0946 | - |
+| bp_be_top.tb.ref.s6.f2 | tool | [-1, -1] | +inf | +inf | flow |
+
+DREAMPlace's selection: 12 layouts to f1 (12 completed), 4 to f2, 4.2 flow-run hours; the tool's own flow run: 0.47 h (the campaign's f2 baseline, median). Pick: layout 5 (target density, seed: (0.8, 1)), no f2 layout admitted under D6: the best f2 J before the gates; the replicates used layout [5] (consistent).
+
+Sources: runs/remote/tb_bp_be_top/runs/seed_orfs/bp_be_top/evals_tb.jsonl, runs/remote/tw_a/runs/seed_orfs/bp_be_top/evals_ext_dp.jsonl, runs/remote/seedB_orfs7_bp_be_top/runs/seed_orfs/bp_be_top/evals_f2.jsonl.
+
+
+## Notes on TW#1 and TW#2 (reported, not tested; written 2026-10-04 05:30)
+
+- **TW#1 bp_fe_top: the pass is substantive.** Before the gates DREAMPlace's layout is worse than both HeurBridge's and
+  the tool's (median J 1.073 against 0.905 and 1.001; reports/trackB_threeway.md:13), and its setup timing is worse:
+  setup WNS -0.120 to -0.216 ns and TNS -0.23 to -3.04 ns, against HeurBridge's -0.031 to -0.045 ns and -0.05 to
+  -0.25 ns and the tool's -0.054 to -0.084 ns and -0.15 to -0.68 ns; three replicates fail the setup gate
+  (threshold -0.143 ns) (local run files `runs/remote/tw_a/runs/seed_orfs/bp_fe_top/evals_ext_dp.jsonl:17-22`,
+  `runs/remote/tb_bp_fe_top/runs/seed_orfs/bp_fe_top/evals_tb.jsonl:1-12`).
+- **TW#2 bp_be_top: the pass rests on a relative hold gate, not on a better layout.** Before the gates DREAMPlace's
+  layout is the best of the three (median J 0.9605 against HeurBridge 1.0167 and the tool 1.1077;
+  reports/trackB_threeway.md:44) and has the best setup timing (WNS -0.245 to -0.292 ns, TNS -22.8 to -28.2 ns,
+  against HeurBridge's -0.269 to -0.308 ns and -24.5 to -29.2 ns). Its five completed replicates have hold WNS -0.02 to
+  +0.02 ns with 0-2 hold violations; the gate's threshold is +0.035 ns (the tool's replay median +0.055 ns minus the
+  0.02-ns guard), so it rejects hold slack that is still positive on four of them; one replicate failed in the flow
+  (local run files `runs/remote/tw_a/runs/seed_orfs/bp_be_top/evals_ext_dp.jsonl:17-22`,
+  `runs/remote/tb_bp_be_top/runs/seed_orfs/bp_be_top/evals_tb.jsonl:1-12`). The recorded result stands (PASSED under the
+  registered rule); read it as "DREAMPlace's layout misses the tool's hold margin", not as "HeurBridge's layout is
+  better". This is the gate behaviour of decision D11 (reports/next_phase_decisions.md, D11).
+- **DREAMPlace's picks:** on both designs none of its four f2 layouts was admitted under D6, so the pick was the best
+  f2 J before the gates (reports/trackB_threeway.md:36, :67).
