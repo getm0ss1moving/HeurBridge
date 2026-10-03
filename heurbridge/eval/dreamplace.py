@@ -47,6 +47,13 @@ def write_oriented_bookshelf(design: Design, layout: Layout, out_dir: str | Path
         raise ValueError("pin order differs from the design's source .nets")
     eff = O.effective_size(design.size, layout.orient)
     n = len(names)
+    if not fix_macros:
+        # A macro the design keeps movable (ISPD2005 in the MMS convention: the source lists it as a terminal) is
+        # written as a movable node: DREAMPlace never moves a terminal, so the tool could not place it (found 3 Oct:
+        # until then every ISPD2005 tool run left the source's terminal macros where the benchmark put them).
+        free = np.asarray(design.is_macro, bool) & ~np.asarray(design.is_fixed, bool) & ~np.asarray(design.is_io, bool)
+        term = np.asarray(term, bool) & ~free
+        term_ni = np.asarray(term_ni, bool) & ~free
     with open(out / (name + ".nodes"), "w") as fh:
         fh.write("UCLA nodes 1.0\n# heurbridge: orientations baked in\n\nNumNodes : %d\nNumTerminals : %d\n" % (n, int(term.sum())))
         for i in range(n):

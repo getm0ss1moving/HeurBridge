@@ -27,3 +27,37 @@ def test_oriented_copy_preserves_every_pin(tmp_path):
     back = read_placed(d, lay, aux.with_suffix(".pl"))
     assert np.abs(d.to_abs(back.pos) - d.to_abs(lay.pos)).max() < 1e-9
     assert np.array_equal(back.orient, lay.orient)
+
+
+def test_tool_input_frees_the_macros_the_design_keeps_movable(tmp_path):
+    """ISPD2005 lists its macros as terminals; in the MMS convention the design keeps them movable.  The tool's input
+    (fix_macros=False) must write them as movable nodes, f1's (fix_macros=True) as fixed; IO pads stay terminals."""
+    src = tmp_path / "src"
+    src.mkdir()
+    (src / "t.aux").write_text("RowBasedPlacement : t.nodes t.nets t.pl t.scl\n")
+    (src / "t.nodes").write_text("UCLA nodes 1.0\n\nNumNodes : 3\nNumTerminals : 2\nc0 2 4\nm0 20 30 terminal\np0 1 1 terminal\n")
+    (src / "t.nets").write_text("UCLA nets 1.0\n\nNumNets : 1\nNumPins : 3\nNetDegree : 3 n0\n"
+                               "  c0 O : 0 0\n  m0 I : 1 2\n  p0 I : 0 0\n")
+    (src / "t.pl").write_text("UCLA pl 1.0\n\nc0 10 10 : N\nm0 40 40 : N /FIXED\np0 0 0 : N /FIXED\n")
+    (src / "t.scl").write_text("UCLA scl 1.0\n\nNumRows : 2\nCoreRow Horizontal\n  Coordinate : 0\n  Height : 4\n"
+                               "  Sitewidth : 1\n  Sitespacing : 1\n  Siteorient : 1\n  Sitesymmetry : 1\n"
+                               "  SubrowOrigin : 0 NumSites : 100\nEnd\nCoreRow Horizontal\n  Coordinate : 4\n  Height : 4\n"
+                               "  Sitewidth : 1\n  Sitespacing : 1\n  Siteorient : 1\n  Sitesymmetry : 1\n"
+                               "  SubrowOrigin : 0 NumSites : 100\nEnd\n")
+    d, lay = load_bookshelf(src / "t.aux", family="ispd2005")
+    m, p = d.names.index("m0"), d.names.index("p0")
+    assert d.is_macro[m] and d.is_fixed[m] and d.is_io[p]
+    d.is_fixed = d.is_fixed & ~d.is_macro                                    # the MMS convention (load_raw)
+    got = {}
+    for fix in (False, True):
+        out = tmp_path / ("w%d" % fix)
+        write_oriented_bookshelf(d, lay, out, name="t", fix_macros=fix)
+        text = (out / "t.nodes").read_text()
+        nodes = {l.split()[0]: l.split()[3:] for l in text.splitlines() if l.split() and l.split()[0] in ("c0", "m0", "p0")}
+        pl = {l.split()[0]: l for l in (out / "t.pl").read_text().splitlines() if l.split() and l.split()[0] in ("c0", "m0", "p0")}
+        got[fix] = (nodes, pl, text)
+        assert nodes["p0"] == ["terminal"] and "/FIXED" in pl["p0"]           # the IO pad is unchanged
+    nodes, pl, text = got[False]                                               # the tool's input: the macro is free
+    assert nodes["m0"] == [] and "/FIXED" not in pl["m0"] and "NumTerminals : 1" in text
+    nodes, pl, text = got[True]                                                # f1's input: unchanged, fixed
+    assert nodes["m0"] == ["terminal"] and "/FIXED" in pl["m0"] and "NumTerminals : 2" in text
