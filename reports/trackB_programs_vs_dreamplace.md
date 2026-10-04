@@ -4,7 +4,7 @@
 |---|---|
 | Report | trackB_programs_vs_dreamplace |
 | Pre-registration | reports/trackB_programs_preregistration.md |
-| Status of the claim | per design below |
+| Status of the claim | **pre-registered confirmatory**: TP#1 passed; TP#2, TP#3, TP#4 failed; overall at the end |
 
 ## bp_fe_top (TP#1)
 
@@ -111,3 +111,57 @@ Reported, not tested: median J before the gates: programs 1.0276, DREAMPlace 1.0
 
 Sources: runs/remote/tp_b/runs/seed_orfs/ariane136/evals_tb_pg.jsonl, runs/remote/tw_b/runs/seed_orfs/ariane136/evals_ext_dp.jsonl, runs/remote/tb_ariane136/runs/seed_orfs/ariane136/evals_tb.jsonl, runs/remote/seedB_orfs7_ariane136/runs/seed_orfs/ariane136/evals_f2.jsonl.
 
+## swerv_wrapper (TP#4)
+
+Program pick swerv_wrapper.M4.v0.s0.f2. Recorded 2026-10-04T19:01:14. **FAILED**: programs lower than DREAMPlace, exact one-sided rank-sum permutation p = 0.5 against alpha_j = 0.003125.
+
+Reported, not tested: median J before the gates: programs 1.0289, DREAMPlace +inf, HeurBridge with local search 0.9266, tool 0.9165; HeurBridge with local search lower than the programs under the same gates: p = 0.0303.
+
+| replicate | arm | shift | J (gated, D11 b; tool: before gates) | J before gates | gates failed | timing reference |
+|---|---|---|---|---|---|---|
+| swerv_wrapper.tb_pg.cand.s1.f2 | programs | [2, 0] | 0.9366 | 0.9366 | - | the tool's replicate at the same shift, median of 1 runs |
+| swerv_wrapper.tb_pg.cand.s2.f2 | programs | [-2, 0] | +inf | 1.0537 | setup, hold | the tool's replicate at the same shift, median of 1 runs |
+| swerv_wrapper.tb_pg.cand.s3.f2 | programs | [0, -1] | +inf | 1.0303 | setup | the tool's replicate at the same shift, median of 1 runs |
+| swerv_wrapper.tb_pg.cand.s4.f2 | programs | [0, 2] | +inf | +inf | flow | - |
+| swerv_wrapper.tb_pg.cand.s5.f2 | programs | [1, 1] | +inf | 0.9687 | hold | the tool's replicate at the same shift, median of 1 runs |
+| swerv_wrapper.tb_pg.cand.s6.f2 | programs | [-1, -1] | +inf | 1.0274 | setup | the tool's replicate at the same shift, median of 1 runs |
+| swerv_wrapper.ext_dp.tb.s1.f2 | DREAMPlace | [2, 0] | +inf | +inf | flow | - |
+| swerv_wrapper.ext_dp.tb.s2.f2 | DREAMPlace | [-2, 0] | +inf | 0.9418 | setup | the tool's replicate at the same shift, median of 1 runs |
+| swerv_wrapper.ext_dp.tb.s3.f2 | DREAMPlace | [0, -1] | +inf | 0.9992 | setup | the tool's replicate at the same shift, median of 1 runs |
+| swerv_wrapper.ext_dp.tb.s4.f2 | DREAMPlace | [0, 2] | +inf | +inf | flow | - |
+| swerv_wrapper.ext_dp.tb.s5.f2 | DREAMPlace | [1, 1] | +inf | 1.0024 | setup, hold | the tool's replicate at the same shift, median of 1 runs |
+| swerv_wrapper.ext_dp.tb.s6.f2 | DREAMPlace | [-1, -1] | +inf | +inf | flow | - |
+| swerv_wrapper.tb.cand.s1.f2 | HeurBridge (local search) | [2, 0] | 0.9143 | 0.9143 | - | the tool's replicate at the same shift, median of 1 runs |
+| swerv_wrapper.tb.cand.s2.f2 | HeurBridge (local search) | [-2, 0] | +inf | 0.9258 | setup | the tool's replicate at the same shift, median of 1 runs |
+| swerv_wrapper.tb.cand.s3.f2 | HeurBridge (local search) | [0, -1] | 0.8883 | 0.8883 | - | the tool's replicate at the same shift, median of 1 runs |
+| swerv_wrapper.tb.cand.s4.f2 | HeurBridge (local search) | [0, 2] | +inf | +inf | flow | - |
+| swerv_wrapper.tb.cand.s5.f2 | HeurBridge (local search) | [1, 1] | 0.9273 | 0.9273 | - | the tool's replicate at the same shift, median of 1 runs |
+| swerv_wrapper.tb.cand.s6.f2 | HeurBridge (local search) | [-1, -1] | 0.9314 | 0.9314 | - | the tool's replicate at the same shift, median of 1 runs |
+| swerv_wrapper.tb.ref.s1.f2 | tool | [2, 0] | 0.9813 | 0.9813 | - | the tool's replicate at the same shift, median of 1 runs |
+| swerv_wrapper.tb.ref.s2.f2 | tool | [-2, 0] | 0.8503 | 0.8503 | - | the tool's replicate at the same shift, median of 1 runs |
+| swerv_wrapper.tb.ref.s3.f2 | tool | [0, -1] | 0.8733 | 0.8733 | - | the tool's replicate at the same shift, median of 1 runs |
+| swerv_wrapper.tb.ref.s4.f2 | tool | [0, 2] | 0.9658 | 0.9658 | - | the tool's replicate at the same shift, median of 1 runs |
+| swerv_wrapper.tb.ref.s5.f2 | tool | [1, 1] | 0.9140 | 0.9140 | - | the tool's replicate at the same shift, median of 1 runs |
+| swerv_wrapper.tb.ref.s6.f2 | tool | [-1, -1] | 0.9190 | 0.9190 | - | the tool's replicate at the same shift, median of 1 runs |
+
+Sources: runs/remote/tp_c/runs/seed_orfs/swerv_wrapper/evals_tb_pg.jsonl, runs/remote/tw_swerv/runs/seed_orfs/swerv_wrapper/evals_ext_dp.jsonl, runs/remote/tb_swerv_wrapper/runs/seed_orfs/swerv_wrapper/evals_tb.jsonl, runs/remote/seedB_orfs7_swerv_wrapper/runs/seed_orfs/swerv_wrapper/evals_f2.jsonl.
+
+
+## Overall (TP#1-TP#4; written 2026-10-04 19:05, after the four recorded results)
+
+| design | entry | p | recorded | median J before the gates: programs / DREAMPlace / HeurBridge with local search / tool | replicates admitted (D11 b): programs, DREAMPlace, local search | local search lower than the programs, p (reported) |
+|---|---|---|---|---|---|---|
+| bp_fe_top | TP#1 | 0.00758 (stats/alpha_ledger.jsonl:56) | **passed** | 0.904 / 1.073 / 0.905 / 1.001 | 5, 0, 5 of 6 | 0.369 |
+| bp_be_top | TP#2 | 0.121 (stats/alpha_ledger.jsonl:57) | failed | 1.035 / 0.961 / 1.017 / 1.108 | 4, 1, 6 of 6 | 0.00433 |
+| ariane136 | TP#3 | 0.159 (stats/alpha_ledger.jsonl:58) | failed | 1.028 / 1.039 / 0.976 / 1.005 | 3, 2, 6 of 6 | 0.00108 |
+| swerv_wrapper | TP#4 | 0.5 (stats/alpha_ledger.jsonl:59) | failed | 1.029 / +inf / 0.927 / 0.917 | 1, 0, 4 of 6 | 0.0303 |
+
+- **Recorded:** HeurBridge's programs alone beat DREAMPlace on 1 of 4 designs (bp_fe_top).
+- **Before the gates:** the programs' median is below DREAMPlace's on bp_fe_top and ariane136 and above it on bp_be_top;
+  on swerv_wrapper half of DREAMPlace's replicates did not complete the flow.
+- **What the flow-scored local search adds:** it improves on the programs on bp_be_top, ariane136 and swerv_wrapper, not on
+  bp_fe_top (last column, reported, not tested). HeurBridge's Track-B results rest mostly on that search, not on the
+  programs alone.
+- **Under D11 (b)** HeurBridge's local-search candidates pass the timing gates on 5, 6, 6 and 4 of 6 shifts (bp_fe_top,
+  bp_be_top, ariane136, swerv_wrapper; the table above), against 6, 6, 3 and 2 under D6 in the Track-B test
+  (reports/trackB_confirmatory.md); the recorded TB results stand.
