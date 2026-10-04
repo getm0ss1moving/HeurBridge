@@ -45,7 +45,7 @@
 after the fix, on ISPD2005 (Section 3); E0's arms are distinct (Section 4: the co-trained partner equals another
 partner only where both keep the raw layout); Track-B macro imports are honoured: 52,974 macro placements read back
 from the flow's outputs on 224, x exact, y within 0.105 um, the tool's macro placer never ran (checked 3 Oct 11:00-12:00,
-recorded in HANDOFF.md:101-103; the commands were not kept as a script and the flow's outputs are on 224 only).
+recorded in HANDOFF.md:104-106; the commands were not kept as a script and the flow's outputs are on 224 only).
 
 **Not re-checked here:** the bridge-promotion tests (campaigns algR_dev, algR_trackA, E0_dev) beyond their ledger
 entries (Section 1).

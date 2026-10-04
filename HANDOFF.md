@@ -35,6 +35,9 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
   (swerv_wrapper, 2); after each: fetch, `python scripts/programs_confirm.py analyze --design <d>` once.
 - **15:50 TW#4 swerv_wrapper failed** (p = 0.23): the three-way comparison is complete (overall section of
   `reports/trackB_threeway.md`): recorded 2 of 4, only TW#1 a better layout.
+- **19:01 D12 (c) complete** (TP#1-TP#4, each analysed once; TP#1 from `tp_a`'s snapshot, final rows identical): TP#1
+  bp_fe_top passed (p = 0.0076), TP#2-TP#4 failed; overall section of `reports/trackB_programs_vs_dreamplace.md`. 224 is
+  idle. Open for the owner: D13 (a) margin-aware selection for new tests, D13 (b) timing-aware search demo, D2.
 - **Timing gates (owner's question):** `reports/timing_margin_explore.md` (exploratory) and D13 in the decision sheet
   (margin-aware selection; timing-aware search demo; DREAMPlace's timing mode).
 
