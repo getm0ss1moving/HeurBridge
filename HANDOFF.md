@@ -33,6 +33,8 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
   TP#1-TP#4 reserved): HeurBridge's best program layout without local search vs DREAMPlace's pick, gates under D11 (b)
   for both arms. Running on 224: `tp_a` (bp_fe_top then bp_be_top, 2 at a time), `tp_b` (ariane136, 3), `tp_c`
   (swerv_wrapper, 2); after each: fetch, `python scripts/programs_confirm.py analyze --design <d>` once.
+- **15:50 TW#4 swerv_wrapper failed** (p = 0.23): the three-way comparison is complete (overall section of
+  `reports/trackB_threeway.md`): recorded 2 of 4, only TW#1 a better layout.
 - **Timing gates (owner's question):** `reports/timing_margin_explore.md` (exploratory) and D13 in the decision sheet
   (margin-aware selection; timing-aware search demo; DREAMPlace's timing mode).
 
