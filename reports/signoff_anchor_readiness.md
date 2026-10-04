@@ -10,7 +10,7 @@
 ## 1 Can f3 signoff (DRC and LVS) run in the current server environment?
 
 **No.** f3 is "f2 plus Magic/KLayout DRC and Netgen LVS" (HEURBRIDGE_TASKS.md:173) and is recorded as unavailable on
-the servers (reports/PROGRESS.md:136). Blockers, as checked on 2026-10-02:
+the servers (reports/PROGRESS.md:137). Blockers, as checked on 2026-10-02:
 
 | # | Missing component | Evidence | Consequence |
 |---|---|---|---|
@@ -51,7 +51,7 @@ Sources: reference values, third_party/ORFS-2024-12/flow/designs/nangate45/bp_fe
 ariane136/metadata-base-ok.json:103, :118, :178, :189, :368, :371; ariane133/metadata-base-ok.json:111, :133, :175,
 :273, :276. Our values: the local run records runs/remote/seedB_orfs7_<design>/runs/seed_orfs/<design>/baseline_f2.json:11,
 :13, :14, :16 (not in the public repo). Our flow: OpenROAD 676f8451, ORFS 2024-12-13 (ENV_REPORT.md:138-139);
-ariane133 runs with RTLMP_MAX_LEVEL=1 (reports/PROGRESS.md:302).
+ariane133 runs with RTLMP_MAX_LEVEL=1 (reports/PROGRESS.md:303).
 
 Reading (descriptive): our flow reproduces the ORFS reference exactly on bp_fe_top, whose reference was generated two
 days before the ORFS commit we pin; the other references come from other OpenROAD versions, so their differences
