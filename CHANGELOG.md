@@ -6,6 +6,17 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 
 ## [Unreleased]
 
+### D13 and D2 (4 Oct evening): J and timing safety, timing-aware search, parallel campaign
+- `heurbridge/pipeline/seed_archive.py`: `SeedConfig.workers` (program evaluations and local-search neighbours several at
+  a time; distinct layouts first so repeats are still reused) and `ls_timing_margin` (`timing_ok(row, margin)`, no sign
+  rule). `scripts/run_seed_orfs.py`: `--workers` (also the f2 stage and the tool's replays, one ledger per file shared by
+  the threads), `--ls-timing-margin`, `--phase tls` (D13 b: timing-aware local search, `tls_score`). Tests:
+  `tests/test_seed_archive.py` (a parallel campaign equals the sequential one; margins), `tests/test_beat_tool.py`.
+- `scripts/timing_safety_report.py` (D13 a): every Track-B layout's J, setup/hold checks against the tool's same-shift
+  run and J_safe = J + 0.04 (1 - S) -> `reports/trackB_timing_safety.md`. Test: `tests/test_timing_safety.py`.
+- Also since the D11 entry: `scripts/programs_confirm.py` (TP), `run_seed_orfs.py --tb-arms/--tb-tag`,
+  `scripts/explore_timing_margin.py`; `tests/test_programs_confirm.py`.
+
 ### Decision D11 (b): same-shift timing-gate reference for future Track-B tests (4 Oct)
 - `heurbridge/eval/cost.same_shift_reference(base, ref_record, completed_refs)`: the timing gates of a replicate refer
   to the tool's replicate at the same shift (evaluate with `timing_sign_rule=False`); if that run failed, to the median

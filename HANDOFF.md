@@ -4,6 +4,23 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
+## 2026-10-04 — Session 4 (19:30): D13 (a) and (b), D2 running
+
+- **Owner (4 Oct evening):** D13 (a) for new tests, combining J and timing safety with a full output of J and gates;
+  D13 (b) run; D2 run.
+- **D13 (a):** `scripts/timing_safety_report.py` -> `reports/trackB_timing_safety.md` (every layout's J, setup/hold
+  marks per position, checks passed, margin, J_safe = J + 0.04 (1 - S)); for new tests each arm's pick is the lowest
+  J_safe among layouts with equal positions (the best few by J run at the band's shifts).
+- **D2 (a):** `seedB_orfs8_ariane133` on 224 since 19:19 (PLACE_DENSITY 0.35 for every run incl. the baseline,
+  RTLMP_MAX_LEVEL 1, `--workers 4`): about 1.5 days. If its baseline fails: D2 (c). When it completes: TB#5's candidate
+  by the TB rule (`trackb_confirm.py candidate --design ariane133` needs ariane133 added to ORDER/CANDIDATES), reserve,
+  tbtest.
+- **D13 (b):** `--phase tls` smoke test `tlssmoke_bp_fe_top` (1 step x 2 neighbours, then six shifts) running; then
+  `tls_swerv`, `tls_ariane136` from swerv_wrapper.ls5.n4.f2 and ariane136.ls7.n3.f2, 2 at a time each (about 18 h).
+- **Watch:** Monitor with the scratchpad's `monitor_jobs.sh` (pid files) or `monitor_log.sh` (log lines).
+
+---
+
 ## 2026-10-04 — Session 4 (05:00): TB#4 failed; TW#1 passed; DREAMPlace on ariane136 fails the flow so far
 
 - **TB#4 swerv_wrapper failed** (analysed once, 04:51; p = 0.98): before the gates the candidate is not better than the
