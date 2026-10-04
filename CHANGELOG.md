@@ -6,6 +6,14 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 
 ## [Unreleased]
 
+### Decision D11 (b): same-shift timing-gate reference for future Track-B tests (4 Oct)
+- `heurbridge/eval/cost.same_shift_reference(base, ref_record, completed_refs)`: the timing gates of a replicate refer
+  to the tool's replicate at the same shift (evaluate with `timing_sign_rule=False`); if that run failed, to the median
+  of the tool's completed replicates in the test; if none completed, to the base's reference. Registered tests (TB,
+  TW) keep D6. Also since 3 Oct 23:15: `scripts/threeway_confirm.py` (TW reserve/analyze; DREAMPlace's pick recomputed
+  from the rows), `scripts/audit_tests.py`. Tests: `tests/test_cost.py` (`test_same_shift_reference`),
+  `tests/test_threeway_confirm.py`. Full suite: 218 passed (148.5 s).
+
 ### Track-B results, DREAMPlace for Track B, the three-way comparison (3 Oct 23:15)
 - `heurbridge/eval/dreamplace.py`: `write_bookshelf_from_design` and `read_bookshelf_layout` (DREAMPlace's mixed-size
   run on any Design, e.g. Track-B designs from DEF; IO pins fixed, every macro movable). Test:

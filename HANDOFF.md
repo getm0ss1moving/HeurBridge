@@ -26,6 +26,9 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 - **13:38 TW#3 ariane136** (`tw_b` done 13:35): failed (p = 0.16); before the gates HeurBridge is the best of the three
   on every replicate; relative gates reject 3 HeurBridge (hold) and 3 DREAMPlace (setup, positive slack) replicates; 9 of
   DREAMPlace's 12 layouts failed the flow at f1. Still running: `tw_swerv`.
+- **Owner's decision D11 (4 Oct): option (b) for future Track-B tests**: each replicate's timing gates refer to the
+  tool's replicate at the same shift (`heurbridge/eval/cost.same_shift_reference`; fallback when the tool's run there
+  failed: the median of its completed replicates in the test). TB#1-TB#4 and TW#1-TW#4 keep D6 as registered.
 
 ---
 

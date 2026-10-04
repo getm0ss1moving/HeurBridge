@@ -126,6 +126,21 @@ def with_gate_reference(base: Baseline, records: list, what: str = "same-path re
                     dict(base.sources, gate_reference="%s, median of %d runs" % (what, len(records))))
 
 
+def same_shift_reference(base: Baseline, ref_record, completed_refs: list) -> Baseline:
+    """The owner's decision D11 (b), 4 Oct 2026, for Track-B tests registered from then on: a replicate's timing gates
+    compare with the tool's replicate at the same shift (``ref_record``); evaluate it with ``timing_sign_rule=False``
+    (the 0.02-ns guard, no sign rule).  If that replicate has no setup and hold slack (its flow failed), the gates
+    compare with the median of the tool's replicates that completed in the same test (``completed_refs``); if none
+    did, with ``base``'s reference.  The J normalization is unchanged."""
+    def usable(r):
+        return (isinstance(r, dict) and r.get("returncode") in (0, None)
+                and _num(r.get("setup_wns_ns")) is not None and _num(r.get("hold_wns_ns")) is not None)
+    if usable(ref_record):
+        return with_gate_reference(base, [ref_record], what="the tool's replicate at the same shift")
+    ok = [r for r in completed_refs if usable(r)]
+    return with_gate_reference(base, ok, what="the tool's completed replicates in the test") if ok else base
+
+
 def _timing_gate(cand, base, guard=GUARD_NS, sign_rule: bool = True):
     """cand >= base - guard; with ``sign_rule`` (cost_v3) also no negative slack when the reference has none.  The
     Track-B confirmatory test drops the sign rule (owner's decision D6, 3 Oct): slack near 0 is noise there."""

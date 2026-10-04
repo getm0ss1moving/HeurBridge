@@ -187,7 +187,7 @@ Re-testing: D10.
 ## D3 T3.9: the cell bridge's endpoint
 
 - **Evidence:** the task list ranks the cell bridge's targets by f2 J (HEURBRIDGE_TASKS.md:372), but Track A has no
-  f2; its final cost is DREAMPlace f1 (reports/PROGRESS.md:302). DREAMPlace ignores start positions
+  f2; its final cost is DREAMPlace f1 (reports/PROGRESS.md:304). DREAMPlace ignores start positions
   (reports/demo_sketch_start.md:34), so a cell bridge cannot hand its result to DREAMPlace; it must deliver a placement.
   The look-ahead predictor misses both parts of its bar (reports/sketch_predictor_s2.md:38,
   reports/sketch_predictor_s2_ranking.md). *Negative results.*
@@ -260,7 +260,7 @@ Re-testing: D10.
 
 ## D8 Housekeeping (owner's actions; nothing was deleted)
 
-- **Staged for deletion** (moved there on 29 Sep: HANDOFF.md:554-555; sizes measured 2 Oct):
+- **Staged for deletion** (moved there on 29 Sep: HANDOFF.md:557-558; sizes measured 2 Oct):
   `/data/dzy/heura_repr/_to_delete_20260929/` on 224, 68 GB (its /data at 93 % use); on 225, 31 GB (/data at 99 %);
   on 231, 7.1 GB (root at 99 %). The final `rm -rf` is yours.
 - **Faulty GPUs:** `nvidia-smi` fails on 224 ("Unable to determine the device handle for GPU 0000:02:00.0: Unknown
@@ -286,6 +286,13 @@ Re-testing: D10.
   (+0.035 ns); before the gates DREAMPlace's layout was the best of the three on J and on setup timing
   (reports/trackB_threeway.md, notes). A gate that also accepts non-negative slack, or the same-shift reference of (b)
   with an absolute floor, would avoid rejecting layouts that do not violate hold.
+- **Decided 4 Oct (owner): (b) for future tests.** Track-B tests registered from now on gate each replicate's setup and
+  hold against the tool's replicate at the same shift, with the 0.02-ns guard and no sign rule. Implemented as
+  heurbridge/eval/cost.py `same_shift_reference` (test: tests/test_cost.py `test_same_shift_reference`); where the
+  tool's run at that shift failed, the reference is the median of the tool's completed replicates in the same test,
+  and the campaign's replay band only if none completed (an implementation choice; each future pre-registration
+  restates it). Unchanged, as registered under D6: TB#1-TB#4 and TW#1-TW#4; TB#5 (ariane133, if D2 is adopted) belongs
+  to the registered TB protocol and keeps D6 unless you decide otherwise. No absolute floor is added.
 
 ## D12 An equal-budget comparison with DREAMPlace (new, 3 Oct; optional)
 

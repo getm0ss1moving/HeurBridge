@@ -124,3 +124,23 @@ def test_timing_gate_without_the_sign_rule():
     worse = dict(ok, hold_wns_ns=-0.006)                                       # more than 0.02 below the reference
     r = cost.evaluate(worse, b, timing_sign_rule=False)
     assert r.gates["hold"]["reason"] == "degrades_more_than_guard" and math.isinf(r.J_inf)
+
+
+def test_same_shift_reference():
+    """Decision D11 (b), 4 Oct: a replicate's timing gates compare with the tool's replicate at the same shift; if that
+    run failed, with the median of the tool's completed replicates in the test; J's normalization unchanged."""
+    ok = {"detailed_wirelength_um": 1000.0, "vias": 500, "gr_overflow_total": 2, "setup_tns_ns": -10.0,
+          "total_power_w": 0.010, "setup_wns_ns": -0.52, "hold_wns_ns": 0.02, "drc_violations": 0}
+    b = cost.Baseline("d", base().values, {"setup_wns_ns": -0.50, "hold_wns_ns": 0.055}, 3)   # replay band: hold +0.055
+    assert math.isinf(cost.evaluate(ok, b, timing_sign_rule=False).J_inf)       # +0.02 < +0.055 - 0.02: fails vs the band
+    ref = dict(ok, setup_wns_ns=-0.51, hold_wns_ns=0.03, returncode=0)          # the tool at the same shift
+    g = cost.same_shift_reference(b, ref, [ref])
+    assert g.timing == {"setup_wns_ns": -0.51, "hold_wns_ns": 0.03} and g.values == b.values
+    assert "same shift" in g.sources["gate_reference"]
+    r = cost.evaluate(ok, g, timing_sign_rule=False)
+    assert r.gates["hold"]["status"] == "pass" and r.gates["setup"]["status"] == "pass" and math.isfinite(r.J_inf)
+    failed = {"returncode": 2}                                                  # the tool's run at this shift failed
+    others = [dict(ref, hold_wns_ns=h) for h in (0.04, 0.05, 0.06)]              # median +0.05
+    g2 = cost.same_shift_reference(b, failed, [failed] + others)
+    assert g2.timing["hold_wns_ns"] == pytest.approx(0.05) and "completed replicates" in g2.sources["gate_reference"]
+    assert cost.same_shift_reference(b, failed, [failed]) is b                  # nothing completed: the base's reference
