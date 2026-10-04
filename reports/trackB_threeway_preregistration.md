@@ -6,7 +6,7 @@
 | Date | 2026-10-03 |
 | Status | **registered 3 Oct**, before any DREAMPlace layout has run through the flow, under the owner's decision of 3 Oct (D9: when Track B's seeding has finished, compare DREAMPlace's and HeurBridge's macro placements through the OpenROAD flow, next to the tool's own; reports/next_phase_decisions.md:125-127). The flow runs start when swerv_wrapper's seeding campaign has finished |
 | Track | B (ORFS 2024-12-13 8ae3ae36, OpenROAD 676f8451, Nangate45; ENV_REPORT.md:138-139) |
-| Cost | cost_v3's J normalized to the unmodified flow (configs/cost.yaml:3, :12-25), with the Track-B test's timing-gate rule (decision D6, reports/next_phase_decisions.md:245-249) |
+| Cost | cost_v3's J normalized to the unmodified flow (configs/cost.yaml:3, :12-25), with the Track-B test's timing-gate rule (decision D6, reports/next_phase_decisions.md:255-259) |
 | alpha-ledger | campaign `TW` (alpha = 0.05; HEURBRIDGE_TASKS.md:541): TW#1 bp_fe_top 0.025, TW#2 bp_be_top 0.0125, TW#3 ariane136 0.00625 reserved now; TW#4 swerv_wrapper 0.003125 reserved after its Track-B candidate is fixed (TB#4), before its DREAMPlace flow runs. ariane133 only under decision D2 |
 | Code | scripts/dreamplace_trackb.py (`place`), scripts/run_seed_orfs.py (`--phase extlayouts --ext-f2-top 4 --ext-tb`, `ext_pick`), scripts/threeway_confirm.py, as committed together with this document |
 

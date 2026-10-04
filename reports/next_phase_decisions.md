@@ -187,6 +187,16 @@ Re-testing: D10.
   run including the two baseline runs, RTLMP_MAX_LEVEL 1 as before, 4 evaluations at a time with the campaign's new
   `--workers`). If its baseline fails: (c). When it completes, TB#5's candidate is fixed by the TB rule (D6, as the
   registered TB protocol says) and reserved before its test.
+- **Outcome of (a) (4 Oct 20:30): the re-run baseline fails** in the tool's own macro placement (2_3_floorplan_macro,
+  `MPL-0040 Failed on cluster (i_cache_subsystem/i_nbdcache)_glue_logic`, after 14 min): ORFS passes PLACE_DENSITY to
+  the macro placer as its target utilization (third_party/ORFS-2024-12/flow/scripts/macro_place_util.tcl:59), so 0.35
+  changes the tool's macro placement, not only global placement. The probes behind (a) re-ran candidate layouts, which
+  skip the macro placer, so they could not show this. The campaign stops by itself when both baseline runs fail
+  (scripts/run_seed_orfs.py:287-290). Under the adopted plan the fallback is (c). Options before dropping the design:
+  (b) virtual resizing (`GLOBAL_PLACEMENT_ARGS=-keep_resize_below_overflow 0.01`) for every run including the
+  baseline, which leaves the macro placer as it is (probes: 5 of 5 layouts complete, two with large setup violations);
+  (a') PLACE_DENSITY 0.35 for global placement only, the tool's macro placer at its default target utilization (the
+  baseline run in two parts; a flow modification); (c) drop. **Recommendation: (b)**, then (c) if its baseline fails.
 
 ## D3 T3.9: the cell bridge's endpoint
 
