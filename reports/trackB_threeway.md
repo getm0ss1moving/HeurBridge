@@ -89,3 +89,54 @@ Sources: runs/remote/tb_bp_be_top/runs/seed_orfs/bp_be_top/evals_tb.jsonl, runs/
   better". This is the gate behaviour of decision D11 (reports/next_phase_decisions.md, D11).
 - **DREAMPlace's picks:** on both designs none of its four f2 layouts was admitted under D6, so the pick was the best
   f2 J before the gates (reports/trackB_threeway.md:36, :67).
+## ariane136 (TW#3)
+
+Recorded 2026-10-04T13:38:32. **FAILED**: HeurBridge lower than DREAMPlace, exact one-sided rank-sum permutation p = 0.1591 against alpha_j = 0.00625.
+
+Reported, not tested: DREAMPlace lower than the tool (DREAMPlace gated, the tool before the gates): p = 1. Median J before the gates: HeurBridge 0.9761, DREAMPlace 1.0388, tool 1.0050.
+
+| replicate | arm | shift | J (HeurBridge, DREAMPlace: gated; tool: before gates) | J before gates | gates failed |
+|---|---|---|---|---|---|
+| ariane136.tb.cand.s1.f2 | HeurBridge | [2, 0] | +inf | 0.9763 | hold |
+| ariane136.tb.cand.s2.f2 | HeurBridge | [-2, 0] | 0.9759 | 0.9759 | - |
+| ariane136.tb.cand.s3.f2 | HeurBridge | [0, -1] | 0.9763 | 0.9763 | - |
+| ariane136.tb.cand.s4.f2 | HeurBridge | [0, 2] | +inf | 0.9764 | hold |
+| ariane136.tb.cand.s5.f2 | HeurBridge | [1, 1] | 0.9753 | 0.9753 | - |
+| ariane136.tb.cand.s6.f2 | HeurBridge | [-1, -1] | +inf | 0.9759 | hold |
+| ariane136.ext_dp.tb.s1.f2 | DREAMPlace | [2, 0] | +inf | 1.0383 | setup |
+| ariane136.ext_dp.tb.s2.f2 | DREAMPlace | [-2, 0] | 1.0394 | 1.0394 | - |
+| ariane136.ext_dp.tb.s3.f2 | DREAMPlace | [0, -1] | +inf | 1.0369 | setup |
+| ariane136.ext_dp.tb.s4.f2 | DREAMPlace | [0, 2] | 1.0381 | 1.0381 | - |
+| ariane136.ext_dp.tb.s5.f2 | DREAMPlace | [1, 1] | +inf | +inf | flow |
+| ariane136.ext_dp.tb.s6.f2 | DREAMPlace | [-1, -1] | +inf | 1.0403 | setup |
+| ariane136.tb.ref.s1.f2 | tool | [2, 0] | 1.0203 | 1.0203 | setup, hold |
+| ariane136.tb.ref.s2.f2 | tool | [-2, 0] | 1.0053 | 1.0053 | hold |
+| ariane136.tb.ref.s3.f2 | tool | [0, -1] | 1.0032 | 1.0032 | - |
+| ariane136.tb.ref.s4.f2 | tool | [0, 2] | 1.0042 | 1.0042 | hold |
+| ariane136.tb.ref.s5.f2 | tool | [1, 1] | 1.0047 | 1.0047 | hold |
+| ariane136.tb.ref.s6.f2 | tool | [-1, -1] | 1.0055 | 1.0055 | hold |
+
+DREAMPlace's selection: 12 layouts to f1 (3 completed), 3 to f2, 18.6 flow-run hours; the tool's own flow run: 1.84 h (the campaign's f2 baseline, median). Pick: layout 9 (target density, seed: (1.0, 1)), no f2 layout admitted under D6: the best f2 J before the gates; the replicates used layout [9] (consistent).
+
+Sources: runs/remote/tb_ariane136/runs/seed_orfs/ariane136/evals_tb.jsonl, runs/remote/tw_b/runs/seed_orfs/ariane136/evals_ext_dp.jsonl, runs/remote/seedB_orfs7_ariane136/runs/seed_orfs/ariane136/evals_f2.jsonl.
+
+
+## Notes on TW#3 (reported, not tested; written 2026-10-04 13:45)
+
+- **TW#3 ariane136 failed as recorded, but before the gates HeurBridge's layout is the best of the three.** All six
+  HeurBridge replicates (J 0.9753-0.9764) are below all five completed DREAMPlace replicates (1.0369-1.0403) and below
+  all six of the tool's (1.0032-1.0203) (reports/trackB_threeway.md:96-117). The gates then make three HeurBridge
+  replicates +inf (hold WNS -0.02 to -0.01 ns against a threshold of -0.005 ns) and three DREAMPlace replicates +inf
+  (setup WNS +0.924 to +1.009 ns, positive slack with TNS 0, against a threshold of +1.032 ns: the tool's replay median
+  +1.052 ns minus the guard); one DREAMPlace replicate failed in the flow (DPL-0036); the rank test cannot separate the
+  seven tied +inf values (p = 0.159). Both arms are rejected by relative gates for slack that is near zero or positive
+  (local run files `runs/remote/tw_b/runs/seed_orfs/ariane136/evals_ext_dp.jsonl:16-21`,
+  `runs/remote/tb_ariane136/runs/seed_orfs/ariane136/evals_tb.jsonl:1-12`).
+- **Why DREAMPlace's J is higher here:** its detailed wirelength is 8.62-8.70 million um against HeurBridge's 7.33-7.35
+  million and the tool's 8.05-8.52 million (the same files).
+- **DREAMPlace in the flow on ariane136:** 9 of its 12 layouts failed f1, in detailed placement (DPL-0036, cells left
+  unplaced) or by the 7,200-s step limit there; the three that completed are the target-density-1.0 runs
+  (reports/trackB_threeway.md:119). HeurBridge's own heuristic programs fail the same way on this design: 40 of 80
+  completed f1 in its campaign, 26 failing in detailed placement (local run file
+  `runs/remote/seedB_orfs7_ariane136/runs/seed_orfs/ariane136/evals.jsonl`); its local-search layouts, moved step by step
+  from a layout that worked, all completed (48 of 48).
