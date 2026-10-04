@@ -228,6 +228,9 @@ def main():
     ap.add_argument("--probe-workers", type=int, default=3, help="--phase probe: ORFS runs at a time")
     ap.add_argument("--tb-candidate", default="", help="--phase tbtest: the pre-registered candidate's f2 run id")
     ap.add_argument("--tb-workers", type=int, default=4, help="--phase tbtest: f2 runs at a time (<= 8 OpenROAD)")
+    ap.add_argument("--tb-arms", default="both", choices=["both", "cand"],
+                    help="--phase tbtest: cand runs the candidate's shifts only (the tool's replicates exist already)")
+    ap.add_argument("--tb-tag", default="", help="--phase tbtest: a later test's tag (its own ledger and run ids)")
     ap.add_argument("--ext-dir", default="", help="--phase extlayouts: an output dir of dreamplace_trackb.py place")
     ap.add_argument("--ext-tag", default="dp", help="--phase extlayouts: names the ledger and the rows")
     ap.add_argument("--ext-tb", action="store_true", help="--phase extlayouts: also the best layout's f2 shifts")
@@ -438,19 +441,22 @@ def main():
         r = rows2.get(a.tb_candidate)
         if r is None or r.get("pos_macros") is None:
             sys.exit("--phase tbtest: no f2 row with a layout for --tb-candidate %r" % a.tb_candidate)
-        ledger = Ledger(rdir / "evals_tb.jsonl")
+        # --tb-tag names a later test's own ledger and rows (evals_tb_<tag>.jsonl, <design>.tb_<tag>.<arm>.s<k>.f2,
+        # TB_<TAG>_CAND); --tb-arms cand runs the candidate only, against the tool's replicates of an earlier test
+        tag = ("_" + a.tb_tag) if a.tb_tag else ""
+        ledger = Ledger(rdir / ("evals_tb%s.jsonl" % tag))
         jobs = []
         for k, sh, c, m in tb_pairs(des, _layout_from_row(des, lay, r), m1):
             if sh is None:
                 print(json.dumps({"tb_slot": k, "skipped": "no legal common shift left"}), flush=True)
                 continue
-            jobs += [("cand", k, sh, c), ("ref", k, sh, m)]
+            jobs += [("cand", k, sh, c)] + ([("ref", k, sh, m)] if a.tb_arms == "both" else [])
 
         def tb_one(job):
             arm, k, sh, lay_x = job
-            return job, _eval(ev2, des, lay_x, base2, "%s.tb.%s.s%d.f2" % (name, arm, k), rdir / "work_tb", ledger,
-                              {"program": "TB_" + arm.upper(), "tb_slot": k, "tb_shift": list(sh), "stage": "M",
-                               "tb_candidate": a.tb_candidate})
+            return job, _eval(ev2, des, lay_x, base2, "%s.tb%s.%s.s%d.f2" % (name, tag, arm, k), rdir / "work_tb", ledger,
+                              {"program": "TB%s_%s" % (tag.upper(), arm.upper()), "tb_slot": k, "tb_shift": list(sh),
+                               "stage": "M", "tb_candidate": a.tb_candidate})
         with ThreadPoolExecutor(max_workers=max(1, min(8, a.tb_workers))) as pool:
             for (arm, k, sh, _), row in pool.map(tb_one, jobs):
                 print(json.dumps({"tb": arm, "slot": k, "shift": sh, "run_id": row["run_id"], "status": row.get("status"),
