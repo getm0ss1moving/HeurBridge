@@ -23,6 +23,9 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
   under the registered rule (p = 0.0011), but before the gates DREAMPlace's layout is the best of the three; its
   replicates fail only the relative hold gate with positive hold slack (notes at the end of `reports/trackB_threeway.md`;
   new D11 evidence). Still running: `tw_b`, `tw_swerv`.
+- **13:38 TW#3 ariane136** (`tw_b` done 13:35): failed (p = 0.16); before the gates HeurBridge is the best of the three
+  on every replicate; relative gates reject 3 HeurBridge (hold) and 3 DREAMPlace (setup, positive slack) replicates; 9 of
+  DREAMPlace's 12 layouts failed the flow at f1. Still running: `tw_swerv`.
 
 ---
 
