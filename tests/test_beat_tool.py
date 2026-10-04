@@ -220,3 +220,20 @@ def test_portfolio_retest_units(tmp_path):
     assert a1[7]["comparator"] == 0.443                                     # cyclic partner: seed 0 (0.45) vs seed 7
     assert any("adaptec1 seed 0 at 0.6: dreamplace_rc_1" in f for f in fails)
     assert all(math.isinf(u["method"]) for u in U if u["design"] == "bigblue4")
+
+
+def test_timing_aware_search_score():
+    """scripts/run_seed_orfs.tls_score (D13 b): J before the gates plus lam times the share of the setup and hold checks
+    that miss the margin over the gate threshold; a failed flow is +inf."""
+    import math
+    import pytest
+    import run_seed_orfs as R
+    g = lambda s, h: {"setup": {"candidate": s, "base": -0.5, "guard_ns": 0.02},
+                      "hold": {"candidate": h, "base": 0.015, "guard_ns": 0.02}}
+    safe = {"status": "ok", "J_raw": 0.90, "gates": g(-0.48, 0.03)}        # clears -0.52 and -0.005 by 0.04, 0.035
+    assert R.tls_score(safe, 0.03, 0.04) == pytest.approx(0.90)
+    one = {"status": "ok", "J_raw": 0.89, "gates": g(-0.50, 0.03)}         # setup clears by 0.02 only
+    assert R.tls_score(one, 0.03, 0.04) == pytest.approx(0.91)
+    both = {"status": "ok", "J_raw": 0.85, "gates": g(-0.53, -0.01)}       # both miss
+    assert R.tls_score(both, 0.03, 0.04) == pytest.approx(0.89)
+    assert math.isinf(R.tls_score({"status": "eval_failed", "J": math.inf}, 0.03, 0.04))

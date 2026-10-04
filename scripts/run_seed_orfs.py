@@ -163,6 +163,20 @@ def ext_pick(sel, f1_best):
     return f1_best, "every f2 run failed: the best by f1"
 
 
+def tls_score(row: dict, margin: float, lam: float) -> float:
+    """D13 (b): a local-search move's f1 score, J before the gates plus lam times the share of its setup and hold
+    checks that do not clear the gate threshold (reference - guard) by ``margin`` ns; a failed flow is +inf."""
+    if row.get("status") != "ok" or row.get("J_raw") is None or not math.isfinite(row["J_raw"]):
+        return math.inf
+    g = row.get("gates") or {}
+    short = 0
+    for k in ("setup", "hold"):
+        x = g.get(k) or {}
+        c, b = x.get("candidate"), x.get("base")
+        short += c is None or b is None or c - (b - x.get("guard_ns", cost.GUARD_NS)) < margin - 1e-12
+    return float(row["J_raw"]) + lam * short / 2.0
+
+
 def tb_pairs(des, cand, ref):
     """[(slot, (dx, dy), candidate layout, reference layout)]: the pre-registered shifts with their fallbacks; a slot
     without a legal common shift has (None, None, None, None) after its index."""
@@ -206,7 +220,8 @@ def main():
     ap.add_argument("--work-home", default=str(ROOT / "runs" / "orfs_work"))
     ap.add_argument("--yosys", default=None, help="Yosys for ORFS (default HB_YOSYS)")
     ap.add_argument("--phase", default="all",
-                    choices=["base", "f1", "f2", "all", "band", "warmstart", "timingprobe", "probe", "tbtest", "extlayouts"])
+                    choices=["base", "f1", "f2", "all", "band", "warmstart", "timingprobe", "probe", "tbtest", "extlayouts",
+                             "tls"])
     ap.add_argument("--base-timeout", type=int, default=4 * 7200, help="whole unmodified flow (each step < 7,200 s)")
     ap.add_argument("--timeout", type=int, default=7200, help="one candidate evaluation")
     ap.add_argument("--noise-replays", type=int, default=3, help="shifted M1 replays for the noise band (0-3)")
@@ -221,6 +236,13 @@ def main():
                     help="local search accepts only moves whose f1 setup and hold gates pass")
     ap.add_argument("--ls-timing-margin", type=float, default=None,
                     help="with --ls-timing: both f1 slacks must clear the gate threshold by this many ns (D13 b)")
+    ap.add_argument("--tls-start", default="", help="--phase tls (D13 b): the starting layout's f2 or f1 run id")
+    ap.add_argument("--tls-steps", type=int, default=8)
+    ap.add_argument("--tls-neighbours", type=int, default=6)
+    ap.add_argument("--tls-margin", type=float, default=0.03, help="--phase tls: timing margin in ns")
+    ap.add_argument("--tls-lambda", type=float, default=0.04, help="--phase tls: J added when both checks miss it")
+    ap.add_argument("--tls-seed", type=int, default=1)
+    ap.add_argument("--tls-workers", type=int, default=2)
     ap.add_argument("--workers", type=int, default=1,
                     help="f1 and f2 evaluations at a time (distinct layouts; <= 8 OpenROAD runs on 224 in all)")
     ap.add_argument("--make-var", action="append", default=[],
@@ -548,6 +570,47 @@ def main():
                 for (k, sh, _), row in pool.map(tb_one, jobs):
                     print(json.dumps({"ext_tb": k, "shift": sh, "run_id": row["run_id"], "status": row.get("status"),
                                       "J": row.get("J"), "J_raw": row.get("J_raw")}), flush=True)
+        return
+    if a.phase == "tls":                                # 11. D13 (b), exploratory: timing-aware local search
+        from heurbridge.core import project
+        p1 = rdir / "evals.jsonl"
+        rows1 = {r["run_id"]: r for r in (json.loads(l) for l in p1.read_text().splitlines() if l.strip())}
+        start = rows1.get(a.tls_start[:-3] + ".f1") if a.tls_start.endswith(".f2") else rows1.get(a.tls_start)
+        if start is None or start.get("pos_macros") is None:
+            sys.exit("--phase tls: no f1 row with a layout for --tls-start %r" % a.tls_start)
+        halo = 2 * max(d.halo)
+        ledger = Ledger(rdir / "evals_tls.jsonl")
+        rng = np.random.default_rng(a.tls_seed)
+        cur_lay, cur = _layout_from_row(des, lay, start), tls_score(start, a.tls_margin, a.tls_lambda)
+        print(json.dumps({"tls_start": start["run_id"], "score": cur, "J_raw": start.get("J_raw")}), flush=True)
+        for step in range(a.tls_steps):
+            jobs = []
+            for n, (move, l) in enumerate(SA.neighbours(des, cur_lay, rng, a.tls_neighbours)):
+                lp, rep = project.legalize_macros(des, l, halo=halo)
+                if rep.ok:
+                    jobs.append(("%s.tls.s%d.n%d.f1" % (name, step, n), lp, move))
+            evals = SA._map(lambda j: _eval(ev1, des, j[1], base1, j[0], rdir / "work_tls", ledger,
+                                            {"program": "TLS", "move": j[2], "stage": "M", "tls_step": step}),
+                            jobs, a.tls_workers)
+            scored = sorted(((tls_score(r, a.tls_margin, a.tls_lambda), i) for i, r in enumerate(evals)), key=lambda t: t[0])
+            took = bool(scored) and scored[0][0] < cur
+            if took:
+                cur, cur_lay = scored[0][0], jobs[scored[0][1]][1]
+            print(json.dumps({"tls_step": step, "evaluated": len(evals), "best": scored[0][0] if scored else None,
+                              "accepted": took, "score": cur, "run_id": jobs[scored[0][1]][0] if took else None}),
+                  flush=True)
+        jobs = []
+        for k, sh, c, m in tb_pairs(des, cur_lay, m1):      # the final layout at the Track-B test's six shifts
+            if sh is None:
+                print(json.dumps({"tb_slot": k, "skipped": "no legal common shift left"}), flush=True)
+            else:
+                jobs.append((k, sh, c))
+        ledger2 = Ledger(rdir / "evals_tls_f2.jsonl")
+        for (k, sh, _), row in zip(jobs, SA._map(lambda j: _eval(
+                ev2, des, j[2], base2, "%s.tls.tb.s%d.f2" % (name, j[0]), rdir / "work_tls", ledger2,
+                {"program": "TLS_TB", "tb_slot": j[0], "tb_shift": list(j[1]), "stage": "M"}), jobs, a.tls_workers)):
+            print(json.dumps({"tls_tb": k, "shift": sh, "run_id": row["run_id"], "status": row.get("status"),
+                              "J_raw": row.get("J_raw")}), flush=True)
         return
     if a.phase in ("f2", "all"):                        # 4. f2 verification
         ev_path = cdir / "evals.jsonl"
