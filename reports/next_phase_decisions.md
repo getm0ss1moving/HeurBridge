@@ -183,6 +183,10 @@ Re-testing: D10.
 - **Recommendation: (a)**, PLACE_DENSITY 0.35 for every ariane133 run including the baseline, then re-run the
   campaign; (c) if the re-run baseline itself fails. The deviation is chosen after seeing the probes and is recorded
   as such; it applies to the baseline and every candidate alike, so J stays normalized to the same flow.
+- **Decided 4 Oct (owner): (a).** Running since 19:19: `seedB_orfs8_ariane133` on 224 (PLACE_DENSITY 0.35 for every
+  run including the two baseline runs, RTLMP_MAX_LEVEL 1 as before, 4 evaluations at a time with the campaign's new
+  `--workers`). If its baseline fails: (c). When it completes, TB#5's candidate is fixed by the TB rule (D6, as the
+  registered TB protocol says) and reserved before its test.
 
 ## D3 T3.9: the cell bridge's endpoint
 
@@ -327,3 +331,11 @@ Re-testing: D10.
   larger setup.
 - **Recommendation:** (a) for every new test (cheap, the same rule for every arm); (b) as an exploratory demo on
   swerv_wrapper and ariane136 when 224 is free; (c) only if a fully fair DREAMPlace arm matters for a claim.
+- **Decided 4 Oct (owner): (a) for new tests, combining J and timing safety; (b) run.** (a): every position a layout ran
+  at has a setup and a hold check against the tool's run at the same shift (D11 (b)); two outputs, J (median J before
+  the gates over the positions) and S (share of the checks passed), and one score, J_safe = J + 0.04 x (1 - S); the
+  best few layouts of every arm by J are also run at the band's shifts so that compared layouts have equal positions,
+  and each arm's pick is its lowest J_safe (scripts/timing_safety_report.py; every layout's J and gates:
+  reports/trackB_timing_safety.md). (b): `run_seed_orfs.py --phase tls` (moves kept only if they lower J plus 0.04 x
+  the share of f1 checks missing a 0.03-ns margin), exploratory, on swerv_wrapper and ariane136 from their TB candidates,
+  the final layouts at the Track-B test's six shifts.

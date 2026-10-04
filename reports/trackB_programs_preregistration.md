@@ -4,7 +4,7 @@
 |---|---|
 | Report | trackB_programs_preregistration |
 | Date | 2026-10-04 |
-| Status | **registered 4 Oct**, before any run of the program picks' shifts, under the owner's decisions of 4 Oct: D12 (c) (reports/next_phase_decisions.md:306-308) and D11 (b) for tests registered from now on (reports/next_phase_decisions.md:289-295) |
+| Status | **registered 4 Oct**, before any run of the program picks' shifts, under the owner's decisions of 4 Oct: D12 (c) (reports/next_phase_decisions.md:310-312) and D11 (b) for tests registered from now on (reports/next_phase_decisions.md:293-299) |
 | Track | B (ORFS 2024-12-13 8ae3ae36, OpenROAD 676f8451, Nangate45; ENV_REPORT.md:138-139) |
 | Cost | cost_v3's J normalized to the unmodified flow (configs/cost.yaml:3, :12-25); timing gates under D11 (b) (Section 4) |
 | alpha-ledger | campaign `TP` (alpha = 0.05; HEURBRIDGE_TASKS.md:541): TP#1 bp_fe_top 0.025, TP#2 bp_be_top 0.0125, TP#3 ariane136 0.00625, TP#4 swerv_wrapper 0.003125, all reserved now |
