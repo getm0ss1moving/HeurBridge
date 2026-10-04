@@ -18,6 +18,9 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 - **D13 (b):** `--phase tls` smoke test `tlssmoke_bp_fe_top` (1 step x 2 neighbours, then six shifts) running; then
   `tls_swerv`, `tls_ariane136` from swerv_wrapper.ls5.n4.f2 and ariane136.ls7.n3.f2, 2 at a time each (about 18 h).
 - **Watch:** Monitor with the scratchpad's `monitor_jobs.sh` (pid files) or `monitor_log.sh` (log lines).
+- **D2 update (5 Oct 00:45):** (a)'s baseline failed in the tool's macro placer (PLACE_DENSITY is also its target
+  utilization; MPL-0040); the owner chose (b): `seedB_orfs9_ariane133` (virtual resizing for every run) running. The
+  smoke test of `--phase tls` passed (search step and six shifts); `tls_swerv`, `tls_ariane136` running.
 
 ---
 

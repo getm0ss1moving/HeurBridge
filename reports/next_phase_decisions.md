@@ -197,6 +197,9 @@ Re-testing: D10.
   baseline, which leaves the macro placer as it is (probes: 5 of 5 layouts complete, two with large setup violations);
   (a') PLACE_DENSITY 0.35 for global placement only, the tool's macro placer at its default target utilization (the
   baseline run in two parts; a flow modification); (c) drop. **Recommendation: (b)**, then (c) if its baseline fails.
+- **Decided 5 Oct (owner): (b).** Running since 00:44: `seedB_orfs9_ariane133` on 224 (`GLOBAL_PLACEMENT_ARGS=
+  -keep_resize_below_overflow 0.01` for every run including the baseline, RTLMP_MAX_LEVEL 1, `--workers 4`); the
+  failed (a) campaign's record: local run files `runs/remote/seedB_orfs8_ariane133/`. If its baseline fails: (c).
 
 ## D3 T3.9: the cell bridge's endpoint
 
@@ -274,7 +277,7 @@ Re-testing: D10.
 
 ## D8 Housekeeping (owner's actions; nothing was deleted)
 
-- **Staged for deletion** (moved there on 29 Sep: HANDOFF.md:585-586; sizes measured 2 Oct):
+- **Staged for deletion** (moved there on 29 Sep: HANDOFF.md:588-589; sizes measured 2 Oct):
   `/data/dzy/heura_repr/_to_delete_20260929/` on 224, 68 GB (its /data at 93 % use); on 225, 31 GB (/data at 99 %);
   on 231, 7.1 GB (root at 99 %). The final `rm -rf` is yours.
 - **Faulty GPUs:** `nvidia-smi` fails on 224 ("Unable to determine the device handle for GPU 0000:02:00.0: Unknown
