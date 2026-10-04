@@ -4,7 +4,7 @@
 |---|---|
 | Report | trackB_threeway |
 | Pre-registration | reports/trackB_threeway_preregistration.md |
-| Status of the claim | per design below |
+| Status of the claim | **pre-registered confirmatory**: TW#1, TW#2 passed (TW#2 through the relative hold gate: see the notes); TW#3, TW#4 failed; overall at the end |
 
 ## bp_fe_top (TW#1)
 
@@ -140,3 +140,54 @@ Sources: runs/remote/tb_ariane136/runs/seed_orfs/ariane136/evals_tb.jsonl, runs/
   completed f1 in its campaign, 26 failing in detailed placement (local run file
   `runs/remote/seedB_orfs7_ariane136/runs/seed_orfs/ariane136/evals.jsonl`); its local-search layouts, moved step by step
   from a layout that worked, all completed (48 of 48).
+## swerv_wrapper (TW#4)
+
+Recorded 2026-10-04T15:49:56. **FAILED**: HeurBridge lower than DREAMPlace, exact one-sided rank-sum permutation p = 0.2273 against alpha_j = 0.003125.
+
+Reported, not tested: DREAMPlace lower than the tool (DREAMPlace gated, the tool before the gates): p = 1. Median J before the gates: HeurBridge 0.9266, DREAMPlace +inf, tool 0.9165.
+
+| replicate | arm | shift | J (HeurBridge, DREAMPlace: gated; tool: before gates) | J before gates | gates failed |
+|---|---|---|---|---|---|
+| swerv_wrapper.tb.cand.s1.f2 | HeurBridge | [2, 0] | +inf | 0.9143 | setup |
+| swerv_wrapper.tb.cand.s2.f2 | HeurBridge | [-2, 0] | +inf | 0.9258 | setup |
+| swerv_wrapper.tb.cand.s3.f2 | HeurBridge | [0, -1] | 0.8883 | 0.8883 | - |
+| swerv_wrapper.tb.cand.s4.f2 | HeurBridge | [0, 2] | +inf | +inf | flow |
+| swerv_wrapper.tb.cand.s5.f2 | HeurBridge | [1, 1] | +inf | 0.9273 | setup |
+| swerv_wrapper.tb.cand.s6.f2 | HeurBridge | [-1, -1] | 0.9314 | 0.9314 | - |
+| swerv_wrapper.ext_dp.tb.s1.f2 | DREAMPlace | [2, 0] | +inf | +inf | flow |
+| swerv_wrapper.ext_dp.tb.s2.f2 | DREAMPlace | [-2, 0] | +inf | 0.9418 | setup |
+| swerv_wrapper.ext_dp.tb.s3.f2 | DREAMPlace | [0, -1] | +inf | 0.9992 | setup |
+| swerv_wrapper.ext_dp.tb.s4.f2 | DREAMPlace | [0, 2] | +inf | +inf | flow |
+| swerv_wrapper.ext_dp.tb.s5.f2 | DREAMPlace | [1, 1] | +inf | 1.0024 | setup, hold |
+| swerv_wrapper.ext_dp.tb.s6.f2 | DREAMPlace | [-1, -1] | +inf | +inf | flow |
+| swerv_wrapper.tb.ref.s1.f2 | tool | [2, 0] | 0.9813 | 0.9813 | setup |
+| swerv_wrapper.tb.ref.s2.f2 | tool | [-2, 0] | 0.8503 | 0.8503 | - |
+| swerv_wrapper.tb.ref.s3.f2 | tool | [0, -1] | 0.8733 | 0.8733 | hold |
+| swerv_wrapper.tb.ref.s4.f2 | tool | [0, 2] | 0.9658 | 0.9658 | setup |
+| swerv_wrapper.tb.ref.s5.f2 | tool | [1, 1] | 0.9140 | 0.9140 | setup, hold |
+| swerv_wrapper.tb.ref.s6.f2 | tool | [-1, -1] | 0.9190 | 0.9190 | setup |
+
+DREAMPlace's selection: 12 layouts to f1 (3 completed), 3 to f2, 23.6 flow-run hours; the tool's own flow run: 1.51 h (the campaign's f2 baseline, median). Pick: layout 8 (target density, seed: (1.0, 0)), no f2 layout admitted under D6: the best f2 J before the gates; the replicates used layout [8] (consistent).
+
+Sources: runs/remote/tb_swerv_wrapper/runs/seed_orfs/swerv_wrapper/evals_tb.jsonl, runs/remote/tw_swerv/runs/seed_orfs/swerv_wrapper/evals_ext_dp.jsonl, runs/remote/seedB_orfs7_swerv_wrapper/runs/seed_orfs/swerv_wrapper/evals_f2.jsonl.
+
+
+## Overall (TW#1-TW#4; written 2026-10-04 15:52, after the four recorded results)
+
+| design | entry | p | recorded | median J before the gates: HeurBridge / DREAMPlace / tool | DREAMPlace runs that failed in the flow: f1, replicates |
+|---|---|---|---|---|---|
+| bp_fe_top | TW#1 | 0.00216 (stats/alpha_ledger.jsonl:47) | **passed** | 0.905 / 1.073 / 1.001 | 0 of 12, 0 of 6 |
+| bp_be_top | TW#2 | 0.00108 (stats/alpha_ledger.jsonl:49) | **passed** | 1.017 / 0.961 / 1.108 | 0 of 12, 1 of 6 |
+| ariane136 | TW#3 | 0.159 (stats/alpha_ledger.jsonl:50) | failed | 0.976 / 1.039 / 1.005 | 9 of 12, 1 of 6 |
+| swerv_wrapper | TW#4 | 0.227 (stats/alpha_ledger.jsonl:55) | failed | 0.927 / +inf (completed: 0.942-1.002) / 0.917 | 9 of 12, 3 of 6 |
+
+- **Recorded:** HeurBridge's layout beats DREAMPlace's under the registered rule on 2 of 4 designs (TW#1, TW#2).
+- **Read with the notes above:** only TW#1 is a better layout; TW#2's pass comes from the relative hold gate (before
+  the gates DREAMPlace's bp_be_top layout is the best of the three). Before the gates HeurBridge's median is the lowest
+  of the three on bp_fe_top and ariane136; on swerv_wrapper the tool's is, and half of DREAMPlace's replicates did not
+  complete the flow.
+- **DREAMPlace in the flow:** its layouts pass the flow on the two small designs and often fail it on the two large ones
+  (detailed placement failures and 7,200-s timeouts), as HeurBridge's own heuristic programs often do there; HeurBridge's
+  candidates come through because its search refines layouts that already pass the flow, scored by the flow itself.
+- **Next (decided 4 Oct):** HeurBridge's programs without the flow-scored search against DREAMPlace (D12 (c), campaign TP,
+  reports/trackB_programs_preregistration.md), gates under D11 (b).
