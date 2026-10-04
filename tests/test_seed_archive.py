@@ -123,3 +123,35 @@ def test_stored_rows_rescored_under_current_gate_rule(tmp_path):
     SA.Ledger(tmp_path / "old" / "evals.jsonl").add(old)
     r2 = SA._eval(ev, des, ref, base, "x", tmp_path, SA.Ledger(tmp_path / "old" / "evals.jsonl"), {})
     assert r2["J"] == r["J"] and r2["gates"]["setup"]["enforced"] is False
+
+
+def test_parallel_campaign_equals_sequential(tmp_path):
+    """workers > 1 (D2 re-run, 4 Oct): the same rows, J and archive as one at a time; a repeated layout is reused."""
+    des, ref = synth.make_design(seed=51, n_macros=8, n_cells=80, n_io=8)
+    cl = cluster_cells(des, n=8)
+    progs = [p for p in all_programs() if p["id"] in ("M6.v0", "M7.v0", "M3.v1")]
+    out = {}
+    for w in (1, 3):
+        ev = F0Eval()
+        base_rec = ev.evaluate(des, ref, "base", tmp_path)
+        baseline = cost.Baseline.from_records(des.id, [base_rec] * 3)
+        arch = Archive(tmp_path / ("arch%d" % w), min_fidelity=1)
+        cfg = SA.SeedConfig(seeds=2, top_f2=4, ls_steps=3, ls_neighbours=3, workers=w)
+        s = SA.seed_design(des, ref, progs, ev, None, arch, baseline, tmp_path / ("out%d" % w), cfg, cluster=cl,
+                           log=lambda x: None)
+        rows = SA.Ledger(tmp_path / ("out%d" % w) / des.id / "evals.jsonl").rows
+        out[w] = ({k: (r["status"], r.get("J"), bool(r.get("reused_from"))) for k, r in rows.items()}, s["archive_top"],
+                  ev.calls)
+    assert out[1][0] == out[3][0] and out[1][1] == out[3][1] and out[1][2] == out[3][2]
+
+
+def test_timing_ok_with_margin():
+    """D13 (b): with a margin both slacks must clear the gate threshold (reference - guard) by that much; no sign rule."""
+    row = {"gates": {"setup": {"status": "fail", "candidate": -0.01, "base": 0.005, "guard_ns": 0.02},
+                     "hold": {"status": "pass", "candidate": 0.06, "base": 0.015, "guard_ns": 0.02}}}
+    assert not SA.timing_ok(row)                            # the sign rule failed setup
+    assert SA.timing_ok(row, margin=0.0)                    # -0.01 >= 0.005 - 0.02: clears by 0.005
+    assert not SA.timing_ok(row, margin=0.03)               # but not by 0.03
+    row["gates"]["setup"]["candidate"] = 0.02
+    assert SA.timing_ok(row, margin=0.03)                   # 0.02 - (-0.015) = 0.035; hold clears by 0.065
+    assert not SA.timing_ok({"gates": {}}, margin=0.0)      # no slack recorded: not timing-safe

@@ -219,6 +219,10 @@ def main():
     ap.add_argument("--tw-frac", type=float, default=0.1, help="nets with more setup slack than this x period: 1")
     ap.add_argument("--ls-timing", action="store_true",
                     help="local search accepts only moves whose f1 setup and hold gates pass")
+    ap.add_argument("--ls-timing-margin", type=float, default=None,
+                    help="with --ls-timing: both f1 slacks must clear the gate threshold by this many ns (D13 b)")
+    ap.add_argument("--workers", type=int, default=1,
+                    help="f1 and f2 evaluations at a time (distinct layouts; <= 8 OpenROAD runs on 224 in all)")
     ap.add_argument("--make-var", action="append", default=[],
                     help="KEY=VALUE override of the design config for every run (recorded in meta.json)")
     ap.add_argument("--probe-runs", default="", help="--phase probe: f1 run ids of evals.jsonl (comma separated)")
@@ -356,15 +360,22 @@ def main():
     # its start, so J's spread over base, replay and shifts is the band a candidate's improvement must exceed.
     replays = [("M1replay", m1)] + [("M1replay.p%d" % k, shifted_m1(des, m1, dx, dy))
                                     for k, (dx, dy) in enumerate(((1, 0), (-1, 0), (0, 1))[:a.noise_replays], 1)]
+    ledgers = {led: Ledger(rdir / led) for led in ("evals.jsonl", "evals_f2.jsonl")}   # one per file: shared by threads
+    jobs = []
     for tag, lay_m in replays:
         if lay_m is None:
             print(json.dumps({"m1_replay": tag, "skipped": "the shift leaves the core in both directions"}), flush=True)
             continue
         for ev, base, led, work in ((ev1, base1, "evals.jsonl", "work"), (ev2, base2, "evals_f2.jsonl", "work_f2")):
-            row = _eval(ev, des, lay_m, base, "%s.%s.f%d" % (name, tag, ev.fidelity), rdir / work, Ledger(rdir / led),
-                        {"program": "M1_replay", "seed": 0 if tag == "M1replay" else int(tag[-1]), "stage": "M"})
-            print(json.dumps({"m1_replay": row["run_id"], "status": row.get("status"), "J": row.get("J"),
-                              "J_raw": row.get("J_raw"), "wall_s": row.get("wall_s")}), flush=True)
+            jobs.append((tag, lay_m, ev, base, led, work))
+
+    def replay_one(j):                                  # --workers at a time
+        tag, lay_m, ev, base, led, work = j
+        return _eval(ev, des, lay_m, base, "%s.%s.f%d" % (name, tag, ev.fidelity), rdir / work, ledgers[led],
+                     {"program": "M1_replay", "seed": 0 if tag == "M1replay" else int(tag[-1]), "stage": "M"})
+    for row in SA._map(replay_one, jobs, a.workers):
+        print(json.dumps({"m1_replay": row["run_id"], "status": row.get("status"), "J": row.get("J"),
+                          "J_raw": row.get("J_raw"), "wall_s": row.get("wall_s")}), flush=True)
 
     # 2d. cost_v3 (user decision 2026-09-29): the candidates' timing gates compare with the same-path replay band
     # (median over the replay and its shifts), not with the unmodified flow and its warm-started standard cells.
@@ -389,7 +400,8 @@ def main():
         np.save(cpath, cl)
         halo = 2 * max(d.halo)          # P_M spacing = 2 x the per-side platform halo (see run_seed_miniflow.py)
         s = SA.seed_design(camp, lay, progs, ev1, None, arch, base1, out, SA.SeedConfig(
-            seeds=a.seeds, top_f2=a.top, ls_steps=a.ls, halo=halo, ls_timing=a.ls_timing), cluster=cl,
+            seeds=a.seeds, top_f2=a.top, ls_steps=a.ls, halo=halo, ls_timing=a.ls_timing,
+            ls_timing_margin=a.ls_timing_margin, workers=a.workers), cluster=cl,
             log=lambda x: print(x, flush=True))
         print(json.dumps(s), flush=True)
     if a.phase == "warmstart":                          # 6. demo: the same layouts with a standard-cell warm start
@@ -542,12 +554,15 @@ def main():
         rows = [json.loads(l) for l in ev_path.read_text().splitlines()] if ev_path.exists() else []
         ledger = Ledger(cdir / "evals_f2.jsonl")
         done = 0
-        for r in select(rows, a.top, a.spread):
+        chosen = select(rows, a.top, a.spread)
+
+        def f2_one(r):                                  # --workers at a time; distinct layouts (select)
+            return _eval(ev2, des, _layout_from_row(des, lay, r), base2, r["run_id"][:-3] + ".f2", cdir / "work_f2",
+                         ledger, {"program": r.get("program"), "seed": r.get("seed"), "stage": "M", "f1_J": r["J"],
+                                  "f1_J_raw": r["J_raw"], "f1_run_id": r["run_id"]})
+        for r, row in zip(chosen, SA._map(f2_one, chosen, a.workers)):
             lay_r = _layout_from_row(des, lay, r)
             rid = r["run_id"][:-3] + ".f2"
-            row = _eval(ev2, des, lay_r, base2, rid, cdir / "work_f2", ledger,
-                        {"program": r.get("program"), "seed": r.get("seed"), "stage": "M", "f1_J": r["J"],
-                         "f1_J_raw": r["J_raw"], "f1_run_id": r["run_id"]})
             done += 1
             if row.get("status") == "ok" and math.isfinite(row["J"]):
                 arch.insert(Candidate(design_id=camp.id, stage="M", layout=lay_r, fidelity=2, J=row["J"],

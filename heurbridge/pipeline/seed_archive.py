@@ -38,6 +38,8 @@ class SeedConfig:
     cpu_s: float = 60.0
     seed: int = 0
     ls_timing: bool = False      # local search accepts only neighbours whose f1 setup and hold gates pass
+    ls_timing_margin: float | None = None   # with ls_timing: they must also clear the gate threshold by this (ns)
+    workers: int = 1             # evaluations at a time (distinct layouts; local-search neighbours of one step)
 
 
 class Ledger:
@@ -174,10 +176,28 @@ def _layout_from_row(design: Design, base: Layout, row: dict) -> Layout:
     return l
 
 
-def timing_ok(row: dict) -> bool:
-    """True unless the row's setup or hold gate failed (the status is reported at f1 even where not enforced)."""
+def timing_ok(row: dict, margin: float | None = None) -> bool:
+    """True unless the row's setup or hold gate failed (the status is reported at f1 even where not enforced).  With
+    ``margin`` (decision D13 (b)): True if both slacks clear the gate threshold (reference - guard) by at least that
+    many ns; the sign rule is not applied (as in decisions D6 and D11)."""
     g = row.get("gates") or {}
-    return all((g.get(k) or {}).get("status") != "fail" for k in ("setup", "hold"))
+    if margin is None:
+        return all((g.get(k) or {}).get("status") != "fail" for k in ("setup", "hold"))
+    for k in ("setup", "hold"):
+        x = g.get(k) or {}
+        c, b = x.get("candidate"), x.get("base")
+        if c is None or b is None or c - (b - x.get("guard_ns", cost.GUARD_NS)) < margin - 1e-12:
+            return False
+    return True
+
+
+def _map(fn, jobs: list, workers: int) -> list:
+    """fn over jobs, in order; ``workers`` at a time (evaluations are independent and the ledger is locked)."""
+    if workers <= 1 or len(jobs) <= 1:
+        return [fn(j) for j in jobs]
+    from concurrent.futures import ThreadPoolExecutor
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        return list(pool.map(fn, jobs))
 
 
 def neighbours(design: Design, layout: Layout, rng: np.random.Generator, n: int) -> list:
@@ -220,7 +240,7 @@ def seed_design(design: Design, base_layout: Layout, programs: list, f1: Evaluat
     ledger = Ledger(out / "evals.jsonl")
     scope = design.is_macro & ~design.is_fixed
     view = SB.make_view(design, base_layout, cluster, halo=cfg.halo)
-    rows = []
+    rows, pending = [], []
     for prog in programs:
         for s in range(cfg.seeds):
             rid = "%s.%s.s%d.f1" % (design.id, prog["id"], s)
@@ -249,7 +269,17 @@ def seed_design(design: Design, base_layout: Layout, programs: list, f1: Evaluat
                 rows.append(row)
                 continue
             extra["pm_disp"] = rep.mean_disp
-            rows.append(_eval(f1, design, lay_p, baseline, rid, work, ledger, extra))
+            pending.append((rid, lay_p, extra))
+    # the evaluations: distinct layouts first, ``workers`` at a time; a layout repeated by a seed-independent program
+    # afterwards, so that it is reused from the ledger as before (_eval) instead of evaluated twice at once
+    mm = design.is_macro & ~design.is_fixed
+    first, later, seen = [], [], set()
+    for job in pending:
+        k = layout_key({"pos_macros": job[1].pos[mm].tolist(), "orient_macros": job[1].orient[mm].tolist()})
+        (later if k in seen else first).append(job)
+        seen.add(k)
+    run = lambda job: _eval(f1, design, job[1], baseline, job[0], work, ledger, job[2])
+    rows += _map(run, first, cfg.workers) + [run(j) for j in later]
     ok = sorted([r for r in rows if r.get("status") == "ok" and math.isfinite(r["J"])], key=lambda r: r["J"])
     uniq = distinct(ok)
     log(json.dumps({"design": design.id, "f1_ok": len(ok), "f1_distinct_layouts": len(uniq), "f1_total": len(rows),
@@ -269,20 +299,21 @@ def seed_design(design: Design, base_layout: Layout, programs: list, f1: Evaluat
     # local search from the best verified layout
     rng = np.random.default_rng(cfg.seed)
     if verified:
-        pool = [t for t in verified if timing_ok(t[0])] if cfg.ls_timing else []
+        pool = [t for t in verified if timing_ok(t[0], cfg.ls_timing_margin)] if cfg.ls_timing else []
         best_row, best_lay = min(pool or verified, key=lambda t: t[0]["J"])     # timing-clean start if any
         cur_J = best_row["J"]
         for step in range(cfg.ls_steps):
-            cands = []
+            jobs = []
             for n, (move, l) in enumerate(neighbours(design, best_lay, rng, cfg.ls_neighbours)):
                 lp, rep = project.legalize_macros(design, l, halo=cfg.halo)
                 if not rep.ok:
                     continue
-                rid = "%s.ls%d.n%d.f1" % (design.id, step, n)
-                row = _eval(f1, design, lp, baseline, rid, work, ledger, {"program": "LS", "move": move, "stage": "M"})
-                cands.append((row["J"], row, lp))
+                jobs.append(("%s.ls%d.n%d.f1" % (design.id, step, n), lp, move))
+            evals = _map(lambda j: _eval(f1, design, j[1], baseline, j[0], work, ledger,
+                                         {"program": "LS", "move": j[2], "stage": "M"}), jobs, cfg.workers)
+            cands = [(row["J"], row, j[1]) for j, row in zip(jobs, evals)]
             if cfg.ls_timing:                       # a move that breaks f1 timing is not taken, however low its J
-                cands = [c for c in cands if timing_ok(c[1])]
+                cands = [c for c in cands if timing_ok(c[1], cfg.ls_timing_margin)]
             if not cands:
                 continue
             j, row, lp = min(cands, key=lambda t: t[0])
