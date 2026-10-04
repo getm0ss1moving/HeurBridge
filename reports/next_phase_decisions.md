@@ -308,3 +308,22 @@ Re-testing: D10.
   flow-scored search.
 - **Recommendation:** decide after the TW results; (c) is cheap and answers the narrower question of whether the
   programs alone beat DREAMPlace through the flow.
+
+## D13 Passing the timing gates more often (new, 4 Oct; the owner's question)
+
+- **Evidence:** the gates decided most Track-B results: TB#3 (hold) and TB#4 (setup) failed on them; DREAMPlace failed
+  setup on bp_fe_top (genuinely worse timing) and the relative hold gate on bp_be_top with positive slack; on ariane136
+  both arms lost replicates to gates with near-zero or positive slack (reports/trackB_confirmatory.md,
+  reports/trackB_threeway.md). D11 (b) removes the reference mismatch for future tests. What a margin costs in J,
+  measured on existing f2 rows (reports/timing_margin_explore.md, exploratory): about nothing on bp_fe_top and ariane136
+  (+0.0005 J for 0.05 ns), +0.010 J for 0.03 ns on swerv_wrapper, +0.038 J for only 0.01 ns on bp_be_top.
+- **Options:** (a) margin-aware selection in future tests: each arm's pick (HeurBridge's and DREAMPlace's alike) is the
+  lowest-J layout whose setup and hold exceed the selection-time reference by at least 0.03 ns, else the layout with the
+  largest margin within +0.01 J of the best; no new runs; (b) timing-aware search: re-run HeurBridge's local search with
+  the existing `--ls-timing` (a move is kept only if its f1 setup and hold gates pass, here with a margin) and optional
+  critical-net weights (`--timing-weights`), to make layouts with real margin where it is scarce (swerv_wrapper,
+  bp_be_top); about 50 f1 and 8 f2 runs per design, about a day per large design on 224; exploratory first;
+  (c) DREAMPlace's own timing-driven mode needs LEF/DEF and liberty input instead of the bookshelf path used now: a
+  larger setup.
+- **Recommendation:** (a) for every new test (cheap, the same rule for every arm); (b) as an exploratory demo on
+  swerv_wrapper and ariane136 when 224 is free; (c) only if a fully fair DREAMPlace arm matters for a claim.
