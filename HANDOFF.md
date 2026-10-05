@@ -26,6 +26,10 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
   from setup TNS (-0.7 to -53.6 ns; wirelength, vias and power nearly equal): ariane133's f2 J is dominated by timing
   noise under virtual resizing. `tls_ariane136`: no move kept in 8 steps (its start already clears both margins), so
   its six shifts re-run TB#3's candidate (a determinism check); `tls_swerv`: one move kept (step 1), step 5 running.
+- **`tls_ariane136` done (5 Oct 10:30):** no move kept in 8 steps; its six shift runs are identical to TB#3's candidate
+  replicates (J and setup/hold slack, 6 of 6; local run files `runs/remote/tls_ariane136/.../evals_tls_f2.jsonl`,
+  `runs/remote/tb_ariane136/.../evals_tb.jsonl`): the flow is deterministic across jobs and days. On ariane136 the
+  timing-aware search leaves the candidate as it is (it passes the D11 (b) gates on all six shifts).
 
 ---
 
