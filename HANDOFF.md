@@ -4,11 +4,25 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
-## 2026-10-06 — Cell-placement chat: C1 prepared (fixed before any run); the C0 smoke still waits for 224
+## 2026-10-06 — Cell-placement chat: C1 prepared (fixed before any run); C0 smoke done; C1 stage 1 running
 
-- **224:** the macro chat's jobs still reserve all 8 slots. It agreed (6 Oct 01:20) that `dpls_a`'s 2 slots go to the C0
-  smoke when `dpls_a` ends (its estimate: 04:00-04:30), and that its next jobs (`dpls_c`, the TB#5 test) start only
-  when its reserved slots are 2 or fewer. Nothing of this chat has run on 224 yet.
+- **224:** the macro chat agreed (6 Oct 01:20) that `dpls_a`'s 2 slots go to this chat, and that its next jobs (`dpls_c`,
+  the TB#5 test) start only when its reserved slots are 2 or fewer. Its notice at 03:34: `dpls_a` ended, its jobs reserve
+  6 (`seedB_orfs9_ariane133` x4, `dpls_b` x2), so this chat has 2, and 4 once `dpls_b` ends (about 14:00).
+- **C0 smoke done** (`cs_c0smoke_bp_fe_top`, 03:35-03:47, bp_fe_top.ls0.n4.f2 at f1, 2 at a time; local run file
+  `runs/remote/cs_c0smoke_bp_fe_top/runs/seed_orfs/bp_fe_top/evals_cs_c0smoke.jsonl`, lines 1-5):
+  - default: J 0.9000776798887087 and all 15 numeric metrics equal to the campaign's f1 row of the layout, so the hook
+    leaves the flow unchanged.
+  - caps_routes: HB_DENSITY_CAPS in the 2_3 log, HB_ROUTE_ADJUST in the 3_3 and 5_1 logs; completes.
+  - hbgp_keep: HB-GP's 33,279 cells do not move in 3_1 or 3_3 (at most 0.0003 um, database rounding). Detailed
+    placement moves 78 % of them (median 1.4 um).
+  - quad_continue: completes.
+  - dp_keep failed by name before the flow (no start file): C0's DREAMPlace job had placed only the six shifted layouts.
+    C1's start files include this layout under the key the server computed. C1's R9 runs the same path and carries
+    the drift check.
+- **C1 stage 1 running:** `cs_c1_bp_fe_top` since 03:48 (24 runs, 2 at a time; scratchpad
+  `c1/launch_c1_stage1.sh <design> <macro reservation>`). bp_be_top follows. ariane136 and swerv_wrapper start once 4
+  slots are free.
 - **C1 prepared (exploratory, no claims):** `reports/cell_stage_c1.md` fixes the eight layouts (the tool's M1 and
   HeurBridge's Track-B candidate of bp_fe_top, bp_be_top, ariane136 and swerv_wrapper; ariane133's two later), 12
   recipes per design (`configs/cellstage/c1_<design>.json`), the two stages and the go rule (`select.go_rule`, in code
@@ -21,10 +35,9 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
   shifts at each design's own density, but did not converge on bp_fe_top or bp_be_top. `cs_c1_dpladder` tried 0.4-0.8
   on their unshifted layouts: they converge from 0.7 and 0.6. `cs_c1_dpcells2` makes the 56 starts C1 uses (0.7,
   0.6, 0.35, 0.46).
-- **Next:** on the macro chat's notice, the scratchpad's `launch_cs_smoke.sh 6` (the C0 smoke, 2 runs at a time, checks
-  as in the entry below). If it passes, C1 stage 1 (f1) with the slots left: 2 until `dpls_b` ends (about 14:00), then
-  4. Before stage 2: one identity run (`--slots 1`); then `--default-rows` takes the default recipe's f2 rows from the
-  Track-B test ledgers.
+- **Next:** stage 1 for the other designs as slots allow. Check R9's drift and R7's prediction on bp_fe_top's rows. Before
+  stage 2: one identity run (`--slots 1`); then `--default-rows` takes the default recipe's f2 rows from the Track-B
+  test ledgers.
 
 ---
 

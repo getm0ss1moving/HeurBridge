@@ -12,8 +12,8 @@
 ## 1 The record
 
 0 of 80 heuristic layouts evaluable at f1. Failures by name: DPL-0036 37, timeout in 3_5_place_dp 25, no parsed
-reason 14, GPL-0307 5, PDN-0179 1 (HANDOFF.md:497). The tool's own layout through the candidates' path (the M1
-replay) completes f1 with J 0.948, but its f2 fails a gate and its one-site-shift replays fail (HANDOFF.md:497-499).
+reason 14, GPL-0307 5, PDN-0179 1 (HANDOFF.md:510). The tool's own layout through the candidates' path (the M1
+replay) completes f1 with J 0.948, but its f2 fails a gate and its one-site-shift replays fail (HANDOFF.md:510-512).
 
 ## 2 What the logs show (scripts/diag_trackb_failures.py, all f1 variants of both campaigns)
 
