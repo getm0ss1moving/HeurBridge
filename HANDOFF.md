@@ -36,6 +36,8 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
   `dpls_a` (bp_fe_top then bp_be_top) since 14:37; `dpls_b` (ariane136) when `tls_swerv` frees its slots; `dpls_c`
   (swerv_wrapper) after `dpls_a` (the scratchpad's `launch_dpls.sh a|b|c`). After each: fetch,
   `python scripts/equal_budget_confirm.py analyze --design <d>` once.
+- **D13 (b) trial done (17:00):** `reports/timing_aware_search_trial.md`: ariane136 unchanged; swerv_wrapper lower J
+  (0.901 vs 0.927) but not safer at signoff (6 vs 9 of 12 checks). `dpls_b` (ariane136) launched 16:55.
 
 ---
 

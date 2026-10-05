@@ -144,6 +144,7 @@ threshold, ns.
 | tool | 6 | 1.0050 | 12 of 12 | SH SH SH SH SH SH | 0.020 | - (reference) |
 | HeurBridge (programs) | 6 | 1.0276 | 8 of 12 | SH -H -- SH -H SH | -0.056 | 1.0409 |
 | DREAMPlace | 6 | 1.0388 | 7 of 12 | SH -H -H SH xx -H | -inf | 1.0555 |
+| HeurBridge (timing-aware search, D13 b) | 6 | 0.9761 | 12 of 12 | SH SH SH SH SH SH | 0.017 | 0.9761 |
 
 ## swerv_wrapper
 
@@ -186,5 +187,6 @@ threshold, ns.
 | tool | 6 | 0.9165 | 12 of 12 | SH SH SH SH SH SH | 0.020 | - (reference) |
 | HeurBridge (programs) | 6 | 1.0289 | 5 of 12 | SH -- -H xx S- -H | -inf | 1.0522 |
 | DREAMPlace | 6 | +inf | 2 of 12 | xx -H -H xx -- xx | -inf | +inf |
+| HeurBridge (timing-aware search, D13 b) | 6 | 0.9014 | 6 of 12 | xx -H -H xx SH SH | -inf | 0.9214 |
 
 Sources: local run files `runs/remote/seedB_orfs7_<design>/runs/seed_orfs/<design>/evals_f2.jsonl` and `baseline_f2.json`, `runs/remote/seedB_band_<design>/.../evals_f2.jsonl` (bands), `runs/remote/tb_<design>/.../evals_tb.jsonl`, `runs/remote/tw_*/.../evals_ext_dp.jsonl`, `runs/remote/tp_*/.../evals_tb_pg.jsonl`, `runs/remote/tls_*/.../evals_tls_f2.jsonl` (when present).

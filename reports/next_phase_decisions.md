@@ -277,7 +277,7 @@ Re-testing: D10.
 
 ## D8 Housekeeping (owner's actions; nothing was deleted)
 
-- **Staged for deletion** (moved there on 29 Sep: HANDOFF.md:603-604; sizes measured 2 Oct):
+- **Staged for deletion** (moved there on 29 Sep: HANDOFF.md:605-606; sizes measured 2 Oct):
   `/data/dzy/heura_repr/_to_delete_20260929/` on 224, 68 GB (its /data at 93 % use); on 225, 31 GB (/data at 99 %);
   on 231, 7.1 GB (root at 99 %). The final `rm -rf` is yours.
 - **Faulty GPUs:** `nvidia-smi` fails on 224 ("Unable to determine the device handle for GPU 0000:02:00.0: Unknown
@@ -356,3 +356,7 @@ Re-testing: D10.
   reports/trackB_timing_safety.md). (b): `run_seed_orfs.py --phase tls` (moves kept only if they lower J plus 0.04 x
   the share of f1 checks missing a 0.03-ns margin), exploratory, on swerv_wrapper and ariane136 from their TB candidates,
   the final layouts at the Track-B test's six shifts.
+- **Outcome of (b) (5 Oct, exploratory; reports/timing_aware_search_trial.md):** on ariane136 no move was kept (the
+  candidate was already timing-safe; its re-run reproduced the Track-B replicates exactly); on swerv_wrapper the search
+  found a lower-J layout (median 0.901 against 0.927 at the six shifts) that is not safer at signoff (6 of 12 timing
+  checks against 9 of 12; two detailed-placement timeouts). A margin at f1 did not carry over to f2.
