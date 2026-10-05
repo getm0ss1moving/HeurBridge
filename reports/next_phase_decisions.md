@@ -277,7 +277,7 @@ Re-testing: D10.
 
 ## D8 Housekeeping (owner's actions; nothing was deleted)
 
-- **Staged for deletion** (moved there on 29 Sep: HANDOFF.md:672-673; sizes measured 2 Oct):
+- **Staged for deletion** (moved there on 29 Sep: HANDOFF.md:683-684; sizes measured 2 Oct):
   `/data/dzy/heura_repr/_to_delete_20260929/` on 224, 68 GB (its /data at 93 % use); on 225, 31 GB (/data at 99 %);
   on 231, 7.1 GB (root at 99 %). The final `rm -rf` is yours.
 - **Faulty GPUs:** `nvidia-smi` fails on 224 ("Unable to determine the device handle for GPU 0000:02:00.0: Unknown
@@ -329,6 +329,10 @@ Re-testing: D10.
 - **Decided 5 Oct (owner): (b) as well**, registered as reports/trackB_equal_budget_preregistration.md (campaign EB):
   DREAMPlace's pick plus HeurBridge's campaign local search, each arm's layout by one-position J_safe (D13 (a)), gates
   under D11 (b), against HeurBridge's candidate.
+- **Outcome so far (6 Oct 03:35; reports/trackB_equal_budget.md):** EB#1 bp_fe_top failed (p = 0.128; HeurBridge lower
+  before the gates, 0.905 vs 0.943, one hold failure per arm); EB#2 bp_be_top failed (p = 0.79; DREAMPlace + local
+  search lower before the gates, 0.956 vs 1.017, but two of its six shifts fail). EB#3 (ariane136) and EB#4
+  (swerv_wrapper) pending.
 
 ## D13 Passing the timing gates more often (new, 4 Oct; the owner's question)
 

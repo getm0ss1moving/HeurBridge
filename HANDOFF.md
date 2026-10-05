@@ -105,6 +105,17 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
   DREAMPlace + local search 0.943; each arm fails hold on one shift. Reported only: the search lifts DREAMPlace's pick
   from 0 to 5 of 6 shifts inside the gates (p = 0.0076 against DREAMPlace alone). At 01:08 `dpls_a` was at bp_be_top
   step 6 of 8 (no move kept), `dpls_b` at ariane136 step 3, `seedB_orfs9_ariane133` in local search (step 2).
+- **`dpls_a` done (6 Oct 03:30, rc 0); EB#2 (bp_be_top) recorded 03:35: failed** (`reports/trackB_equal_budget.md`;
+  p = 0.79 against alpha_j 0.0125). One move kept (step 6, f1 J 0.832); the pick `bp_be_top.dpls.s6.f2` (J 0.870 at the
+  unshifted check, inside both gates). At the six shifts DREAMPlace + local search is lower before the gates (median
+  0.956 against HeurBridge's 1.017) but loses two shifts: the flow fails at (-2, 0) (PDN-0179, unable to repair all
+  channels; DREAMPlace's own pick fails there too) and hold fails at (0, +2); HeurBridge's candidate passes every gate
+  on all six. Reported only: against DREAMPlace alone (one shift inside the gates) p = 0.053.
+- **224 slot split (CS-D2 (a), relayed by the cell-placement chat; replaces "`dpls_c` when `dpls_a` finishes" above):**
+  macro jobs at most 4 of the 8 OpenROAD slots once running jobs allow. After `dpls_a` the macro jobs reserve 6
+  (`seedB_orfs9_ariane133` 4, `dpls_b` 2); `dpls_a`'s 2 slots went to the cell chat's C0 smoke (notice sent 03:35). No
+  new macro job until the reserved count is 2 or fewer: `dpls_c` and the TB#5 test start together, within 4 slots,
+  after `seedB_orfs9_ariane133` ends (estimate 7 Oct 01:00); `dpls_b` about 14:00 today.
 
 ---
 
