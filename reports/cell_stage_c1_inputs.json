@@ -1,0 +1,628 @@
+{
+ "made_by": "scripts/cell_stage_inputs.py",
+ "designs": {
+  "bp_fe_top": {
+   "campaign": "runs/remote/seedB_orfs7_bp_fe_top/runs/seed_orfs/bp_fe_top",
+   "density": {
+    "density": 0.3099,
+    "addon": 0.1,
+    "lower_bound": 0.2222,
+    "uniform_density": 0.2222,
+    "log": "runs/remote/seedB_orfs7_bp_fe_top/runs/orfs_work/logs/nangate45/bp_fe/base/3_3_place_gp.log"
+   },
+   "routability": {
+    "logs": 116,
+    "ends": {
+     "target_reached": 0,
+     "without_improvement": 116,
+     "no_loop": 0
+    },
+    "lowest_final_rc": {
+     "without_improvement": [
+      1.027,
+      1.237
+     ]
+    }
+   },
+   "wall_s": {
+    "f1": {
+     "runs": 90,
+     "reused": 39,
+     "median": 316,
+     "max": 7201
+    },
+    "f2": {
+     "runs": 24,
+     "reused": 0,
+     "median": 576,
+     "max": 1158
+    }
+   },
+   "channels": {
+    "M1": {
+     "macros": 11,
+     "free_area_um2": 289882,
+     "orfs_band_share": 0.193,
+     "gap_30": {
+      "rects": 19,
+      "share": 0.139,
+      "share_beyond_band": 0.012
+     },
+     "gap_40": {
+      "rects": 19,
+      "share": 0.139,
+      "share_beyond_band": 0.012
+     },
+     "gap_50": {
+      "rects": 21,
+      "share": 0.187,
+      "share_beyond_band": 0.05
+     },
+     "gap_60": {
+      "rects": 21,
+      "share": 0.187,
+      "share_beyond_band": 0.05
+     },
+     "gap_80": {
+      "rects": 21,
+      "share": 0.187,
+      "share_beyond_band": 0.05
+     }
+    },
+    "bp_fe_top.ls0.n4.f2": {
+     "macros": 11,
+     "free_area_um2": 289882,
+     "orfs_band_share": 0.194,
+     "gap_30": {
+      "rects": 14,
+      "share": 0.081,
+      "share_beyond_band": 0.025
+     },
+     "gap_40": {
+      "rects": 14,
+      "share": 0.081,
+      "share_beyond_band": 0.025
+     },
+     "gap_50": {
+      "rects": 15,
+      "share": 0.083,
+      "share_beyond_band": 0.026
+     },
+     "gap_60": {
+      "rects": 17,
+      "share": 0.135,
+      "share_beyond_band": 0.059
+     },
+     "gap_80": {
+      "rects": 22,
+      "share": 0.231,
+      "share_beyond_band": 0.13
+     }
+    }
+   }
+  },
+  "bp_be_top": {
+   "campaign": "runs/remote/seedB_orfs7_bp_be_top/runs/seed_orfs/bp_be_top",
+   "density": {
+    "density": 0.3596,
+    "addon": 0.1,
+    "lower_bound": 0.2774,
+    "uniform_density": 0.2774,
+    "log": "runs/remote/seedB_orfs7_bp_be_top/runs/orfs_work/logs/nangate45/bp_be/base/3_3_place_gp.log"
+   },
+   "routability": {
+    "logs": 117,
+    "ends": {
+     "target_reached": 0,
+     "without_improvement": 117,
+     "no_loop": 0
+    },
+    "lowest_final_rc": {
+     "without_improvement": [
+      1.075,
+      1.254
+     ]
+    }
+   },
+   "wall_s": {
+    "f1": {
+     "runs": 90,
+     "reused": 39,
+     "median": 858,
+     "max": 4949
+    },
+    "f2": {
+     "runs": 24,
+     "reused": 0,
+     "median": 1324,
+     "max": 2083
+    }
+   },
+   "channels": {
+    "M1": {
+     "macros": 10,
+     "free_area_um2": 384420,
+     "orfs_band_share": 0.132,
+     "gap_30": {
+      "rects": 15,
+      "share": 0.09,
+      "share_beyond_band": 0.004
+     },
+     "gap_40": {
+      "rects": 15,
+      "share": 0.09,
+      "share_beyond_band": 0.004
+     },
+     "gap_50": {
+      "rects": 15,
+      "share": 0.09,
+      "share_beyond_band": 0.004
+     },
+     "gap_60": {
+      "rects": 15,
+      "share": 0.09,
+      "share_beyond_band": 0.004
+     },
+     "gap_80": {
+      "rects": 15,
+      "share": 0.09,
+      "share_beyond_band": 0.004
+     }
+    },
+    "bp_be_top.ls7.n1.f2": {
+     "macros": 10,
+     "free_area_um2": 384420,
+     "orfs_band_share": 0.132,
+     "gap_30": {
+      "rects": 17,
+      "share": 0.06,
+      "share_beyond_band": 0.007
+     },
+     "gap_40": {
+      "rects": 18,
+      "share": 0.061,
+      "share_beyond_band": 0.007
+     },
+     "gap_50": {
+      "rects": 18,
+      "share": 0.061,
+      "share_beyond_band": 0.007
+     },
+     "gap_60": {
+      "rects": 19,
+      "share": 0.063,
+      "share_beyond_band": 0.009
+     },
+     "gap_80": {
+      "rects": 19,
+      "share": 0.063,
+      "share_beyond_band": 0.009
+     }
+    }
+   }
+  },
+  "ariane136": {
+   "campaign": "runs/remote/seedB_orfs7_ariane136/runs/seed_orfs/ariane136",
+   "density": {
+    "density": 0.35,
+    "addon": null,
+    "uniform_density": 0.2529,
+    "log": "runs/remote/seedB_orfs7_ariane136/runs/orfs_work/logs/nangate45/ariane136/base/3_3_place_gp.log"
+   },
+   "routability": {
+    "logs": 109,
+    "ends": {
+     "target_reached": 84,
+     "without_improvement": 25,
+     "no_loop": 0
+    },
+    "lowest_final_rc": {
+     "target_reached": [
+      1.0,
+      1.01
+     ],
+     "without_improvement": [
+      1.014,
+      1.182
+     ]
+    }
+   },
+   "wall_s": {
+    "f1": {
+     "runs": 83,
+     "reused": 49,
+     "median": 1885,
+     "max": 7201
+    },
+    "f2": {
+     "runs": 24,
+     "reused": 0,
+     "median": 3419,
+     "max": 3727
+    }
+   },
+   "channels": {
+    "M1": {
+     "macros": 136,
+     "free_area_um2": 1634332,
+     "orfs_band_share": 0.23,
+     "gap_30": {
+      "rects": 250,
+      "share": 0.164,
+      "share_beyond_band": 0.001
+     },
+     "gap_40": {
+      "rects": 252,
+      "share": 0.165,
+      "share_beyond_band": 0.002
+     },
+     "gap_50": {
+      "rects": 256,
+      "share": 0.174,
+      "share_beyond_band": 0.007
+     },
+     "gap_60": {
+      "rects": 256,
+      "share": 0.174,
+      "share_beyond_band": 0.007
+     },
+     "gap_80": {
+      "rects": 256,
+      "share": 0.174,
+      "share_beyond_band": 0.007
+     }
+    },
+    "ariane136.ls7.n3.f2": {
+     "macros": 136,
+     "free_area_um2": 1634332,
+     "orfs_band_share": 0.23,
+     "gap_30": {
+      "rects": 167,
+      "share": 0.17,
+      "share_beyond_band": 0.044
+     },
+     "gap_40": {
+      "rects": 262,
+      "share": 0.251,
+      "share_beyond_band": 0.078
+     },
+     "gap_50": {
+      "rects": 264,
+      "share": 0.253,
+      "share_beyond_band": 0.079
+     },
+     "gap_60": {
+      "rects": 265,
+      "share": 0.255,
+      "share_beyond_band": 0.081
+     },
+     "gap_80": {
+      "rects": 266,
+      "share": 0.259,
+      "share_beyond_band": 0.083
+     }
+    }
+   }
+  },
+  "swerv_wrapper": {
+   "campaign": "runs/remote/seedB_orfs7_swerv_wrapper/runs/seed_orfs/swerv_wrapper",
+   "density": {
+    "density": 0.4563,
+    "addon": 0.1,
+    "lower_bound": 0.3847,
+    "uniform_density": 0.3847,
+    "log": "runs/remote/seedB_orfs7_swerv_wrapper/runs/orfs_work/logs/nangate45/swerv_wrapper/base/3_3_place_gp.log"
+   },
+   "routability": {
+    "logs": 117,
+    "ends": {
+     "target_reached": 10,
+     "without_improvement": 107,
+     "no_loop": 0
+    },
+    "lowest_final_rc": {
+     "target_reached": [
+      1.004,
+      1.009
+     ],
+     "without_improvement": [
+      1.024,
+      1.316
+     ]
+    }
+   },
+   "wall_s": {
+    "f1": {
+     "runs": 94,
+     "reused": 38,
+     "median": 2677,
+     "max": 7201
+    },
+    "f2": {
+     "runs": 24,
+     "reused": 0,
+     "median": 4011,
+     "max": 5005
+    }
+   },
+   "channels": {
+    "M1": {
+     "macros": 28,
+     "free_area_um2": 585418,
+     "orfs_band_share": 0.236,
+     "gap_30": {
+      "rects": 58,
+      "share": 0.194,
+      "share_beyond_band": 0.008
+     },
+     "gap_40": {
+      "rects": 58,
+      "share": 0.194,
+      "share_beyond_band": 0.008
+     },
+     "gap_50": {
+      "rects": 58,
+      "share": 0.194,
+      "share_beyond_band": 0.008
+     },
+     "gap_60": {
+      "rects": 58,
+      "share": 0.194,
+      "share_beyond_band": 0.008
+     },
+     "gap_80": {
+      "rects": 58,
+      "share": 0.194,
+      "share_beyond_band": 0.008
+     }
+    },
+    "swerv_wrapper.ls5.n4.f2": {
+     "macros": 28,
+     "free_area_um2": 585418,
+     "orfs_band_share": 0.236,
+     "gap_30": {
+      "rects": 42,
+      "share": 0.119,
+      "share_beyond_band": 0.03
+     },
+     "gap_40": {
+      "rects": 50,
+      "share": 0.169,
+      "share_beyond_band": 0.051
+     },
+     "gap_50": {
+      "rects": 54,
+      "share": 0.191,
+      "share_beyond_band": 0.063
+     },
+     "gap_60": {
+      "rects": 59,
+      "share": 0.254,
+      "share_beyond_band": 0.103
+     },
+     "gap_80": {
+      "rects": 61,
+      "share": 0.272,
+      "share_beyond_band": 0.116
+     }
+    }
+   }
+  }
+ },
+ "dreamplace": {
+  "runs/remote/cs_c1_dpcells": {
+   "ariane136 0.35": {
+    "runs": 14,
+    "ok": 14,
+    "logs": 14,
+    "converged": 14,
+    "diverged": 0,
+    "iterations": [
+     569,
+     607
+    ],
+    "overflow": [
+     0.0691,
+     0.07
+    ]
+   },
+   "bp_be_top 0.36": {
+    "runs": 14,
+    "ok": 14,
+    "logs": 14,
+    "converged": 0,
+    "diverged": 14,
+    "iterations": [
+     859,
+     891
+    ],
+    "overflow": [
+     0.1524,
+     0.1559
+    ]
+   },
+   "bp_fe_top 0.31": {
+    "runs": 14,
+    "ok": 14,
+    "logs": 14,
+    "converged": 0,
+    "diverged": 0,
+    "iterations": [
+     999,
+     999
+    ],
+    "overflow": [
+     0.2152,
+     0.2168
+    ]
+   },
+   "swerv_wrapper 0.46": {
+    "runs": 14,
+    "ok": 14,
+    "logs": 14,
+    "converged": 14,
+    "diverged": 0,
+    "iterations": [
+     511,
+     535
+    ],
+    "overflow": [
+     0.0688,
+     0.0699
+    ]
+   }
+  },
+  "runs/remote/cs_c1_dpladder": {
+   "bp_be_top_d0.4 0.4": {
+    "runs": 2,
+    "ok": 2,
+    "logs": 2,
+    "converged": 0,
+    "diverged": 2,
+    "iterations": [
+     783,
+     798
+    ],
+    "overflow": [
+     0.1329,
+     0.1339
+    ]
+   },
+   "bp_be_top_d0.5 0.5": {
+    "runs": 2,
+    "ok": 2,
+    "logs": 2,
+    "converged": 0,
+    "diverged": 2,
+    "iterations": [
+     717,
+     779
+    ],
+    "overflow": [
+     0.0873,
+     0.0916
+    ]
+   },
+   "bp_be_top_d0.6 0.6": {
+    "runs": 2,
+    "ok": 2,
+    "logs": 2,
+    "converged": 2,
+    "diverged": 0,
+    "iterations": [
+     584,
+     819
+    ],
+    "overflow": [
+     0.0697,
+     0.07
+    ]
+   },
+   "bp_be_top_d0.7 0.7": {
+    "runs": 2,
+    "ok": 2,
+    "logs": 2,
+    "converged": 2,
+    "diverged": 0,
+    "iterations": [
+     555,
+     577
+    ],
+    "overflow": [
+     0.0696,
+     0.0698
+    ]
+   },
+   "bp_be_top_d0.8 0.8": {
+    "runs": 2,
+    "ok": 2,
+    "logs": 2,
+    "converged": 2,
+    "diverged": 0,
+    "iterations": [
+     548,
+     571
+    ],
+    "overflow": [
+     0.0693,
+     0.0695
+    ]
+   },
+   "bp_fe_top_d0.4 0.4": {
+    "runs": 2,
+    "ok": 2,
+    "logs": 2,
+    "converged": 0,
+    "diverged": 2,
+    "iterations": [
+     867,
+     871
+    ],
+    "overflow": [
+     0.1542,
+     0.1559
+    ]
+   },
+   "bp_fe_top_d0.5 0.5": {
+    "runs": 2,
+    "ok": 2,
+    "logs": 2,
+    "converged": 0,
+    "diverged": 2,
+    "iterations": [
+     753,
+     757
+    ],
+    "overflow": [
+     0.1129,
+     0.1133
+    ]
+   },
+   "bp_fe_top_d0.6 0.6": {
+    "runs": 2,
+    "ok": 2,
+    "logs": 2,
+    "converged": 0,
+    "diverged": 1,
+    "iterations": [
+     711,
+     999
+    ],
+    "overflow": [
+     0.0811,
+     0.0834
+    ]
+   },
+   "bp_fe_top_d0.7 0.7": {
+    "runs": 2,
+    "ok": 2,
+    "logs": 2,
+    "converged": 2,
+    "diverged": 0,
+    "iterations": [
+     568,
+     590
+    ],
+    "overflow": [
+     0.0697,
+     0.0699
+    ]
+   },
+   "bp_fe_top_d0.8 0.8": {
+    "runs": 2,
+    "ok": 2,
+    "logs": 2,
+    "converged": 2,
+    "diverged": 0,
+    "iterations": [
+     547,
+     587
+    ],
+    "overflow": [
+     0.0697,
+     0.0697
+    ]
+   }
+  }
+ }
+}

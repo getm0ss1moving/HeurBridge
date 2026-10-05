@@ -4,6 +4,30 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
+## 2026-10-06 — Cell-placement chat: C1 prepared (fixed before any run); the C0 smoke still waits for 224
+
+- **224:** the macro chat's jobs still reserve all 8 slots. It agreed (6 Oct 01:20) that `dpls_a`'s 2 slots go to the C0
+  smoke when `dpls_a` ends (its estimate: 04:00-04:30), and that its next jobs (`dpls_c`, the TB#5 test) start only
+  when its reserved slots are 2 or fewer. Nothing of this chat has run on 224 yet.
+- **C1 prepared (exploratory, no claims):** `reports/cell_stage_c1.md` fixes the eight layouts (the tool's M1 and
+  HeurBridge's Track-B candidate of bp_fe_top, bp_be_top, ariane136 and swerv_wrapper; ariane133's two later), 12
+  recipes per design (`configs/cellstage/c1_<design>.json`), the two stages and the go rule (`select.go_rule`, in code
+  since 8f70c70), before any C1 run. Inputs read from the campaigns' files: `reports/cell_stage_c1_inputs.json`
+  (`scripts/cell_stage_inputs.py`, local, runs no tool).
+- **New code:** `heurbridge/cellstage/hints.py` (hint programs run on each run's macro layout; `channel_caps`: soft
+  density caps over the macro channels, as disjoint rectangles), `CellRecipe.programs` (ids of recipes without
+  programs unchanged), npz starts recorded by file name and sha256.
+- **225 (approved), DREAMPlace starts for R9/R9c:** `cs_c1_dpcells` placed the eight C1 layouts and their six test
+  shifts at each design's own density, but did not converge on bp_fe_top or bp_be_top. `cs_c1_dpladder` tried 0.4-0.8
+  on their unshifted layouts: they converge from 0.7 and 0.6. `cs_c1_dpcells2` makes the 56 starts C1 uses (0.7,
+  0.6, 0.35, 0.46).
+- **Next:** on the macro chat's notice, the scratchpad's `launch_cs_smoke.sh 6` (the C0 smoke, 2 runs at a time, checks
+  as in the entry below). If it passes, C1 stage 1 (f1) with the slots left: 2 until `dpls_b` ends (about 14:00), then
+  4. Before stage 2: one identity run (`--slots 1`); then `--default-rows` takes the default recipe's f2 rows from the
+  Track-B test ledgers.
+
+---
+
 ## 2026-10-05 — Cell-placement chat (a fork of this session): C0 started
 
 - **Scope:** this chat works on standard-cell placement for HeurBridge's macro layouts; the macro chat keeps every

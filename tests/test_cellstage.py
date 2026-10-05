@@ -172,8 +172,9 @@ def test_npz_positions_round_trip_and_checks(tmp_path):
     cells = np.flatnonzero(cell_mask(des))
     ll = P.lower_left(des, ref, cells)
     path = P.write_npz(tmp_path / "p.npz", des, cells, ll)
-    c2, ll2 = P.from_npz(path)(des, ref)
+    c2, ll2, info = P.from_npz(path)(des, ref)
     assert np.array_equal(c2, cells) and np.allclose(ll2, ll)
+    assert info["positions_file"] == "p.npz" and len(info["positions_sha256"]) == 16
     P.write_npz(tmp_path / "short.npz", des, cells[1:], ll[1:])
     with pytest.raises(ValueError, match="misses 1 standard cells"):
         P.from_npz(tmp_path / "short.npz")(des, ref)
@@ -244,8 +245,8 @@ def test_npz_dir_finds_the_file_of_the_layout_evaluated(tmp_path):
     cells = np.flatnonzero(cell_mask(des))
     key = P.layout_key(des, ref)
     P.write_npz(tmp_path / ("%s.npz" % key), des, cells, P.lower_left(des, ref, cells))
-    c, ll = P.from_source("npzdir:%s" % tmp_path)(des, ref)
-    assert np.array_equal(c, cells)
+    c, ll, info = P.from_source("npzdir:%s" % tmp_path)(des, ref)
+    assert np.array_equal(c, cells) and info["positions_file"] == "%s.npz" % key
     other = ref.copy()
     mm = des.is_macro & ~des.is_fixed
     other.pos[np.flatnonzero(mm)[0]] += 0.001
@@ -281,9 +282,21 @@ def test_dreamplace_positions_hold_the_macros(tmp_path, monkeypatch):
     monkeypatch.setattr(D, "run_placer", fake_run)
     cells, ll, info = P.dreamplace(des, ref, tmp_path / "w")
     assert np.array_equal(cells, np.flatnonzero(cell_mask(des)))
+    assert info["converged"] is False and info["iterations"] is None     # the fake log has no iterations
     assert info["macro_max_shift_um"] < 1e-3                 # the bookshelf copy rounds to 1/scale
     # placed cells started at the core centre (the reference layout's cells are placed, so: their own positions)
     assert np.isfinite(ll).all()
     fake_run.move = True
     with pytest.raises(RuntimeError, match="moved a fixed macro"):
         P.dreamplace(des, ref, tmp_path / "w2")
+
+
+def test_dreamplace_convergence_from_its_log():
+    it = "[INFO   ] DREAMPlace - iteration %4d, ( %d,  0,  0), Obj 1E+07, DensityWeight 1E-01, wHPWL 1E+07, Overflow %s, MaxDensity 1.0E+00, gamma 1E+01, time 2ms"
+    ok = "\n".join([it % (0, 0, "1.000000E+00"), it % (547, 547, "6.991584E-02"), "[INFO   ] done"])
+    assert P.dreamplace_convergence(ok, 0.07) == {"iterations": 547, "overflow": 0.06991584, "diverged": False,
+                                                   "converged": True}
+    stuck = "\n".join([it % (999, 999, "2.159000E-01")])
+    assert P.dreamplace_convergence(stuck, 0.07)["converged"] is False
+    div = ok + "\n[ERROR  ] DREAMPlace - possible DIVERGENCE detected, roll back to the best position recorded"
+    assert P.dreamplace_convergence(div, 0.07)["diverged"] and not P.dreamplace_convergence(div, 0.07)["converged"]

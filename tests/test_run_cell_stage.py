@@ -106,3 +106,38 @@ def test_unknown_layout_and_duplicate_recipes_are_refused(campaign, monkeypatch,
     dup.write_text(json.dumps([CellRecipe(name="a").to_dict(), CellRecipe(name="b").to_dict()]))
     with pytest.raises(ValueError, match="own settings"):
         RC.load_recipes(dup)
+
+
+def test_default_rows_are_imported_not_run(campaign, monkeypatch):
+    camp, rpath, recipes, calls, tmp = campaign
+    des, ref = RS.load_design(None, "d", camp, None)[:2]
+    mm = des.is_macro & ~des.is_fixed
+    lay = {"pos_macros": ref.pos[mm].tolist(), "orient_macros": ref.orient[mm].tolist()}
+    src = tmp / "evals_tb.jsonl"
+    decoy = dict(lay, run_id="d.other.f2", evaluator="orfs_cs_%s" % recipes[1].id, fidelity=2, status="ok", record=REC)
+    plain = dict(lay, run_id="d.tb.ref.s0.f2", evaluator="orfs", fidelity=2, status="ok", record=dict(REC, gr_wl=950.0))
+    src.write_text(json.dumps(decoy) + "\n" + json.dumps(plain) + "\n")
+    _argv(monkeypatch, camp, rpath, tmp, "--fidelity", "2", "--default-rows", str(src))
+    RC.main()
+    rows = {(r["cs_layout"], r["cs_recipe_name"]): r for r in RC.jl(camp / "evals_cs_t.jsonl")}
+    got = rows[("M1", "default")]
+    assert got["imported_from"] == "%s:2" % src and got["imported_run_id"] == "d.tb.ref.s0.f2"
+    assert got["record"]["gr_wl"] == 950.0 and got["evaluator"] == "orfs_cs_%s" % recipes[0].id
+    assert "imported_from" not in rows[("d.cand.f2", "default")]          # no row of that layout: it ran
+    assert len(calls) == 5 and len(rows) == 6
+
+
+def test_slots_need_the_test_shifts(campaign, monkeypatch):
+    camp, rpath, recipes, calls, tmp = campaign
+    _argv(monkeypatch, camp, rpath, tmp, "--slots", "1")
+    with pytest.raises(SystemExit, match="--shifts tb"):
+        RC.main()
+
+
+def test_slots_limit_the_test_shifts(campaign, monkeypatch):
+    camp, rpath, recipes, calls, tmp = campaign
+    _argv(monkeypatch, camp, rpath, tmp, "--fidelity", "1", "--shifts", "tb", "--slots", "1,6")
+    RC.main()
+    rows = RC.jl(camp / "evals_cs_t.jsonl")
+    assert sorted({(r["cs_slot"], tuple(r["cs_shift"])) for r in rows}) == [(1, (2, 0)), (6, (-1, -1))]
+    assert len(rows) == 2 * 2 * 3

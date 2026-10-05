@@ -35,7 +35,10 @@ third_party/OpenROAD-676f8451/src):
                  run: a per-run FASTROUTE_TCL that first does what the design's own FASTROUTE_TCL or the platform
                  default does (scripts/util.tcl:7-17), then set_global_routing_region_adjustment
                  (grt/src/GlobalRouter.tcl:75-124).
-A recipe's id is a hash of its canonical settings (the name is a label and is not part of it).
+  programs       hint programs run on each run's macro layout, (name, ((parameter, value), ...)); their density caps
+                 join the recipe's own (heurbridge/cellstage/hints.py).
+A recipe's id is a hash of its canonical settings (the name is a label and is not part of it; ``programs`` enters only
+when set, so recipes without programs keep the ids they had before the field existed).
 """
 
 from __future__ import annotations
@@ -217,6 +220,7 @@ class CellRecipe:
     hold: str = "restart"
     density_caps: tuple = ()
     route_adjust: tuple = ()
+    programs: tuple = ()                    # ((name, ((parameter, value), ...)), ...): heurbridge/cellstage/hints.py
 
     def __post_init__(self):
         if self.start not in STARTS:
@@ -254,6 +258,8 @@ class CellRecipe:
                                                        for c in self.density_caps))
         object.__setattr__(self, "route_adjust", tuple(a if isinstance(a, RouteAdjust) else RouteAdjust(*a)
                                                        for a in self.route_adjust))
+        from .hints import check
+        object.__setattr__(self, "programs", tuple(check(n, p) for n, p in self.programs))
 
     # ---- identity
     def settings(self) -> dict:
@@ -262,7 +268,8 @@ class CellRecipe:
                 "routability_driven": self.routability_driven, "gpl": [list(p) for p in self.gpl],
                 "start": self.start, "source": self.source, "hold": self.hold,
                 "density_caps": [[list(c.rect), c.max_density] for c in self.density_caps],
-                "route_adjust": [[list(a.rect), a.layer, a.adjustment] for a in self.route_adjust]}
+                "route_adjust": [[list(a.rect), a.layer, a.adjustment] for a in self.route_adjust],
+                **({"programs": [[n, [list(kv) for kv in p]] for n, p in self.programs]} if self.programs else {})}
 
     @property
     def id(self) -> str:
@@ -281,7 +288,8 @@ class CellRecipe:
                 routability_driven=d.get("routability_driven"), gpl=tuple(tuple(p) for p in d.get("gpl", ())),
                 start=d.get("start", "centre"), source=d.get("source", ""), hold=d.get("hold", "restart"),
                 density_caps=tuple(DensityCap(tuple(c[0]), c[1]) for c in d.get("density_caps", ())),
-                route_adjust=tuple(RouteAdjust(tuple(a[0]), a[1], a[2]) for a in d.get("route_adjust", ())))
+                route_adjust=tuple(RouteAdjust(tuple(a[0]), a[1], a[2]) for a in d.get("route_adjust", ())),
+                programs=tuple((n, tuple(tuple(kv) for kv in p)) for n, p in d.get("programs", ())))
         if d.get("id") not in (None, r.id):
             raise ValueError("recipe %r: stored id %s does not match its settings (%s)" % (r.name, d["id"], r.id))
         return r
@@ -307,13 +315,15 @@ class CellRecipe:
             v.append("GLOBAL_PLACEMENT_ARGS=%s" % render_gpl_args(args))
         return v
 
-    def hint_tcl(self, core) -> str:
-        """Density caps as soft partial placement blockages, clipped to the core box (xl, yl, xh, yh) in microns; a
-        cap wholly outside the core is an error, not a silent drop."""
-        if not self.density_caps:
+    def hint_tcl(self, core, program_caps=()) -> str:
+        """Density caps (the recipe's own, then ``program_caps``, those its programs made for this run's layout) as
+        soft partial placement blockages, clipped to the core box (xl, yl, xh, yh) in microns; a cap wholly outside
+        the core is an error, not a silent drop."""
+        caps = self.density_caps + tuple(program_caps)
+        if not caps:
             return ""
         rows = []
-        for c in self.density_caps:
+        for c in caps:
             xl, yl, xh, yh = _clip(c.rect, core, "density cap")
             rows.append("  %.4f %.4f %.4f %.4f %s" % (xl, yl, xh, yh, _num(c.max_density)))
         return "\n".join(["# HeurBridge cell-stage density caps (recipe %s %s): soft partial placement blockages"
@@ -414,7 +424,7 @@ class CellStage:
     inspect_runs: bool = True
 
     def __post_init__(self):
-        self._starts = {}
+        self._starts, self._hints = {}, {}
         if self.positions is None and self.recipe.source:
             from .positions import from_source
             self.positions = from_source(self.recipe.source)
@@ -435,7 +445,16 @@ class CellStage:
             info = got[2] if len(got) > 2 else None
             self._starts[run_id] = ([design.names[int(i)] for i in cells], np.asarray(ll, float), info)
             text += orfs.cell_locations_tcl(design, cells, ll, "cell-stage recipe %s %s" % (r.name, r.id))
-        text += r.hint_tcl(design.core)
+        caps = ()
+        if r.programs:
+            from . import hints
+            caps = tuple(DensityCap(rect, d) for n, p in r.programs
+                         for rect, d in hints.run(n, p, design, layout).get("density_caps", ()))
+            self._hints[run_id] = {"programs": [[n, [list(kv) for kv in p]] for n, p in r.programs],
+                                   "density_caps": [[[round(v, 4) for v in c.rect], c.max_density] for c in caps],
+                                   "cap_area_um2": round(sum((c.rect[2] - c.rect[0]) * (c.rect[3] - c.rect[1])
+                                                             for c in caps), 3)}
+        text += r.hint_tcl(design.core, caps)
         mv = r.make_vars()
         if r.route_adjust:
             if self.design_fastroute is None:
@@ -454,9 +473,12 @@ class CellStage:
                 "design_fastroute": self.design_fastroute}
 
     def inspect(self, run) -> dict:
-        """The run's own log lines and, with check_drift, the started cells' drift per step.  Errors are recorded,
-        not raised: the evaluation itself stands."""
+        """The hints the recipe's programs made for the run, the run's own log lines and, with check_drift, the
+        started cells' drift per step.  Errors are recorded, not raised: the evaluation itself stands."""
         out = {}
+        made = self._hints.pop(run.variant, None)
+        if made is not None:
+            out["program_hints"] = made
         if not self.inspect_runs:
             return out
         try:

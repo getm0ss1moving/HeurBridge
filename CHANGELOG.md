@@ -6,6 +6,31 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 
 ## [Unreleased]
 
+### Cell stage on Track B: C1 prepared (6 Oct; no runs yet)
+- `heurbridge/cellstage/hints.py` (new): hint programs computed from each run's macro layout. `channel_caps(max_gap,
+  max_density[, min_gap])` caps the density of every channel up to `max_gap` um wide, between facing macro edges or a
+  macro edge and the core edge. Macros are cut out, and the union is written as disjoint rectangles, since global
+  placement blocks each partial blockage's share of sites on its own. `CellRecipe.programs` enters a recipe's id only
+  when set, so existing ids are unchanged. `CellStage` records the caps each run got (`program_hints`).
+- `heurbridge/cellstage/positions.py`: npz starts also return the file's name and the start of its sha256, recorded in
+  each run's row. DREAMPlace starts record DREAMPlace's last iteration, final overflow, a reported divergence and
+  whether it reached its overflow target (`dreamplace_convergence`).
+- `scripts/cell_stage_inputs.py` (new; local, runs no tool): a recipe list's inputs from fetched campaigns. It reads
+  the flow's own placement density, how global placement's routability loop ended, run times and the channel geometry
+  of each layout, and writes them to `reports/cell_stage_c1_inputs.json`. With `--dreamplace` it also summarizes how
+  fetched DREAMPlace jobs ended, per design and density.
+- Finding: at the flow's own placement density DREAMPlace does not converge on bp_fe_top (overflow stuck at 0.22) or
+  bp_be_top (divergence at 0.15). It converges from 0.7 and 0.6, which C1 uses for those two designs
+  (`reports/cell_stage_c1.md`).
+- `configs/cellstage/c1_{bp_fe_top,bp_be_top,ariane136,swerv_wrapper}.json` and `reports/cell_stage_c1.md`: the
+  headroom demo's recipe list and plan, fixed before any C1 run.
+- `scripts/run_cell_stage.py`: `--slots` (with `--shifts tb`, only these shift slots) and `--default-rows` (a default
+  recipe's run whose fidelity and macro layout match a row of the unmodified cell stage in the given ledgers is copied,
+  with `imported_from`, instead of run again).
+- Tests: `tests/test_cellstage_hints.py` (new, 5); `tests/test_cellstage.py` (npz info, DREAMPlace convergence);
+  `tests/test_run_cell_stage.py` (+3: import, slots). Full suite (225, `cs_c1_tests2`): 271 passed, 5 skipped (data
+  that exists only locally).
+
 ### EB#1 result (6 Oct 01:10; no code change)
 - `scripts/equal_budget_confirm.py analyze --design bp_fe_top` run once on `dpls_a`'s complete bp_fe_top part (a
   partial fetch; bp_be_top still running): EB#1 failed (p = 0.128 against alpha_j 0.025; `reports/trackB_equal_budget.md`,

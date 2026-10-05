@@ -86,10 +86,13 @@ def write_npz(path, design, cells, ll_um) -> Path:
 
 
 def from_npz(path):
-    """A positions function reading a placement file; every standard cell of the design must be in it."""
+    """A positions function reading a placement file; every standard cell of the design must be in it.  The info it
+    returns names the file and the start of its sha256, so a run's record traces its start to the file."""
     path = Path(path)
 
     def fn(design, layout):
+        import hashlib
+        info = {"positions_file": path.name, "positions_sha256": hashlib.sha256(path.read_bytes()).hexdigest()[:16]}
         z = np.load(path, allow_pickle=False)
         names, ll = [str(n) for n in z["names"]], np.asarray(z["ll_um"], float)
         if ll.shape != (len(names), 2) or not np.isfinite(ll).all():
@@ -104,8 +107,22 @@ def from_npz(path):
         if len(missing):
             raise ValueError("%s misses %d standard cells, e.g. %s" % (path, len(missing), design.names[int(missing[0])]))
         keep = np.isin(given, cells)
-        return given[keep], ll[keep]
+        return given[keep], ll[keep], info
     return fn
+
+
+def dreamplace_convergence(log: str, stop_overflow: float) -> dict:
+    """DREAMPlace's last logged global-placement iteration and its overflow, whether it reported a divergence (it
+    then rolls back to its best position), and whether it stopped at its overflow target without one."""
+    import re
+    last = None
+    for m in re.finditer(r"iteration\s+(\d+),.*?Overflow\s+([0-9.Ee+-]+),", log):
+        last = (int(m.group(1)), float(m.group(2)))
+    div = "DIVERGENCE" in log
+    if last is None:
+        return {"iterations": None, "overflow": None, "diverged": div, "converged": False}
+    return {"iterations": last[0], "overflow": last[1], "diverged": div,
+            "converged": bool(last[1] <= stop_overflow + 1e-9 and not div)}
 
 
 def dreamplace(design, layout, work, target_density: float = 0.8, seed: int = 0, gpu: bool = True, iters: int = 1000,
@@ -126,7 +143,8 @@ def dreamplace(design, layout, work, target_density: float = 0.8, seed: int = 0,
     pj["abacus_legalize_flag"] = 0
     rc, log, wall = run_placer(pj, work, timeout)
     pl = work / "out" / design.id / ("%s.gp.pl" % design.id)
-    info = {"dreamplace_rc": rc, "dreamplace_s": wall, "target_density": target_density, "seed": seed}
+    info = {"dreamplace_rc": rc, "dreamplace_s": wall, "target_density": target_density, "seed": seed,
+            **dreamplace_convergence(log, pj.get("stop_overflow", 0.07))}
     if rc != 0 or not pl.exists():
         raise RuntimeError("DREAMPlace failed (rc %s): %s" % (rc, log[-400:]))
     placed = read_bookshelf_layout(fixed, layout, pl, scale=scale)

@@ -3,7 +3,7 @@
 
   python scripts/run_cell_stage.py --flow <ORFS>/flow --design nangate45/bp_fe_top --recipes configs/cellstage/c0_smoke.json \
       --layouts M1,bp_fe_top.ls0.n4.f2 --fidelity 1 --tag smoke [--shifts none|tb] [--workers 2] [--check-drift] \
-      [--race K] [--make-var KEY=VALUE ...] [--yosys ...]
+      [--race K] [--slots 1,2] [--default-rows LEDGER[,LEDGER]] [--make-var KEY=VALUE ...] [--yosys ...]
 
 Runs inside a campaign's resumed workspace (runs/seed_orfs/<design>/ of scripts/run_seed_orfs.py: its baselines, the
 pre-macro floorplan, M1's macros, clusters.npy and the base variant's synthesis and floorplan).  It never runs or
@@ -17,6 +17,11 @@ runs/seed_orfs/<design>/evals_cs_<tag>.jsonl and runs/seed_orfs/<design>/cs_<tag
   --race K    with --fidelity 2: per layout, the default recipe plus the K best other recipes by this tag's f1 rows
               (J before the gates; heurbridge/cellstage/select.race); without it every recipe runs
   --check-drift  for recipes whose cells start at given positions: how far they moved after 3_1, 3_3 and 3_5
+  --slots     with --shifts tb: only these slots (1-6), e.g. one run to compare with an earlier one
+  --default-rows  ledgers with runs of the unmodified cell stage (the Track-B test's evals_tb.jsonl): a run of the
+              default recipe whose fidelity and macro layout (positions to 1e-9 and orientations) match a row there
+              is not run again; the row is copied into this tag's ledger with imported_from = <ledger>:<line> and
+              scored like every other row.  Only rows of the plain ORFS evaluator (or of this default recipe) count
 Rows: run id <design>.cs_<tag>.<layout>.s<slot>.<recipe id>.f<1|2>, program CS; every row carries the recipe, the
 layout, the shift, and the record's cell_stage entry (effective make variables, the cell stage's own log lines,
 drift).  J is scored like the campaign (cost_v3: J against the unmodified flow, timing gates against the same-path
@@ -73,6 +78,50 @@ def find_layout(des, lay, m1, rdir: Path, lid: str):
     raise SystemExit("layout %s is in none of the campaign's ledgers (%s)" % (lid, rdir))
 
 
+PLAIN = "orfs"          # the evaluator of the unmodified cell stage in the campaigns and the Track-B tests
+
+
+def import_default_rows(ledger, jobs, sources, default_id: str, fidelity: int, des) -> dict:
+    """--default-rows: copy rows of the unmodified cell stage into this tag's ledger for the default recipe's jobs that
+    have no row yet.  A source row counts if its evaluator is the plain ORFS one or this default recipe's, at this
+    fidelity, completed or failed by a named deterministic failure, with no other recipe in its record.  Returns the
+    run ids imported and those with no matching row (they run as usual)."""
+    idx = {}
+    for path in sources:
+        for n, line in enumerate(Path(path).read_text().splitlines(), 1):
+            if not line.strip():
+                continue
+            r = json.loads(line)
+            cs = (r.get("record") or {}).get("cell_stage") or {}
+            if r.get("evaluator") not in (PLAIN, "orfs_cs_%s" % default_id) or r.get("fidelity") != fidelity \
+                    or (cs and cs.get("recipe_id") != default_id) or "pos_macros" not in r or r.get("reused_from") \
+                    or not (r.get("status") == "ok" or SA.deterministic_failure(r)):
+                continue
+            idx.setdefault(SA.layout_key(r), ("%s:%d" % (path, n), r))
+    mm = des.is_macro & ~des.is_fixed
+    out = {"imported": [], "missing": []}
+    for ev, L, rid, extra in jobs:
+        if extra["cs_recipe"] != default_id or ledger.get(rid) is not None:
+            continue
+        probe = {"pos_macros": L.pos[mm].tolist(), "orient_macros": L.orient[mm].tolist()}
+        hit = idx.get(SA.layout_key(probe))
+        if hit is None:
+            out["missing"].append(rid)
+            continue
+        where, src = hit
+        if src.get("status") == "ok":
+            row = {k: src[k] for k in SA.REUSE_KEYS if k in src}
+        else:
+            row = {k: src[k] for k in ("status", "fidelity", "J", "error") if k in src}
+            row["record"] = {"failure": SA.deterministic_failure(src),
+                             "returncode": (src.get("record") or {}).get("returncode")}
+        row.update({"run_id": rid, "evaluator": ev.name, "imported_from": where, "imported_run_id": src.get("run_id"),
+                    "wall_s": 0.0, **probe, **extra})
+        ledger.add(row)
+        out["imported"].append(rid)
+    return out
+
+
 def replay_records(rdir: Path, ledger: str) -> list:
     return [r["record"] for r in jl(rdir / ledger) if r.get("program") == "M1_replay" and r.get("status") == "ok"
             and isinstance(r.get("record"), dict)]
@@ -89,6 +138,8 @@ def main():
     ap.add_argument("--tag", required=True)
     ap.add_argument("--shifts", choices=["none", "tb"], default="none")
     ap.add_argument("--race", type=int, default=0)
+    ap.add_argument("--slots", default="", help="with --shifts tb: comma-separated slots to run (default all)")
+    ap.add_argument("--default-rows", default="", help="comma-separated ledgers of unmodified-cell-stage runs")
     ap.add_argument("--workers", type=int, default=1, help="evaluations at a time (each runs one OpenROAD at a time)")
     ap.add_argument("--check-drift", action="store_true")
     ap.add_argument("--timeout", type=int, default=7200)
@@ -99,6 +150,8 @@ def main():
     a = ap.parse_args()
     if a.race and a.fidelity != 2:
         raise SystemExit("--race picks f2 recipes from this tag's f1 rows: use it with --fidelity 2")
+    if a.slots and a.shifts != "tb":
+        raise SystemExit("--slots picks among the six shift slots: use it with --shifts tb")
     a.flow, a.work_home_abs = str(Path(a.flow).resolve()), str(Path(a.work_home).resolve())
     name, cfg = a.design.split("/")[-1], "./designs/%s/config.mk" % a.design
     rdir = Path(a.campaign_dir) if a.campaign_dir else ROOT / "runs" / "seed_orfs" / name
@@ -130,6 +183,8 @@ def main():
         L, src = find_layout(des, lay, m1, rdir, lid)
         slots = [(0, (0, 0), L)] if a.shifts == "none" else \
             [(k, sh, c) for k, sh, c, _ in RS.tb_pairs(des, L, m1) if sh is not None]
+        if a.slots:
+            slots = [s for s in slots if s[0] in {int(x) for x in a.slots.split(",") if x}]
         layouts[lid] = (src, slots)
 
     ledger = SA.Ledger(rdir / ("evals_cs_%s.jsonl" % a.tag))
@@ -172,6 +227,10 @@ def main():
                eda_threads=tools.eda_threads(8), record_host=True)
     print(json.dumps({"cell_stage": a.tag, "design": name, "fidelity": a.fidelity, "runs": len(jobs),
                       "workers": a.workers}), flush=True)
+    if a.default_rows:
+        got = import_default_rows(ledger, jobs, [x for x in a.default_rows.split(",") if x], default.id, a.fidelity, des)
+        print(json.dumps({"default_rows": a.default_rows, "imported": len(got["imported"]),
+                          "not_found": got["missing"]}), flush=True)
 
     def one(job):
         ev, L, rid, extra = job
