@@ -38,6 +38,10 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
   `python scripts/equal_budget_confirm.py analyze --design <d>` once.
 - **D13 (b) trial done (17:00):** `reports/timing_aware_search_trial.md`: ariane136 unchanged; swerv_wrapper lower J
   (0.901 vs 0.927) but not safer at signoff (6 vs 9 of 12 checks). `dpls_b` (ariane136) launched 16:55.
+- **State at 17:50 (interim, no result):** `seedB_orfs9_ariane133` 28 of 80 program layouts at f1, all completed, best f1 J
+  0.940 (below the tool's replays 0.949-0.956); `dpls_a` bp_fe_top 3 of 8 steps (f1 J 0.951 -> 0.935; kept moves at f2
+  0.958 and 0.941, inside the D11 (b) gates against the tool's unshifted replay); `dpls_b` ariane136 step 0. 7 OpenROAD
+  runs on 224. Next: `dpls_c` (swerv_wrapper) when `dpls_a` finishes.
 
 ---
 
