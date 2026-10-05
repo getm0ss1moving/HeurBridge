@@ -326,6 +326,10 @@ Re-testing: D10.
 - **Recommendation:** decide after the TW results; (c) is cheap and answers the narrower question of whether the
   programs alone beat DREAMPlace through the flow.
 
+- **Decided 5 Oct (owner): (b) as well**, registered as reports/trackB_equal_budget_preregistration.md (campaign EB):
+  DREAMPlace's pick plus HeurBridge's campaign local search, each arm's layout by one-position J_safe (D13 (a)), gates
+  under D11 (b), against HeurBridge's candidate.
+
 ## D13 Passing the timing gates more often (new, 4 Oct; the owner's question)
 
 - **Evidence:** the gates decided most Track-B results: TB#3 (hold) and TB#4 (setup) failed on them; DREAMPlace failed

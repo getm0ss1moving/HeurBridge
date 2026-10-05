@@ -243,6 +243,13 @@ def main():
     ap.add_argument("--tls-lambda", type=float, default=0.04, help="--phase tls: J added when both checks miss it")
     ap.add_argument("--tls-seed", type=int, default=1)
     ap.add_argument("--tls-workers", type=int, default=2)
+    ap.add_argument("--tls-tag", default="tls", help="--phase tls: names its ledgers, run ids and programs")
+    ap.add_argument("--tls-start-ledger", default="evals.jsonl", help="--phase tls: the ledger holding --tls-start")
+    ap.add_argument("--tls-verify-f2", action="store_true", help="--phase tls: every kept move also at f2")
+    ap.add_argument("--tls-pick", default="final", choices=["final", "jsafe"],
+                    help="--phase tls: the final layout, or the lowest one-position J_safe (D13 a) to the six shifts")
+    ap.add_argument("--tls-pool-ledger", default="", help="--phase tls --tls-pick jsafe: more f2 layouts to pick from")
+    ap.add_argument("--tls-pool-programs", default="", help="--phase tls: their programs, comma-separated")
     ap.add_argument("--workers", type=int, default=1,
                     help="f1 and f2 evaluations at a time (distinct layouts; <= 8 OpenROAD runs on 224 in all)")
     ap.add_argument("--make-var", action="append", default=[],
@@ -571,44 +578,71 @@ def main():
                     print(json.dumps({"ext_tb": k, "shift": sh, "run_id": row["run_id"], "status": row.get("status"),
                                       "J": row.get("J"), "J_raw": row.get("J_raw")}), flush=True)
         return
-    if a.phase == "tls":                                # 11. D13 (b), exploratory: timing-aware local search
+    if a.phase == "tls":                                # 11. local search from a given layout (D13 b; D12 b)
+        # --tls-tag names the ledgers, run ids and programs (default tls: evals_tls.jsonl, <d>.tls.s<k>.n<i>.f1, TLS);
+        # --tls-lambda 0 is the campaign's local search (J only); --tls-verify-f2 checks every kept move at f2;
+        # --tls-pick jsafe sends the lowest one-position J_safe (D13 a, against the tool's unshifted replay, D11 b) of
+        # the pool's f2 layouts and the checked moves to the six shifts, else the final layout
         from heurbridge.core import project
-        p1 = rdir / "evals.jsonl"
+        tag, TAG = a.tls_tag, a.tls_tag.upper()
+        p1 = rdir / a.tls_start_ledger
         rows1 = {r["run_id"]: r for r in (json.loads(l) for l in p1.read_text().splitlines() if l.strip())}
         start = rows1.get(a.tls_start[:-3] + ".f1") if a.tls_start.endswith(".f2") else rows1.get(a.tls_start)
         if start is None or start.get("pos_macros") is None:
-            sys.exit("--phase tls: no f1 row with a layout for --tls-start %r" % a.tls_start)
+            sys.exit("--phase tls: no f1 row with a layout for --tls-start %r in %s" % (a.tls_start, p1.name))
         halo = 2 * max(d.halo)
-        ledger = Ledger(rdir / "evals_tls.jsonl")
+        ledger = Ledger(rdir / ("evals_%s.jsonl" % tag))
+        ledger2 = Ledger(rdir / ("evals_%s_f2.jsonl" % tag))
         rng = np.random.default_rng(a.tls_seed)
         cur_lay, cur = _layout_from_row(des, lay, start), tls_score(start, a.tls_margin, a.tls_lambda)
         print(json.dumps({"tls_start": start["run_id"], "score": cur, "J_raw": start.get("J_raw")}), flush=True)
+        checked = []
         for step in range(a.tls_steps):
             jobs = []
             for n, (move, l) in enumerate(SA.neighbours(des, cur_lay, rng, a.tls_neighbours)):
                 lp, rep = project.legalize_macros(des, l, halo=halo)
                 if rep.ok:
-                    jobs.append(("%s.tls.s%d.n%d.f1" % (name, step, n), lp, move))
-            evals = SA._map(lambda j: _eval(ev1, des, j[1], base1, j[0], rdir / "work_tls", ledger,
-                                            {"program": "TLS", "move": j[2], "stage": "M", "tls_step": step}),
+                    jobs.append(("%s.%s.s%d.n%d.f1" % (name, tag, step, n), lp, move))
+            evals = SA._map(lambda j: _eval(ev1, des, j[1], base1, j[0], rdir / ("work_%s" % tag), ledger,
+                                            {"program": TAG, "move": j[2], "stage": "M", "tls_step": step}),
                             jobs, a.tls_workers)
             scored = sorted(((tls_score(r, a.tls_margin, a.tls_lambda), i) for i, r in enumerate(evals)), key=lambda t: t[0])
             took = bool(scored) and scored[0][0] < cur
             if took:
                 cur, cur_lay = scored[0][0], jobs[scored[0][1]][1]
+                if a.tls_verify_f2:
+                    checked.append(_eval(ev2, des, cur_lay, base2, "%s.%s.s%d.f2" % (name, tag, step),
+                                         rdir / ("work_%s" % tag), ledger2, {"program": TAG + "_F2", "stage": "M",
+                                                                            "tls_step": step}))
             print(json.dumps({"tls_step": step, "evaluated": len(evals), "best": scored[0][0] if scored else None,
                               "accepted": took, "score": cur, "run_id": jobs[scored[0][1]][0] if took else None}),
                   flush=True)
+        if a.tls_pick == "jsafe":
+            import timing_safety_report as TS
+            p2 = rdir / "evals_f2.jsonl"
+            ref0 = next(r["record"] for r in (json.loads(l) for l in p2.read_text().splitlines() if l.strip())
+                        if r["run_id"] == "%s.M1replay.f2" % name)
+            pool = []
+            if a.tls_pool_ledger:
+                progs = set(a.tls_pool_programs.split(","))
+                pool = [r for r in (json.loads(l) for l in (rdir / a.tls_pool_ledger).read_text().splitlines() if l.strip())
+                        if r.get("program") in progs and r.get("pos_macros") is not None]
+            cands = [(TS.summary([TS.position(r, ref0, base2)]), r) for r in pool + checked if r.get("pos_macros") is not None]
+            if not cands:
+                sys.exit("--phase tls --tls-pick jsafe: no f2 layout to pick from")
+            best_s, best_r = min(cands, key=lambda t: (t[0]["J_safe"], t[0]["J"]))
+            cur_lay = _layout_from_row(des, lay, best_r)
+            print(json.dumps({"tls_pick": best_r["run_id"], "J_safe": best_s["J_safe"], "J": best_s["J"],
+                              "marks": best_s["marks"], "pool": len(pool), "checked": len(checked)}), flush=True)
         jobs = []
-        for k, sh, c, m in tb_pairs(des, cur_lay, m1):      # the final layout at the Track-B test's six shifts
+        for k, sh, c, m in tb_pairs(des, cur_lay, m1):      # the layout at the Track-B test's six shifts
             if sh is None:
                 print(json.dumps({"tb_slot": k, "skipped": "no legal common shift left"}), flush=True)
             else:
                 jobs.append((k, sh, c))
-        ledger2 = Ledger(rdir / "evals_tls_f2.jsonl")
         for (k, sh, _), row in zip(jobs, SA._map(lambda j: _eval(
-                ev2, des, j[2], base2, "%s.tls.tb.s%d.f2" % (name, j[0]), rdir / "work_tls", ledger2,
-                {"program": "TLS_TB", "tb_slot": j[0], "tb_shift": list(j[1]), "stage": "M"}), jobs, a.tls_workers)):
+                ev2, des, j[2], base2, "%s.%s.tb.s%d.f2" % (name, tag, j[0]), rdir / ("work_%s" % tag), ledger2,
+                {"program": TAG + "_TB", "tb_slot": j[0], "tb_shift": list(j[1]), "stage": "M"}), jobs, a.tls_workers)):
             print(json.dumps({"tls_tb": k, "shift": sh, "run_id": row["run_id"], "status": row.get("status"),
                               "J_raw": row.get("J_raw")}), flush=True)
         return
