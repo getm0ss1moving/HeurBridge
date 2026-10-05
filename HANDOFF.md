@@ -4,6 +4,39 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
+## 2026-10-05 — Cell-placement chat (a fork of this session): C0 started
+
+- **Scope:** this chat works on standard-cell placement for HeurBridge's macro layouts; the macro chat keeps every
+  macro job and analysis. Plan: the local, unpublished `HEURBRIDGE_PLAN_cell_stage.md`; the owner adopted every
+  recommendation (CS-D1 to CS-D6) on 5 Oct and asked to start C0.
+- **224 slots (CS-D2 (a)):** at most 4 of the 8 OpenROAD slots for this chat, counted live before every launch. The
+  macro chat keeps its own jobs at 4 or fewer once the running ones allow; at 17:50 they held all 8
+  (`seedB_orfs9_ariane133` x4, `dpls_a` x2, `dpls_b` x2), and it will say when `dpls_a` ends.
+- **Built (C0; infrastructure, no claims):** `heurbridge/cellstage/` (recipes, start positions, selection rules, the
+  go rule), `OrfsEvaluator.cell_stage` (default off), `scripts/run_cell_stage.py`, `scripts/cell_positions.py`,
+  `configs/cellstage/c0_smoke.json`, the originality tools (`scripts/code_overlap_scan.py`,
+  `scripts/originality_scan.py`, `scripts/overlap_scan.py`), `reports/templates/cell_stage_preregistration.md`.
+  Details in CHANGELOG.
+- **Finding:** in ORFS 2024-12 a cell warm start reaches the main global placement (3_3) only through 3_2's IO pin
+  placement, since 3_3 restarts from the core centre; a recipe's `hold` can now continue 3_3 from 3_1 or keep a start.
+- **CS-D1:** 224's pinned ORFS tree has no Nangate45 macro design beyond our five (black_parrot and bp_multi_top
+  are only in the newer local checkout), so held-out macro layouts (option (a)) for now.
+- **225 (approved):** `cs_c0_dpcells` (DREAMPlace start positions for bp_fe_top's Track-B candidate and M1 at the six
+  test shifts: 33,279 cells, about 9 s per layout); the full test suite `cs_c0_tests3` (eda harness mounted): 262 passed,
+  5 skipped for local-only data (`tests/test_core_design.py`, `tests/test_orfs.py`: both pass locally).
+- **Next, when 224 has free slots:** the C0 smoke on bp_fe_top at f1, 5 runs at 2 at a time, with the Track-B launch
+  recipe below (`--resume-from` the latest final holding `seedB_orfs7_bp_fe_top`'s campaign, plus
+  `--data cellpos_dp_bp_fe_top:cellpos/bp_fe_top`, DREAMPlace's positions pushed to 224's vault), command
+  `bash scripts/server/trackb.sh python scripts/run_cell_stage.py --flow /data/dzy/heura_repr/third_party/ORFS-2024-12/flow
+  --design nangate45/bp_fe_top --recipes configs/cellstage/c0_smoke.json --layouts bp_fe_top.ls0.n4.f2 --fidelity 1
+  --tag c0smoke --workers 2 --check-drift --yosys /data/dzy/heura_repr/tools/yosys_048/bin/yosys`. Checks: the default
+  recipe reproduces the campaign's f1 row of that layout (J 0.9000776798887087, local run file
+  `runs/remote/seedB_orfs7_bp_fe_top/runs/seed_orfs/bp_fe_top/evals.jsonl`); HB_DENSITY_CAPS / HB_ROUTE_ADJUST lines
+  in the 2_3, 3_3 and 5_1 logs; the cells of hbgp_keep and dp_keep (DREAMPlace's positions, source `npzdir:`) do not
+  move in 3_1 or 3_3. Then C1's recipe list and registration.
+
+---
+
 ## 2026-10-04 — Session 4 (19:30): D13 (a) and (b), D2 running
 
 - **Owner (4 Oct evening):** D13 (a) for new tests, combining J and timing safety with a full output of J and gates;

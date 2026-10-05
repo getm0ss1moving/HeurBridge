@@ -6,6 +6,36 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 
 ## [Unreleased]
 
+### Cell stage on Track B: C0 infrastructure (5 Oct; owner's decisions CS-D1 to CS-D6)
+- `heurbridge/cellstage/` (new). `recipe.py`: `CellRecipe`, a content-hashed recipe for how the flow places the
+  standard cells around an imported macro layout: density (PLACE_DENSITY or its addon), padding, GPL timing- and
+  routability-driven flags, extra global_placement keys merged into GLOBAL_PLACEMENT_ARGS after the campaign's own, the
+  cells' start (core centre, cluster quadratic positions, or a full placement from HB-GP, a file or a per-layout
+  directory), what 3_3 does with it (restart; continue: `-skip_initial_place`; keep: also `-skip_nesterov_place`), soft
+  partial-blockage density caps, and per-region routing-capacity reductions chained after the design's FASTROUTE_TCL.
+  `CellStage` applies a recipe to every run of an evaluator and records the recipe, the effective make variables, the
+  cell stage's own log lines and, on request, how far started cells moved after 3_1, 3_3 and 3_5. `positions.py`:
+  HB-GP, npz files, per-layout npz directories (keyed like the ledgers' layout_key), DREAMPlace with the macros fixed.
+  `select.py`: racing at f1, the J_safe pick over equal positions (D13 a), and the cell-stage headroom demo's go rule,
+  fixed in code before any run.
+- `heurbridge/pipeline/evaluators.py`: `OrfsEvaluator.cell_stage` (default None: every existing run unchanged).
+- Finding, from the pinned sources (`heurbridge/cellstage/recipe.py` docstring): in ORFS 2024-12 only 3_1 (`-skip_io`,
+  which skips initial placement) starts pre-placed cells where they are; 3_2 places the IO pins from 3_1's result; 3_3
+  runs initial placement again from the core centre. The quadratic warm start of the Track-B demos therefore reached the
+  main global placement only through the IO pin placement.
+- `scripts/run_cell_stage.py` (new): cell-stage runs inside a campaign's resumed workspace, in their own ledger
+  `evals_cs_<tag>.jsonl` (never a baseline; `--shifts tb`, `--race K`, `--check-drift`). `scripts/cell_positions.py`
+  (new): per-layout start positions (export locally; DREAMPlace on a GPU server, HB-GP anywhere).
+  `configs/cellstage/c0_smoke.json`: four smoke recipes for bp_fe_top.
+- Originality tooling (T7.5): `scripts/code_overlap_scan.py` (our Python against third-party Python),
+  `scripts/originality_scan.py` (driver of `heurbridge/verify/originality.py`), `scripts/overlap_scan.py` (a manuscript
+  against source texts: the task list's overlap_scan.py). Files too small to judge are listed, not scored. Run 5 Oct:
+  176 files scanned, mean share 0.036, one file at 0.10 or more (`heurbridge/core/orient.py` 0.182: rows of the eight
+  orientation matrices), longest common run 57 tokens; 25 rediscovery targets, none above 0.8 (highest 0.218 by tokens,
+  0.431 by AST); CUGR2 is not in third_party.
+- `reports/templates/cell_stage_preregistration.md` (campaign CS).
+- Tests: test_cellstage, test_run_cell_stage, test_originality_tools (43). Full suite (225): 262 passed, 5 skipped.
+
 ### D13 and D2 (4 Oct evening): J and timing safety, timing-aware search, parallel campaign
 - `heurbridge/pipeline/seed_archive.py`: `SeedConfig.workers` (program evaluations and local-search neighbours several at
   a time; distinct layouts first so repeats are still reused) and `ls_timing_margin` (`timing_ok(row, margin)`, no sign

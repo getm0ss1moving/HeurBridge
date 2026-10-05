@@ -1,0 +1,111 @@
+{
+ "purpose": "C0 smoke test on bp_fe_top at f1 (infrastructure, no claims): the default recipe reproduces the campaign's f1 row of the same layout; density caps and routing adjustments reach the flow's logs; HB-GP positions kept through global placement; a quadratic start continued in 3_3. The rectangles are arbitrary (bp_fe_top core 10 10 790 590 um), chosen only to exercise the hooks. dp_keep reads DREAMPlace's positions per macro layout from the job's data directory cellpos/bp_fe_top (hbv data cellpos_dp_bp_fe_top, made by scripts/cell_positions.py on 225).",
+ "recipes": [
+  {
+   "name": "default",
+   "id": "3b8b11b81c3f",
+   "density": null,
+   "pad_global": null,
+   "pad_detail": null,
+   "timing_driven": null,
+   "routability_driven": null,
+   "gpl": [],
+   "start": "centre",
+   "source": "",
+   "hold": "restart",
+   "density_caps": [],
+   "route_adjust": []
+  },
+  {
+   "name": "caps_routes",
+   "id": "aa0eeaca7c49",
+   "density": null,
+   "pad_global": null,
+   "pad_detail": null,
+   "timing_driven": null,
+   "routability_driven": null,
+   "gpl": [],
+   "start": "centre",
+   "source": "",
+   "hold": "restart",
+   "density_caps": [
+    [
+     [
+      300.0,
+      200.0,
+      500.0,
+      400.0
+     ],
+     50.0
+    ]
+   ],
+   "route_adjust": [
+    [
+     [
+      300.0,
+      200.0,
+      500.0,
+      400.0
+     ],
+     "metal2",
+     0.2
+    ],
+    [
+     [
+      300.0,
+      200.0,
+      500.0,
+      400.0
+     ],
+     "metal3",
+     0.2
+    ]
+   ]
+  },
+  {
+   "name": "hbgp_keep",
+   "id": "52467aaa4590",
+   "density": null,
+   "pad_global": null,
+   "pad_detail": null,
+   "timing_driven": null,
+   "routability_driven": null,
+   "gpl": [],
+   "start": "positions",
+   "source": "hbgp",
+   "hold": "keep",
+   "density_caps": [],
+   "route_adjust": []
+  },
+  {
+   "name": "quad_continue",
+   "id": "a883991e2010",
+   "density": null,
+   "pad_global": null,
+   "pad_detail": null,
+   "timing_driven": null,
+   "routability_driven": null,
+   "gpl": [],
+   "start": "quadratic",
+   "source": "",
+   "hold": "continue",
+   "density_caps": [],
+   "route_adjust": []
+  },
+  {
+   "name": "dp_keep",
+   "id": "ddba3d9e435f",
+   "density": null,
+   "pad_global": null,
+   "pad_detail": null,
+   "timing_driven": null,
+   "routability_driven": null,
+   "gpl": [],
+   "start": "positions",
+   "source": "npzdir:cellpos/bp_fe_top",
+   "hold": "keep",
+   "density_caps": [],
+   "route_adjust": []
+  }
+ ]
+}

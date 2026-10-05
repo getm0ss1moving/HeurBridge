@@ -144,6 +144,7 @@ class OrfsEvaluator(Evaluator):
     make_vars_extra: tuple = ()          # design-config overrides (e.g. ariane133's RTLMP settings)
     warm_start: str = ""                 # "quadratic": standard cells start at their cluster's quadratic position
     cluster_of: object = None            # (N_obj,) std-cell cluster ids for warm_start
+    cell_stage: object = None            # heurbridge.cellstage.CellStage: a cell-stage recipe for every run (None: none)
 
     def __post_init__(self):
         if self.fidelity < 2 and self.weights == cost.WEIGHTS:
@@ -170,18 +171,28 @@ class OrfsEvaluator(Evaluator):
         workdir = Path(workdir)
         workdir.mkdir(parents=True, exist_ok=True)
         tcl = workdir / ("%s.macros.tcl" % run_id)
+        if self.cell_stage is not None and self.warm_start:
+            raise ValueError("warm_start and a cell-stage recipe both set where the cells start")
         text = orfs.macro_placement_tcl(design, layout)
         if self.warm_start == "quadratic":
             text += self._warm_start_tcl(design, layout)
         elif self.warm_start:
             raise ValueError("unknown warm_start %r" % self.warm_start)
+        make_vars = tuple(self.make_vars_extra)
+        if self.cell_stage is not None:              # the recipe's start, hints and settings (heurbridge/cellstage)
+            hint, extra = self.cell_stage.prepare(self, design, layout, run_id, workdir)
+            text += hint
+            make_vars = self.cell_stage.merge(make_vars, extra)
         tcl.write_text(text)
         stage = "finish" if self.fidelity >= 2 else "grt"
         run = orfs.OrfsRun(flow_dir=self.flow_dir, design_config=self.design_config, variant=run_id,
                            macro_tcl=str(tcl.resolve()), stage=stage, threads=self.threads, timeout_s=self.timeout_s,
                            work_home=self.work_home, base_variant=self.base_variant, yosys=self.yosys,
-                           make_vars_extra=tuple(self.make_vars_extra), env={"EDA_THREADS": self.threads})
+                           make_vars_extra=make_vars, env={"EDA_THREADS": self.threads})
         rec = orfs.run(run)
+        if self.cell_stage is not None:              # before the cleanup below: inspection may read the databases
+            rec["cell_stage"] = self.cell_stage.describe(make_vars)
+            rec["cell_stage"].update(self.cell_stage.inspect(run))
         if not self.keep_results:           # logs and reports (every metric) stay; databases go
             import shutil
             d = run.dirs()
