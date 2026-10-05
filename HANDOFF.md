@@ -21,6 +21,11 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 - **D2 update (5 Oct 00:45):** (a)'s baseline failed in the tool's macro placer (PLACE_DENSITY is also its target
   utilization; MPL-0040); the owner chose (b): `seedB_orfs9_ariane133` (virtual resizing for every run) running. The
   smoke test of `--phase tls` passed (search step and six shifts); `tls_swerv`, `tls_ariane136` running.
+- **D2 (b) progress (5 Oct 08:00):** both baseline runs complete and identical (f2: setup WNS -0.059 ns, TNS -12.9 ns,
+  DRC 0). Warning for TB#5: the tool's own layout replayed at f2 swings J from 0.74 to 1.88 with one-site shifts, all
+  from setup TNS (-0.7 to -53.6 ns; wirelength, vias and power nearly equal): ariane133's f2 J is dominated by timing
+  noise under virtual resizing. `tls_ariane136`: no move kept in 8 steps (its start already clears both margins), so
+  its six shifts re-run TB#3's candidate (a determinism check); `tls_swerv`: one move kept (step 1), step 5 running.
 
 ---
 
