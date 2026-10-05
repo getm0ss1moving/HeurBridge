@@ -30,6 +30,12 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
   replicates (J and setup/hold slack, 6 of 6; local run files `runs/remote/tls_ariane136/.../evals_tls_f2.jsonl`,
   `runs/remote/tb_ariane136/.../evals_tb.jsonl`): the flow is deterministic across jobs and days. On ariane136 the
   timing-aware search leaves the candidate as it is (it passes the D11 (b) gates on all six shifts).
+- **D12 (b) registered 14:35 and running** (`reports/trackB_equal_budget_preregistration.md`, campaign EB, EB#1-EB#4
+  reserved): DREAMPlace's pick + the campaign's local search (`--phase tls --tls-tag dpls --tls-lambda 0 --tls-seed 0
+  --tls-verify-f2 --tls-pick jsafe ...`) vs HeurBridge's candidate (its one-position J_safe pick on all four designs).
+  `dpls_a` (bp_fe_top then bp_be_top) since 14:37; `dpls_b` (ariane136) when `tls_swerv` frees its slots; `dpls_c`
+  (swerv_wrapper) after `dpls_a` (the scratchpad's `launch_dpls.sh a|b|c`). After each: fetch,
+  `python scripts/equal_budget_confirm.py analyze --design <d>` once.
 
 ---
 

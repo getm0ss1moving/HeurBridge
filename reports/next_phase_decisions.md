@@ -204,7 +204,7 @@ Re-testing: D10.
 ## D3 T3.9: the cell bridge's endpoint
 
 - **Evidence:** the task list ranks the cell bridge's targets by f2 J (HEURBRIDGE_TASKS.md:372), but Track A has no
-  f2; its final cost is DREAMPlace f1 (reports/PROGRESS.md:316). DREAMPlace ignores start positions
+  f2; its final cost is DREAMPlace f1 (reports/PROGRESS.md:317). DREAMPlace ignores start positions
   (reports/demo_sketch_start.md:34), so a cell bridge cannot hand its result to DREAMPlace; it must deliver a placement.
   The look-ahead predictor misses both parts of its bar (reports/sketch_predictor_s2.md:38,
   reports/sketch_predictor_s2_ranking.md). *Negative results.*
@@ -277,7 +277,7 @@ Re-testing: D10.
 
 ## D8 Housekeeping (owner's actions; nothing was deleted)
 
-- **Staged for deletion** (moved there on 29 Sep: HANDOFF.md:597-598; sizes measured 2 Oct):
+- **Staged for deletion** (moved there on 29 Sep: HANDOFF.md:603-604; sizes measured 2 Oct):
   `/data/dzy/heura_repr/_to_delete_20260929/` on 224, 68 GB (its /data at 93 % use); on 225, 31 GB (/data at 99 %);
   on 231, 7.1 GB (root at 99 %). The final `rm -rf` is yours.
 - **Faulty GPUs:** `nvidia-smi` fails on 224 ("Unable to determine the device handle for GPU 0000:02:00.0: Unknown
