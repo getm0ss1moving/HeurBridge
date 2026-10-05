@@ -75,6 +75,12 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
   0.940 (below the tool's replays 0.949-0.956); `dpls_a` bp_fe_top 3 of 8 steps (f1 J 0.951 -> 0.935; kept moves at f2
   0.958 and 0.941, inside the D11 (b) gates against the tool's unshifted replay); `dpls_b` ariane136 step 0. 7 OpenROAD
   runs on 224. Next: `dpls_c` (swerv_wrapper) when `dpls_a` finishes.
+- **EB#1 (bp_fe_top) recorded 6 Oct 01:10: failed** (`reports/trackB_equal_budget.md`; p = 0.128 against alpha_j
+  0.025). `dpls_a`'s bp_fe_top part was complete (fetched as a partial snapshot: 45 f1 runs, 4 kept moves at f2, the
+  pick `bp_fe_top.dpls.s2.f2` (kept move of step 2) at the six shifts). Medians before the gates: HeurBridge 0.905,
+  DREAMPlace + local search 0.943; each arm fails hold on one shift. Reported only: the search lifts DREAMPlace's pick
+  from 0 to 5 of 6 shifts inside the gates (p = 0.0076 against DREAMPlace alone). At 01:08 `dpls_a` was at bp_be_top
+  step 6 of 8 (no move kept), `dpls_b` at ariane136 step 3, `seedB_orfs9_ariane133` in local search (step 2).
 
 ---
 
