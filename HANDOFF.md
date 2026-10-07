@@ -4,6 +4,31 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
+## 2026-10-07 — Macro chat: EB#1-EB#3 recorded (EB#3 passed); D2 (b) campaign done; TB#5 and EB#4 running
+
+- **Gap:** this chat was paused from 6 Oct about 07:15 until 7 Oct 15:30. `dpls_b` ended 6 Oct 16:09 and
+  `seedB_orfs9_ariane133` 17:12 (both rc 0), so my 4 slots on 224 sat idle for about 22 h; the cell chat took its full
+  share of 4 at 7 Oct 15:26 as agreed.
+- **D12 (b), equal search budget (`reports/trackB_equal_budget.md`; campaign EB):** EB#1 bp_fe_top failed (p = 0.128),
+  EB#2 bp_be_top failed (p = 0.79), **EB#3 ariane136 passed** (7 Oct 15:34; p = 0.0011 against alpha_j 0.00625):
+  HeurBridge's candidate J 0.975-0.976 on all six shifts inside the gates; DREAMPlace + local search (4 moves kept, f1
+  0.983 -> 0.981; pick `ariane136.dpls.s4.f2`) 1.036-1.038 before the gates, with setup failing on four of its six
+  shifts (D11 (b), against the tool's replicate at the same shift). Reported only: the search adds little to DREAMPlace
+  on ariane136 (p = 0.35 against DREAMPlace alone); it cost 34.5 flow-run hours. EB#4 (swerv_wrapper) is running.
+- **D2 (b) campaign done** (`seedB_orfs9_ariane133`): 80 program layouts at f1 (36 distinct, all completed), local
+  search, 20 f2 layouts (one stopped at the 7,200-s cap), 12 admitted under the TB rule (D6). **TB#5's candidate
+  `ariane133.ls5.n5`** (f2 J 0.904) fixed by `scripts/trackb_confirm.py candidate --design ariane133 --campaign-prefix
+  seedB_orfs9_` and reserved (alpha_5 = 0.0015625) before its test: addendum in `reports/trackB_preregistration.md`
+  (commit a55a963). Only complete separation can pass (p = 1/924). The tool's f2 replays vary J 0.74-1.88 (setup TNS).
+- **Running on 224 since 15:37 (my 4 slots; the cell chat has the other 4):** `tb9_ariane133` (TB#5: `--phase tbtest
+  --tb-candidate ariane133.ls5.n5.f2 --tb-workers 2` with the campaign's make variables, resumed from
+  `seedB_orfs9_ariane133`; 12 f2 runs, about 9-10 h) and `dpls_c` (EB#4: the scratchpad's `launch_dpls.sh c`; about a
+  day). Afterwards, once each: `python scripts/trackb_confirm.py analyze --design ariane133 --tb-prefix tb9_
+  --campaign-prefix seedB_orfs9_` (then `describe` with the same prefixes) and `python scripts/equal_budget_confirm.py
+  analyze --design swerv_wrapper`. The cell chat has ariane133's candidate run id for its C1 layouts.
+- **Citation re-map:** the scratchpad's `remap_citations.py` was lost to the temp-folder cleanup and rebuilt; it now
+  also re-maps `, :L` continuations (a second range after a cited file's first), which were left unmapped before.
+
 ## 2026-10-07 — Cell-placement chat: C1 stage 1 done on bp_fe_top and bp_be_top; ariane136 and swerv_wrapper running
 
 - **Stage 1 (f1, single runs, exploratory):** bp_fe_top (`cs_c1_bp_fe_top`, 6 Oct 03:48-05:31) and bp_be_top

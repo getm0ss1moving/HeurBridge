@@ -38,11 +38,15 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
   `tests/test_run_cell_stage.py` (+3: import, slots). Full suite (225, `cs_c1_tests2`): 271 passed, 5 skipped (data
   that exists only locally).
 
-### EB#1 and EB#2 results (6 Oct 01:10 and 03:35; no code change)
+### EB#1-EB#3 results; TB#5's candidate (6-7 Oct)
 - `scripts/equal_budget_confirm.py analyze --design bp_fe_top` run once on `dpls_a`'s complete bp_fe_top part (a
   partial fetch; bp_be_top still running): EB#1 failed (p = 0.128 against alpha_j 0.025; `reports/trackB_equal_budget.md`,
   `stats/alpha_ledger.jsonl`).
 - `--design bp_be_top` run once after `dpls_a` ended: EB#2 failed (p = 0.79 against alpha_j 0.0125).
+- `--design ariane136` run once after `dpls_b` ended: EB#3 passed (p = 0.0011 against alpha_j 0.00625).
+- `scripts/trackb_confirm.py`: `CANDIDATES` gains ariane133 (`ariane133.ls5.n5.f2`, fixed 7 Oct by `candidate
+  --campaign-prefix seedB_orfs9_`; pre-registration addendum); TB#5 reserved before its test (`tests/test_trackb_confirm.py`
+  passes).
 
 ### Cell stage on Track B: C0 infrastructure (5 Oct; owner's decisions CS-D1 to CS-D6)
 - `heurbridge/cellstage/` (new). `recipe.py`: `CellRecipe`, a content-hashed recipe for how the flow places the
