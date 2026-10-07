@@ -141,3 +141,40 @@ def test_slots_limit_the_test_shifts(campaign, monkeypatch):
     rows = RC.jl(camp / "evals_cs_t.jsonl")
     assert sorted({(r["cs_slot"], tuple(r["cs_shift"])) for r in rows}) == [(1, (2, 0)), (6, (-1, -1))]
     assert len(rows) == 2 * 2 * 3
+
+
+def _sources(camp, tmp, m1_gr_wl):
+    des, ref = RS.load_design(None, "d", camp, None)[:2]
+    mm = des.is_macro & ~des.is_fixed
+    rows = []
+    for rid, pos in (("d.tb.ref.f2", ref.pos[mm]), ("d.tb.cand.f2", ref.pos[mm].copy())):
+        if rid.endswith("cand.f2"):
+            pos[0] += 0.001                                  # the candidate of the campaign fixture
+        rec = dict(REC, gr_wl=m1_gr_wl if "ref" in rid else 1000.0, detailed_wirelength_um=1000.0)
+        rows.append(dict(run_id=rid, evaluator="orfs", fidelity=2, status="ok", record=rec,
+                         pos_macros=pos.tolist(), orient_macros=ref.orient[mm].tolist()))
+    src = tmp / "evals_tb.jsonl"
+    src.write_text("".join(json.dumps(r) + "\n" for r in rows))
+    return src
+
+
+def test_verified_default_rows_are_imported_only_when_identical(campaign, monkeypatch):
+    camp, rpath, recipes, calls, tmp = campaign
+    src = _sources(camp, tmp, 1000.0)                        # what the faked flow gives the default recipe
+    _argv(monkeypatch, camp, rpath, tmp, "--fidelity", "2", "--default-rows", str(src), "--verify-default", "1")
+    RC.main()
+    rows = {(r["cs_layout"], r["cs_recipe_name"]): r for r in RC.jl(camp / "evals_cs_t.jsonl")}
+    assert "imported_from" not in rows[("M1", "default")]              # the verification run
+    assert rows[("d.cand.f2", "default")]["imported_from"] == "%s:2" % src
+    assert len(calls) == 5
+
+
+def test_a_differing_verification_run_imports_nothing(campaign, monkeypatch):
+    camp, rpath, recipes, calls, tmp = campaign
+    src = _sources(camp, tmp, 950.0)                         # the source row of M1 differs from the flow's result
+    _argv(monkeypatch, camp, rpath, tmp, "--fidelity", "2", "--default-rows", str(src), "--verify-default", "1")
+    RC.main()
+    rows = RC.jl(camp / "evals_cs_t.jsonl")
+    assert not any("imported_from" in r for r in rows) and len(calls) == 6
+    assert RC.same_run({"status": "ok", "record": {"gr_wl": 1.0, "duration_s": 5}},
+                       {"status": "ok", "record": {"gr_wl": 1.0, "duration_s": 9}}) == (True, {})

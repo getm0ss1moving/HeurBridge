@@ -25,8 +25,17 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
   bp_be_top's job ended. At 15:25 the macro chat's jobs had all ended and 224 was idle. `cs_c1_ariane136` and
   `cs_c1_swerv_wrapper` started at 15:26 with 2 workers each, this chat's 4 slots. The macro chat was told that its
   4 slots are free for TB#5 and `dpls_c`.
-- **Next:** when a stage-1 job ends, the identity run and then stage 2 for bp_fe_top and bp_be_top
-  (`--fidelity 2 --shifts tb --race 2 --default-rows` the Track-B test's ledger).
+- **Stage 2 for bp_fe_top and bp_be_top queued on 224** (`cs_c1s2_bp`, scratchpad `c1/launch_c1_stage2_bp_queued.sh`).
+  - The job waits until `cs_c1_ariane136` or `cs_c1_swerv_wrapper` ends, so this chat stays within its 4 slots. It
+    then runs `--fidelity 2 --shifts tb --race 2 --default-rows runs/seed_orfs/<design>/evals_tb.jsonl --verify-default 1`
+    for each design.
+  - Each design's first R0 run (HeurBridge's layout, shift slot 1) is compared with its Track-B row before the rows
+    are imported. This is the record's identity run (reports/cell_stage_c1.md, Section 4), done for every design
+    instead of bp_fe_top only.
+  - All 12 shifted layouts of each design have a Track-B row (local check). The failed ones are named failures
+    (GRT-0116; one timeout), which are imported as such.
+- **Next:** ariane136's and swerv_wrapper's stage 2 once their stage-1 jobs end. Their final archives are needed at
+  launch, so these cannot be queued now.
 
 ---
 

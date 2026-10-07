@@ -6,6 +6,13 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 
 ## [Unreleased]
 
+### Cell stage: verified import of the default recipe's rows (7 Oct)
+- `scripts/run_cell_stage.py --verify-default N` (with `--default-rows`): the first N default-recipe jobs that have a
+  row of the unmodified cell stage run first, and each is compared with that row (status, failure name, every numeric
+  metric of the record but the run time). The other rows are imported only if all N are identical; otherwise every
+  default job runs. `same_run`, `default_sources` (refactored out of `import_default_rows`).
+- Tests: `tests/test_run_cell_stage.py` (+2: identical, differing).
+
 ### Cell stage on Track B: C1 prepared (6 Oct; no runs yet)
 - `heurbridge/cellstage/hints.py` (new): hint programs computed from each run's macro layout. `channel_caps(max_gap,
   max_density[, min_gap])` caps the density of every channel up to `max_gap` um wide, between facing macro edges or a

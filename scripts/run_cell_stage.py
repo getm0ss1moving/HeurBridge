@@ -22,6 +22,9 @@ runs/seed_orfs/<design>/evals_cs_<tag>.jsonl and runs/seed_orfs/<design>/cs_<tag
               default recipe whose fidelity and macro layout (positions to 1e-9 and orientations) match a row there
               is not run again; the row is copied into this tag's ledger with imported_from = <ledger>:<line> and
               scored like every other row.  Only rows of the plain ORFS evaluator (or of this default recipe) count
+  --verify-default N  with --default-rows: first run the first N default-recipe jobs that have such a row and compare
+              each with it (status and every numeric metric of the record but the run time); rows are imported only if
+              all N are identical, else every default job runs
 Rows: run id <design>.cs_<tag>.<layout>.s<slot>.<recipe id>.f<1|2>, program CS; every row carries the recipe, the
 layout, the shift, and the record's cell_stage entry (effective make variables, the cell stage's own log lines,
 drift).  J is scored like the campaign (cost_v3: J against the unmodified flow, timing gates against the same-path
@@ -81,11 +84,10 @@ def find_layout(des, lay, m1, rdir: Path, lid: str):
 PLAIN = "orfs"          # the evaluator of the unmodified cell stage in the campaigns and the Track-B tests
 
 
-def import_default_rows(ledger, jobs, sources, default_id: str, fidelity: int, des) -> dict:
-    """--default-rows: copy rows of the unmodified cell stage into this tag's ledger for the default recipe's jobs that
-    have no row yet.  A source row counts if its evaluator is the plain ORFS one or this default recipe's, at this
-    fidelity, completed or failed by a named deterministic failure, with no other recipe in its record.  Returns the
-    run ids imported and those with no matching row (they run as usual)."""
+def default_sources(sources, default_id: str, fidelity: int) -> dict:
+    """--default-rows: {layout key: ("<ledger>:<line>", row)} of rows of the unmodified cell stage.  A row counts if its
+    evaluator is the plain ORFS one or this default recipe's, at this fidelity, completed or failed by a named
+    deterministic failure, with no other recipe in its record."""
     idx = {}
     for path in sources:
         for n, line in enumerate(Path(path).read_text().splitlines(), 1):
@@ -98,12 +100,41 @@ def import_default_rows(ledger, jobs, sources, default_id: str, fidelity: int, d
                     or not (r.get("status") == "ok" or SA.deterministic_failure(r)):
                 continue
             idx.setdefault(SA.layout_key(r), ("%s:%d" % (path, n), r))
+    return idx
+
+
+def _probe(des, L) -> dict:
     mm = des.is_macro & ~des.is_fixed
+    return {"pos_macros": L.pos[mm].tolist(), "orient_macros": L.orient[mm].tolist()}
+
+
+def same_run(row: dict, src: dict) -> tuple:
+    """(identical, differences): status, the failure's name, and every numeric metric of the record but the run
+    time."""
+    a, b = row.get("record") or {}, src.get("record") or {}
+    diff = {}
+    if row.get("status") != src.get("status"):
+        diff["status"] = (row.get("status"), src.get("status"))
+    if row.get("status") != "ok" and a.get("failure") != b.get("failure"):
+        diff["failure"] = (a.get("failure"), b.get("failure"))
+    for k in sorted(set(a) | set(b)):
+        if k == "duration_s":
+            continue
+        x, y = a.get(k), b.get(k)
+        if isinstance(x, (int, float)) or isinstance(y, (int, float)):
+            if x != y:
+                diff[k] = (x, y)
+    return not diff, diff
+
+
+def import_default_rows(ledger, jobs, idx: dict, default_id: str, des) -> dict:
+    """Copy the matching rows of ``idx`` (default_sources) into this tag's ledger for the default recipe's jobs that
+    have no row yet.  Returns the run ids imported and those with no matching row (they run as usual)."""
     out = {"imported": [], "missing": []}
     for ev, L, rid, extra in jobs:
         if extra["cs_recipe"] != default_id or ledger.get(rid) is not None:
             continue
-        probe = {"pos_macros": L.pos[mm].tolist(), "orient_macros": L.orient[mm].tolist()}
+        probe = _probe(des, L)
         hit = idx.get(SA.layout_key(probe))
         if hit is None:
             out["missing"].append(rid)
@@ -140,6 +171,7 @@ def main():
     ap.add_argument("--race", type=int, default=0)
     ap.add_argument("--slots", default="", help="with --shifts tb: comma-separated slots to run (default all)")
     ap.add_argument("--default-rows", default="", help="comma-separated ledgers of unmodified-cell-stage runs")
+    ap.add_argument("--verify-default", type=int, default=0, help="with --default-rows: default jobs run and compared first")
     ap.add_argument("--workers", type=int, default=1, help="evaluations at a time (each runs one OpenROAD at a time)")
     ap.add_argument("--check-drift", action="store_true")
     ap.add_argument("--timeout", type=int, default=7200)
@@ -152,6 +184,8 @@ def main():
         raise SystemExit("--race picks f2 recipes from this tag's f1 rows: use it with --fidelity 2")
     if a.slots and a.shifts != "tb":
         raise SystemExit("--slots picks among the six shift slots: use it with --shifts tb")
+    if a.verify_default and not a.default_rows:
+        raise SystemExit("--verify-default compares runs with --default-rows: give both")
     a.flow, a.work_home_abs = str(Path(a.flow).resolve()), str(Path(a.work_home).resolve())
     name, cfg = a.design.split("/")[-1], "./designs/%s/config.mk" % a.design
     rdir = Path(a.campaign_dir) if a.campaign_dir else ROOT / "runs" / "seed_orfs" / name
@@ -227,10 +261,6 @@ def main():
                eda_threads=tools.eda_threads(8), record_host=True)
     print(json.dumps({"cell_stage": a.tag, "design": name, "fidelity": a.fidelity, "runs": len(jobs),
                       "workers": a.workers}), flush=True)
-    if a.default_rows:
-        got = import_default_rows(ledger, jobs, [x for x in a.default_rows.split(",") if x], default.id, a.fidelity, des)
-        print(json.dumps({"default_rows": a.default_rows, "imported": len(got["imported"]),
-                          "not_found": got["missing"]}), flush=True)
 
     def one(job):
         ev, L, rid, extra = job
@@ -241,6 +271,30 @@ def main():
                           "wall_s": row.get("wall_s"), "log_marks": cs.get("log_marks"), "drift": cs.get("drift"),
                           "inspect_error": cs.get("inspect_error")}, default=str), flush=True)
         return row
+
+    if a.default_rows:
+        idx = default_sources([x for x in a.default_rows.split(",") if x], default.id, a.fidelity)
+        identical = True
+        if a.verify_default:
+            vjobs = [j for j in jobs if j[3]["cs_recipe"] == default.id
+                     and SA.layout_key(_probe(des, j[1])) in idx][:a.verify_default]
+            for j in vjobs:
+                where, src = idx[SA.layout_key(_probe(des, j[1]))]
+                same, diff = same_run(one(j), src)
+                identical = identical and same
+                print(json.dumps({"verify_default": j[2], "source": where, "identical": same, "differing": diff},
+                                 default=str), flush=True)
+            if not vjobs:
+                identical = False
+                print(json.dumps({"verify_default": "no default job has a source row: nothing imported"}), flush=True)
+        if identical:
+            got = import_default_rows(ledger, jobs, idx, default.id, des)
+            print(json.dumps({"default_rows": a.default_rows, "imported": len(got["imported"]),
+                              "not_found": got["missing"]}), flush=True)
+        else:
+            print(json.dumps({"default_rows": a.default_rows, "imported": 0,
+                              "reason": "a verification run differs from its source row: every default job runs"}),
+                  flush=True)
     SA._map(one, jobs, max(1, a.workers))
 
 
