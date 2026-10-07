@@ -4,6 +4,32 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
+## 2026-10-07 — Cell-placement chat: C1 stage 1 done on bp_fe_top and bp_be_top; ariane136 and swerv_wrapper running
+
+- **Stage 1 (f1, single runs, exploratory):** bp_fe_top (`cs_c1_bp_fe_top`, 6 Oct 03:48-05:31) and bp_be_top
+  (`cs_c1_bp_be_top`, 05:32-09:48). Local run files: `runs/remote/cs_c1_<design>/runs/seed_orfs/<design>/evals_cs_c1.jsonl`.
+  - R0 reproduces the campaign's f1 rows of all four layouts exactly (14 metrics each).
+  - R7 equals R0 on all four, as predicted.
+  - R9 (DREAMPlace's start kept): no cell moves in 3_1 or 3_3, which closes the smoke's open check. Global routing
+    then fails (GRT-0116) on all four layouts; R9c fails on three of four.
+  - bp_be_top is sensitive to congestion: 9 of its 24 runs fail global routing (GRT-0116), among them R1c on both
+    layouts and R2, R4 and R8 on M1. On its HeurBridge layout no recipe beats R0 at f1 (R0 0.918, next R3 0.966).
+  - bp_fe_top, J before the gates, R0 against the best recipe: M1 0.959 against 0.922 (R6, no timing-driven global
+    placement); HeurBridge's layout 0.900 against 0.887 (R5 and R3).
+  - Stage 2's race (the fixed rule):
+    - bp_fe_top: R6 and R1 on M1; R5 and R3 on HeurBridge's layout.
+    - bp_be_top: R5 and R7 on M1; R7 and R3 on HeurBridge's layout.
+    - R7 enters on both bp_be_top layouts because its f1 rows tie R0's. It runs as the rule says, and its f2 rows
+      double as a determinism check.
+- **224:** nothing of this chat ran between 6 Oct 09:48 and 7 Oct 15:25, because the session was not re-invoked when
+  bp_be_top's job ended. At 15:25 the macro chat's jobs had all ended and 224 was idle. `cs_c1_ariane136` and
+  `cs_c1_swerv_wrapper` started at 15:26 with 2 workers each, this chat's 4 slots. The macro chat was told that its
+  4 slots are free for TB#5 and `dpls_c`.
+- **Next:** when a stage-1 job ends, the identity run and then stage 2 for bp_fe_top and bp_be_top
+  (`--fidelity 2 --shifts tb --race 2 --default-rows` the Track-B test's ledger).
+
+---
+
 ## 2026-10-06 — Cell-placement chat: C1 prepared (fixed before any run); C0 smoke done; C1 stage 1 running
 
 - **224:** the macro chat agreed (6 Oct 01:20) that `dpls_a`'s 2 slots go to this chat, and that its next jobs (`dpls_c`,
