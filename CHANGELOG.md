@@ -6,6 +6,17 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 
 ## [Unreleased]
 
+### Cell stage: a slot gate shared with the macro chat; the C1 queue gated (7 Oct, evening)
+- `heurbridge/cellstage/slots.py` (new): cooperative sharing of 224's 8 OpenROAD slots.
+  - Jobs register the slots they hold as `<dir>/<owner>.<job>` files. A registration counts while its job runs, or
+    for 6 h after a launch is announced.
+  - Each gated evaluation takes a token; a lower priority number goes first.
+  - The server's live OpenROAD count is a hard cap.
+- `scripts/run_cell_stage.py --slot-gate DIR [--slot-priority N]`: every evaluation takes a token first.
+- `scripts/server/cs_c1_queue.sh`, second version: each C1 step starts when it is ready, and the gate caps and orders
+  the evaluations (stage 2 before stage 1). The running job `cs_c1_queue` still runs the first version (3230aa8).
+- Tests: `tests/test_cellstage_slots.py` (new, 4); `tests/test_cs_c1_queue.py` (second version).
+
 ### Cell stage: the campaign's make variables, a C1 queue on 224, ariane133 joins C1 (7 Oct)
 - `scripts/run_cell_stage.py`: `--make-var` defaults to the campaign's own (its meta.json, `config.make_var`); any
   other value is refused, so J stays normalized to the flow the campaign ran (ariane133: D2 (b)).

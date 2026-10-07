@@ -1,5 +1,6 @@
-"""scripts/server/cs_c1_queue.sh with fake jobs: ledgers copied from running stage-1 jobs, an incomplete copy skipped by
-name, stage 2 before stage 1, and never more than this chat's two pairs of slots."""
+"""scripts/server/cs_c1_queue.sh with fake jobs: ledgers copied from running stage-1 jobs, a stage-2 entry started when its
+stage-1 job has ended, an incomplete copy skipped by name, a stage-1 entry started at once (the slot gate inside the
+runner orders and caps the evaluations: tests/test_cellstage_slots.py)."""
 
 import json
 import subprocess
@@ -22,7 +23,7 @@ def _job(state: Path, name: str, seconds: float, wd: Path | None = None):
     return p
 
 
-def test_queue_order_skips_and_slots(tmp_path):
+def test_queue_starts_each_step_when_ready_and_skips_incomplete_ledgers(tmp_path):
     state, repo = tmp_path / "state", tmp_path / "repo"
     state.mkdir()
     (repo / "logs").mkdir(parents=True)
@@ -36,26 +37,24 @@ def test_queue_order_skips_and_slots(tmp_path):
         led.parent.mkdir(parents=True)
         led.write_text("".join(json.dumps(ROW) + "\n" for _ in range(rows)))
         _job(state, "cs_c1_%s" % d, 1.0, w)
-    _job(state, "cs_other", 2.5)                   # another job of this chat (one pair)
     events = tmp_path / "events"
     fake = tmp_path / "fake_run.sh"
     fake.write_text('#!/bin/bash\necho "start $1 $2 $(python3 -c "import time; print(time.time())")" >> %s\n'
-                    'sleep 1\necho "end $1 $2 $(python3 -c "import time; print(time.time())")" >> %s\n' % (events, events))
+                    'sleep 0.5\n' % events)
     fake.chmod(0o755)
     t0 = time.time()
-    p = subprocess.run(["bash", str(QUEUE), "cs_c1_queue", "s2:A:a.f2", "s2:B:b.f2", "s1:C:c.f2"], cwd=repo,
-                       env={"PATH": "/usr/bin:/bin:/usr/sbin:/sbin", "HB_STATE_DIR": str(state), "HB_QUEUE_POLL": "0.1",
-                            "HB_QUEUE_RUN": str(fake)}, capture_output=True, text=True, timeout=60)
+    p = subprocess.run(["bash", str(QUEUE), "s2:A:a.f2", "s2:B:b.f2", "s1:C:c.f2"], cwd=repo,
+                       env={"PATH": "/usr/bin:/bin:/usr/sbin:/sbin", "HB_STATE_DIR": str(state),
+                            "HB_SLOT_DIR": str(tmp_path / "slots"), "HB_QUEUE_POLL": "0.1", "HB_QUEUE_RUN": str(fake)},
+                       capture_output=True, text=True, timeout=60)
     assert p.returncode == 0, p.stdout + p.stderr
-    assert "s2:B:b.f2 skipped: the stage-1 ledger copy has 1 of 2 f1 rows" in p.stdout
+    assert "s2:B:b.f2 skipped: the stage-1 ledger has 1 of 2 f1 rows" in p.stdout
     assert "all entries done" in p.stdout
     assert (repo / "runs" / "seed_orfs" / "A" / "evals_cs_c1.jsonl").read_text().count('"fidelity": 1,') == 2
     ev = {}
     for line in events.read_text().splitlines():
         what, kind, d, ts = line.split()
-        ev[(what, kind, d)] = float(ts) - t0
-    assert ("start", "s2", "B") not in ev
-    assert ev[("start", "s2", "A")] >= 1.0                              # after A's stage-1 job ended
-    assert ev[("start", "s1", "C")] >= ev[("start", "s2", "A")]          # stage 2 first
-    # two pairs at most: while cs_other (to 2.5 s) and s2:A ran, C waited for one of them to end
-    assert ev[("start", "s1", "C")] >= min(ev[("end", "s2", "A")], 2.5) - 0.05
+        ev[(kind, d)] = float(ts) - t0
+    assert ("s2", "B") not in ev
+    assert ev[("s1", "C")] < 1.0                         # at once: the runner's slot gate orders the evaluations
+    assert ev[("s2", "A")] >= 1.0                         # after A's stage-1 job ended

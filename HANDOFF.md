@@ -76,6 +76,15 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
     It needs no launch by hand, since the queue copies their stage-1 ledgers while those jobs run.
   - Then ariane133's stage 1 runs.
   - ariane133's stage 2 needs TB#5's rows (`tb9_ariane133`, running), so it is launched after that test ends.
+- **Owner, 7 Oct evening: "use the idle slots while the macro chat isn't using them."** A slot gate is built
+  (CHANGELOG) but not in use yet, for three reasons.
+  - No slot was idle: at 18:55 all 8 OpenROAD runs were running, 4 of them the macro chat's.
+  - Another user's Gaussian jobs take about 40 of 224's 64 cores (load about 50), so C1's f1 runs take 2.2-3 times
+    their campaign time. The load changes run time, not results: ariane136's R0 on M1 gives exactly the campaign's J
+    (0.9576387134518968) in 5,070 s against 2,012 s. Only the 7,200-s step cap can turn it into a failure, as it did
+    for TB#5's first runs (the macro chat's D14).
+  - Gating the queue means stopping the two waiting queue jobs, which have started no run. That needs the owner's OK,
+    and the macro chat would register its jobs in the slot directory.
 
 ---
 

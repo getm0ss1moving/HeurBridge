@@ -17,6 +17,8 @@ runs/seed_orfs/<design>/evals_cs_<tag>.jsonl and runs/seed_orfs/<design>/cs_<tag
   --race K    with --fidelity 2: per layout, the default recipe plus the K best other recipes by this tag's f1 rows
               (J before the gates; heurbridge/cellstage/select.race); without it every recipe runs
   --check-drift  for recipes whose cells start at given positions: how far they moved after 3_1, 3_3 and 3_5
+  --slot-gate DIR  share the server's slots with the macro chat: every evaluation first takes a token from DIR
+              (heurbridge/cellstage/slots.py; --slot-priority, lower first)
   --make-var  the campaign's own KEY=VALUE overrides; by default read from its meta.json (config.make_var), and any
               other value is refused, since J is normalized to the flow the campaign ran (ariane133's D2 (b) runs)
   --slots     with --shifts tb: only these slots (1-6), e.g. one run to compare with an earlier one
@@ -174,6 +176,8 @@ def main():
     ap.add_argument("--slots", default="", help="with --shifts tb: comma-separated slots to run (default all)")
     ap.add_argument("--default-rows", default="", help="comma-separated ledgers of unmodified-cell-stage runs")
     ap.add_argument("--verify-default", type=int, default=0, help="with --default-rows: default jobs run and compared first")
+    ap.add_argument("--slot-gate", default="", help="slot registry directory shared with the macro chat (slots.py)")
+    ap.add_argument("--slot-priority", type=int, default=0)
     ap.add_argument("--workers", type=int, default=1, help="evaluations at a time (each runs one OpenROAD at a time)")
     ap.add_argument("--check-drift", action="store_true")
     ap.add_argument("--timeout", type=int, default=7200)
@@ -272,9 +276,20 @@ def main():
     print(json.dumps({"cell_stage": a.tag, "design": name, "fidelity": a.fidelity, "runs": len(jobs),
                       "workers": a.workers}), flush=True)
 
+    gate = None
+    if a.slot_gate:
+        from heurbridge.cellstage.slots import SlotGate
+        gate = SlotGate(a.slot_gate, log=lambda m: print(m, flush=True))
+        print(json.dumps({"slot_gate": a.slot_gate, "priority": a.slot_priority, **gate.state()}), flush=True)
+
     def one(job):
         ev, L, rid, extra = job
-        row = SA._eval(ev, des, L, base, rid, work, ledger, extra)
+        tok = gate.acquire(a.slot_priority, rid) if gate is not None and ledger.get(rid) is None else None
+        try:
+            row = SA._eval(ev, des, L, base, rid, work, ledger, extra)
+        finally:
+            if tok is not None:
+                gate.release(tok)
         cs = (row.get("record") or {}).get("cell_stage") or {}
         print(json.dumps({"run": rid, "status": row.get("status"), "J_raw": row.get("J_raw"),
                           "failure": (row.get("record") or {}).get("failure") or row.get("error"),
