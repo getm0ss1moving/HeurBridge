@@ -94,3 +94,14 @@ replicates (a failed gate or flow is +inf; a shift slot without a legal common s
 no p below alpha_5 is attainable). Descriptive, not part of the test: the tool's four same-path replays at f2 vary J
 from 0.739 to 1.877 (the same file's lines 1-4), almost entirely through setup TNS: under this flow ariane133's f2 J is
 dominated by timing noise.
+
+## Addendum (7 Oct 19:15): TB#5's runs restarted (decision D14 (c))
+
+Another user's jobs took about 40 of 224's 64 cores from the afternoon of 7 Oct. Both of TB#5's first runs (job
+`tb9_ariane133`: the candidate and the tool at shift (+2, 0)) hit the 7,200-s cap, in `4_1_cts` and `5_2_route`. The
+campaign's ariane133 f2 runs had taken 1.0-1.9 h. No replicate had completed (0 of 12). The owner decided (D14 (c),
+reports/next_phase_decisions.md) to stop the job and re-run the test with only TB#5's runs on our side of 224. The
+voided runs stay in the record (`runs/remote/tb9_ariane133/runs/seed_orfs/ariane133/evals_tb.jsonl`). Unchanged: the
+candidate `ariane133.ls5.n5.f2`, the six shifts and their fallback rule, the gates (D6), alpha_5 and the analysis. The
+re-run is job `tb10_ariane133` (2 runs at a time), analysed once with `--tb-prefix tb10_ --campaign-prefix
+seedB_orfs9_`.

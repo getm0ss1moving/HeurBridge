@@ -204,7 +204,7 @@ Re-testing: D10.
 ## D3 T3.9: the cell bridge's endpoint
 
 - **Evidence:** the task list ranks the cell bridge's targets by f2 J (HEURBRIDGE_TASKS.md:372), but Track A has no
-  f2; its final cost is DREAMPlace f1 (reports/PROGRESS.md:328). DREAMPlace ignores start positions
+  f2; its final cost is DREAMPlace f1 (reports/PROGRESS.md:329). DREAMPlace ignores start positions
   (reports/demo_sketch_start.md:34), so a cell bridge cannot hand its result to DREAMPlace; it must deliver a placement.
   The look-ahead predictor misses both parts of its bar (reports/sketch_predictor_s2.md:38,
   reports/sketch_predictor_s2_ranking.md). *Negative results.*
@@ -277,7 +277,7 @@ Re-testing: D10.
 
 ## D8 Housekeeping (owner's actions; nothing was deleted)
 
-- **Staged for deletion** (moved there on 29 Sep: HANDOFF.md:780-781; sizes measured 2 Oct):
+- **Staged for deletion** (moved there on 29 Sep: HANDOFF.md:783-784; sizes measured 2 Oct):
   `/data/dzy/heura_repr/_to_delete_20260929/` on 224, 68 GB (its /data at 93 % use); on 225, 31 GB (/data at 99 %);
   on 231, 7.1 GB (root at 99 %). The final `rm -rf` is yours.
 - **Faulty GPUs:** `nvidia-smi` fails on 224 ("Unable to determine the device handle for GPU 0000:02:00.0: Unknown
@@ -383,3 +383,20 @@ Re-testing: D10.
   4 + 4 split follow. (c) suspends CS-D2 (a)'s split for those hours.
 - **Recommendation: (c):** TB#5 gets clean timings without waiting an unknown time for the other user's jobs. In (b)
   and (c) the voided runs stay in the record, marked as voided by the load.
+- **Decided 7 Oct 19:00 (owner): (c).** `tb9_ariane133` and `dpls_c` stopped 18:56; their runs stay in the record as
+  voided by the load (`runs/remote/tb9_ariane133/runs/seed_orfs/ariane133/evals_tb.jsonl`: both runs at the cap;
+  `runs/remote/dpls_c/runs/seed_orfs/swerv_wrapper/evals_dpls.jsonl`: two at the cap, one GRT-0116, one completed). TB#5
+  re-runs alone as `tb10_ariane133` once the cell chat's runs have ended and its queues are held; then EB#4 from the
+  start (`dpls_c2`) and TW#5 (D15) share this chat's 4 slots. Evidence added by the cell chat (its report, 7 Oct): its C1
+  runs under the same load took 2.2-3 times longer with identical results (R0 on ariane136's M1 reproduced the campaign
+  replay's J exactly), so the load changes run time, not results; only the 7,200-s cap bites.
+
+## D15 DREAMPlace and OpenROAD on ariane133 (owner's request, 7 Oct 19:00)
+
+- **Evidence:** bp_fe_top, bp_be_top, ariane136 and swerv_wrapper have the three-way comparison (TW#1-TW#4:
+  HeurBridge, DREAMPlace and the tool's own OpenROAD macro placement through the same flow) and the equal-budget test
+  (EB#1-EB#4); ariane133, added later under D2 (b), has only the test against the tool (TB#5).
+- **Decided 7 Oct 19:00 (owner): a three-way comparison on ariane133, TW#5.** DREAMPlace's ariane133 layouts (GPU on
+  225) through the same flow (D2 (b)'s make variables) next to HeurBridge's TB#5 candidate and the tool, pre-registered
+  before any DREAMPlace layout runs through the flow. As a test registered after 4 Oct: gates under D11 (b) and each
+  arm's pick by one-position J_safe (D13 (a)). About a day on 224 after TB#5.

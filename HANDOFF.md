@@ -31,8 +31,11 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
   (candidate and tool at shift (+2, 0)) both hit the 7,200-s cap (`4_1_cts`, `5_2_route`); the campaign's ariane133
   f2 runs took 1.0-1.9 h. EB#4's first two f1 runs failed (one at the cap, one GRT-0116). No TB#5 replicate has
   completed. Options in `reports/next_phase_decisions.md`, D14; nothing stopped without the owner's OK.
-- **Owner's request (7 Oct 19:00):** compare with DREAMPlace and OpenROAD on ariane133 too (the four other designs
-  have TW and EB); scope being confirmed.
+- **Owner's decisions (7 Oct 19:00):** D14 (c): `tb9_ariane133` and `dpls_c` stopped 18:56 (voided runs kept);
+  TB#5 re-runs alone as `tb10_ariane133` once the cell chat's runs have ended and its queues are held; then EB#4
+  from the start (`dpls_c2`) and TW#5. D15: a three-way comparison on ariane133 (TW#5: DREAMPlace's layouts through
+  the same flow next to HeurBridge and OpenROAD; D11 (b) gates, D13 (a) picks), pre-registered before its runs.
+  Addenda: `reports/trackB_preregistration.md` and `reports/trackB_equal_budget_preregistration.md` (7 Oct 19:15).
 - **Citation re-map:** the scratchpad's `remap_citations.py` was lost to the temp-folder cleanup and rebuilt; it now
   also re-maps `, :L` continuations (a second range after a cited file's first), which were left unmapped before.
 

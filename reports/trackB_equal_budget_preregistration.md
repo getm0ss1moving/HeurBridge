@@ -65,3 +65,13 @@ placement?
   search is known. On ariane136 and swerv_wrapper DREAMPlace's pick comes from the 3 of its 12 layouts that completed
   the flow at f1.
 - f3 is not available.
+
+## Addendum (7 Oct 19:15): EB#4's search restarted (decision D14 (c))
+
+`dpls_c` (swerv_wrapper) ran under another user's load on 224 (about 40 of 64 cores) from its launch on 7 Oct 15:37.
+Of its first four f1 runs two hit the 7,200-s cap, one failed with GRT-0116 congestion and one completed
+(`runs/remote/dpls_c/runs/seed_orfs/swerv_wrapper/evals_dpls.jsonl`). No step of the search had finished and no f2
+run existed. The owner decided (D14 (c), reports/next_phase_decisions.md) to stop it. The search restarts from the
+start as job `dpls_c2` after TB#5's re-run. Unchanged: start, seed 0, moves, budget, pick rule, gates, alpha_4 and the
+analysis (`equal_budget_confirm.py analyze --design swerv_wrapper`: dpls_c holds no f2 ledger, so its glob finds only
+dpls_c2's). The voided runs stay in the record.
