@@ -76,3 +76,38 @@ Reported, not tested: median J before the gates: HeurBridge 1.0167, DREAMPlace+L
 
 Sources: runs/remote/tb_bp_be_top/runs/seed_orfs/bp_be_top/evals_tb.jsonl, runs/remote/dpls_a/runs/seed_orfs/bp_be_top/evals_dpls_f2.jsonl, runs/remote/tw_a/runs/seed_orfs/bp_be_top/evals_ext_dp.jsonl, runs/remote/seedB_orfs7_bp_be_top/runs/seed_orfs/bp_be_top/evals_f2.jsonl.
 
+## ariane136 (EB#3)
+
+Recorded 2026-10-07T15:34:22. **PASSED**: HeurBridge (programs + local search) lower than DREAMPlace + the same local search, exact one-sided rank-sum permutation p = 0.001082 against alpha_j = 0.00625.
+
+Reported, not tested: median J before the gates: HeurBridge 0.9761, DREAMPlace+LS 1.0369, DREAMPlace 1.0388, tool 1.0050; DREAMPlace+LS lower than DREAMPlace under the same gates (what the search adds to DREAMPlace): p = 0.3485. DREAMPlace+LS's flow runs: 48 at f1 and 4 at f2 in its search (34.5 flow-run hours), after DREAMPlace's selection (15 runs, 18.6 flow-run hours).
+
+| replicate | arm | shift | J (gated, D11 b; tool: before gates) | J before gates | gates failed |
+|---|---|---|---|---|---|
+| ariane136.tb.cand.s1.f2 | HeurBridge | [2, 0] | 0.9763 | 0.9763 | - |
+| ariane136.tb.cand.s2.f2 | HeurBridge | [-2, 0] | 0.9759 | 0.9759 | - |
+| ariane136.tb.cand.s3.f2 | HeurBridge | [0, -1] | 0.9763 | 0.9763 | - |
+| ariane136.tb.cand.s4.f2 | HeurBridge | [0, 2] | 0.9764 | 0.9764 | - |
+| ariane136.tb.cand.s5.f2 | HeurBridge | [1, 1] | 0.9753 | 0.9753 | - |
+| ariane136.tb.cand.s6.f2 | HeurBridge | [-1, -1] | 0.9759 | 0.9759 | - |
+| ariane136.dpls.tb.s1.f2 | DREAMPlace+LS | [2, 0] | 1.0366 | 1.0366 | - |
+| ariane136.dpls.tb.s2.f2 | DREAMPlace+LS | [-2, 0] | +inf | 1.0373 | setup |
+| ariane136.dpls.tb.s3.f2 | DREAMPlace+LS | [0, -1] | +inf | 1.0379 | setup |
+| ariane136.dpls.tb.s4.f2 | DREAMPlace+LS | [0, 2] | 1.0363 | 1.0363 | - |
+| ariane136.dpls.tb.s5.f2 | DREAMPlace+LS | [1, 1] | +inf | 1.0373 | setup |
+| ariane136.dpls.tb.s6.f2 | DREAMPlace+LS | [-1, -1] | +inf | 1.0357 | setup |
+| ariane136.ext_dp.tb.s1.f2 | DREAMPlace | [2, 0] | 1.0383 | 1.0383 | - |
+| ariane136.ext_dp.tb.s2.f2 | DREAMPlace | [-2, 0] | +inf | 1.0394 | setup |
+| ariane136.ext_dp.tb.s3.f2 | DREAMPlace | [0, -1] | +inf | 1.0369 | setup |
+| ariane136.ext_dp.tb.s4.f2 | DREAMPlace | [0, 2] | 1.0381 | 1.0381 | - |
+| ariane136.ext_dp.tb.s5.f2 | DREAMPlace | [1, 1] | +inf | +inf | flow |
+| ariane136.ext_dp.tb.s6.f2 | DREAMPlace | [-1, -1] | +inf | 1.0403 | setup |
+| ariane136.tb.ref.s1.f2 | tool | [2, 0] | 1.0203 | 1.0203 | - |
+| ariane136.tb.ref.s2.f2 | tool | [-2, 0] | 1.0053 | 1.0053 | - |
+| ariane136.tb.ref.s3.f2 | tool | [0, -1] | 1.0032 | 1.0032 | - |
+| ariane136.tb.ref.s4.f2 | tool | [0, 2] | 1.0042 | 1.0042 | - |
+| ariane136.tb.ref.s5.f2 | tool | [1, 1] | 1.0047 | 1.0047 | - |
+| ariane136.tb.ref.s6.f2 | tool | [-1, -1] | 1.0055 | 1.0055 | - |
+
+Sources: runs/remote/tb_ariane136/runs/seed_orfs/ariane136/evals_tb.jsonl, runs/remote/dpls_b/runs/seed_orfs/ariane136/evals_dpls_f2.jsonl, runs/remote/tw_b/runs/seed_orfs/ariane136/evals_ext_dp.jsonl, runs/remote/seedB_orfs7_ariane136/runs/seed_orfs/ariane136/evals_f2.jsonl.
+

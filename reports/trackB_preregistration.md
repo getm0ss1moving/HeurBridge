@@ -74,3 +74,23 @@ computed by `scripts/trackb_confirm.py candidate --design swerv_wrapper` from th
 (alpha_4 = 0.003125). Descriptive, not part of the test: unlike on the other three designs, this candidate's f2 J lies
 above all four same-path replays of the tool's layout (J 0.8407-0.8611, the same file's lines 1-4). The test runs as
 registered.
+
+## Addendum (7 Oct 15:36): ariane133's candidate, fixed before its test (TB#5)
+
+ariane133 runs under the owner's decision D2 (b) of 5 Oct (reports/next_phase_decisions.md, D2): virtual
+timing-driven resizing for every run, the baseline included (`GLOBAL_PLACEMENT_ARGS=-keep_resize_below_overflow 0.01`,
+with `RTLMP_MAX_LEVEL=1` as before). It is a documented flow deviation, the same for the candidate's and the tool's
+runs, so J stays normalized to the same flow. As Section 3 provides, after the campaign completed (job
+`seedB_orfs9_ariane133`) and before its test ran: **ariane133.ls5.n5** (f2 J 0.9038 under Section 4's rule; 12 of 20
+f2 layouts admitted), computed by `scripts/trackb_confirm.py candidate --design ariane133 --campaign-prefix seedB_orfs9_`
+from the local run file `runs/remote/seedB_orfs9_ariane133/runs/seed_orfs/ariane133/evals_f2.jsonl:15`. The gates stay
+as registered (D6: the replay band's median, the 0.02-ns guard, no sign rule; decision D11 keeps D6 for TB#5). TB#5 is
+reserved with it (alpha_5 = 0.0015625). The test's runs: job `tb9_ariane133` (`--phase tbtest` with the campaign's make
+variables), analysed with `--tb-prefix tb9_ --campaign-prefix seedB_orfs9_`.
+
+Stated in advance: with six replicates per arm the smallest attainable p is 1/924 = 0.0011, below alpha_5; the next is
+2/924 = 0.0022, above it. TB#5 therefore passes only if all six candidate replicates lie below all six reference
+replicates (a failed gate or flow is +inf; a shift slot without a legal common shift leaves fewer replicates, and then
+no p below alpha_5 is attainable). Descriptive, not part of the test: the tool's four same-path replays at f2 vary J
+from 0.739 to 1.877 (the same file's lines 1-4), almost entirely through setup TNS: under this flow ariane133's f2 J is
+dominated by timing noise.
