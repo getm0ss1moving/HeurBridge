@@ -178,3 +178,14 @@ def test_a_differing_verification_run_imports_nothing(campaign, monkeypatch):
     assert not any("imported_from" in r for r in rows) and len(calls) == 6
     assert RC.same_run({"status": "ok", "record": {"gr_wl": 1.0, "duration_s": 5}},
                        {"status": "ok", "record": {"gr_wl": 1.0, "duration_s": 9}}) == (True, {})
+
+
+def test_the_campaigns_make_vars_are_used_and_others_refused(campaign, monkeypatch):
+    camp, rpath, recipes, calls, tmp = campaign
+    (camp / "meta.json").write_text(json.dumps({"config": {"make_var": ["RTLMP_MAX_LEVEL=1"]}}))
+    _argv(monkeypatch, camp, rpath, tmp, "--fidelity", "1")
+    RC.main()
+    assert calls and all("RTLMP_MAX_LEVEL=1" in c.make_vars_extra for c in calls)
+    _argv(monkeypatch, camp, rpath, tmp, "--fidelity", "1", "--make-var", "RTLMP_MAX_LEVEL=2")
+    with pytest.raises(SystemExit, match="differs from the campaign's own"):
+        RC.main()

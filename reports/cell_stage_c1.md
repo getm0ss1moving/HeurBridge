@@ -5,7 +5,7 @@
 | Report | CS-C1 |
 | Date | 6 Oct 2026 |
 | Status | **exploratory, fixed before any C1 run**: nothing here is a claim; no alpha is reserved (the alpha-ledger's campaign CS starts with the confirmatory tests, C3) |
-| Owner's decisions | CS-D1 to CS-D6, adopted 5 Oct (HANDOFF.md:106-111, :119-120) |
+| Owner's decisions | CS-D1 to CS-D6, adopted 5 Oct (HANDOFF.md:114-119, :127-128) |
 | Track | B (ORFS 2024-12-13 8ae3ae36, OpenROAD 676f8451, Nangate45; ENV_REPORT.md:138-139) |
 | Cost | cost_v3's J normalized to the unmodified flow (configs/cost.yaml:3, :12-25) |
 | Timing gates | decision D11 (b): each run against the tool's run at the same shift (heurbridge/eval/cost.py:129), 0.02-ns guard |
@@ -38,7 +38,7 @@ Eight layouts: the tool's macro layout and HeurBridge's Track-B candidate for ea
 - **ariane133:** its two layouts join after the macro chat fixes TB#5's candidate (its D2 (b) campaign is running).
   Its recipe file is written then by the same rules. That campaign already runs every layout with virtual resizing
   (reports/next_phase_decisions.md:196), so R5 equals R0 there.
-- **Held out:** the confirmatory tests (C3) will use other macro layouts of these designs (CS-D1 (a); HANDOFF.md:119-120).
+- **Held out:** the confirmatory tests (C3) will use other macro layouts of these designs (CS-D1 (a); HANDOFF.md:127-128).
 
 ## 3 Recipes (12 per design)
 
@@ -49,7 +49,7 @@ the settings are identical.
 |---|---|---|---|
 | R0 default | nothing | 3b8b11b81c3f | the control: the Track-B campaigns and tests ran with it |
 | R1 quad_restart | cells start at their cluster's quadratic position; 3_3 restarts from the core centre | f17371a3bb63 | the warm start of the earlier Track-B demos; it shapes only 3_1 and the IO pins (heurbridge/cellstage/recipe.py:23-30) |
-| R1c quad_continue | the same start; 3_3 continues from 3_1 (`-skip_initial_place`) | a883991e2010 | the start reaches the main global placement (C0's finding, HANDOFF.md:117-118) |
+| R1c quad_continue | the same start; 3_3 continues from 3_1 (`-skip_initial_place`) | a883991e2010 | the start reaches the main global placement (C0's finding, HANDOFF.md:125-126) |
 | R2 density_down | addon 0.05 (bp_fe_top, bp_be_top, swerv_wrapper); PLACE_DENSITY 0.31 (ariane136) | 930f683d3f81; ariane136 772aa9371d43 | one step below the design's own density (below) |
 | R3 density_up | addon 0.15; PLACE_DENSITY 0.39 (ariane136) | aa1d57809130; ariane136 30ee7cb5d507 | one step above |
 | R4 pad1 | one site of padding each side in global placement (CELL_PAD_IN_SITES_GLOBAL_PLACEMENT=1) | 5c529846ec27 | spreads cells without moving the density target; on ariane136 (absolute density 0.35) the padded cells need about 0.33, an estimate from its baseline's 3_3 log (316,666 um^2 of cells in 171,508 instances: runs/remote/seedB_orfs7_ariane136/runs/orfs_work/logs/nangate45/ariane136/base/3_3_place_gp.log:11, :22; sites 0.19 um wide: third_party/ORFS-2024-12/flow/platforms/nangate45/lef/NangateOpenCellLibrary.tech.lef:773); if they do not fit, global placement stops (GPL-0302) and R4 fails there by name |
@@ -181,9 +181,41 @@ At most 4 OpenROAD runs at a time on 224 (CS-D2 (a)); 7,200 s per step; a failed
 
 ## 7 Before the first C1 run
 
-- The C0 smoke on bp_fe_top at f1 passes (HANDOFF.md:124-133). It checks three things:
+- The C0 smoke on bp_fe_top at f1 passes (HANDOFF.md:132-141). It checks three things:
   - the default recipe reproduces the campaign's row of the same layout;
   - the caps' and the routing adjustments' log lines appear;
   - the started cells stay where a kept start puts them.
 - 224 has free slots in this chat's share. The macro chat's jobs hold all 8 now. This chat gets 2 when `dpls_a`
-  ends and 4 when `dpls_b` ends as well (HANDOFF.md:69-71).
+  ends and 4 when `dpls_b` ends as well (HANDOFF.md:77-79).
+
+## 8 ariane133 (added 7 Oct 2026, before any of its C1 runs)
+
+The macro chat fixed TB#5's candidate on 7 Oct (commit a55a963), so ariane133's two layouts join C1 under the rules
+above. Its inputs are in reports/cell_stage_c1_inputs_ariane133.json; its recipes are in
+configs/cellstage/c1_ariane133.json.
+
+- **Layouts:**
+  - M1 of the D2 (b) campaign seedB_orfs9_ariane133.
+  - TB#5's candidate ariane133.ls5.n5.f2 (runs/remote/seedB_orfs9_ariane133/runs/seed_orfs/ariane133/evals_f2.jsonl:15,
+    a local run file).
+- **Flow:** every run uses the campaign's make variables, RTLMP_MAX_LEVEL=1 and
+  GLOBAL_PLACEMENT_ARGS=-keep_resize_below_overflow 0.01 (reports/cell_stage_c1_inputs_ariane133.json:6-9). The
+  runner reads them from the campaign and refuses any other value, so J stays normalized to the same flow.
+- **Recipe settings:**
+  - R2/R3: PLACE_DENSITY 0.26 and 0.34. The design's own is 0.30 (the platform default), and the lowest gpl accepts
+    is 0.245 (reports/cell_stage_c1_inputs_ariane133.json:10-15).
+  - R5 equals R0: the campaign already sets the same value.
+  - R7 acts here: the routability loop reached the 1.01 target in 83 of 107 logs
+    (reports/cell_stage_c1_inputs_ariane133.json:16-33).
+  - R8's caps reach 2.8 % of M1's free core area beyond ORFS's band and 7.6 % of the candidate's
+    (reports/cell_stage_c1_inputs_ariane133.json:68-72, :98-102).
+- **DREAMPlace's start (R9, R9c):** at the design's own density, 0.30, all 14 starts converged (624-645 iterations;
+  reports/cell_stage_c1_inputs_ariane133.json:114-128). So R9 and R9c use 0.30 (job cs_c1_dp_a133, in 224's vault as
+  cellpos_c1_ariane133).
+- **Cost:** f1 and f2 runs take 3,845 s and 4,989 s at the median (reports/cell_stage_c1_inputs_ariane133.json:35-46).
+  Stage 1 is about 26 run-hours; stage 2 is about 33.
+- **Schedule:**
+  - Stage 1 starts once ariane136's and swerv_wrapper's stage 2 have started.
+  - Stage 2 needs TB#5's rows of R0, so it starts after TB#5's test ends.
+  - As Section 6 says, ariane133 counts for the go rule only if its stage 2 is complete when the other four designs'
+    is.

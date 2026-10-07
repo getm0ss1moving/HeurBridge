@@ -6,6 +6,21 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 
 ## [Unreleased]
 
+### Cell stage: the campaign's make variables, a C1 queue on 224, ariane133 joins C1 (7 Oct)
+- `scripts/run_cell_stage.py`: `--make-var` defaults to the campaign's own (its meta.json, `config.make_var`); any
+  other value is refused, so J stays normalized to the flow the campaign ran (ariane133: D2 (b)).
+- `scripts/server/cs_c1_queue.sh` (new): runs inside a vault job on 224 and starts the next C1 step when the cell chat
+  has a free pair of its 4 slots.
+  - `s2:<design>:<candidate>`: stage 2 after a stage-1 job that runs elsewhere. Its ledger is copied from that job's
+    workspace while the job runs, because the job deletes the workspace when it ends. An incomplete copy is skipped
+    by name.
+  - `s1:<design>:<candidate>`: stage 1 inside the queue.
+- `scripts/cell_stage_inputs.py`: the campaign can be named per design (`design:candidate:campaign`); records the
+  campaign's make variables. `reports/cell_stage_c1_inputs_ariane133.json`.
+- `configs/cellstage/c1_ariane133.json` and `reports/cell_stage_c1.md` Section 8: ariane133's C1 recipes and plan
+  (TB#5's candidate and M1), fixed before any of its C1 runs.
+- Tests: `tests/test_run_cell_stage.py` (+1: the campaign's make variables used, others refused).
+
 ### Cell stage: verified import of the default recipe's rows (7 Oct)
 - `scripts/run_cell_stage.py --verify-default N` (with `--default-rows`): the first N default-recipe jobs that have a
   row of the unmodified cell stage run first, and each is compared with that row (status, failure name, every numeric

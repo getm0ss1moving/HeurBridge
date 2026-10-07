@@ -1,0 +1,217 @@
+{
+ "purpose": "C1 headroom demo on ariane133 (exploratory, no claims): the recipe list fixed before any C1 run. Layouts: the tool's macro layout (M1) and HeurBridge's Track-B candidate. R2/R3 move the design's placement density one step (absolute 0.26 / absolute 0.34; the flow's own density is 0.30). R9/R9c start the cells at DREAMPlace's placement around the fixed macros (target density 0.30, the flow's own), one file per macro layout in the job's data directory cellpos_c1/ariane133 (scripts/cell_positions.py). reports/cell_stage_c1.md has the reasons for each setting and the go rule (heurbridge/cellstage/select.py go_rule). ariane133 runs, like its campaign seedB_orfs9_ariane133 (decision D2 (b)), with RTLMP_MAX_LEVEL=1 and GLOBAL_PLACEMENT_ARGS=-keep_resize_below_overflow 0.01 (scripts/run_cell_stage.py reads them from the campaign's meta.json), so R5 equals R0 here.",
+ "dreamplace_target_density": 0.3,
+ "recipes": [
+  {
+   "name": "R0_default",
+   "id": "3b8b11b81c3f",
+   "density": null,
+   "pad_global": null,
+   "pad_detail": null,
+   "timing_driven": null,
+   "routability_driven": null,
+   "gpl": [],
+   "start": "centre",
+   "source": "",
+   "hold": "restart",
+   "density_caps": [],
+   "route_adjust": []
+  },
+  {
+   "name": "R1_quad_restart",
+   "id": "f17371a3bb63",
+   "density": null,
+   "pad_global": null,
+   "pad_detail": null,
+   "timing_driven": null,
+   "routability_driven": null,
+   "gpl": [],
+   "start": "quadratic",
+   "source": "",
+   "hold": "restart",
+   "density_caps": [],
+   "route_adjust": []
+  },
+  {
+   "name": "R1c_quad_continue",
+   "id": "a883991e2010",
+   "density": null,
+   "pad_global": null,
+   "pad_detail": null,
+   "timing_driven": null,
+   "routability_driven": null,
+   "gpl": [],
+   "start": "quadratic",
+   "source": "",
+   "hold": "continue",
+   "density_caps": [],
+   "route_adjust": []
+  },
+  {
+   "name": "R2_density_down",
+   "id": "7eca7cdd5b4a",
+   "density": [
+    "absolute",
+    0.26
+   ],
+   "pad_global": null,
+   "pad_detail": null,
+   "timing_driven": null,
+   "routability_driven": null,
+   "gpl": [],
+   "start": "centre",
+   "source": "",
+   "hold": "restart",
+   "density_caps": [],
+   "route_adjust": []
+  },
+  {
+   "name": "R3_density_up",
+   "id": "be25a8bb4f7e",
+   "density": [
+    "absolute",
+    0.34
+   ],
+   "pad_global": null,
+   "pad_detail": null,
+   "timing_driven": null,
+   "routability_driven": null,
+   "gpl": [],
+   "start": "centre",
+   "source": "",
+   "hold": "restart",
+   "density_caps": [],
+   "route_adjust": []
+  },
+  {
+   "name": "R4_pad1",
+   "id": "5c529846ec27",
+   "density": null,
+   "pad_global": 1,
+   "pad_detail": null,
+   "timing_driven": null,
+   "routability_driven": null,
+   "gpl": [],
+   "start": "centre",
+   "source": "",
+   "hold": "restart",
+   "density_caps": [],
+   "route_adjust": []
+  },
+  {
+   "name": "R5_virtual_resize",
+   "id": "9ee28617d708",
+   "density": null,
+   "pad_global": null,
+   "pad_detail": null,
+   "timing_driven": null,
+   "routability_driven": null,
+   "gpl": [
+    [
+     "-keep_resize_below_overflow",
+     "0.01"
+    ]
+   ],
+   "start": "centre",
+   "source": "",
+   "hold": "restart",
+   "density_caps": [],
+   "route_adjust": []
+  },
+  {
+   "name": "R6_no_timing",
+   "id": "147e823f033b",
+   "density": null,
+   "pad_global": null,
+   "pad_detail": null,
+   "timing_driven": false,
+   "routability_driven": null,
+   "gpl": [],
+   "start": "centre",
+   "source": "",
+   "hold": "restart",
+   "density_caps": [],
+   "route_adjust": []
+  },
+  {
+   "name": "R7_rc_target_low",
+   "id": "c7a13e7cde0f",
+   "density": null,
+   "pad_global": null,
+   "pad_detail": null,
+   "timing_driven": null,
+   "routability_driven": null,
+   "gpl": [
+    [
+     "-routability_target_rc_metric",
+     "0.95"
+    ]
+   ],
+   "start": "centre",
+   "source": "",
+   "hold": "restart",
+   "density_caps": [],
+   "route_adjust": []
+  },
+  {
+   "name": "R8_channel_caps",
+   "id": "8949980c97c7",
+   "density": null,
+   "pad_global": null,
+   "pad_detail": null,
+   "timing_driven": null,
+   "routability_driven": null,
+   "gpl": [],
+   "start": "centre",
+   "source": "",
+   "hold": "restart",
+   "density_caps": [],
+   "route_adjust": [],
+   "programs": [
+    [
+     "channel_caps",
+     [
+      [
+       "max_density",
+       50.0
+      ],
+      [
+       "max_gap",
+       60.0
+      ]
+     ]
+    ]
+   ]
+  },
+  {
+   "name": "R9_dp_keep",
+   "id": "e2aa95e40f81",
+   "density": null,
+   "pad_global": null,
+   "pad_detail": null,
+   "timing_driven": null,
+   "routability_driven": null,
+   "gpl": [],
+   "start": "positions",
+   "source": "npzdir:cellpos_c1/ariane133",
+   "hold": "keep",
+   "density_caps": [],
+   "route_adjust": []
+  },
+  {
+   "name": "R9c_dp_continue",
+   "id": "fc80d325eb5a",
+   "density": null,
+   "pad_global": null,
+   "pad_detail": null,
+   "timing_driven": null,
+   "routability_driven": null,
+   "gpl": [],
+   "start": "positions",
+   "source": "npzdir:cellpos_c1/ariane133",
+   "hold": "continue",
+   "density_caps": [],
+   "route_adjust": []
+  }
+ ]
+}

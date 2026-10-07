@@ -17,6 +17,8 @@ runs/seed_orfs/<design>/evals_cs_<tag>.jsonl and runs/seed_orfs/<design>/cs_<tag
   --race K    with --fidelity 2: per layout, the default recipe plus the K best other recipes by this tag's f1 rows
               (J before the gates; heurbridge/cellstage/select.race); without it every recipe runs
   --check-drift  for recipes whose cells start at given positions: how far they moved after 3_1, 3_3 and 3_5
+  --make-var  the campaign's own KEY=VALUE overrides; by default read from its meta.json (config.make_var), and any
+              other value is refused, since J is normalized to the flow the campaign ran (ariane133's D2 (b) runs)
   --slots     with --shifts tb: only these slots (1-6), e.g. one run to compare with an earlier one
   --default-rows  ledgers with runs of the unmodified cell stage (the Track-B test's evals_tb.jsonl): a run of the
               default recipe whose fidelity and macro layout (positions to 1e-9 and orientations) match a row there
@@ -177,7 +179,8 @@ def main():
     ap.add_argument("--timeout", type=int, default=7200)
     ap.add_argument("--work-home", default=str(ROOT / "runs" / "orfs_work"))
     ap.add_argument("--yosys", default=None)
-    ap.add_argument("--make-var", action="append", default=[], help="the campaign's KEY=VALUE overrides, as it ran")
+    ap.add_argument("--make-var", action="append", default=[],
+                    help="the campaign's KEY=VALUE overrides, as it ran (default: its meta.json)")
     ap.add_argument("--campaign-dir", default="", help="default: runs/seed_orfs/<design name>")
     a = ap.parse_args()
     if a.race and a.fidelity != 2:
@@ -192,6 +195,13 @@ def main():
     bpath, b2path = rdir / "baseline.json", rdir / "baseline_f2.json"
     if not (bpath.exists() and b2path.exists()):
         raise SystemExit("no campaign baselines in %s: run inside a campaign's resumed workspace" % rdir)
+    camp_mv = []
+    if (rdir / "meta.json").exists():
+        camp_mv = list((json.loads((rdir / "meta.json").read_text()).get("config") or {}).get("make_var") or [])
+    if a.make_var and list(a.make_var) != camp_mv:
+        raise SystemExit("--make-var %s differs from the campaign's own %s (%s): J is normalized to the flow the "
+                         "campaign ran" % (a.make_var, camp_mv, rdir / "meta.json"))
+    a.make_var = camp_mv
     recs = {f: [r for r in json.loads(p.read_text())["records"] if r.get("returncode") == 0]
             for f, p in ((1, bpath), (2, b2path))}
     if not recs[1] or not recs[2]:

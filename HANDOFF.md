@@ -59,8 +59,16 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
     instead of bp_fe_top only.
   - All 12 shifted layouts of each design have a Track-B row (local check). The failed ones are named failures
     (GRT-0116; one timeout), which are imported as such.
-- **Next:** ariane136's and swerv_wrapper's stage 2 once their stage-1 jobs end. Their final archives are needed at
-  launch, so these cannot be queued now.
+- **ariane133 joins C1** (`reports/cell_stage_c1.md` Section 8; `configs/cellstage/c1_ariane133.json`).
+  - Layouts: TB#5's candidate ariane133.ls5.n5.f2 (the macro chat's message, 7 Oct) and M1 of `seedB_orfs9_ariane133`.
+  - Every run uses that campaign's D2 (b) make variables; the runner now reads them from the campaign's meta.json.
+  - DREAMPlace starts: all 14 converged at its own density, 0.30 (`cs_c1_dp_a133` on 225).
+- **C1 queue on 224:** `cs_c1_queue` runs `scripts/server/cs_c1_queue.sh` with the entries `s2:ariane136`,
+  `s2:swerv_wrapper`, `s1:ariane133`.
+  - Stage 2 of ariane136 and swerv_wrapper starts when their stage-1 jobs end and a pair of this chat's slots is free.
+    It needs no launch by hand, since the queue copies their stage-1 ledgers while those jobs run.
+  - Then ariane133's stage 1 runs.
+  - ariane133's stage 2 needs TB#5's rows (`tb9_ariane133`, running), so it is launched after that test ends.
 
 ---
 

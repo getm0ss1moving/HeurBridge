@@ -4,7 +4,7 @@
   python scripts/cell_stage_inputs.py --campaigns runs/remote --out reports/cell_stage_c1_inputs.json \
       bp_fe_top:bp_fe_top.ls0.n4.f2 bp_be_top:bp_be_top.ls7.n1.f2 ...
 
-Per design (campaign seedB_orfs7_<design>):
+Per design (campaign seedB_orfs7_<design>, or the one named as design:candidate:campaign):
   density       the flow's own placement density, from the baseline runs' 3_3 logs (ORFS prints how it computed it:
                 third_party/ORFS-2024-12/flow/scripts/util.tcl:153-168) and gpl's uniform density (the lowest it accepts:
                 third_party/OpenROAD-676f8451/src/gpl/src/nesterovBase.cpp:1654-1667)
@@ -146,19 +146,21 @@ def dreamplace_jobs(dirs):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("pairs", nargs="+", help="design:candidate layout id")
+    ap.add_argument("pairs", nargs="+", help="design:candidate layout id[:campaign run]")
     ap.add_argument("--campaigns", default=str(ROOT / "runs" / "remote"))
     ap.add_argument("--out", required=True)
     ap.add_argument("--dreamplace", default="", help="comma-separated fetched cell_positions.py job directories")
     a = ap.parse_args()
     res = {"made_by": "scripts/cell_stage_inputs.py", "designs": {}}
     for pair in a.pairs:
-        d, cand = pair.split(":")
-        camp = Path(a.campaigns) / ("seedB_orfs7_%s" % d)
+        d, cand, *rest = pair.split(":")
+        camp = Path(a.campaigns) / (rest[0] if rest else "seedB_orfs7_%s" % d)
         rdir = camp / "runs" / "seed_orfs" / d
         logs = sorted(camp.glob("runs/orfs_work/logs/nangate45/*/*/3_3_place_gp.log"))
         base = [f for f in logs if f.parent.name == "base"] + [f for f in logs if f.parent.name.startswith("base")]
         res["designs"][d] = {"campaign": str(rdir.relative_to(ROOT)) if rdir.is_relative_to(ROOT) else str(rdir),
+                             "make_var": (json.loads((rdir / "meta.json").read_text()).get("config") or {}).get("make_var")
+                             if (rdir / "meta.json").exists() else None,
                              "density": density(base or logs), "routability": routability(logs),
                              "wall_s": {"f1": wall(rdir / "evals.jsonl"), "f2": wall(rdir / "evals_f2.jsonl")},
                              "channels": channels(d, rdir, ["M1", cand])}

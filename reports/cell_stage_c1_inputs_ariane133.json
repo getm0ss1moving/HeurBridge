@@ -1,0 +1,206 @@
+{
+ "made_by": "scripts/cell_stage_inputs.py",
+ "designs": {
+  "ariane133": {
+   "campaign": "runs/remote/seedB_orfs9_ariane133/runs/seed_orfs/ariane133",
+   "make_var": [
+    "RTLMP_MAX_LEVEL=1",
+    "GLOBAL_PLACEMENT_ARGS=-keep_resize_below_overflow 0.01"
+   ],
+   "density": {
+    "density": 0.3,
+    "addon": null,
+    "uniform_density": 0.2454,
+    "log": "runs/remote/seedB_orfs9_ariane133/runs/orfs_work/logs/nangate45/ariane133/base/3_3_place_gp.log"
+   },
+   "routability": {
+    "logs": 107,
+    "ends": {
+     "target_reached": 83,
+     "without_improvement": 24,
+     "no_loop": 0
+    },
+    "lowest_final_rc": {
+     "target_reached": [
+      0.995,
+      1.01
+     ],
+     "without_improvement": [
+      1.011,
+      1.151
+     ]
+    }
+   },
+   "wall_s": {
+    "f1": {
+     "runs": 81,
+     "reused": 51,
+     "median": 3845,
+     "max": 7104
+    },
+    "f2": {
+     "runs": 24,
+     "reused": 0,
+     "median": 4989,
+     "max": 7201
+    }
+   },
+   "channels": {
+    "M1": {
+     "macros": 132,
+     "free_area_um2": 1646952,
+     "orfs_band_share": 0.222,
+     "gap_30": {
+      "rects": 238,
+      "share": 0.145,
+      "share_beyond_band": 0.007
+     },
+     "gap_40": {
+      "rects": 247,
+      "share": 0.152,
+      "share_beyond_band": 0.01
+     },
+     "gap_50": {
+      "rects": 263,
+      "share": 0.171,
+      "share_beyond_band": 0.021
+     },
+     "gap_60": {
+      "rects": 271,
+      "share": 0.182,
+      "share_beyond_band": 0.028
+     },
+     "gap_80": {
+      "rects": 263,
+      "share": 0.2,
+      "share_beyond_band": 0.038
+     }
+    },
+    "ariane133.ls5.n5.f2": {
+     "macros": 132,
+     "free_area_um2": 1646952,
+     "orfs_band_share": 0.222,
+     "gap_30": {
+      "rects": 158,
+      "share": 0.153,
+      "share_beyond_band": 0.039
+     },
+     "gap_40": {
+      "rects": 245,
+      "share": 0.224,
+      "share_beyond_band": 0.07
+     },
+     "gap_50": {
+      "rects": 252,
+      "share": 0.232,
+      "share_beyond_band": 0.074
+     },
+     "gap_60": {
+      "rects": 253,
+      "share": 0.234,
+      "share_beyond_band": 0.076
+     },
+     "gap_80": {
+      "rects": 259,
+      "share": 0.256,
+      "share_beyond_band": 0.095
+     }
+    }
+   }
+  }
+ },
+ "dreamplace": {
+  "runs/remote/cs_c1_dp_a133": {
+   "ariane133 0.3": {
+    "runs": 14,
+    "ok": 14,
+    "logs": 14,
+    "converged": 14,
+    "diverged": 0,
+    "iterations": [
+     624,
+     645
+    ],
+    "overflow": [
+     0.0691,
+     0.07
+    ]
+   },
+   "ariane133_d0.4 0.4": {
+    "runs": 2,
+    "ok": 2,
+    "logs": 2,
+    "converged": 2,
+    "diverged": 0,
+    "iterations": [
+     577,
+     612
+    ],
+    "overflow": [
+     0.0696,
+     0.0696
+    ]
+   },
+   "ariane133_d0.5 0.5": {
+    "runs": 2,
+    "ok": 2,
+    "logs": 2,
+    "converged": 2,
+    "diverged": 0,
+    "iterations": [
+     572,
+     573
+    ],
+    "overflow": [
+     0.069,
+     0.0699
+    ]
+   },
+   "ariane133_d0.6 0.6": {
+    "runs": 2,
+    "ok": 2,
+    "logs": 2,
+    "converged": 2,
+    "diverged": 0,
+    "iterations": [
+     565,
+     570
+    ],
+    "overflow": [
+     0.0687,
+     0.069
+    ]
+   },
+   "ariane133_d0.7 0.7": {
+    "runs": 2,
+    "ok": 2,
+    "logs": 2,
+    "converged": 2,
+    "diverged": 0,
+    "iterations": [
+     538,
+     565
+    ],
+    "overflow": [
+     0.0692,
+     0.0693
+    ]
+   },
+   "ariane133_d0.8 0.8": {
+    "runs": 2,
+    "ok": 2,
+    "logs": 2,
+    "converged": 2,
+    "diverged": 0,
+    "iterations": [
+     549,
+     560
+    ],
+    "overflow": [
+     0.0695,
+     0.0696
+    ]
+   }
+  }
+ }
+}
