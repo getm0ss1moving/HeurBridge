@@ -352,7 +352,7 @@ design; "disposition" is the existing mitigation or the proposed fix.
 | Sandbox memory (4 GB) | ISPD2005: 80 crashes + 40 errors; bigblue2 cannot run any program | +inf; bigblue2 stays out of E0 as a documented deviation (§7) | `reports/T2_trackA_ispd_dreamplace.md`:34, :41-43, §7 |
 | Too few legal sources | bigblue4: 30 of 80 program runs project legally | registered as is for E0 (§7) | §7 |
 | Host out-of-memory kill | 1 (bigblue3 E0 slice, 21 GB) | fixed: memory-lean RUDY (`HB_RUDY_IMPL=bmm`), per-host slot cap, a SIGKILLed placer run is re-run, the watcher reports OOM kills | §2 (28-29 Sep) |
-| GPU out of memory | 1 (S1 evaluation, all cached sources in one batch) | fixed: batches of `--chunk` sources | CHANGELOG.md:317-318 |
+| GPU out of memory | 1 (S1 evaluation, all cached sources in one batch) | fixed: batches of `--chunk` sources | CHANGELOG.md:327-328 |
 | Label-job CPU oversubscription (not a failure) | 14 workers x 8 DREAMPlace threads on 64 cores | fixed 2 Oct: `make_cell_labels.py --workers 8 --threads 4` | HANDOFF.md:584-586 |
 | Pipeline defect: the tool's input froze ISPD2005's macros (source terminals) | every ISPD2005 tool run since 28 Sep (seeding M1, RL#1-RL#3) | fixed 3 Oct (commit 157bf21); RL#1-RL#3 not evidence for their claims; re-test: D10 | `reports/defect_ispd_tool_runs.md` |
 

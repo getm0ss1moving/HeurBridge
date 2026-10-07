@@ -37,7 +37,7 @@
    reports/sketch_predictor_s2.md:38). *Negative results.*
 5. **Narrow data.** Round 0 has 1,608 pairs from 13 IBM designs, and later rounds added no new information
    (reports/T3_algorithmR_trackA.md:55-60). Known data defect: on 15 of 17 IBM designs the top elite's cluster target
-   was a quadratic placement (CHANGELOG.md:323-327). It affects clusters, not macro targets.
+   was a quadratic placement (CHANGELOG.md:333-337). It affects clusters, not macro targets.
 
 ## 3 Levers
 

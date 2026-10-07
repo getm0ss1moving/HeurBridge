@@ -163,6 +163,21 @@ def ext_pick(sel, f1_best):
     return f1_best, "every f2 run failed: the best by f1"
 
 
+def jsafe_pick(rows, ref0, base, f1_best):
+    """D13 (a), for tests registered from 7 Oct (TW#5): the external arm's layout from its f2 runs, rows = [(index, f2
+    row)]: the lowest one-position J_safe against the tool's unshifted replay ``ref0`` (D11 b), ties by J; if every f2
+    run failed, the best by f1.  Returns (index, rule)."""
+    import timing_safety_report as TS
+    fin = []
+    for k, row in rows:
+        s = TS.summary([TS.position(row, ref0, base)])
+        if math.isfinite(s["J_safe"]):
+            fin.append((s["J_safe"], s["J"], k))
+    if fin:
+        return min(fin)[2], "the lowest one-position J_safe (D13 a)"
+    return f1_best, "every f2 run failed: the best by f1"
+
+
 def tls_score(row: dict, margin: float, lam: float) -> float:
     """D13 (b): a local-search move's f1 score, J before the gates plus lam times the share of its setup and hold
     checks that do not clear the gate threshold (reference - guard) by ``margin`` ns; a failed flow is +inf."""
@@ -267,6 +282,9 @@ def main():
     ap.add_argument("--ext-dir", default="", help="--phase extlayouts: an output dir of dreamplace_trackb.py place")
     ap.add_argument("--ext-tag", default="dp", help="--phase extlayouts: names the ledger and the rows")
     ap.add_argument("--ext-tb", action="store_true", help="--phase extlayouts: also the best layout's f2 shifts")
+    ap.add_argument("--ext-pick", default="d6", choices=["d6", "jsafe"],
+                    help="--phase extlayouts --ext-f2-top: the layout for the shifts: d6 (ext_pick, TW#1-TW#4) or jsafe "
+                         "(jsafe_pick, D13 a, against the tool's unshifted replay; TW#5)")
     ap.add_argument("--ext-f2-top", type=int, default=0, help="--phase extlayouts: f2 for the best K by f1, and the "
                     "shifts for the best f2 layout admitted under the Track-B test's rule (0: the best by f1)")
     a = ap.parse_args()
@@ -559,7 +577,13 @@ def main():
                 sel.append((jd6, jb, k))
                 print(json.dumps({"ext_f2": k, "run_id": row["run_id"], "status": row.get("status"), "J_d6": jd6,
                                   "J_before_gates": jb}), flush=True)
-            best, why = ext_pick(sel, best)
+            if a.ext_pick == "jsafe":
+                p2 = rdir / "evals_f2.jsonl"
+                ref0 = next(r["record"] for r in (json.loads(l) for l in p2.read_text().splitlines() if l.strip())
+                            if r["run_id"] == "%s.M1replay.f2" % name)
+                best, why = jsafe_pick(res2, ref0, base2, best)
+            else:
+                best, why = ext_pick(sel, best)
             print(json.dumps({"ext_pick": best, "rule": why, "meta": meta.get(best)}), flush=True)
         if a.ext_tb:
             jobs = []

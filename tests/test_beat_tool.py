@@ -172,6 +172,28 @@ def test_external_arm_pick_prefers_admitted_then_before_gates_then_f1():
     assert k == 7 and why.startswith("every f2 run failed")
 
 
+def test_external_arm_jsafe_pick_charges_failed_checks_then_falls_back_to_f1():
+    """scripts/run_seed_orfs.jsafe_pick (D13 a, TW#5): the lowest one-position J_safe against the tool's unshifted
+    replay, so a lower J with a failed timing check loses to a slightly higher J that passes both; ties by J; with
+    every f2 run failed, the best by f1."""
+    import pytest
+    import run_seed_orfs as R
+    from heurbridge.paths import eda_dir
+    if eda_dir() is None:
+        pytest.skip("needs eda/harness/metrics_schema.py")
+    from heurbridge.eval import cost
+    rec = {"detailed_wirelength_um": 1000.0, "vias": 500, "gr_overflow_total": 0, "setup_tns_ns": 0.0,
+           "total_power_w": 0.01, "setup_wns_ns": 1.0, "hold_wns_ns": 0.05, "drc_violations": 0, "returncode": 0}
+    base = cost.Baseline.from_records("d", [rec, rec])
+    tool = {"setup_wns_ns": 1.0, "hold_wns_ns": 0.05}
+    low_j_bad_hold = {"status": "ok", "record": dict(rec, detailed_wirelength_um=990.0, hold_wns_ns=0.0)}
+    safe = {"status": "ok", "record": dict(rec, detailed_wirelength_um=995.0)}
+    failed = {"status": "eval_failed", "record": {"returncode": "timeout"}}
+    assert R.jsafe_pick([(2, low_j_bad_hold), (4, safe), (6, failed)], tool, base, 9) == \
+        (4, "the lowest one-position J_safe (D13 a)")
+    assert R.jsafe_pick([(2, failed), (4, failed)], tool, base, 9) == (9, "every f2 run failed: the best by f1")
+
+
 def test_density_confirm_units_pair_the_seed_with_rl1s_best_of_four(tmp_path):
     """scripts/density_confirm.units: unit (design, s) = the density-d* run of seed s vs RL#1's best of 4 from seed s;
     a missing density row is +inf by name."""

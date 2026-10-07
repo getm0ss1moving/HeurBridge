@@ -6,6 +6,16 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 
 ## [Unreleased]
 
+### TW#5 on ariane133 (decision D15, 7 Oct): code and registration before any DREAMPlace layout
+- `scripts/run_seed_orfs.py`: `jsafe_pick` (D13 a: the lowest one-position J_safe against the tool's unshifted
+  replay, ties by J, else the best by f1) and `--ext-pick {d6,jsafe}` for `--phase extlayouts` (default d6: TW#1-TW#4
+  unchanged). Test: `tests/test_beat_tool.py::test_external_arm_jsafe_pick_charges_failed_checks_then_falls_back_to_f1`.
+- `scripts/threeway_confirm.py`: ariane133 as TW#5 (`ORDER`), scored under D11 (b) (`score_d11b`: the tool's replicate
+  at the same shift) with DREAMPlace's pick recomputed by `jsafe_pick` (`D11B`); TW#1-TW#4 unchanged. Test:
+  `tests/test_threeway_confirm.py::test_tw5_gates_against_the_same_shift_tool_replicate_and_picks_by_jsafe`.
+- `reports/trackB_threeway_ariane133_preregistration.md` (new); TW#5 reserved (alpha_5 = 0.0015625). Full suite: 272
+  passed (the cell chat's two in-progress test files left out).
+
 ### Cell stage: a slot gate shared with the macro chat; the C1 queue gated (7 Oct, evening)
 - `heurbridge/cellstage/slots.py` (new): cooperative sharing of 224's 8 OpenROAD slots.
   - Jobs register the slots they hold as `<dir>/<owner>.<job>` files. A registration counts while its job runs, or

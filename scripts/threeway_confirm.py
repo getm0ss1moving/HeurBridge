@@ -11,7 +11,10 @@ Arms per design, on the Track-B test's six shifts at f2:
   tool        the Track-B test's reference replicates (TB_REF rows; reported, not tested)
 HeurBridge and DREAMPlace are scored alike: f2 J with every gate enforced, the timing gates against the campaign's
 same-path replay band's median with the 0.02-ns guard and no sign rule (decision D6); a failed gate or flow is +inf.
-Test: the exact one-sided rank-sum permutation test of trackb_confirm.py (HeurBridge lower).
+TW#5 (ariane133, reports/trackB_threeway_ariane133_preregistration.md, registered 7 Oct): the timing gates against the
+tool's replicate at the same shift (D11 b, equal_budget_confirm.score_d11b) and DREAMPlace's pick by one-position
+J_safe (D13 a, run_seed_orfs.jsafe_pick).  Test: the exact one-sided rank-sum permutation test of trackb_confirm.py
+(HeurBridge lower).
 """
 
 import argparse
@@ -30,7 +33,9 @@ from heurbridge.eval import cost  # noqa: E402
 from heurbridge.stats.alpha_ledger import AlphaLedger  # noqa: E402
 from trackb_confirm import jl, one, rank_sum_p  # noqa: E402
 
-ORDER = ("bp_fe_top", "bp_be_top", "ariane136", "swerv_wrapper")      # TW#1, TW#2, ... in this order
+ORDER = ("bp_fe_top", "bp_be_top", "ariane136", "swerv_wrapper", "ariane133")      # TW#1, TW#2, ... in this order
+D11B = ("ariane133",)            # TW#5, registered 7 Oct: gates under D11 (b), DREAMPlace's pick under D13 (a)
+PREREG = {"ariane133": "reports/trackB_threeway_ariane133_preregistration.md"}
 
 
 def gate_reference(camp: Path, design: str):
@@ -57,11 +62,20 @@ def arms(design: str, remote: Path, tb_prefix: str, tw_prefix: str, camp_prefix:
     camp = one(str(remote / (camp_prefix + "*") / "runs" / "seed_orfs" / design / "evals_f2.jsonl"))
     ref_base, recs2 = gate_reference(camp, design)
     out = {"HeurBridge": [], "DREAMPlace": [], "tool": [], "sources": [tb, tw, camp]}
+    d11b = design in D11B
+    if d11b:                                                        # the tool's replicate at the same shift (D11 b)
+        from equal_budget_confirm import flow_ok, score_d11b
+        tool = {tuple(r.get("tb_shift") or ()): r for r in jl(tb) if r.get("program") == "TB_REF"}
+        completed = [r["record"] for r in tool.values() if flow_ok(r)]
     for name, path, prog, gated in (("HeurBridge", tb, "TB_CAND", True), ("tool", tb, "TB_REF", False),
                                     ("DREAMPlace", tw, "EXT_DP_TB", True)):
         for r in sorted(jl(path), key=lambda r: r["run_id"]):
             if r.get("program") == prog:
-                v, jb, failed = score(r, ref_base, gated)
+                if d11b:
+                    x = score_d11b(r, tool, completed, ref_base, gated)
+                    v, jb, failed = x["J"], x["J_before_gates"], x["gates_failed"]
+                else:
+                    v, jb, failed = score(r, ref_base, gated)
                 out[name].append({"run_id": r["run_id"], "shift": r.get("tb_shift"), "J": v, "J_before_gates": jb,
                                   "gates_failed": failed, "wall_s": r.get("wall_s")})
     dp = jl(tw)
@@ -73,8 +87,14 @@ def arms(design: str, remote: Path, tb_prefix: str, tw_prefix: str, camp_prefix:
     for r in out["dp_f2"]:
         v, jb, _ = score(r, ref_base, True)
         sel.append((v, jb, r["ext_index"]))
-    from run_seed_orfs import ext_pick                              # the registered rule, recomputed from the rows
-    pick, rule = ext_pick(sel, min(f1ok)[1]) if f1ok else (None, "no layout completed f1")
+    from run_seed_orfs import ext_pick, jsafe_pick                  # the registered rule, recomputed from the rows
+    if not f1ok:
+        pick, rule = None, "no layout completed f1"
+    elif d11b:
+        ref0 = next(r["record"] for r in jl(camp) if r["run_id"] == "%s.M1replay.f2" % design)
+        pick, rule = jsafe_pick([(r["ext_index"], r) for r in out["dp_f2"]], ref0, ref_base, min(f1ok)[1])
+    else:
+        pick, rule = ext_pick(sel, min(f1ok)[1])
     used = {r.get("ext_index") for r in dp if r.get("program") == "EXT_DP_TB"}
     meta = {r["ext_index"]: (r.get("target_density"), r.get("seed")) for r in out["dp_f1"]}
     out["dp_pick"] = {"index": pick, "rule": rule, "target_density_seed": meta.get(pick), "replicates_used": sorted(used),
@@ -100,10 +120,12 @@ def main():
     if a.cmd == "reserve":
         if any(e.get("event") == "reserve" and e.get("meta", {}).get("design") == a.design for e in es):
             sys.exit("%s is already reserved" % a.design)
+        rule = ("the tool's replicate at the same shift, 0.02-ns guard, no sign rule (D11 b), both arms; DREAMPlace's pick "
+                "by one-position J_safe (D13 a)" if a.design in D11B else "0.02-ns guard, no sign rule (D6), both arms")
         e = led.reserve("heurbridge_vs_dreamplace", "%s: HeurBridge's macro layout vs DREAMPlace's at f2" % a.design,
                         "exact_rank_sum_permutation", meta={"design": a.design, "replicates": "the Track-B test's six shifts",
-                                                            "gate_rule": "0.02-ns guard, no sign rule (D6), both arms",
-                                                            "preregistration": "reports/trackB_threeway_preregistration.md"})
+                                                            "gate_rule": rule,
+                                                            "preregistration": PREREG.get(a.design, "reports/trackB_threeway_preregistration.md")})
         if e["ledger_id"] != want:
             sys.exit("expected %s for %s, got %s: reserve the designs in order" % (want, a.design, e["ledger_id"]))
         print(json.dumps(e))
