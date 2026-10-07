@@ -36,6 +36,15 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
   from the start (`dpls_c2`) and TW#5. D15: a three-way comparison on ariane133 (TW#5: DREAMPlace's layouts through
   the same flow next to HeurBridge and OpenROAD; D11 (b) gates, D13 (a) picks), pre-registered before its runs.
   Addenda: `reports/trackB_preregistration.md` and `reports/trackB_equal_budget_preregistration.md` (7 Oct 19:15).
+- **TW#5 inputs ready (7 Oct 19:23):** `dptb_place5` on 227 (GPU 1) placed all 12 of DREAMPlace's ariane133 layouts (58-83 s
+  each; P_M moved one layout's macros by up to 0.11 of the die, the others by under 0.006; local run file
+  `runs/remote/dptb_place5/runs/dptb5/ariane133/rows.jsonl`), staged on 224 as data `dptb5_layouts`. Its flow job
+  `tw_ariane133` (`--phase extlayouts --ext-f2-top 4 --ext-tb --ext-pick jsafe`, D2 (b)'s make variables) follows TB#5.
+- **TB#5 waits (20:30):** the cell chat held its queues, but its two stage-1 jobs kept starting runs (4 live at 20:24);
+  asked to pause them as D14 (c) intends; TB#5 (`tb10_ariane133`) starts when its count is 0.
+- **Group-meeting page updated (7 Oct 20:20):** https://claude.ai/artifact/Wn3W1diE45Hii2pn8Qfvsf (version 6; private):
+  Track B against OpenROAD and DREAMPlace (test matrix, J and gates, cost), RL#4, the ISPD2005 reference correction
+  (0.45 is the benchmark's own macro placement there), 15-slide outline; every tag at git 5afdb15.
 - **Citation re-map:** the scratchpad's `remap_citations.py` was lost to the temp-folder cleanup and rebuilt; it now
   also re-maps `, :L` continuations (a second range after a cited file's first), which were left unmapped before.
 
