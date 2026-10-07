@@ -12,8 +12,8 @@
 ## 1 The record
 
 0 of 80 heuristic layouts evaluable at f1. Failures by name: DPL-0036 37, timeout in 3_5_place_dp 25, no parsed
-reason 14, GPL-0307 5, PDN-0179 1 (HANDOFF.md:578). The tool's own layout through the candidates' path (the M1
-replay) completes f1 with J 0.948, but its f2 fails a gate and its one-site-shift replays fail (HANDOFF.md:578-580).
+reason 14, GPL-0307 5, PDN-0179 1 (HANDOFF.md:585). The tool's own layout through the candidates' path (the M1
+replay) completes f1 with J 0.948, but its f2 fails a gate and its one-site-shift replays fail (HANDOFF.md:585-587).
 
 ## 2 What the logs show (scripts/diag_trackb_failures.py, all f1 variants of both campaigns)
 
@@ -43,7 +43,7 @@ resizer adds about 58,900 um^2 of buffers; within the next 70 iterations the con
 while the shifted run's wirelength jumps from 1.26e10 to 1.23e11 and never recovers (local logs
 `runs/remote/seedB_orfs7_ariane133/runs/orfs_work/logs/nangate45/ariane133/ariane133.M1replay.f1/3_3_place_gp.log`:195-220
 and `runs/remote/seedB_orfs7_ariane133/runs/orfs_work/logs/nangate45/ariane133/ariane133.M1replay.p1.f1/3_3_place_gp.log`:196-214, :644). This matches the documented finding that ORFS
-2024-12's timing-driven global placement diverges on scattered layouts (reports/PROGRESS.md:171).
+2024-12's timing-driven global placement diverges on scattered layouts (reports/PROGRESS.md:174).
 
 **The configuration lead.** ariane133's config sets no PLACE_DENSITY (third_party/ORFS-2024-12/flow/designs/nangate45/ariane133/config.mk),
 so the platform default 0.30 applies (platforms/nangate45/config.mk:69); ariane136 sets 0.35

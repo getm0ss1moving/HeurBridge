@@ -26,6 +26,13 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
   day). Afterwards, once each: `python scripts/trackb_confirm.py analyze --design ariane133 --tb-prefix tb9_
   --campaign-prefix seedB_orfs9_` (then `describe` with the same prefixes) and `python scripts/equal_budget_confirm.py
   analyze --design swerv_wrapper`. The cell chat has ariane133's candidate run id for its C1 layouts.
+- **State at 7 Oct 19:00: runs time out under another user's load (decision D14 open).** Another user's Gaussian
+  jobs (`g16`, since about 14:00-15:25; not ours, not touched) take about 40 of 224's 64 cores. TB#5's first two runs
+  (candidate and tool at shift (+2, 0)) both hit the 7,200-s cap (`4_1_cts`, `5_2_route`); the campaign's ariane133
+  f2 runs took 1.0-1.9 h. EB#4's first two f1 runs failed (one at the cap, one GRT-0116). No TB#5 replicate has
+  completed. Options in `reports/next_phase_decisions.md`, D14; nothing stopped without the owner's OK.
+- **Owner's request (7 Oct 19:00):** compare with DREAMPlace and OpenROAD on ariane133 too (the four other designs
+  have TW and EB); scope being confirmed.
 - **Citation re-map:** the scratchpad's `remap_citations.py` was lost to the temp-folder cleanup and rebuilt; it now
   also re-maps `, :L` continuations (a second range after a cited file's first), which were left unmapped before.
 

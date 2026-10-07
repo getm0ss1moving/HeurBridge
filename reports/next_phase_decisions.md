@@ -204,7 +204,7 @@ Re-testing: D10.
 ## D3 T3.9: the cell bridge's endpoint
 
 - **Evidence:** the task list ranks the cell bridge's targets by f2 J (HEURBRIDGE_TASKS.md:372), but Track A has no
-  f2; its final cost is DREAMPlace f1 (reports/PROGRESS.md:325). DREAMPlace ignores start positions
+  f2; its final cost is DREAMPlace f1 (reports/PROGRESS.md:328). DREAMPlace ignores start positions
   (reports/demo_sketch_start.md:34), so a cell bridge cannot hand its result to DREAMPlace; it must deliver a placement.
   The look-ahead predictor misses both parts of its bar (reports/sketch_predictor_s2.md:38,
   reports/sketch_predictor_s2_ranking.md). *Negative results.*
@@ -277,7 +277,7 @@ Re-testing: D10.
 
 ## D8 Housekeeping (owner's actions; nothing was deleted)
 
-- **Staged for deletion** (moved there on 29 Sep: HANDOFF.md:764-765; sizes measured 2 Oct):
+- **Staged for deletion** (moved there on 29 Sep: HANDOFF.md:771-772; sizes measured 2 Oct):
   `/data/dzy/heura_repr/_to_delete_20260929/` on 224, 68 GB (its /data at 93 % use); on 225, 31 GB (/data at 99 %);
   on 231, 7.1 GB (root at 99 %). The final `rm -rf` is yours.
 - **Faulty GPUs:** `nvidia-smi` fails on 224 ("Unable to determine the device handle for GPU 0000:02:00.0: Unknown
@@ -364,3 +364,22 @@ Re-testing: D10.
   candidate was already timing-safe; its re-run reproduced the Track-B replicates exactly); on swerv_wrapper the search
   found a lower-J layout (median 0.901 against 0.927 at the six shifts) that is not safer at signoff (6 of 12 timing
   checks against 9 of 12; two detailed-placement timeouts). A margin at f1 did not carry over to f2.
+
+## D14 Another user's load on 224 times out our runs (new, 7 Oct 19:00)
+
+- **Evidence:** since about 14:00-15:25 on 7 Oct another user's Gaussian jobs (`g16`: `l401.exe`, `l502.exe`; not
+  ours, not touched) take about 40 of 224's 64 cores (load average 52). Our 8 OpenROAD runs (4 of this chat, 4 of the
+  cell chat) share the rest. TB#5's first two runs, the candidate and the tool at shift (+2, 0), both hit the 7,200-s
+  cap (in `4_1_cts` and `5_2_route`), where the campaign's ariane133 f2 runs took 1.0-1.9 h
+  (`runs/remote/seedB_orfs9_ariane133/runs/seed_orfs/ariane133/evals_f2.jsonl`, `wall_s`). EB#4's first two f1 runs
+  failed: one at the cap, one with GRT-0116 congestion. Under the registered rule a timed-out run counts as +inf. If
+  most of TB#5's 12 runs time out, it fails without saying anything about the layouts, and alpha_5 is spent. No TB#5
+  replicate has completed (0 of 12).
+- **Options:** (a) let `tb9_ariane133` and `dpls_c` run as registered; (b) stop both now and re-run both from the
+  start once the foreign load is gone (checked before each launch). This is an infrastructure deviation, recorded
+  before any completed replicate is seen; the candidate, gates, alpha and analysis stay as registered. (c) Stop both,
+  re-run TB#5 first with the cores we control: `dpls_c` waits and the cell chat holds its queue until TB#5 ends. Its 12
+  runs, 2 at a time, fit in the ~24 free cores, taking about 9-10 h. EB#4 (re-run from the start) and the cell chat's
+  4 + 4 split follow. (c) suspends CS-D2 (a)'s split for those hours.
+- **Recommendation: (c):** TB#5 gets clean timings without waiting an unknown time for the other user's jobs. In (b)
+  and (c) the voided runs stay in the record, marked as voided by the load.

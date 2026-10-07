@@ -12,10 +12,10 @@
 - Confirmed (pre-registered): the co-trained bridge beats the non-learning partners (G0'; reports/E0_partner_ablation.md:46).
 - Also measured: every partner's mean J, and every bridge-refined layout, stays above 0.45, the tool's own
   mixed-size macro placement; the bridge lowers mean J by 1.9-6.9 % per design against the raw heuristic
-  (HANDOFF.md:536-538). Mean J of the co-trained bridge: 0.5579 on ISPD2005 (reports/E0_partner_ablation.md:29),
+  (HANDOFF.md:543-545). Mean J of the co-trained bridge: 0.5579 on ISPD2005 (reports/E0_partner_ablation.md:29),
   0.6004 on the held-out IBM designs ibm08 and ibm12 (reports/E0_partner_ablation_ibm_heldout.md:27), against 0.45.
   *Pre-registered confirmatory result (E0) plus its descriptive context.*
-- Seeding: the heuristics beat the tool on 2 of 25 Track-A designs only (reports/PROGRESS.md:327-329); on ISPD2005
+- Seeding: the heuristics beat the tool on 2 of 25 Track-A designs only (reports/PROGRESS.md:330-332); on ISPD2005
   no layout is below the baseline (reports/T2_trackA_ispd_dreamplace.md:38). *Development / descriptive.*
 
 ## 2 Why the bridge cannot reach the tool today (evidence)
