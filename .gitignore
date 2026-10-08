@@ -63,3 +63,6 @@ LAB_*
 # lab-server recovery payload: large, machine-local, never published
 _recovered_from_server/
 CODE_VERSION
+
+# local harness files the chats share (coordination of tasks and servers; names hosts and jobs): never published
+_harness/
