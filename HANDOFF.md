@@ -42,6 +42,10 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
   `tw_ariane133` (`--phase extlayouts --ext-f2-top 4 --ext-tb --ext-pick jsafe`, D2 (b)'s make variables) follows TB#5.
 - **TB#5 waits (20:30):** the cell chat held its queues, but its two stage-1 jobs kept starting runs (4 live at 20:24);
   asked to pause them as D14 (c) intends; TB#5 (`tb10_ariane133`) starts when its count is 0.
+- **TB#5 launched 8 Oct 10:10** (`tb10_ariane133`, 2 runs at a time, registered as `slots/macro.tb10_ariane133`): the
+  cell chat's stage-1 jobs ended on their own at 06:23 and 06:45, its queue jobs then ran stage 2 until the owner's OK to
+  stop them came at 10:08 (224 idle for TB#5 from then). Another user's Gaussian jobs held about 43 of the 64 cores at
+  launch (11 processes at about 4 cores each); TB#5's 16 threads fit in the rest. About 9-10 h if each run keeps 1-2 h.
 - **Group-meeting page updated (7 Oct 20:20):** https://claude.ai/artifact/Wn3W1diE45Hii2pn8Qfvsf (version 6; private):
   Track B against OpenROAD and DREAMPlace (test matrix, J and gates, cost), RL#4, the ISPD2005 reference correction
   (0.45 is the benchmark's own macro placement there), 15-slide outline; every tag at git 5afdb15.
