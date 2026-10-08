@@ -4,6 +4,26 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
+## 2026-10-09 — Project stopped by the owner
+
+- **Owner's decision (9 Oct ~00:40):** stop the project; push everything essential to GitHub; remove the project's
+  folders from the servers. Nothing is launched any more; the cell-placement chat was told to stand down.
+- **State at the stop:**
+  - TB#5 (`tb10_ariane133`, ariane133 vs OpenROAD's macro placer) was running on 224 when 224 stopped answering SSH
+    (8 Oct ~11:56; every connection closed at once since, 225/227/231 fine). No TB#5 replicate was fetched; TB#5 has
+    no result and its alpha stays reserved unused. TW#5 and EB#4 (restart `dpls_c2`) never ran.
+  - Recorded results stand as reported: G0' passed (reports/E0_partner_ablation.md); Track B TB 2 of 4, TW 2 of 4,
+    TP 1 of 4, EB 1 of 3 (reports/trackB_confirmatory.md, reports/trackB_threeway.md,
+    reports/trackB_programs_vs_dreamplace.md, reports/trackB_equal_budget.md); T5 (LLM evolution) never ran with the
+    real LLM.
+- **Server data:** the encrypted vaults of 225 and 227 and the small plaintext result folders of 225 and 231 were
+  copied to the Mac (outside the repository) before any removal; the vault key stays on
+  the Mac only (back it up, or the vault copies cannot be decrypted). 224's folders could not be
+  reached or backed up; they hold the hbv vault of the Track-B runs (fetched copies are local under `runs/remote/`).
+- **Removal:** the agent cannot delete files permanently; the owner runs the removal commands (listed in the chat).
+
+---
+
 ## 2026-10-08 — Cell-placement chat: C1 stage 1 done on four designs; C1 held for TB#5 (D14 (c)); load-voided runs
 
 - **Stage 1 done (f1, single runs, exploratory)** under another user's load (runs 2.2-3 times slower):

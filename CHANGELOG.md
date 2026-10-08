@@ -6,6 +6,9 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 
 ## [Unreleased]
 
+### Project stopped (9 Oct)
+- No code change. The owner stopped the project; HANDOFF.md and reports/PROGRESS.md record the final state.
+
 ### Cell stage: the slot gate follows D16, the load-aware cap (8 Oct)
 - `heurbridge/cellstage/slots.py`: the cap is `load_aware_cap()`, floor((cores - other accounts' cores) / 8) within
   [0, 8] (the owner's D16). The cell chat's share is the allowance file `<dir>/cs.allowance`, written by either chat,
