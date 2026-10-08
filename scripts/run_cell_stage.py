@@ -17,6 +17,9 @@ runs/seed_orfs/<design>/evals_cs_<tag>.jsonl and runs/seed_orfs/<design>/cs_<tag
   --race K    with --fidelity 2: per layout, the default recipe plus the K best other recipes by this tag's f1 rows
               (J before the gates; heurbridge/cellstage/select.race); without it every recipe runs
   --check-drift  for recipes whose cells start at given positions: how far they moved after 3_1, 3_3 and 3_5
+  --void RUN_IDS --void-reason TEXT  move these rows of this tag's ledger to evals_cs_<tag>.void.jsonl (each with
+              the reason and the time) before anything runs, so they run again; for runs voided by an outside cause,
+              e.g. timeouts under another user's load (decision D14).  A voided row is kept and reported, never dropped
   --slot-gate DIR  share the server's slots with the macro chat: every evaluation first takes a token from DIR
               (heurbridge/cellstage/slots.py; --slot-priority, lower first)
   --make-var  the campaign's own KEY=VALUE overrides; by default read from its meta.json (config.make_var), and any
@@ -157,6 +160,29 @@ def import_default_rows(ledger, jobs, idx: dict, default_id: str, des) -> dict:
     return out
 
 
+def void_rows(path: Path, run_ids, reason: str) -> list:
+    """Move the rows of ``run_ids`` from the ledger ``path`` to <ledger>.void.jsonl (with the reason and the time);
+    every named run id must be in the ledger.  Returns the run ids moved."""
+    import time as _time
+    want = set(run_ids)
+    rows = jl(path)
+    have = {r.get("run_id") for r in rows}
+    missing = sorted(want - have)
+    if missing:
+        raise SystemExit("--void: %s not in %s" % (missing, path))
+    if not reason:
+        raise SystemExit("--void needs --void-reason")
+    keep, moved = [r for r in rows if r.get("run_id") not in want], [r for r in rows if r.get("run_id") in want]
+    stamp = _time.strftime("%Y-%m-%dT%H:%M:%S")
+    with open(path.with_name(path.stem + ".void.jsonl"), "a") as fh:
+        for r in moved:
+            fh.write(json.dumps({**r, "voided": reason, "voided_at": stamp}, default=str) + "\n")
+    tmp = path.with_name(path.name + ".tmp")
+    tmp.write_text("".join(json.dumps(r, default=str) + "\n" for r in keep))
+    tmp.replace(path)
+    return [r["run_id"] for r in moved]
+
+
 def replay_records(rdir: Path, ledger: str) -> list:
     return [r["record"] for r in jl(rdir / ledger) if r.get("program") == "M1_replay" and r.get("status") == "ok"
             and isinstance(r.get("record"), dict)]
@@ -177,6 +203,8 @@ def main():
     ap.add_argument("--default-rows", default="", help="comma-separated ledgers of unmodified-cell-stage runs")
     ap.add_argument("--verify-default", type=int, default=0, help="with --default-rows: default jobs run and compared first")
     ap.add_argument("--slot-gate", default="", help="slot registry directory shared with the macro chat (slots.py)")
+    ap.add_argument("--void", default="", help="comma-separated run ids of this tag's ledger to void and run again")
+    ap.add_argument("--void-reason", default="")
     ap.add_argument("--slot-priority", type=int, default=0)
     ap.add_argument("--workers", type=int, default=1, help="evaluations at a time (each runs one OpenROAD at a time)")
     ap.add_argument("--check-drift", action="store_true")
@@ -235,6 +263,9 @@ def main():
             slots = [s for s in slots if s[0] in {int(x) for x in a.slots.split(",") if x}]
         layouts[lid] = (src, slots)
 
+    if a.void:
+        moved = void_rows(rdir / ("evals_cs_%s.jsonl" % a.tag), [x for x in a.void.split(",") if x], a.void_reason)
+        print(json.dumps({"voided": moved, "reason": a.void_reason}), flush=True)
     ledger = SA.Ledger(rdir / ("evals_cs_%s.jsonl" % a.tag))
     f1_rows = jl(rdir / ("evals_cs_%s.jsonl" % a.tag))
     plan = {}

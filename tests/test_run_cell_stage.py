@@ -189,3 +189,20 @@ def test_the_campaigns_make_vars_are_used_and_others_refused(campaign, monkeypat
     _argv(monkeypatch, camp, rpath, tmp, "--fidelity", "1", "--make-var", "RTLMP_MAX_LEVEL=2")
     with pytest.raises(SystemExit, match="differs from the campaign's own"):
         RC.main()
+
+
+def test_voided_rows_run_again_and_stay_on_record(campaign, monkeypatch):
+    camp, rpath, recipes, calls, tmp = campaign
+    _argv(monkeypatch, camp, rpath, tmp, "--fidelity", "1")
+    RC.main()
+    led = camp / "evals_cs_t.jsonl"
+    victim = RC.jl(led)[0]["run_id"]
+    calls.clear()
+    _argv(monkeypatch, camp, rpath, tmp, "--fidelity", "1", "--void", victim, "--void-reason", "timeout under load")
+    RC.main()
+    assert len(calls) == 1 and len(RC.jl(led)) == 6                      # only the voided run ran again
+    void = RC.jl(camp / "evals_cs_t.void.jsonl")
+    assert [r["run_id"] for r in void] == [victim] and void[0]["voided"] == "timeout under load"
+    _argv(monkeypatch, camp, rpath, tmp, "--fidelity", "1", "--void", "nope", "--void-reason", "x")
+    with pytest.raises(SystemExit, match="not in"):
+        RC.main()

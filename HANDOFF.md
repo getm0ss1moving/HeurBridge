@@ -4,6 +4,38 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
 
 ---
 
+## 2026-10-08 — Cell-placement chat: C1 stage 1 done on four designs; C1 held for TB#5 (D14 (c)); load-voided runs
+
+- **Stage 1 done (f1, single runs, exploratory)** under another user's load (runs 2.2-3 times slower):
+  - ariane136: `cs_c1_ariane136`, 7 Oct 15:26 - 8 Oct 06:45.
+  - swerv_wrapper: `cs_c1_swerv_wrapper`, to 06:23.
+  - Local run files: `runs/remote/cs_c1_<design>/runs/seed_orfs/<design>/evals_cs_c1.jsonl`.
+  - R0 reproduces the campaign's f1 rows exactly wherever it completed: both ariane136 layouts and swerv_wrapper's
+    M1. R7 differs from R0 on ariane136, whose routability loop reaches the target, as the record expects.
+  - Load-voided: swerv_wrapper's R0 on HeurBridge's layout (that run completed in the campaign) and R9 on M1, both
+    `timeout in 5_1_grt`.
+  - Stage 2's race (the fixed rule):
+    - ariane136: R9 and R3 on M1; R5 and R6 on HeurBridge's layout.
+    - swerv_wrapper: R7 and R1 on HeurBridge's layout; on M1 currently R6 and R5, but that pick waits for R9's re-run.
+- **Stage 2 was started by the queues, then stopped** at 10:08, with the owner's OK under D14 (c):
+  - bp_fe_top (`cs_c1s2_bp`, from 06:24): its identity run equalled its Track-B row, so R0's other 11 rows were
+    imported. HeurBridge's layout finished R3 and R5 at all six shifts; M1's R1 and R6 are partly done.
+  - ariane136 (`cs_c1_queue`, from 06:45): its identity run timed out under the load (`6_report`, 7,204 s), so it is
+    load-voided.
+- **Load-voided runs** move to `evals_cs_c1.void.jsonl` with their reason (`run_cell_stage.py --void`). They stay on
+  record and run again.
+- **Other servers** (the owner's option, 8 Oct): none is free (225, 227 and 231 are busy with other users' work), so
+  C1 waits for 224.
+- **Shared coordination file:** `_harness/COORDINATION.md` (the owner's request; gitignored). Both chats read it
+  before any launch or stop and update it right after.
+- **Next:**
+  - After TB#5's end (the macro chat logs it): bp_fe_top's and bp_be_top's stage 2, and swerv_wrapper's two voided
+    f1 runs.
+  - The large designs' f2 work (stage 2 of ariane136 and swerv_wrapper; ariane133) waits until the other user's load
+    drops. Under it their f2 steps reach the 7,200-s cap.
+
+---
+
 ## 2026-10-07 — Macro chat: EB#1-EB#3 recorded (EB#3 passed); D2 (b) campaign done; TB#5 and EB#4 running
 
 - **Gap:** this chat was paused from 6 Oct about 07:15 until 7 Oct 15:30. `dpls_b` ended 6 Oct 16:09 and

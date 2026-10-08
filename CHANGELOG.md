@@ -6,6 +6,12 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 
 ## [Unreleased]
 
+### Cell stage: load-voided runs (8 Oct)
+- `scripts/run_cell_stage.py --void RUN_IDS --void-reason TEXT`: these rows of the tag's ledger move to
+  `evals_cs_<tag>.void.jsonl`, each with its reason and the time, before anything runs. They then run again. This is
+  for runs voided by an outside cause, such as timeouts under another user's load (D14). A voided row stays on record.
+- Tests: `tests/test_run_cell_stage.py` (+1).
+
 ### TW#5 on ariane133 (decision D15, 7 Oct): code and registration before any DREAMPlace layout
 - `scripts/run_seed_orfs.py`: `jsafe_pick` (D13 a: the lowest one-position J_safe against the tool's unshifted
   replay, ties by J, else the best by f1) and `--ext-pick {d6,jsafe}` for `--phase extlayouts` (default d6: TW#1-TW#4
