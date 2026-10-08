@@ -277,7 +277,7 @@ Re-testing: D10.
 
 ## D8 Housekeeping (owner's actions; nothing was deleted)
 
-- **Staged for deletion** (moved there on 29 Sep: HANDOFF.md:828-829; sizes measured 2 Oct):
+- **Staged for deletion** (moved there on 29 Sep: HANDOFF.md:831-832; sizes measured 2 Oct):
   `/data/dzy/heura_repr/_to_delete_20260929/` on 224, 68 GB (its /data at 93 % use); on 225, 31 GB (/data at 99 %);
   on 231, 7.1 GB (root at 99 %). The final `rm -rf` is yours.
 - **Faulty GPUs:** `nvidia-smi` fails on 224 ("Unable to determine the device handle for GPU 0000:02:00.0: Unknown
@@ -400,3 +400,17 @@ Re-testing: D10.
   225) through the same flow (D2 (b)'s make variables) next to HeurBridge's TB#5 candidate and the tool, pre-registered
   before any DREAMPlace layout runs through the flow. As a test registered after 4 Oct: gates under D11 (b) and each
   arm's pick by one-position J_safe (D13 (a)). About a day on 224 after TB#5.
+
+## D16 Sharing 224 while another user's jobs hold most of it (new, 8 Oct 10:15)
+
+- **Evidence:** another user's Gaussian jobs hold about 39-43 of 224's 64 cores on 8 Oct (D14). Only about 2-3 OpenROAD
+  runs at 8 threads fit beside them; more runs slow each other down, and the large designs' f2 runs (ariane133,
+  ariane136, swerv_wrapper) then exceed the 7,200-s cap. The cell chat's C1 runs under the same load took 2.2-3 times
+  longer (D14), and it voided three of them that timed out.
+- **Options:** (a) a load-aware cap: our total OpenROAD runs on 224 at most floor((64 - the other user's cores) / 8),
+  split by turns between the macro and the cell chat, large-design work first; the 4 + 4 split (CS-D2 (a)) again when 8
+  runs fit; (b) the macro chat first (TW#5, then EB#4), the cell chat waiting until the load drops; (c) keep the 4 + 4
+  split (large-design runs would likely time out and be voided).
+- **Decided 8 Oct 10:16 (owner): (a).** After TB#5 at that day's load: TW#5 with 2 runs, the cell chat 1 run (bp stage 2),
+  EB#4 waits for room. Both chats check the load before each launch and record it in their shared coordination file
+  (local).

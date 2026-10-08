@@ -78,6 +78,9 @@ Newest entry first.  Each entry: what was done, commands, artifacts, open issues
   cell chat's stage-1 jobs ended on their own at 06:23 and 06:45, its queue jobs then ran stage 2 until the owner's OK to
   stop them came at 10:08 (224 idle for TB#5 from then). Another user's Gaussian jobs held about 43 of the 64 cores at
   launch (11 processes at about 4 cores each); TB#5's 16 threads fit in the rest. About 9-10 h if each run keeps 1-2 h.
+- **D16 decided 8 Oct 10:16 (owner): a load-aware cap on 224** (`reports/next_phase_decisions.md`, D16): total OpenROAD
+  runs at most floor((64 - the other user's cores) / 8), by turns between the chats, large designs first; after TB#5
+  at today's load TW#5 runs with 2 runs and EB#4 waits. The chats coordinate in a shared local file (gitignored).
 - **Group-meeting page updated (7 Oct 20:20):** https://claude.ai/artifact/Wn3W1diE45Hii2pn8Qfvsf (version 6; private):
   Track B against OpenROAD and DREAMPlace (test matrix, J and gates, cost), RL#4, the ISPD2005 reference correction
   (0.45 is the benchmark's own macro placement there), 15-slide outline; every tag at git 5afdb15.
