@@ -28,7 +28,7 @@ def test_queue_starts_each_step_when_ready_and_skips_incomplete_ledgers(tmp_path
     state.mkdir()
     (repo / "logs").mkdir(parents=True)
     (repo / "configs" / "cellstage").mkdir(parents=True)
-    for d in "ABC":
+    for d in "ABCD":
         (repo / "configs" / "cellstage" / ("c1_%s.json" % d)).write_text(json.dumps({"recipes": [{"id": "r0"}]}, indent=1))
         (repo / "runs" / "seed_orfs" / d).mkdir(parents=True)
     for d, rows in (("A", 2), ("B", 1)):           # A's stage 1 completes (2 layouts x 1 recipe), B's misses a row
@@ -37,15 +37,19 @@ def test_queue_starts_each_step_when_ready_and_skips_incomplete_ledgers(tmp_path
         led.parent.mkdir(parents=True)
         led.write_text("".join(json.dumps(ROW) + "\n" for _ in range(rows)))
         _job(state, "cs_c1_%s" % d, 1.0, w)
+    # D: its ledger was restored with one row voided; this queue's stage 1 re-runs it, then its stage 2 starts
+    (repo / "runs" / "seed_orfs" / "D" / "evals_cs_c1.jsonl").write_text(json.dumps(ROW) + "\n")
     events = tmp_path / "events"
     fake = tmp_path / "fake_run.sh"
-    fake.write_text('#!/bin/bash\necho "start $1 $2 $(python3 -c "import time; print(time.time())")" >> %s\n'
-                    'sleep 0.5\n' % events)
+    fake.write_text('#!/bin/bash\necho "start $1 $2 $4 $5 $(python3 -c "import time; print(time.time())")" >> %s\n'
+                    'if [ "$1" = s1 ]; then echo \'%s\' >> runs/seed_orfs/$2/evals_cs_c1.jsonl; fi\n'
+                    'sleep 0.5\n' % (events, json.dumps(ROW)))
     fake.chmod(0o755)
     t0 = time.time()
-    p = subprocess.run(["bash", str(QUEUE), "s2:A:a.f2", "s2:B:b.f2", "s1:C:c.f2"], cwd=repo,
-                       env={"PATH": "/usr/bin:/bin:/usr/sbin:/sbin", "HB_STATE_DIR": str(state),
-                            "HB_SLOT_DIR": str(tmp_path / "slots"), "HB_QUEUE_POLL": "0.1", "HB_QUEUE_RUN": str(fake)},
+    p = subprocess.run(["bash", str(QUEUE), "s2:A:a.f2", "s2:B:b.f2", "s2:D:d.f2", "s1:D:d.f2:D.run1", "s1:C:c.f2"],
+                       cwd=repo, env={"PATH": "/usr/bin:/bin:/usr/sbin:/sbin", "HB_STATE_DIR": str(state),
+                                      "HB_SLOT_DIR": str(tmp_path / "slots"), "HB_QUEUE_POLL": "0.1",
+                                      "HB_QUEUE_RUN": str(fake)},
                        capture_output=True, text=True, timeout=60)
     assert p.returncode == 0, p.stdout + p.stderr
     assert "s2:B:b.f2 skipped: the stage-1 ledger has 1 of 2 f1 rows" in p.stdout
@@ -53,8 +57,11 @@ def test_queue_starts_each_step_when_ready_and_skips_incomplete_ledgers(tmp_path
     assert (repo / "runs" / "seed_orfs" / "A" / "evals_cs_c1.jsonl").read_text().count('"fidelity": 1,') == 2
     ev = {}
     for line in events.read_text().splitlines():
-        what, kind, d, ts = line.split()
-        ev[(kind, d)] = float(ts) - t0
+        parts = line.split()
+        kind, d, prio, ts = parts[1], parts[2], parts[3], parts[-1]
+        ev[(kind, d)] = (float(ts) - t0, int(prio), parts[4] if len(parts) == 6 else "")
     assert ("s2", "B") not in ev
-    assert ev[("s1", "C")] < 1.0                         # at once: the runner's slot gate orders the evaluations
-    assert ev[("s2", "A")] >= 1.0                         # after A's stage-1 job ended
+    assert ev[("s1", "C")][0] < 1.0 and ev[("s1", "C")][1] == 4             # at once, priority = its place
+    assert ev[("s2", "A")][0] >= 1.0 and ev[("s2", "A")][1] == 0            # after A's stage-1 job ended
+    assert ev[("s1", "D")][2] == "D.run1"                                   # the run ids to void
+    assert ev[("s2", "D")][0] >= ev[("s1", "D")][0] + 0.5                   # after this queue's stage 1 of D

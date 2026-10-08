@@ -6,6 +6,15 @@ Versions: `0.<milestone>.<patch>`; a git tag `v<version>` marks each release.
 
 ## [Unreleased]
 
+### Cell stage: the slot gate follows D16, the load-aware cap (8 Oct)
+- `heurbridge/cellstage/slots.py`: the cap is `load_aware_cap()`, floor((cores - other accounts' cores) / 8) within
+  [0, 8] (the owner's D16). The cell chat's share is the allowance file `<dir>/cs.allowance`, written by either chat,
+  so the share changes without restarting a run; that file is never read as a registration.
+  `scripts/run_cell_stage.py --slot-gate` uses both.
+- `scripts/server/cs_c1_queue.sh`: an entry's place is its slot priority. An optional fourth field names run ids to
+  void first (reason `$HB_VOID_REASON`). A design's stage 2 waits for this queue's stage 1 of the same design.
+- Tests: `tests/test_cellstage_slots.py` (+2), `tests/test_cs_c1_queue.py`.
+
 ### Cell stage: load-voided runs (8 Oct)
 - `scripts/run_cell_stage.py --void RUN_IDS --void-reason TEXT`: these rows of the tag's ledger move to
   `evals_cs_<tag>.void.jsonl`, each with its reason and the time, before anything runs. They then run again. This is

@@ -3,13 +3,16 @@
 # is ready, and every evaluation takes a slot from the gate shared with the macro chat (heurbridge/cellstage/slots.py:
 # at most 8 OpenROAD runs on the server, the macro chat's registered jobs first), so C1 uses whatever slots are free:
 #   bash scripts/server/cs_c1_queue.sh <entry> [<entry> ...]
+# An entry's place on the command line is its slot priority (the first goes first).  An optional fourth field names
+# run ids of the design's ledger to void first (run_cell_stage.py --void; reason: $HB_VOID_REASON).
 #   s2:<design>:<candidate>   stage 2 (f2, the six shifts, --race 2, R0's rows from the Track-B test's ledger after
 #                             one identical verification run).  If the design's stage-1 job cs_c1_<design> runs
 #                             elsewhere, its ledger is copied from that job's workspace while it runs (the job deletes
 #                             the workspace when it ends); a restored ledger serves as it is.  The entry starts once no
 #                             stage-1 job runs and the ledger holds every f1 row (2 layouts x the recipes of
-#                             configs/cellstage/c1_<design>.json); it is skipped, by name, if not.  Slot priority 0.
-#   s1:<design>:<candidate>   stage 1 (f1, unshifted).  Slot priority 1: stage 2 goes first.
+#                             configs/cellstage/c1_<design>.json); it is skipped, by name, if not.  It also waits for
+#                             a stage-1 entry of the same design in this queue to end.
+#   s1:<design>:<candidate>   stage 1 (f1, unshifted): the rows the ledger lacks.
 # The job must restore seedB_orfs*_<design> (and for s2 tb_<design>, and the stage-1 job's final when it has ended)
 # and mount cellpos_c1_<design> at cellpos_c1/<design>.  Make variables come from each campaign's meta.json.
 # Tests (tests/test_cs_c1_queue.py) set HB_STATE_DIR, HB_SLOT_DIR, HB_QUEUE_POLL and HB_QUEUE_RUN (a command run
@@ -33,16 +36,17 @@ grab() {   # the newest copy of a running stage-1 job's ledger
 }
 f1rows() { grep -c '"fidelity": 1,' "runs/seed_orfs/$1/evals_cs_c1.jsonl" 2>/dev/null || true; }
 want() { echo $((2 * $(grep -c '"id":' "configs/cellstage/c1_$1.json"))); }
-run() {    # kind design candidate
-  if [ -n "${HB_QUEUE_RUN:-}" ]; then $HB_QUEUE_RUN "$1" "$2" "$3"; return; fi
-  local prio=1
-  [ "$1" = s2 ] && prio=0
-  local common="--flow $F --design nangate45/$2 --recipes configs/cellstage/c1_$2.json --layouts $3,M1 --tag c1 --workers 4 --check-drift --yosys $Y --slot-gate $SLOTS --slot-priority $prio"
+run() {    # kind design candidate priority void-ids
+  if [ -n "${HB_QUEUE_RUN:-}" ]; then $HB_QUEUE_RUN "$1" "$2" "$3" "$4" "${5:-}"; return; fi
+  local common="--flow $F --design nangate45/$2 --recipes configs/cellstage/c1_$2.json --layouts $3,M1 --tag c1 --workers 4 --check-drift --yosys $Y --slot-gate $SLOTS --slot-priority $4"
+  if [ -n "${5:-}" ]; then common="$common --void $5"; fi
   if [ "$1" = s2 ]; then
     bash scripts/server/trackb.sh python scripts/run_cell_stage.py $common --fidelity 2 --shifts tb --race 2 \
-      --default-rows "runs/seed_orfs/$2/evals_tb.jsonl" --verify-default 1
+      --default-rows "runs/seed_orfs/$2/evals_tb.jsonl" --verify-default 1 \
+      ${5:+--void-reason "${HB_VOID_REASON:-voided}"}
   else
-    bash scripts/server/trackb.sh python scripts/run_cell_stage.py $common --fidelity 1
+    bash scripts/server/trackb.sh python scripts/run_cell_stage.py $common --fidelity 1 \
+      ${5:+--void-reason "${HB_VOID_REASON:-voided}"}
   fi
 }
 entries=("$@")
@@ -52,13 +56,13 @@ for ((i = 0; i < n; i++)); do state[i]=""; pid[i]=""; done
 log "start: ${entries[*]}"
 while :; do
   for ((i = 0; i < n; i++)); do
-    IFS=: read -r kind d cand <<< "${entries[i]}"
+    IFS=: read -r kind d cand vids <<< "${entries[i]}"
     if [ "$kind" = s2 ] && [ -z "${state[i]}" ] && alive "cs_c1_$d"; then grab "$d"; fi
   done
   open=0
   for ((i = 0; i < n; i++)); do
     e=${entries[i]}
-    IFS=: read -r kind d cand <<< "$e"
+    IFS=: read -r kind d cand vids <<< "$e"
     case "${state[i]}" in
       running)
         if kill -0 "${pid[i]}" 2>/dev/null; then open=$((open + 1)); else
@@ -67,13 +71,21 @@ while :; do
         open=$((open + 1))
         if [ "$kind" = s2 ]; then
           alive "cs_c1_$d" && continue                    # stage 1 still running: keep copying
+          s1open=0
+          for ((j = 0; j < n; j++)); do
+            IFS=: read -r k2 d2 c2 v2 <<< "${entries[j]}"
+            if [ "$k2" = s1 ] && [ "$d2" = "$d" ] && { [ -z "${state[j]}" ] || [ "${state[j]}" = running ]; }; then
+              s1open=1
+            fi
+          done
+          [ "$s1open" -eq 1 ] && continue                 # this queue's stage 1 of the design comes first
           if [ "$(f1rows "$d")" != "$(want "$d")" ]; then
             log "$e skipped: the stage-1 ledger has $(f1rows "$d") of $(want "$d") f1 rows (launch it by hand)"
             state[i]=skipped; open=$((open - 1)); continue
           fi
         fi
         log "$e starts"
-        run "$kind" "$d" "$cand" > "logs/cs_c1_queue_${kind}_$d.log" 2>&1 &
+        run "$kind" "$d" "$cand" "$i" "$vids" > "logs/cs_c1_queue_${kind}_$d.log" 2>&1 &
         pid[i]=$!; state[i]=running ;;
     esac
   done

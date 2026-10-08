@@ -99,3 +99,37 @@ def test_a_better_priority_goes_first(tmp_path):
     for t in toks[1:]:
         g.release(t)
     assert order[0] == "stage2"
+
+
+def test_the_allowance_file_and_a_load_aware_cap_limit_the_tokens(tmp_path):
+    slots, state = tmp_path / "slots", tmp_path / "state"
+    state.mkdir()
+    cap = {"v": 8}
+    g = SL.SlotGate(slots, state, poll=0.02, live_fn=lambda: 0, log=lambda m: None, cap_fn=lambda: cap["v"])
+    (slots / "cs.allowance").write_text("1\n")         # D16 at today's load: one run for the cell chat
+    t1 = g.acquire(0, "a")
+    got = {}
+    th = threading.Thread(target=lambda: got.setdefault("t", g.acquire(0, "b")), daemon=True)
+    th.start()
+    time.sleep(0.2)
+    assert "t" not in got and g.state()["allowance"] == 1
+    (slots / "cs.allowance").write_text("3\n")         # the share grows without restarting anything
+    th.join(2)
+    assert "t" in got
+    cap["v"] = 2                                      # other users' load rises: cap 2, two tokens held
+    th2 = threading.Thread(target=lambda: got.setdefault("u", g.acquire(0, "c")), daemon=True)
+    th2.start()
+    time.sleep(0.2)
+    assert "u" not in got and g.state()["cap"] == 2
+    g.release(t1)
+    th2.join(2)
+    assert "u" in got
+    assert SL.allowance(tmp_path / "nowhere", 5) == 5
+    assert 0 <= SL.load_aware_cap(cores=64) <= SL.CAP
+
+
+def test_the_allowance_file_is_not_a_registration(tmp_path):
+    slots, state = tmp_path / "slots", tmp_path / "state"
+    slots.mkdir(), state.mkdir()
+    (slots / "cs.allowance").write_text("3\n")
+    assert SL.registered(slots, state)["cs"] == 0

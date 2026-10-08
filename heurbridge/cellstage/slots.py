@@ -8,9 +8,15 @@ one whose job has ended counts no more.
 
 The cell chat's gated evaluations (scripts/run_cell_stage.py --slot-gate) take one token each, a file
 ``<dir>/tokens/<pid>.<thread>.<n>``, removed when the evaluation ends or when its process is gone.  An evaluation
-starts only while tokens + registrations < CAP, no gated waiter with a better (lower) priority is waiting, and the
-server's live OpenROAD count is below CAP.  So the macro chat takes its slots back by registering a job: no new gated
-evaluation starts, and the running ones end within one run.
+starts only while tokens + registrations < the cap, tokens < the cell chat's allowance, no gated waiter with a better
+(lower) priority is waiting, and the server's live OpenROAD count is below the cap.  So the macro chat takes its slots
+back by registering a job: no new gated evaluation starts, and the running ones end within one run.
+
+The cap and the allowance follow the owner's decision D16 (8 Oct): while other users' jobs hold much of the server, our
+total OpenROAD runs stay at most floor((cores - other users' cores) / 8), split between the chats by agreement.
+load_aware_cap measures that bound (``ps``: the CPU share of every process that is not this account's); the
+allowance file ``<dir>/cs.allowance`` holds the cell chat's agreed share, written by either chat, so the share can
+change without restarting a run.  Without the file the allowance is the cap.
 """
 
 from __future__ import annotations
@@ -23,6 +29,7 @@ import time
 from pathlib import Path
 
 CAP = 8
+ALLOWANCE = "cs.allowance"                  # the cell chat's share (allowance()); not a job registration
 PENDING_S = 6 * 3600
 LOCK_STALE_S = 120
 STATE_DIR = os.environ.get("HB_STATE_DIR", "/data/dzy/heura_repr/hb/state")
@@ -54,7 +61,7 @@ def registered(slot_dir, state_dir=STATE_DIR, now: float | None = None) -> dict:
     out = {"macro": 0, "cs": 0, "jobs": {}}
     for f in sorted(Path(slot_dir).glob("*.*")):
         m = re.match(r"^(macro|cs)\.([A-Za-z0-9_.-]+)$", f.name)
-        if not m:
+        if not m or f.name == ALLOWANCE:
             continue
         try:
             n = int(f.read_text().split()[0])
@@ -70,6 +77,38 @@ def registered(slot_dir, state_dir=STATE_DIR, now: float | None = None) -> dict:
     return out
 
 
+def foreign_cores() -> float:
+    """Cores in use by processes of other accounts (ps's %CPU, each process's average over its life)."""
+    import getpass
+    me = getpass.getuser()
+    p = subprocess.run(["ps", "-eo", "user:64,pcpu"], capture_output=True, text=True)
+    if p.returncode != 0:                       # BSD ps: no width suffix
+        p = subprocess.run(["ps", "-eo", "user,pcpu"], capture_output=True, text=True)
+    total = 0.0
+    for line in p.stdout.splitlines()[1:]:
+        parts = line.split()
+        if len(parts) >= 2 and parts[0] != me:
+            try:
+                total += float(parts[1])
+            except ValueError:
+                pass
+    return total / 100.0
+
+
+def load_aware_cap(cores: int | None = None, threads: int = 8) -> int:
+    """D16: floor((cores - other accounts' cores) / threads), within [0, CAP]."""
+    cores = os.cpu_count() if cores is None else cores
+    return max(0, min(CAP, int((cores - foreign_cores()) // threads)))
+
+
+def allowance(slot_dir, default: int) -> int:
+    """The cell chat's agreed share (``<dir>/cs.allowance``), or ``default`` when there is no readable file."""
+    try:
+        return max(0, int((Path(slot_dir) / ALLOWANCE).read_text().split()[0]))
+    except (OSError, ValueError, IndexError):
+        return default
+
+
 def live_openroad() -> int:
     """OpenROAD processes running on this machine (the processes named openroad, as the red line counts them)."""
     p = subprocess.run(["ps", "-eo", "args"], capture_output=True, text=True)
@@ -78,9 +117,9 @@ def live_openroad() -> int:
 
 class SlotGate:
     def __init__(self, slot_dir, state_dir=STATE_DIR, cap: int = CAP, poll: float = 30.0, live_fn=live_openroad,
-                 log=print):
+                 log=print, cap_fn=None):
         self.dir, self.state_dir, self.cap, self.poll = Path(slot_dir), state_dir, cap, poll
-        self.live_fn, self.log = live_fn, log
+        self.live_fn, self.log, self.cap_fn = live_fn, log, cap_fn
         for sub in ("tokens", "waiters"):
             (self.dir / sub).mkdir(parents=True, exist_ok=True)
         self._seq = 0
@@ -117,10 +156,14 @@ class SlotGate:
                 f.unlink(missing_ok=True)
         return out
 
+    def current_cap(self) -> int:
+        return min(self.cap, self.cap_fn()) if self.cap_fn is not None else self.cap
+
     def state(self) -> dict:
         reg = registered(self.dir, self.state_dir)
+        cap = self.current_cap()
         return {"tokens": len(self._clean("tokens")), "macro": reg["macro"], "cs": reg["cs"], "live": self.live_fn(),
-                "cap": self.cap}
+                "cap": cap, "allowance": allowance(self.dir, cap)}
 
     def acquire(self, priority: int = 0, label: str = "") -> Path:
         """Wait for a slot; returns the token to release."""
@@ -141,15 +184,18 @@ class SlotGate:
                     better = any(int(w.name.split(".")[0]) < int(priority) for w in waiters if w != waiter)
                     used = len(tokens) + reg["macro"] + reg["cs"]
                     live = self.live_fn()
-                    if used < self.cap and not better and live < self.cap:
+                    cap = self.current_cap()
+                    share = allowance(self.dir, cap)
+                    if used < cap and len(tokens) < share and not better and live < cap:
                         tok = self.dir / "tokens" / me
                         tok.write_text(label)
                         return tok
                 finally:
                     lk.rmdir()
                 if not said:
-                    self.log("HB_SLOTS wait %s: tokens %d, macro %d, cs %d, live %d, cap %d%s" % (
-                        label, len(tokens), reg["macro"], reg["cs"], live, self.cap, ", a better priority waits" if better else ""))
+                    self.log("HB_SLOTS wait %s: tokens %d (allowance %d), macro %d, cs %d, live %d, cap %d%s" % (
+                        label, len(tokens), share, reg["macro"], reg["cs"], live, cap,
+                        ", a better priority waits" if better else ""))
                     said = True
                 time.sleep(self.poll)
         finally:

@@ -309,8 +309,8 @@ def main():
 
     gate = None
     if a.slot_gate:
-        from heurbridge.cellstage.slots import SlotGate
-        gate = SlotGate(a.slot_gate, log=lambda m: print(m, flush=True))
+        from heurbridge.cellstage.slots import SlotGate, load_aware_cap
+        gate = SlotGate(a.slot_gate, log=lambda m: print(m, flush=True), cap_fn=load_aware_cap)   # D16
         print(json.dumps({"slot_gate": a.slot_gate, "priority": a.slot_priority, **gate.state()}), flush=True)
 
     def one(job):
