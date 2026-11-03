@@ -66,3 +66,30 @@ CODE_VERSION
 
 # local harness files the chats share (coordination of tasks and servers; names hosts and jobs): never published
 _harness/
+
+# --- public mirror: internal process documents are not published ---
+HANDOFF.md
+CHANGELOG.md
+ENV_REPORT.md
+HeurBridge-PR_group_meeting_v6.html
+HeurBridge-PR_verification.md
+ai-infra-engineer-learning/
+docs/
+
+# --- reports: only the curated evidence set cited by the README is published ---
+reports/*
+!reports/bridge_final_summary.md
+!reports/E0_preregistration.md
+!reports/E0_partner_ablation.md
+!reports/E0_partner_ablation_ibm_heldout.md
+!reports/T2_trackA_ibm_dreamplace.md
+!reports/T3_algorithmR_trackA.md
+!reports/T3_pretrain_small.md
+!reports/beat_tool_track_a.md
+!reports/bridge_target_audit.md
+!reports/defect_ispd_tool_runs.md
+!reports/demo_sketch_start.md
+!reports/gap_to_tool_plan.md
+!reports/next_phase_decisions.md
+!reports/test_audit.md
+!reports/trackB_preregistration.md

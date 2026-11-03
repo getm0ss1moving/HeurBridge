@@ -277,15 +277,8 @@ Re-testing: D10.
 
 ## D8 Housekeeping (owner's actions; nothing was deleted)
 
-- **Staged for deletion** (moved there on 29 Sep: HANDOFF.md:851-852; sizes measured 2 Oct):
-  `/data/dzy/heura_repr/_to_delete_20260929/` on 224, 68 GB (its /data at 93 % use); on 225, 31 GB (/data at 99 %);
-  on 231, 7.1 GB (root at 99 %). The final `rm -rf` is yours.
-- **Faulty GPUs:** `nvidia-smi` fails on 224 ("Unable to determine the device handle for GPU 0000:02:00.0: Unknown
-  Error") and on 227 (the same for GPU 0000:21:00.0), checked 2 Oct; the server admins need to reset or replace
-  them.
-- **Vault key:** `~/.config/heurbridge/vault.key` on the Mac (scripts/hbv.py:8, :47). Without it every encrypted
-  run archive is unreadable. Whether an offline backup exists is not documented in the repo. Keep a copy in a
-  password manager or on offline media; it must never be committed or copied to the servers.
+- Housekeeping details (scratch-directory sizes, machine-local paths, GPU fault reports, key-file locations) are
+  **redacted in this public mirror**, because they describe a specific lab cluster rather than the research itself.
 
 ## D11 The timing-gate reference for future Track-B tests (new, 3 Oct; nothing registered changes)
 
